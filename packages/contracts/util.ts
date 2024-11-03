@@ -56,3 +56,98 @@ export function getContractErrorName(
 
   return reason.endsWith('Error') ? reason.slice(0, -5) : reason;
 }
+
+export const HEX_BYTES = {
+  BLS_KEY_BYTES: 128,
+  BLS_SIG_BYTES: 256,
+  ED_25519_KEY_BYTES: 64,
+  ED_25519_SIG_BYTES: 128,
+};
+
+export function encodeHexToBigIntChunks(hex: string, hexBytes: number): Array<bigint> {
+  if (hexBytes < 64 || hexBytes % 64 !== 0) {
+    throw new Error(`hexBytes must be divisible by 2. hexBits: ${hexBytes}`);
+  }
+
+  if (hex.length !== hexBytes) {
+    throw new Error(`Hex length is invalid, it must be a ${hexBytes} byte string`);
+  }
+
+  const numberOfChunks = hexBytes / 64;
+
+  const chunks = [];
+
+  for (let i = 0; i < numberOfChunks; i++) {
+    chunks.push(hex.slice(i * 64, (i + 1) * 64));
+  }
+
+  return chunks.map((hexChunk) => BigInt(`0x${hexChunk}`));
+}
+
+export const encodeBlsPubKey = (hex: string) => {
+  const chunks = encodeHexToBigIntChunks(hex, HEX_BYTES.BLS_KEY_BYTES);
+  const [X, Y] = chunks;
+  if (chunks.length !== 2) {
+    throw new Error(`BLS Pubkey improperly chunked. Expected 2 chunks, got ${chunks.length}`);
+  }
+  if (typeof X === 'undefined') {
+    throw new Error(`BLS Pubkey improperly chunked. X is undefined, got ${X}`);
+  }
+  if (typeof Y === 'undefined') {
+    throw new Error(`BLS Pubkey improperly chunked. Y is undefined, got ${Y}`);
+  }
+  return { X, Y };
+};
+
+export const encodeBlsSignature = (hex: string) => {
+  const chunks = encodeHexToBigIntChunks(hex, HEX_BYTES.BLS_SIG_BYTES);
+  const [sigs0, sigs1, sigs2, sigs3] = chunks;
+  if (chunks.length !== 4) {
+    throw new Error(`BLS Signature improperly chunked. Expected 4 chunks, got ${chunks.length}`);
+  }
+  if (typeof sigs0 === 'undefined') {
+    throw new Error(`BLS Signature improperly chunked. sigs0 is undefined, got ${sigs0}`);
+  }
+  if (typeof sigs1 === 'undefined') {
+    throw new Error(`BLS Signature improperly chunked. sigs0 is undefined, got ${sigs1}`);
+  }
+  if (typeof sigs2 === 'undefined') {
+    throw new Error(`BLS Signature improperly chunked. sigs0 is undefined, got ${sigs2}`);
+  }
+  if (typeof sigs3 === 'undefined') {
+    throw new Error(`BLS Signature improperly chunked. sigs0 is undefined, got ${sigs3}`);
+  }
+
+  return { sigs0, sigs1, sigs2, sigs3 };
+};
+
+export const encodeED25519PubKey = (hex: string) => {
+  const chunks = encodeHexToBigIntChunks(hex, HEX_BYTES.ED_25519_KEY_BYTES);
+  const [pubKey] = chunks;
+  if (chunks.length !== 1) {
+    throw new Error(
+      `ED 25519 Public Key improperly chunked. Expected 1 chunk, got ${chunks.length}`
+    );
+  }
+  if (typeof pubKey === 'undefined') {
+    throw new Error(`ED 25519 Public Key improperly chunked. pubKey is undefined, got ${pubKey}`);
+  }
+  return { pubKey };
+};
+
+export const encodeED25519Signature = (hex: string) => {
+  const chunks = encodeHexToBigIntChunks(hex, HEX_BYTES.ED_25519_SIG_BYTES);
+  const [sigs0, sigs1] = chunks;
+  if (chunks.length !== 2) {
+    throw new Error(
+      `ED 25519 Signature improperly chunked. Expected 2 chunks, got ${chunks.length}`
+    );
+  }
+  if (typeof sigs0 === 'undefined') {
+    throw new Error(`ED 25519 Signature improperly chunked. sigs0 is undefined, got ${sigs0}`);
+  }
+  if (typeof sigs1 === 'undefined') {
+    throw new Error(`ED 25519 Signature improperly chunked. sigs0 is undefined, got ${sigs1}`);
+  }
+  return { sigs0, sigs1 };
+};

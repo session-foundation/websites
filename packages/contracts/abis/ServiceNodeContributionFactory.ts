@@ -5,15 +5,59 @@
  */
 export const ServiceNodeContributionFactoryAbi = [
   {
+    inputs: [],
+    name: 'EnforcedPause',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'ExpectedPause',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidInitialization',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NotInitializing',
+    type: 'error',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
-        name: '_stakingRewardsContract',
+        name: 'owner',
         type: 'address',
       },
     ],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
+    name: 'OwnableInvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'OwnableUnauthorizedAccount',
+    type: 'error',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'version',
+        type: 'uint64',
+      },
+    ],
+    name: 'Initialized',
+    type: 'event',
   },
   {
     anonymous: false,
@@ -35,16 +79,74 @@ export const ServiceNodeContributionFactoryAbi = [
     type: 'event',
   },
   {
-    inputs: [],
-    name: 'SENT',
-    outputs: [
+    anonymous: false,
+    inputs: [
       {
-        internalType: 'contract IERC20',
-        name: '',
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
         type: 'address',
       },
     ],
-    stateMutability: 'view',
+    name: 'OwnershipTransferStarted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnershipTransferred',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'Paused',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'Unpaused',
+    type: 'event',
+  },
+  {
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -63,7 +165,34 @@ export const ServiceNodeContributionFactoryAbi = [
           },
         ],
         internalType: 'struct BN256G1.G1Point',
-        name: 'blsPubkey',
+        name: 'key',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'sig',
         type: 'tuple',
       },
       {
@@ -90,26 +219,145 @@ export const ServiceNodeContributionFactoryAbi = [
           },
         ],
         internalType: 'struct IServiceNodeRewards.ServiceNodeParams',
-        name: 'serviceNodeParams',
+        name: 'params',
         type: 'tuple',
       },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'amount',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ReservedContributor[]',
+        name: 'reserved',
+        type: 'tuple[]',
+      },
+      {
+        internalType: 'bool',
+        name: 'manualFinalize',
+        type: 'bool',
+      },
     ],
-    name: 'deployContributionContract',
+    name: 'deploy',
+    outputs: [
+      {
+        internalType: 'address',
+        name: 'result',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'deployedContracts',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_stakingRewardsContract',
+        type: 'address',
+      },
+    ],
+    name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [],
-    name: 'maxContributors',
+    name: 'owner',
     outputs: [
       {
-        internalType: 'uint256',
+        internalType: 'address',
         name: '',
-        type: 'uint256',
+        type: 'address',
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'contractAddress',
+        type: 'address',
+      },
+    ],
+    name: 'owns',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'paused',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -123,6 +371,26 @@ export const ServiceNodeContributionFactoryAbi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'unpause',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
 ] as const;

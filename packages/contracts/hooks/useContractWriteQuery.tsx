@@ -1,5 +1,6 @@
 import type {
   Abi,
+  Address,
   ContractFunctionArgs,
   ContractFunctionName,
   SimulateContractErrorType,
@@ -27,6 +28,7 @@ export type WriteContractStatus = GenericContractStatus | 'idle';
 export type WriteContractFunction<Args> = (args?: Args) => void;
 
 export type ContractWriteQueryProps = {
+  transactionData: unknown;
   /** Execute getting the fee estimation for the contract write */
   estimateContractWriteFee: () => void;
   /** Re-fetch the gas price and units of gas needed to write the contract */
@@ -64,6 +66,7 @@ export type ContractWriteQueryProps = {
 export type UseContractWrite<Args> = ContractWriteQueryProps & {
   /** Simulate the contract write then write to the contract if the simulation is successful */
   simulateAndWriteContract: WriteContractFunction<Args>;
+  writeContractWithoutSimulating: WriteContractFunction<Args>;
 };
 
 export type ContractWriteQueryFetchOptions = {
@@ -81,10 +84,12 @@ export function useContractWriteQuery<
   functionName,
   defaultArgs,
   chain,
+  addressOverride,
 }: {
   contract: T;
   defaultArgs?: Args;
   functionName: FName;
+  addressOverride?: Address | null;
 } & ContractWriteQueryFetchOptions): UseContractWrite<Args> {
   const { address: executorAddress } = useAccount();
   const [estimateGasEnabled, setEstimateGasEnabled] = useState<boolean>(false);
@@ -100,18 +105,23 @@ export function useContractWriteQuery<
     writeContract,
     reset,
   } = useWriteContract();
-  const { error: transactionError, status: transactionStatus } = useWaitForTransactionReceipt({
+
+  const {
+    error: transactionError,
+    status: transactionStatus,
+    data: transactionData,
+  } = useWaitForTransactionReceipt({
     hash,
   });
 
   const contractDetails = useMemo(() => {
     return {
-      address: addresses[contract][chain],
+      address: addressOverride ?? addresses[contract][chain],
       abi: Contracts[contract] as Abi,
       functionName,
       args: contractArgs as ContractFunctionArgs,
     };
-  }, [contract, chain, functionName, contractArgs]);
+  }, [contract, chain, functionName, contractArgs, addressOverride]);
 
   const {
     data,
@@ -168,6 +178,15 @@ export function useContractWriteQuery<
     void refetchSimulate();
   };
 
+  const writeContractWithoutSimulating: WriteContractFunction<Args> = (args) => {
+    if (args) setContractArgs(args);
+
+    writeContract({
+      ...contractDetails,
+      chainId: chains[chain].id,
+    });
+  };
+
   const resetContract = () => {
     setSimulateEnabled(false);
     reset();
@@ -203,9 +222,11 @@ export function useContractWriteQuery<
 
   return {
     simulateAndWriteContract,
+    writeContractWithoutSimulating,
     estimateContractWriteFee,
     refetchContractWriteFeeEstimate,
     resetContract,
+    transactionData,
     fee,
     gasAmountEstimate,
     gasPrice,
