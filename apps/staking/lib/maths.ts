@@ -1,5 +1,6 @@
 import type { Contributor } from '@session/sent-staking-js/client';
-import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
+
+const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
 
 export const getContributionRangeFromContributors = (contributors: Array<Contributor> = []) => {
   let remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT;
