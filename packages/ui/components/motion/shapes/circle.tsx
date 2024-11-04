@@ -10,7 +10,7 @@ import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 
-const circleVariants = cva('', {
+export const circleVariants = cva('', {
   variants: {
     variant: {
       black: 'fill-indicator-black',
