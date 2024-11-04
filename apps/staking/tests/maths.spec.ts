@@ -46,7 +46,7 @@ async function getMinContributionFromContract(contributors: Array<Contributor>) 
 }
 
 async function contributionTest(contributors: Array<Contributor>) {
-  const { minStake, maxStake, totalStaked } = getContributionRangeFromContributors(contributors);
+  const { minStake } = getContributionRangeFromContributors(contributors);
 
   const minFromContract = await getMinContributionFromContract(contributors);
 

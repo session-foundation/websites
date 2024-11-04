@@ -162,16 +162,6 @@ export const isReadyToExit = (stake: Stake, blockHeight: number): stake is NodeR
 export const isNodeOperator = (node: Stake, address: string): boolean =>
   areHexesEqual(node.operator_address, address);
 
-/**
- * Checks if a given contributor address is a contributor of a session node.
- *
- * @param node - The session node to check.
- * @param contributorAddress - The address of the contributor to check.
- * @returns `true` if the contributor address is a contributor of the session node, `false` otherwise.
- */
-// const isNodeContributor = (node: StakedNode, contributorAddress: string): boolean =>
-//   node.contributors.some(({ address }) => areHexesEqual(address, contributorAddress));
-
 function getNodeStatus(state: NODE_STATE): VariantProps<typeof statusVariants>['status'] {
   switch (state) {
     case NODE_STATE.RUNNING:

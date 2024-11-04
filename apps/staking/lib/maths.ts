@@ -46,7 +46,7 @@ function calcMinimumContribution(
     throw new Error(`maxNumContributors must be non-negative`);
   }
 
-  let result: bigint = 0n;
+  let result: bigint;
   if (numContributors === 0n) {
     // Equivalent to Math.ceil(contributionRemaining / 4)
     result = (contributionRemaining + 3n) / 4n;

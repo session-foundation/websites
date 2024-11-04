@@ -78,18 +78,9 @@ const OpenNodeCard = forwardRef<
   const pathname = usePathname();
   const { address } = useWallet();
 
-  const {
-    service_node_pubkey: pubKey,
-    fee,
-    operator,
-    total_contributions,
-    contract,
-    contributors,
-  } = node;
+  const { service_node_pubkey: pubKey, fee, total_contributions, contract } = node;
 
-  const { minStake, maxStake, totalStaked } = getContributionRangeFromContributors(
-    node.contributors
-  );
+  const { minStake, maxStake } = getContributionRangeFromContributors(node.contributors);
 
   const isOperator = isOpenNodeOperator(node, address);
   const isContributor = isOpenNodeContributor(node, address);
