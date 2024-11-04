@@ -39,6 +39,7 @@ import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 import { ActionModuleDivider } from '@/components/ActionModule';
 import { Address } from 'viem';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import Link from 'next/link';
 
 type StakeInContract = Stake & {
   contract_id: NonNullable<Stake['contract_id']>;
@@ -95,10 +96,10 @@ type ExitedNode = NodeRequestingExit & {
  * @param node - The node to check.
  * @returns `true` if the node is being deregistered, `false` otherwise.
  */
-const isBeingDeregistered = (node: Stake): node is DecommissionedNode =>
+export const isBeingDeregistered = (node: Stake): node is DecommissionedNode =>
   node.state === NODE_STATE.DECOMMISSIONED;
 
-const hasDeregistrationUnlockHeight = (node: Stake): node is DeregisteredNode =>
+export const hasDeregistrationUnlockHeight = (node: Stake): node is DeregisteredNode =>
   !!('deregistration_unlock_height' in node && node.deregistration_unlock_height);
 
 const hasRequestedUnlockHeight = (node: Stake): node is NodeRequestingExit =>
@@ -126,7 +127,10 @@ const hasExited = (stake: Stake): stake is ExitedNode =>
  * @param stake - The stake to check.
  * @param blockHeight - The current block height.
  */
-const isRequestingToExit = (stake: Stake, blockHeight: number): stake is NodeRequestingExit =>
+export const isRequestingToExit = (
+  stake: Stake,
+  blockHeight: number
+): stake is NodeRequestingExit =>
   !hasExited(stake) &&
   hasRequestedUnlockHeight(stake) &&
   stake.requested_unlock_height >= blockHeight;
@@ -137,7 +141,7 @@ const isRequestingToExit = (stake: Stake, blockHeight: number): stake is NodeReq
  * @param stake - The stake to check.
  * @param blockHeight - The current block height.
  */
-const isReadyToExit = (stake: Stake, blockHeight: number): stake is NodeRequestingExit =>
+export const isReadyToExit = (stake: Stake, blockHeight: number): stake is NodeRequestingExit =>
   !hasExited(stake) &&
   ((hasRequestedUnlockHeight(stake) && stake.requested_unlock_height <= blockHeight) ||
     (hasDeregistrationUnlockHeight(stake) && stake.deregistration_unlock_height <= blockHeight));
@@ -155,7 +159,7 @@ const isReadyToExit = (stake: Stake, blockHeight: number): stake is NodeRequesti
  * @param address - The address of the user to compare with.
  * @returns `true` if the node is operated by the specified user, `false` otherwise.
  */
-const isNodeOperator = (node: Stake, address: string): boolean =>
+export const isNodeOperator = (node: Stake, address: string): boolean =>
   areHexesEqual(node.operator_address, address);
 
 /**
@@ -263,29 +267,36 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
   )
 );
 
-const NodeOperatorIndicator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const dictionary = useTranslations('nodeCard.staked');
-
-    return (
-      <>
-        <Tooltip tooltipContent={dictionary('operatorTooltip')}>
-          <div
-            ref={ref}
-            className={cn(
-              'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
-              className
-            )}
-            {...props}
-          >
-            <SpannerAndScrewdriverIcon className="fill-session-green h-3.5 w-3.5" />
-            {dictionary('operator')}
-          </div>
-        </Tooltip>
-      </>
-    );
+export const NodeOperatorIndicator = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement> & {
+    hideTextOnMobile?: boolean;
   }
-);
+>(({ className, hideTextOnMobile, ...props }, ref) => {
+  const dictionary = useTranslations('nodeCard.staked');
+
+  return (
+    <>
+      <Tooltip tooltipContent={dictionary('operatorTooltip')}>
+        <div
+          ref={ref}
+          className={cn(
+            'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
+            className
+          )}
+          {...props}
+        >
+          <SpannerAndScrewdriverIcon className="fill-session-green h-3.5 w-3.5" />
+          {hideTextOnMobile ? (
+            <span className="hidden md:block">{dictionary('operator')}</span>
+          ) : (
+            dictionary('operator')
+          )}
+        </div>
+      </Tooltip>
+    </>
+  );
+});
 
 /**
  * Checks if a given date is in the past or `soon`
@@ -642,24 +653,6 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
   ]);
 };
 
-/**
- * Generates a unique identifier for a stake. This is used to identify the stake in the UI for the
- * list key and for creating a collapse toggle key.
- * @param stake - The stake to generate an identifier for.
- *
- * @note `contract_id` is a unique identifier for the stake in the smart contract.
- * @note stakes that have exited the smart contract will have a null contract_id.
- * @note stakes can have the same `service_node_pubkey` if they are for the same node. A node can be
- * staked to, exited, then re-staked.
- * @note `last_uptime_proof` is in no way unique. But it's impossible for a stake with the same
- * `service_node_pubkey` to have the same `last_uptime_proof`, as by definition the two stakes are
- * for the same node and can't exist in the same time.
- *
- * @returns A unique identifier for the stake.
- */
-export const generateStakeId = (stake: Stake) =>
-  `stake-${stake.contract_id}-${stake.service_node_pubkey}-${stake.last_uptime_proof}`;
-
 const StakedNodeCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
@@ -667,24 +660,15 @@ const StakedNodeCard = forwardRef<
     targetWalletAddress?: Address;
     blockHeight: number;
     networkTime: number;
-    uniqueId?: string;
     hideButton?: boolean;
   }
 >(
   (
-    {
-      className,
-      node,
-      blockHeight,
-      networkTime,
-      hideButton,
-      uniqueId,
-      targetWalletAddress,
-      ...props
-    },
+    { className, node, blockHeight, networkTime, hideButton, targetWalletAddress, ...props },
     ref
   ) => {
     const dictionary = useTranslations('nodeCard.staked');
+    const dictionaryOpenNode = useTranslations('nodeCard.open');
     const generalDictionary = useTranslations('general');
     const generalNodeDictionary = useTranslations('sessionNodes.general');
     const stakingNodeDictionary = useTranslations('sessionNodes.staking');
@@ -698,10 +682,10 @@ const StakedNodeCard = forwardRef<
       [targetWalletAddress, connectedAddress]
     );
 
-    const toggleId = useMemo(() => `toggle-${uniqueId ?? generateStakeId(node)}`, [uniqueId, node]);
-
     const {
       state,
+      contract,
+      unique_id,
       service_node_pubkey: pubKey,
       operator_fee: operatorFee,
       operator_address: operatorAddress,
@@ -711,9 +695,22 @@ const StakedNodeCard = forwardRef<
       last_uptime_proof: lastUptimeProofSeconds,
     } = node;
 
+    const toggleId = `toggle-${unique_id}`;
+
     const formattedStakeBalance = useMemo(() => formatSENTNumber(stakedBalance), [stakedBalance]);
     const showAllTimers = useFeatureFlag(FEATURE_FLAG.SHOW_ALL_TIMERS);
     const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
+
+    const beneficiaryAddress = useMemo(() => {
+      const contributor = contributors.find((contributor) =>
+        areHexesEqual(contributor.address, walletAddress)
+      );
+      if (!contributor) return null;
+
+      return !areHexesEqual(contributor.beneficiary, contributor.address)
+        ? contributor.beneficiary
+        : null;
+    }, [contributors]);
 
     const {
       lastUptimeDate,
@@ -788,7 +785,7 @@ const StakedNodeCard = forwardRef<
             />
           </CollapsableContent>
         ) : null}
-        {state !== NODE_STATE.RUNNING ? (
+        {state !== NODE_STATE.RUNNING && state !== NODE_STATE.AWAITING_CONTRIBUTORS ? (
           <CollapsableContent size="xs">
             <Tooltip
               tooltipContent={dictionary('lastRewardDescription', {
@@ -847,6 +844,14 @@ const StakedNodeCard = forwardRef<
           </RowLabel>
           <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
         </CollapsableContent>
+        {beneficiaryAddress ? (
+          <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+            <RowLabel>
+              {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
+            </RowLabel>
+            <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+          </CollapsableContent>
+        ) : null}
         <CollapsableContent>
           <RowLabel>
             {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
@@ -858,7 +863,7 @@ const StakedNodeCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
             </RowLabel>
-            {operatorFee !== null ? formatPercentage(operatorFee) : notFoundString}
+            {operatorFee !== null ? formatPercentage(operatorFee / 1000000) : notFoundString}
           </CollapsableContent>
         ) : null}
         {showRawNodeData ? (
@@ -908,6 +913,24 @@ const StakedNodeCard = forwardRef<
             </Tooltip>
           ) : !hasExited(node) ? (
             <NodeRequestExitButton node={node} />
+          ) : state === NODE_STATE.AWAITING_CONTRIBUTORS && contract ? (
+            <CollapsableContent
+              className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
+              size="buttonMd"
+            >
+              <Link href={`/stake/${contract}`}>
+                <Button
+                  rounded="md"
+                  size="md"
+                  variant="outline"
+                  className="uppercase"
+                  aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
+                  data-testid={ButtonDataTestId.Node_Card_View}
+                >
+                  {dictionaryOpenNode('viewButton.text')}
+                </Button>
+              </Link>
+            </CollapsableContent>
           ) : null
         ) : null}
       </NodeCard>

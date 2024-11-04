@@ -11,7 +11,11 @@ export enum ButtonDataTestId {
   Faucet_Disconnect = 'button:faucet-disconnect',
   Dropdown_Hamburger_Menu = 'button:dropdown-hamburger-menu',
   Stake_Submit = 'button:stake-submit',
-  Register_Submit = 'button:register-submit',
+  Register_Submit_Solo = 'button:register-submit-solo',
+  Register_Add_Reserved = 'button:register-add-reserved',
+  Register_Submit_Multi = 'button:register-submit-multi',
+  Stake_Submit_Multi = 'button:stake-submit-multi',
+  Register_Submit_Multi_Register_Only = 'button:register-submit-multi-register-only',
   Learn_More_Open_Nodes = 'button:learn-more-open-nodes',
   Agree_TOS = 'button:agree-tos',
   Claim_Tokens_Open_Dialog = 'button:claim-tokens-open-dialog',
@@ -23,6 +27,8 @@ export enum ButtonDataTestId {
   Staked_Node_Request_Exit_Dialog_Cancel = 'button:staked-node-request-exit-dialog-cancel',
   Staked_Node_Request_Exit_Write_Dialog_Submit = 'button:staked-node-request-exit-write-dialog-submit',
   Staked_Node_Exit_Dialog_Submit = 'button:staked-node-exit-dialog-submit',
+  Stake_Amount_Min = 'button:stake-amount-min',
+  Stake_Amount_Max = 'button:stake-amount-max',
 }
 
 export enum SpecialDataTestId {

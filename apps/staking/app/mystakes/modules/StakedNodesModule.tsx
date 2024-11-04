@@ -1,7 +1,13 @@
 'use client';
 
 import Loading from '@/app/loading';
-import { generateStakeId, StakedNodeCard } from '@/components/StakedNodeCard';
+import {
+  hasDeregistrationUnlockHeight,
+  isBeingDeregistered,
+  isReadyToExit,
+  isRequestingToExit,
+  StakedNodeCard,
+} from '@/components/StakedNodeCard';
 import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -23,6 +29,47 @@ import { EXPERIMENTAL_FEATURE_FLAG, FEATURE_FLAG } from '@/lib/feature-flags';
 import { useExperimentalFeatureFlag, useFeatureFlag } from '@/lib/feature-flags-client';
 import { Address } from 'viem';
 import { generateMockNodeData } from '@session/sent-staking-js/test';
+import { NODE_STATE, type Stake } from '@session/sent-staking-js/client';
+
+export const sortAndGroupStakes = (nodes: Array<Stake>, blockHeight: number) => {
+  nodes.sort((a, b) => {
+    if (a.staked_balance === b.staked_balance) return (a.operator_fee ?? 0) - (b.operator_fee ?? 0);
+    return (b.staked_balance ?? 0) - (a.staked_balance ?? 0);
+  });
+
+  const decommissioning = [];
+  const readyToExit = [];
+  const exiting = [];
+  const running = [];
+  const other = [];
+
+  for (const node of nodes) {
+    if (isBeingDeregistered(node)) decommissioning.push(node);
+    else if (isReadyToExit(node, blockHeight)) readyToExit.push(node);
+    else if (isRequestingToExit(node, blockHeight) || hasDeregistrationUnlockHeight(node)) {
+      exiting.push(node);
+    } else if (node.state === NODE_STATE.RUNNING) running.push(node);
+    else other.push(node);
+  }
+
+  decommissioning.sort(
+    (a, b) =>
+      (a.deregistration_unlock_height ?? a.requested_unlock_height ?? 0) -
+      (b.deregistration_unlock_height ?? b.requested_unlock_height ?? 0)
+  );
+
+  readyToExit.sort((a, b) => (a.requested_unlock_height ?? 0) - (b.requested_unlock_height ?? 0));
+
+  console.log({
+    decommissioning,
+    readyToExit,
+    exiting,
+    running,
+    other,
+  });
+
+  return [...decommissioning, ...readyToExit, ...exiting, ...running, ...other];
+};
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
   const showMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_STAKED_NODES);
@@ -47,9 +94,9 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     } else if (!data || showNoNodes) {
       return [[], null, null];
     }
-    
+
     return [
-      [...data.stakes, ...data.historical_stakes],
+      sortAndGroupStakes([...data.stakes, ...data.historical_stakes], data.network.block_height),
       data.network.block_height,
       data.network.block_timestamp,
     ];
@@ -61,11 +108,9 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         <Loading />
       ) : stakes?.length && blockHeight && networkTime ? (
         stakes.map((node) => {
-          const key = generateStakeId(node);
           return (
             <StakedNodeCard
-              key={key}
-              uniqueId={key}
+              key={node.unique_id}
               node={node}
               blockHeight={blockHeight}
               networkTime={networkTime}
