@@ -3,7 +3,7 @@ import { bigIntToNumber, bigIntToString, stringToBigInt } from '@session/util-cr
 import { FormControl, FormItem, FormMessage } from '@session/ui/ui/form';
 import { ActionModuleTooltip } from '@/components/ActionModule';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Input } from '@session/ui/ui/input';
@@ -35,13 +35,13 @@ export const getStakeAmountFormFieldSchema = ({
     .refine(
       (value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) >= minStake,
       dictionary(isOperator ? 'underMinOperator' : 'underMin', {
-        min: formatSENTBigInt(minStake),
+        min: formatSENTBigIntNoRounding(minStake),
       })
     )
     .refine(
       (value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) <= maxStake,
       dictionary('overMax', {
-        max: formatSENTBigInt(maxStake),
+        max: formatSENTBigIntNoRounding(maxStake),
       })
     );
 };
@@ -146,7 +146,7 @@ export default function StakeAmountField({
                 }
               >
                 {dictionary.rich('minContribution', {
-                  min: formatSENTBigInt(minStake),
+                  min: formatSENTBigIntNoRounding(minStake),
                 })}
               </Button>
               {'|'}
@@ -165,7 +165,7 @@ export default function StakeAmountField({
                 }
               >
                 {dictionary.rich('maxContribution', {
-                  max: formatSENTBigInt(maxStake),
+                  max: formatSENTBigIntNoRounding(maxStake),
                 })}
               </Button>
             </div>

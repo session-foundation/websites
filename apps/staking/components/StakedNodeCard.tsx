@@ -41,6 +41,7 @@ import { Address } from 'viem';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import Link from 'next/link';
 import NodeOperatorStartButton from '@/components/StakedNode/NodeOperatorStartButton';
+import { SENT_DECIMALS } from '@session/contracts';
 
 type StakeInContract = Stake & {
   contract_id: NonNullable<Stake['contract_id']>;
@@ -700,7 +701,10 @@ const StakedNodeCard = forwardRef<
 
     const toggleId = `toggle-${unique_id}`;
 
-    const formattedStakeBalance = useMemo(() => formatSENTNumber(stakedBalance), [stakedBalance]);
+    const formattedStakeBalance = useMemo(
+      () => formatSENTNumber(stakedBalance, SENT_DECIMALS),
+      [stakedBalance]
+    );
     const showAllTimers = useFeatureFlag(FEATURE_FLAG.SHOW_ALL_TIMERS);
     const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
 

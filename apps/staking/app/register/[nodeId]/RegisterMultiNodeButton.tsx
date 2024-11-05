@@ -9,7 +9,7 @@ import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
 import { toast } from '@session/ui/lib/toast';
 import { RegistrationPausedInfo } from '@/components/RegistrationPausedInfo';
 import { Tooltip } from '@session/ui/ui/tooltip';
@@ -93,7 +93,7 @@ export function RegisterMultiNodeButton({
     contractAddress: openNodeContractAddress,
   });
 
-  const tokenAmount = formData?.stakeAmount ? formatSENTBigInt(formData.stakeAmount, 0) : '';
+  const tokenAmount = formatSENTBigIntNoRounding(formData?.stakeAmount);
 
   useEffect(() => {
     if (!isSolo && formData) {

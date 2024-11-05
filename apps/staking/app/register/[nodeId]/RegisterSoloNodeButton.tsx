@@ -1,7 +1,7 @@
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { useTranslations } from 'next-intl';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
 import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import useRegisterNode from '@/hooks/useRegisterNode';
@@ -38,7 +38,7 @@ export function RegisterSoloNodeButton({
   const dictionaryStage = useTranslations('actionModules.register.stageSolo');
 
   const stakeAmount = SESSION_NODE_FULL_STAKE_AMOUNT;
-  const stakeAmountString = formatSENTBigInt(stakeAmount, 0);
+  const stakeAmountString = formatSENTBigIntNoRounding(stakeAmount);
 
   const registerNodeArgs = useMemo(
     () => ({
@@ -76,7 +76,7 @@ export function RegisterSoloNodeButton({
     }
   };
 
-  const tokenAmount = formatSENTBigInt(stakeAmount);
+  const tokenAmount = formatSENTBigIntNoRounding(stakeAmount);
 
   useEffect(() => {
     if (

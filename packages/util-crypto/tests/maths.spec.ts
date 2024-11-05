@@ -1,5 +1,6 @@
 import {
   bigIntToNumber,
+  bigIntToString,
   formatBigIntTokenValue,
   formatNumber,
   roundNumber,
@@ -280,5 +281,60 @@ describe('stringToBigInt', () => {
     expect(stringToBigInt('100.00000123456789', 14)).toBe(10000000123456789n);
     expect(stringToBigInt('100.000000123456789', 15)).toBe(100000000123456789n);
     expect(stringToBigInt('100.0000000123456789', 16)).toBe(1000000000123456789n);
+  });
+});
+
+describe('bigIntToString', () => {
+  test('should convert a positive BigInt value to a string with decimals', () => {
+    expect(bigIntToString(BigInt(1), 4)).toBe('0.0001');
+    expect(bigIntToString(BigInt(10), 4)).toBe('0.001');
+    expect(bigIntToString(BigInt(100), 4)).toBe('0.01');
+    expect(bigIntToString(BigInt(1000), 4)).toBe('0.1');
+    expect(bigIntToString(BigInt(10000), 4)).toBe('1');
+    expect(bigIntToString(BigInt(100000), 4)).toBe('10');
+    expect(bigIntToString(BigInt(1000000), 4)).toBe('100');
+    expect(bigIntToString(BigInt(10000000), 4)).toBe('1000');
+  });
+
+  test('should convert a negative BigInt value to a string with decimals', () => {
+    expect(bigIntToString(BigInt(-1), 4)).toBe('-0.0001');
+    expect(bigIntToString(BigInt(-10), 4)).toBe('-0.001');
+    expect(bigIntToString(BigInt(-100), 4)).toBe('-0.01');
+    expect(bigIntToString(BigInt(-1000), 4)).toBe('-0.1');
+    expect(bigIntToString(BigInt(-10000), 4)).toBe('-1');
+    expect(bigIntToString(BigInt(-100000), 4)).toBe('-10');
+    expect(bigIntToString(BigInt(-1000000), 4)).toBe('-100');
+    expect(bigIntToString(BigInt(-10000000), 4)).toBe('-1000');
+  });
+
+  test('should convert a BigInt value to a string with decimals', () => {
+    expect(bigIntToString(BigInt(123456789), 0)).toBe('123456789');
+    expect(bigIntToString(BigInt(123456789), 1)).toBe('12345678.9');
+    expect(bigIntToString(BigInt(123456789), 2)).toBe('1234567.89');
+    expect(bigIntToString(BigInt(123456789), 3)).toBe('123456.789');
+    expect(bigIntToString(BigInt(123456789), 4)).toBe('12345.6789');
+    expect(bigIntToString(BigInt(123456789), 5)).toBe('1234.56789');
+    expect(bigIntToString(BigInt(123456789), 6)).toBe('123.456789');
+    expect(bigIntToString(BigInt(123456789), 7)).toBe('12.3456789');
+    expect(bigIntToString(BigInt(123456789), 8)).toBe('1.23456789');
+    expect(bigIntToString(BigInt(123456789), 9)).toBe('0.123456789');
+    expect(bigIntToString(BigInt(123456789), 10)).toBe('0.0123456789');
+    expect(bigIntToString(BigInt(123456789), 11)).toBe('0.00123456789');
+    expect(bigIntToString(BigInt(123456789), 12)).toBe('0.000123456789');
+    expect(bigIntToString(BigInt(123456789), 13)).toBe('0.0000123456789');
+    expect(bigIntToString(BigInt(123456789), 14)).toBe('0.00000123456789');
+    expect(bigIntToString(BigInt(123456789), 15)).toBe('0.000000123456789');
+    expect(bigIntToString(BigInt(123456789), 16)).toBe('0.0000000123456789');
+
+    expect(bigIntToString(100123456789n, 7)).toBe('10012.3456789');
+    expect(bigIntToString(1000123456789n, 8)).toBe('10001.23456789');
+    expect(bigIntToString(10000123456789n, 9)).toBe('10000.123456789');
+    expect(bigIntToString(100000123456789n, 10)).toBe('10000.0123456789');
+    expect(bigIntToString(1000000123456789n, 11)).toBe('10000.00123456789');
+    expect(bigIntToString(10000000123456789n, 12)).toBe('10000.000123456789');
+    expect(bigIntToString(100000000123456789n, 13)).toBe('10000.0000123456789');
+    expect(bigIntToString(1000000000123456789n, 14)).toBe('10000.00000123456789');
+    expect(bigIntToString(10000000000123456789n, 15)).toBe('10000.000000123456789');
+    expect(bigIntToString(100000000000123456789n, 16)).toBe('10000.0000000123456789');
   });
 });

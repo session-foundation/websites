@@ -18,6 +18,9 @@ import {
 import { useChain } from './useChain';
 import type { CHAIN } from '../chains';
 
+export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
+  formatSENTBigInt(value, SENT_DECIMALS, hideSymbol);
+
 export const formatSENTBigInt = (value?: bigint | null, decimals?: number, hideSymbol?: boolean) =>
   `${value ? formatBigIntTokenValue(value, SENT_DECIMALS, decimals) : 0}${hideSymbol ? '' : ` ${SENT_SYMBOL}`}`;
 
