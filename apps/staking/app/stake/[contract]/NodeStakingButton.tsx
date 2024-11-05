@@ -96,6 +96,7 @@ export function NodeStakingButton({
           {dictionary('button.submitMultiStake', { amount: formattedWatchedStakeAmount })}
         </Button>
       ) : (
+        // TODO: Add tooltip buttons as a component because this is getting ridiculous. This current implementation is required as the tooltip mounts its events to the child, so if its a button its game over, hence the div sandwiched between the tooltip and button. (if the button is disabled it also disabled the tooltip which is annoying)
         <Tooltip tooltipContent={dictionary('button.submitMultiRegisterDisabledDescription')}>
           <div>
             <Button
