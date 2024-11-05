@@ -10,6 +10,7 @@
     "you": "You",
     "emptySlot": "Empty Contributor Slot",
     "notFound": "Not Found",
+    "nodeNotFound": "Node Not Found",
     "soon": "Soon",
     "now": "now"
   },
@@ -334,6 +335,7 @@
       "maxContribution": "Max: <text-bold>{max}</text-bold>",
       "feeNA": "N/A",
       "feeNADescription": "Single contributor nodes cannot have an operator fee, as the operator already receives all rewards.",
+      "disabled": "Registrations are disabled",
       "advancedOptions": {
         "title": "Advanced Options",
         "autoRegister": "Auto-Register",

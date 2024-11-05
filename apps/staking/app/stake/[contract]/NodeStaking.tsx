@@ -45,6 +45,7 @@ import { getContributionRangeFromContributors } from '@/lib/maths';
 
 export default function NodeStaking({ contract }: { contract: string }) {
   const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
+  const dictionary = useTranslations('general');
 
   const node = useMemo(() => {
     return data?.nodes?.find((node) => areHexesEqual(node.contract, contract));
@@ -55,7 +56,7 @@ export default function NodeStaking({ contract }: { contract: string }) {
   ) : node ? (
     <NodeStakingForm node={node} />
   ) : (
-    <span>Node not found</span>
+    <span>{dictionary('nodeNotFound')}</span>
   );
 }
 

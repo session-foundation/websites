@@ -231,7 +231,7 @@ export function NodeRegistrationForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {!isRemoteFlagLoading && isRegistrationPausedFlagEnabled ? (
-          <span>Registrations are disabled</span>
+          <span>{dictionary('disabled')}</span>
         ) : null}
         {stakedNode ? (
           <>
