@@ -28,7 +28,6 @@ import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { EXPERIMENTAL_FEATURE_FLAG, FEATURE_FLAG } from '@/lib/feature-flags';
 import { useExperimentalFeatureFlag, useFeatureFlag } from '@/lib/feature-flags-client';
 import { Address } from 'viem';
-import { generateMockNodeData } from '@session/sent-staking-js/test';
 import { NODE_STATE, type Stake } from '@session/sent-staking-js/client';
 
 export const sortAndGroupStakes = (nodes: Array<Stake>, blockHeight: number) => {
@@ -60,14 +59,6 @@ export const sortAndGroupStakes = (nodes: Array<Stake>, blockHeight: number) => 
 
   readyToExit.sort((a, b) => (a.requested_unlock_height ?? 0) - (b.requested_unlock_height ?? 0));
 
-  console.log({
-    decommissioning,
-    readyToExit,
-    exiting,
-    running,
-    other,
-  });
-
   return [...decommissioning, ...readyToExit, ...exiting, ...running, ...other];
 };
 
@@ -85,12 +76,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
 
   const [stakes, blockHeight, networkTime] = useMemo(() => {
     if (showMockNodes) {
-      const mockResponse = generateMockNodeData({ userAddress: address });
-      return [
-        mockResponse.stakes,
-        mockResponse.network.block_height,
-        mockResponse.network.block_timestamp,
-      ];
+      return [[], 0, 0];
     } else if (!data || showNoNodes) {
       return [[], null, null];
     }

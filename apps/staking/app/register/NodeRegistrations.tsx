@@ -6,7 +6,6 @@ import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
 import { useTranslations } from 'next-intl';
-import { generateMockRegistrations } from '@session/sent-staking-js/test';
 import { QUERY, URL } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
 import { NodesListSkeleton } from '@/components/NodesListModule';
@@ -77,17 +76,6 @@ export default function NodeRegistrations() {
   const nodes = useMemo(() => {
     if (showNoNodes) {
       return [];
-    }
-    if (address) {
-      if (showManyMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 12 });
-      } else if (showThreeMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 3 });
-      } else if (showTwoMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 2 });
-      } else if (showOneMockNode) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 1 });
-      }
     }
 
     if (isLoadingRegistrations || isLoadingStakes) {

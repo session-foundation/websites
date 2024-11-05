@@ -5,7 +5,6 @@ import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-cli
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { QUERY } from '@/lib/constants';
 import { notFound } from 'next/navigation';
-import { generateMockRegistrations } from '@session/sent-staking-js/test';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
@@ -49,16 +48,6 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   );
 
   const node = useMemo(() => {
-    if (
-      showMockRegistration ||
-      showOneMockNode ||
-      showTwoMockNodes ||
-      showThreeMockNodes ||
-      showManyMockNodes
-    ) {
-      return generateMockRegistrations({ userAddress: address!, numberOfNodes: 1 })[0];
-    }
-
     if (isLoadingRegistrations || isLoadingStakes) {
       return null;
     }
