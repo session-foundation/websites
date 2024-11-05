@@ -440,6 +440,7 @@ export function NodeRegistrationForm({
                     size="lg"
                     variant="outline"
                     disabled={
+                      // TODO: enable when its built
                       true ||
                       isRegistrationPausedFlagEnabled ||
                       isRemoteFlagLoading ||
