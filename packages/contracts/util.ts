@@ -64,21 +64,29 @@ export const HEX_BYTES = {
   ED_25519_SIG_BYTES: 128,
 };
 
+const bytes64 = 64;
+
+/**
+ * Encodes a hex string to an array of BigInt chunks.
+ * @param hex - The hex string to encode.
+ * @param hexBytes - The number of bytes in the hex string.
+ * @returns An array of BigInt chunks.
+ */
 export function encodeHexToBigIntChunks(hex: string, hexBytes: number): Array<bigint> {
-  if (hexBytes < 64 || hexBytes % 64 !== 0) {
-    throw new Error(`hexBytes must be divisible by 2. hexBits: ${hexBytes}`);
+  if (hexBytes < bytes64 || hexBytes % bytes64 !== 0) {
+    throw new Error(`hexBytes must be divisible by ${bytes64}. hexBits: ${hexBytes}`);
   }
 
   if (hex.length !== hexBytes) {
     throw new Error(`Hex length is invalid, it must be a ${hexBytes} byte string`);
   }
 
-  const numberOfChunks = hexBytes / 64;
+  const numberOfChunks = hexBytes / bytes64;
 
   const chunks = [];
 
   for (let i = 0; i < numberOfChunks; i++) {
-    chunks.push(hex.slice(i * 64, (i + 1) * 64));
+    chunks.push(hex.slice(i * bytes64, (i + 1) * bytes64));
   }
 
   return chunks.map((hexChunk) => BigInt(`0x${hexChunk}`));

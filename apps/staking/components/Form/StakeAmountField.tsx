@@ -7,8 +7,7 @@ import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Input } from '@session/ui/ui/input';
-import { Slider } from '@session/ui/ui/slider';
-import { Circle } from '@session/ui/motion/shapes/circle';
+import { Slider, SliderLineCircle } from '@session/ui/ui/slider';
 import * as React from 'react';
 import type { DecimalDelimiter } from '@/lib/locale-client';
 import { useTranslations } from 'next-intl';
@@ -252,28 +251,20 @@ export default function StakeAmountField({
               return onChange(val.toString());
             }}
           >
-            <svg
-              height={10}
-              width={10}
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute cursor-pointer"
+            <SliderLineCircle
+              variant="blue"
+              strokeVariant="blue"
               style={{
                 left: `calc(${(bigIntToNumber(maxStake, SENT_DECIMALS) / bigIntToNumber(fullStake, SENT_DECIMALS)) * 100}% - 8px)`,
               }}
-            >
-              <Circle cx="50%" cy="50%" r={4} variant="blue" strokeVariant="blue" />
-            </svg>
-            <svg
-              height={10}
-              width={10}
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute cursor-pointer"
+            />
+            <SliderLineCircle
+              variant="blue"
+              strokeVariant="blue"
               style={{
                 left: `calc(${(bigIntToNumber(minStake, SENT_DECIMALS) / bigIntToNumber(fullStake, SENT_DECIMALS)) * 100}%)`,
               }}
-            >
-              <Circle cx="50%" cy="50%" r={4} variant="blue" strokeVariant="blue" />
-            </svg>
+            />
           </Slider>
         </div>
       </FormControl>

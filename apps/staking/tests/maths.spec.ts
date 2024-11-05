@@ -102,6 +102,7 @@ function getRandomBigInt(min: bigint, max: bigint): bigint {
 
 const getRandomOperatorContributorAmount = (): bigint =>
   getRandomBigInt(5000000000000n, 20000000000000n);
+
 const getRandomContributorAmount = (min: bigint, max: bigint): bigint => getRandomBigInt(min, max);
 
 function createRandomContributorArray() {
