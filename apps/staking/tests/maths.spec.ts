@@ -119,7 +119,8 @@ function createRandomContributorArray() {
   return contributors;
 }
 
-const fuzzAmount = 100;
+const fuzzAmount = 400;
+
 describe('getContributionRangeFromContributors fuzzing', () => {
   const tests = [];
   const testInfo = [];

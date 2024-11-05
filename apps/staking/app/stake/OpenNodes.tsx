@@ -41,7 +41,7 @@ export default function OpenNodes() {
 
   const nodes = useMemo(
     () => (data?.nodes?.length ? sortAndGroupOpenNodes(data.nodes, address) : []),
-    [data]
+    [data, address]
   );
 
   return isLoading ? (
