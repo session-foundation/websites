@@ -445,8 +445,13 @@ const NodeSummary = ({
 }: NodeSummaryProps) => {
   const allTimers = [];
 
-  if (hasExited(node)) {
-    return null;
+  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS && hasExited(node)) {
+    return (
+      <NodeContributorList
+        contributors={node.contributors}
+        data-testid={StakedNodeDataTestId.Contributor_List}
+      />
+    );
   }
 
   if (isReadyToExit(node, blockHeight)) {
