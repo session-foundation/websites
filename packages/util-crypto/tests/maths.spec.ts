@@ -170,11 +170,13 @@ describe('bigIntToNumber', () => {
     expect(bigIntToNumber(10000123456789n, 9)).toBe(10000.123456789);
     expect(bigIntToNumber(100000123456789n, 10)).toBe(10000.0123456789);
     expect(bigIntToNumber(1000000123456789n, 11)).toBe(10000.00123456789);
+    /* eslint-disable @typescript-eslint/no-loss-of-precision -- dw about it */
     expect(bigIntToNumber(10000000123456789n, 12)).toBe(10000.000123456789);
     expect(bigIntToNumber(100000000123456789n, 13)).toBe(10000.0000123456789);
     expect(bigIntToNumber(1000000000123456789n, 14)).toBe(10000.00000123456789);
     expect(bigIntToNumber(10000000000123456789n, 15)).toBe(10000.000000123456789);
     expect(bigIntToNumber(100000000000123456789n, 16)).toBe(10000.0000000123456789);
+    /* eslint-enable @typescript-eslint/no-loss-of-precision */
   });
 
   describe('safe for javascript number range', () => {
