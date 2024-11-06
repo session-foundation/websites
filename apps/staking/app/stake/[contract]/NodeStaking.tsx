@@ -49,7 +49,7 @@ export default function NodeStaking({ contract }: { contract: string }) {
 
   const node = useMemo(() => {
     return data?.nodes?.find((node) => areHexesEqual(node.contract, contract));
-  }, [data]);
+  }, [data, contract]);
 
   return isLoading ? (
     <Loading />
