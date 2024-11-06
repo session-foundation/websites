@@ -59,7 +59,7 @@ export const sortAndGroupStakes = (nodes: Array<Stake>, blockHeight: number) => 
 
   readyToExit.sort((a, b) => (a.requested_unlock_height ?? 0) - (b.requested_unlock_height ?? 0));
 
-  return [...decommissioning, ...readyToExit, ...exiting, ...running, ...other];
+  return [decommissioning, readyToExit, exiting, running, other].flat(1);
 };
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {

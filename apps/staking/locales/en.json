@@ -484,7 +484,7 @@
       "typeDescription": "The node type",
       "solo": "Single Contributor Node",
       "multi": "Multi Contributor Node",
-      "soloDescription": "A single contributor node is a node has the full stake amount contributed by the node operator.",
+      "soloDescription": "A single contributor node is a node that has the full stake amount contributed by the node operator.",
       "multiDescription": "A multi contributor node is a node that has a stake amount contributed by multiple contributors.",
       "registerButton": {
         "text": "View",
