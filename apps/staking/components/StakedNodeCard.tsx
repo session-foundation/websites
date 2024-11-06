@@ -174,6 +174,7 @@ function getNodeStatus(state: NODE_STATE): VariantProps<typeof statusVariants>['
   switch (state) {
     case NODE_STATE.RUNNING:
       return 'green';
+    case NODE_STATE.AWAITING_OPERATOR_START:
     case NODE_STATE.AWAITING_CONTRIBUTORS:
       return 'blue';
     case NODE_STATE.DECOMMISSIONED:
@@ -427,6 +428,7 @@ type NodeSummaryProps = {
   liquidationDate: Date | null;
   liquidationTime: string | null;
   showAllTimers?: boolean;
+  isOperator?: boolean;
 };
 
 const NodeSummary = ({
@@ -441,6 +443,7 @@ const NodeSummary = ({
   liquidationDate,
   liquidationTime,
   showAllTimers,
+  isOperator,
 }: NodeSummaryProps) => {
   const allTimers = [];
 
@@ -795,7 +798,9 @@ const StakedNodeCard = forwardRef<
             />
           </CollapsableContent>
         ) : null}
-        {state !== NODE_STATE.RUNNING && state !== NODE_STATE.AWAITING_CONTRIBUTORS ? (
+        {state !== NODE_STATE.RUNNING &&
+        state !== NODE_STATE.AWAITING_CONTRIBUTORS &&
+        node.state !== NODE_STATE.AWAITING_OPERATOR_START ? (
           <CollapsableContent size="xs">
             <Tooltip
               tooltipContent={dictionary('lastRewardDescription', {
@@ -835,7 +840,7 @@ const StakedNodeCard = forwardRef<
         ) : null}
         {/** NOTE - ensure any changes here still work with the pubkey component */}
         <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {walletAddress && isNodeOperator(node, walletAddress) ? (
+          {isOperator ? (
             <>
               <NodeOperatorIndicator />
               <TextSeparator className="separator mx-1 font-medium" />{' '}
