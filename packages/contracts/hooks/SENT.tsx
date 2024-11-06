@@ -64,15 +64,15 @@ export type SENTAllowanceQuery = ContractReadQueryProps & {
 export function useAllowanceQuery({
   contractAddress,
 }: {
-  contractAddress: Address;
+  contractAddress?: Address | null;
 }): SENTAllowanceQuery {
   const { address } = useAccount();
   const chain = useChain();
   const { data: allowance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'allowance',
-    args: [address!, contractAddress],
-    enabled: !!address,
+    args: [address!, contractAddress!],
+    enabled: !!address && !!contractAddress,
     chain,
   });
 
@@ -97,7 +97,7 @@ export function useProxyApproval({
   contractAddress,
   tokenAmount,
 }: {
-  contractAddress: Address;
+  contractAddress?: Address | null;
   tokenAmount: bigint;
 }): UseProxyApprovalReturn {
   const [hasEnoughAllowance, setHasEnoughAllowance] = useState<boolean>(false);
@@ -149,8 +149,8 @@ export function useProxyApproval({
   };
 
   const approveWrite = () => {
-    if (readStatus !== 'success') {
-      throw new Error('Checking if current allowance is sufficient');
+    if (!contractAddress) {
+      throw new Error('No contract address for approveWrite');
     }
 
     if (tokenAmount > BigInt(0) && allowance >= tokenAmount) {
@@ -183,10 +183,14 @@ export function useProxyApproval({
   }, [readStatus, contractCallStatus, hasEnoughAllowance]);
 
   useEffect(() => {
-    if (readStatus === 'success' && tokenAmount > BigInt(0)) {
+    if (readStatus === 'success' && tokenAmount > BigInt(0) && contractAddress) {
       approveWrite();
     }
-  }, [readStatus]);
+  }, [readStatus, contractAddress]);
+
+  useEffect(() => {
+    void refetchAllowance();
+  }, [contractAddress]);
 
   return {
     approve,

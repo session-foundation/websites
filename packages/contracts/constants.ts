@@ -6,6 +6,8 @@ const contracts = [
   'RewardRatePool',
   'SENT',
   'ServiceNodeRewards',
+  'ServiceNodeContributionFactory',
+  'ServiceNodeContribution',
 ] as const satisfies Array<ContractWithAbiName>;
 export type ContractName = (typeof contracts)[number];
 
@@ -20,44 +22,31 @@ export const addresses: Record<ContractName, Record<CHAIN, Address>> = {
   },
   ServiceNodeRewards: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0xb691e7C159369475D0a3d4694639ae0144c7bAB2',
+    [CHAIN.MAINNET]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0xb691e7C159369475D0a3d4694639ae0144c7bAB2',
-    [CHAIN.TESTNET]: '0xb691e7C159369475D0a3d4694639ae0144c7bAB2',
+    [CHAIN.ETHEREUM]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
+    [CHAIN.TESTNET]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
   },
   RewardRatePool: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x84a648F74Eaf037dD9558987F6179E692d5F2566',
+    [CHAIN.MAINNET]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x84a648F74Eaf037dD9558987F6179E692d5F2566',
-    [CHAIN.TESTNET]: '0x84a648F74Eaf037dD9558987F6179E692d5F2566',
+    [CHAIN.ETHEREUM]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
+    [CHAIN.TESTNET]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
   },
-} as const;
-
-/**
- * @deprecated - Use {@link addresses} instead
- */
-export const addressesV1: Record<ContractName, Record<CHAIN, Address>> = {
-  SENT: {
+  ServiceNodeContributionFactory: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x7FBDC29b81e410eB0eaE75Dca64a76d898EAc4A9',
+    [CHAIN.MAINNET]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x7FBDC29b81e410eB0eaE75Dca64a76d898EAc4A9',
-    [CHAIN.TESTNET]: '0x7FBDC29b81e410eB0eaE75Dca64a76d898EAc4A9',
+    [CHAIN.ETHEREUM]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
+    [CHAIN.TESTNET]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
   },
-  ServiceNodeRewards: {
+  ServiceNodeContribution: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0xEF43cd64528eA89966E251d4FE17c660222D2c9d',
+    [CHAIN.MAINNET]: '0x0000000000000000000000000000000000000000',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0xEF43cd64528eA89966E251d4FE17c660222D2c9d',
-    [CHAIN.TESTNET]: '0xEF43cd64528eA89966E251d4FE17c660222D2c9d',
-  },
-  RewardRatePool: {
-    /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x408bCc6C9b942ECc4F289C080d2A1a2a3617Aff8',
-    /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x408bCc6C9b942ECc4F289C080d2A1a2a3617Aff8',
-    [CHAIN.TESTNET]: '0x408bCc6C9b942ECc4F289C080d2A1a2a3617Aff8',
+    [CHAIN.ETHEREUM]: '0x0000000000000000000000000000000000000000',
+    [CHAIN.TESTNET]: '0x0000000000000000000000000000000000000000',
   },
 } as const;
 

@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 import { Loading } from '@session/ui/components/loading';
 import { areHexesEqual } from '@session/util-crypto/string';
 
-export const BlockExplorerLink = ({ nodeId }: { nodeId: string }) => {
+export const BlockExplorerLink = ({ contract }: { contract: string }) => {
   const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
 
   const node = useMemo(() => {
-    return data?.nodes?.find((node) => areHexesEqual(node.service_node_pubkey, nodeId));
-  }, [data, nodeId]);
+    return data?.nodes?.find((node) => areHexesEqual(node.contract, contract));
+  }, [data, contract]);
 
   return isLoading ? (
     <Loading />

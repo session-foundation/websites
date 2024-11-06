@@ -30,7 +30,34 @@ export const ServiceNodeContributionAbi = [
           },
         ],
         internalType: 'struct BN256G1.G1Point',
-        name: '_blsPubkey',
+        name: 'key',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'sig',
         type: 'tuple',
       },
       {
@@ -57,8 +84,30 @@ export const ServiceNodeContributionAbi = [
           },
         ],
         internalType: 'struct IServiceNodeRewards.ServiceNodeParams',
-        name: '_serviceNodeParams',
+        name: 'params',
         type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'amount',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ReservedContributor[]',
+        name: 'reserved',
+        type: 'tuple[]',
+      },
+      {
+        internalType: 'bool',
+        name: '_manualFinalize',
+        type: 'bool',
       },
     ],
     stateMutability: 'nonpayable',
@@ -87,8 +136,347 @@ export const ServiceNodeContributionAbi = [
     type: 'error',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'ed25519Pubkey',
+        type: 'uint256',
+      },
+    ],
+    name: 'BeneficiaryUpdatingDisabledNodeIsNotOpen',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'numContributors',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'maxNumContributors',
+        type: 'uint256',
+      },
+    ],
+    name: 'CalcMinContributionGivenBadContribArgs',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'ContributeFundsNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'contributed',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'min',
+        type: 'uint256',
+      },
+    ],
+    name: 'ContributionBelowMinAmount',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'contributed',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'reserved',
+        type: 'uint256',
+      },
+    ],
+    name: 'ContributionBelowReservedAmount',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'totalContributed',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'totalReserved',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'stakingRequirement',
+        type: 'uint256',
+      },
+    ],
+    name: 'ContributionExceedsStakingRequirement',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'index',
+        type: 'uint256',
+      },
+    ],
+    name: 'DuplicateAddressInReservedContributor',
+    type: 'error',
+  },
+  {
     inputs: [],
     name: 'FailedInnerCall',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'fee',
+        type: 'uint16',
+      },
+      {
+        internalType: 'uint16',
+        name: 'max',
+        type: 'uint16',
+      },
+    ],
+    name: 'FeeExceedsPossibleValue',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'FeeUpdateNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'FinalizeNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'contributor',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+    ],
+    name: 'FirstContributionMustBeOperator',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'index',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+    ],
+    name: 'FirstReservedContributorMustBeOperator',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'maxContributors',
+        type: 'uint256',
+      },
+    ],
+    name: 'MaxContributorsExceeded',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'nonContributorAddr',
+        type: 'address',
+      },
+    ],
+    name: 'NonContributorUpdatedBeneficiary',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'addr',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+    ],
+    name: 'OnlyOperatorIsAuthorised',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'PubkeyUpdateNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'token',
+        type: 'address',
+      },
+    ],
+    name: 'RescueBalanceIsEmpty',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'RescueNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'index',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'contributed',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'min',
+        type: 'uint256',
+      },
+    ],
+    name: 'ReservedContributionBelowMinAmount',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'index',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'contributed',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'remaining',
+        type: 'uint256',
+      },
+    ],
+    name: 'ReservedContributionExceedsStakingRequirement',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'index',
+        type: 'uint256',
+      },
+    ],
+    name: 'ReservedContributorHasZeroAddress',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: 'status',
+        type: 'uint8',
+      },
+    ],
+    name: 'ReservedContributorUpdateNotPossible',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'oldMax',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'newMax',
+        type: 'uint256',
+      },
+    ],
+    name: 'RewardsContractMaxContributorsChanged',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'oldRequirement',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'newRequirement',
+        type: 'uint256',
+      },
+    ],
+    name: 'RewardsContractStakingRequirementChanged',
     type: 'error',
   },
   {
@@ -103,6 +491,43 @@ export const ServiceNodeContributionAbi = [
     type: 'error',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'length',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'max',
+        type: 'uint256',
+      },
+    ],
+    name: 'TooManyReservedContributors',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'contribTime',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'blockTime',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'delayRequired',
+        type: 'uint256',
+      },
+    ],
+    name: 'WithdrawTooEarly',
+    type: 'error',
+  },
+  {
     anonymous: false,
     inputs: [
       {
@@ -111,8 +536,14 @@ export const ServiceNodeContributionAbi = [
         name: 'serviceNodePubkey',
         type: 'uint256',
       },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
     ],
-    name: 'Cancelled',
+    name: 'Filled',
     type: 'event',
   },
   {
@@ -152,6 +583,56 @@ export const ServiceNodeContributionAbi = [
     inputs: [
       {
         indexed: true,
+        internalType: 'uint256',
+        name: 'serviceNodePubkey',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint16',
+        name: 'fee',
+        type: 'uint16',
+      },
+    ],
+    name: 'OpenForPublicContribution',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'staker',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'oldBeneficiary',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'newBeneficiary',
+        type: 'address',
+      },
+    ],
+    name: 'UpdateStakerBeneficiary',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: 'address',
         name: 'contributor',
         type: 'address',
@@ -165,6 +646,19 @@ export const ServiceNodeContributionAbi = [
     ],
     name: 'WithdrawContribution',
     type: 'event',
+  },
+  {
+    inputs: [],
+    name: 'MAX_FEE',
+    outputs: [
+      {
+        internalType: 'uint16',
+        name: '',
+        type: 'uint16',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     inputs: [],
@@ -194,6 +688,86 @@ export const ServiceNodeContributionAbi = [
   },
   {
     inputs: [],
+    name: '_blsSignature',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'sigs0',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'sigs1',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'sigs2',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'sigs3',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: '_contributorAddresses',
+    outputs: [
+      {
+        internalType: 'address',
+        name: 'addr',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'beneficiary',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: '_serviceNodeParams',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'serviceNodePubkey',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'serviceNodeSignature1',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'serviceNodeSignature2',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint16',
+        name: 'fee',
+        type: 'uint16',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'blsPubkey',
     outputs: [
       {
@@ -215,24 +789,31 @@ export const ServiceNodeContributionAbi = [
     name: 'blsSignature',
     outputs: [
       {
-        internalType: 'uint256',
-        name: 'sigs0',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'sigs1',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'sigs2',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'sigs3',
-        type: 'uint256',
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: '',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
@@ -268,31 +849,16 @@ export const ServiceNodeContributionAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'cancelNode',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'cancelled',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'uint256',
         name: 'amount',
         type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'beneficiary',
+        type: 'address',
       },
     ],
     name: 'contributeFunds',
@@ -303,48 +869,8 @@ export const ServiceNodeContributionAbi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: 'amount',
-        type: 'uint256',
-      },
-      {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'sigs0',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs1',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs2',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs3',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
-        name: '_blsSignature',
-        type: 'tuple',
-      },
-    ],
-    name: 'contributeOperatorFunds',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'address',
-        name: '',
+        name: 'stakerAddr',
         type: 'address',
       },
     ],
@@ -352,7 +878,7 @@ export const ServiceNodeContributionAbi = [
     outputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'amount',
         type: 'uint256',
       },
     ],
@@ -363,7 +889,7 @@ export const ServiceNodeContributionAbi = [
     inputs: [
       {
         internalType: 'address',
-        name: '',
+        name: 'stakerAddr',
         type: 'address',
       },
     ],
@@ -371,7 +897,7 @@ export const ServiceNodeContributionAbi = [
     outputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'amount',
         type: 'uint256',
       },
     ],
@@ -382,16 +908,28 @@ export const ServiceNodeContributionAbi = [
     inputs: [
       {
         internalType: 'uint256',
-        name: '',
+        name: 'index',
         type: 'uint256',
       },
     ],
     name: 'contributorAddresses',
     outputs: [
       {
-        internalType: 'address',
+        components: [
+          {
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'beneficiary',
+            type: 'address',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.Staker',
         name: '',
-        type: 'address',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
@@ -412,15 +950,9 @@ export const ServiceNodeContributionAbi = [
   },
   {
     inputs: [],
-    name: 'finalized',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
+    name: 'finalize',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -433,9 +965,50 @@ export const ServiceNodeContributionAbi = [
         type: 'address[]',
       },
       {
+        internalType: 'address[]',
+        name: 'beneficiaries',
+        type: 'address[]',
+      },
+      {
         internalType: 'uint256[]',
         name: 'contribs',
         type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getReserved',
+    outputs: [
+      {
+        internalType: 'address[]',
+        name: 'addrs',
+        type: 'address[]',
+      },
+      {
+        internalType: 'uint256[]',
+        name: 'contribs',
+        type: 'uint256[]',
+      },
+      {
+        internalType: 'bool[]',
+        name: 'received',
+        type: 'bool[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'manualFinalize',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
       },
     ],
     stateMutability: 'view',
@@ -528,12 +1101,205 @@ export const ServiceNodeContributionAbi = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'stakerAddr',
+        type: 'address',
+      },
+    ],
+    name: 'reservedContributions',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'bool',
+        name: 'received',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: 'reservedContributionsAddresses',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'reset',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'X',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'Y',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct BN256G1.G1Point',
+        name: 'key',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'sig',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'serviceNodePubkey',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'serviceNodeSignature1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'serviceNodeSignature2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint16',
+            name: 'fee',
+            type: 'uint16',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ServiceNodeParams',
+        name: 'params',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'amount',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ReservedContributor[]',
+        name: 'reserved',
+        type: 'tuple[]',
+      },
+      {
+        internalType: 'bool',
+        name: '_manualFinalize',
+        type: 'bool',
+      },
+      {
+        internalType: 'address',
+        name: 'beneficiary',
+        type: 'address',
+      },
+      {
         internalType: 'uint256',
         name: 'amount',
         type: 'uint256',
       },
     ],
-    name: 'resetContract',
+    name: 'resetUpdateAndContribute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'fee',
+        type: 'uint16',
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'amount',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ReservedContributor[]',
+        name: 'reserved',
+        type: 'tuple[]',
+      },
+      {
+        internalType: 'bool',
+        name: '_manualFinalize',
+        type: 'bool',
+      },
+      {
+        internalType: 'address',
+        name: 'beneficiary',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'resetUpdateFeeReservedAndContribute',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -543,24 +1309,31 @@ export const ServiceNodeContributionAbi = [
     name: 'serviceNodeParams',
     outputs: [
       {
-        internalType: 'uint256',
-        name: 'serviceNodePubkey',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'serviceNodeSignature1',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'serviceNodeSignature2',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint16',
-        name: 'fee',
-        type: 'uint16',
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'serviceNodePubkey',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'serviceNodeSignature1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'serviceNodeSignature2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint16',
+            name: 'fee',
+            type: 'uint16',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.ServiceNodeParams',
+        name: '',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
@@ -594,6 +1367,19 @@ export const ServiceNodeContributionAbi = [
   },
   {
     inputs: [],
+    name: 'status',
+    outputs: [
+      {
+        internalType: 'enum IServiceNodeContribution.Status',
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'totalContribution',
     outputs: [
       {
@@ -603,6 +1389,58 @@ export const ServiceNodeContributionAbi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'totalReservedContribution',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'result',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newBeneficiary',
+        type: 'address',
+      },
+    ],
+    name: 'updateBeneficiary',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint16',
+        name: 'fee',
+        type: 'uint16',
+      },
+    ],
+    name: 'updateFee',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bool',
+        name: 'value',
+        type: 'bool',
+      },
+    ],
+    name: 'updateManualFinalize',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -621,11 +1459,53 @@ export const ServiceNodeContributionAbi = [
           },
         ],
         internalType: 'struct BN256G1.G1Point',
-        name: 'newBlsPubkey',
+        name: 'newBLSPubkey',
         type: 'tuple',
       },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'newBLSSig',
+        type: 'tuple',
+      },
+      {
+        internalType: 'uint256',
+        name: 'ed25519Pubkey',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'ed25519Sig0',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'ed25519Sig1',
+        type: 'uint256',
+      },
     ],
-    name: 'updateBLSPubkey',
+    name: 'updatePubkeys',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -635,32 +1515,22 @@ export const ServiceNodeContributionAbi = [
       {
         components: [
           {
-            internalType: 'uint256',
-            name: 'serviceNodePubkey',
-            type: 'uint256',
+            internalType: 'address',
+            name: 'addr',
+            type: 'address',
           },
           {
             internalType: 'uint256',
-            name: 'serviceNodeSignature1',
+            name: 'amount',
             type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'serviceNodeSignature2',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint16',
-            name: 'fee',
-            type: 'uint16',
           },
         ],
-        internalType: 'struct IServiceNodeRewards.ServiceNodeParams',
-        name: 'newParams',
-        type: 'tuple',
+        internalType: 'struct IServiceNodeRewards.ReservedContributor[]',
+        name: 'reserved',
+        type: 'tuple[]',
       },
     ],
-    name: 'updateServiceNodeParams',
+    name: 'updateReservedContributors',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

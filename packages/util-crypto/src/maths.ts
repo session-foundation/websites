@@ -81,3 +81,87 @@ export const formatBigIntTokenValue = (
   const number = bigIntToNumber(value, decimalValue);
   return formatNumber(number, decimals);
 };
+
+export const stringToBigInt = (value: string, decimals: number, decimalDelimiter = '.'): bigint => {
+  if (!value.includes(decimalDelimiter)) {
+    return BigInt(value) * BigInt(10) ** BigInt(decimals);
+  }
+
+  const [integer, fraction] = value.split(decimalDelimiter);
+
+  if (integer === undefined || fraction === undefined) {
+    throw new Error('Invalid string format');
+  }
+
+  return BigInt(integer) * BigInt(10) ** BigInt(decimals) + BigInt(fraction.padEnd(decimals, '0'));
+};
+
+export const numberToBigInt = (value: number): bigint => {
+  return BigInt(value.toString().replaceAll(',', '').replaceAll('.', ''));
+};
+
+export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter = '.'): string => {
+  if (decimals === 0) {
+    return value.toString();
+  }
+
+  const integer = value / BigInt(10) ** BigInt(decimals);
+  const fraction = value % BigInt(10) ** BigInt(decimals);
+
+  if (fraction === 0n) {
+    return integer.toString();
+  }
+  return `${integer}${decimalDelimiter}${fraction.toString()}`;
+};
+
+/**
+ * Get the smaller bigint value between two values.
+ * @param v1 first bigint value
+ * @param v2 second bigint value
+ */
+export const bigIntMin = (
+  v1?: bigint | null | undefined,
+  v2?: bigint | null | undefined
+): bigint => {
+  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
+    throw new Error('Both values are undefined or null');
+  }
+
+  // Simulate v1 being Infinity if it is undefined or null
+  if (v1 === undefined || v1 === null) {
+    return v2!;
+  }
+
+  // Simulate v2 being Infinity if it is undefined or null
+  if (v2 === undefined || v2 === null) {
+    return v1!;
+  }
+
+  return v1 < v2 ? v1 : v2;
+};
+
+/**
+ * Get the larger bigint value between two values.
+ * @param v1 first bigint value
+ * @param v2 second bigint value
+ */
+export const bigIntMax = (
+  v1?: bigint | null | undefined,
+  v2?: bigint | null | undefined
+): bigint => {
+  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
+    throw new Error('Both values are undefined or null');
+  }
+
+  // Simulate v1 being -Infinity if it is undefined or null
+  if (v1 === undefined || v1 === null) {
+    return v2!;
+  }
+
+  // Simulate v2 being -Infinity if it is undefined or null
+  if (v2 === undefined || v2 === null) {
+    return v1!;
+  }
+
+  return v1 > v2 ? v1 : v2;
+};

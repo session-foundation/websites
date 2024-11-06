@@ -196,7 +196,7 @@ type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorListProps>(
-  ({ className, contributors, showEmptySlots, forceExpand, ...props }, ref) => {
+  ({ className, contributors = [], showEmptySlots, forceExpand, ...props }, ref) => {
     const { address: userAddress } = useWallet();
 
     const dictionary = useTranslations('maths');

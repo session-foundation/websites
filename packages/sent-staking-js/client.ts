@@ -34,8 +34,9 @@ export interface LockedContribution {
 
 export interface Contributor {
   address: string;
-  amount: bigint;
-  reserved: bigint;
+  beneficiary: string;
+  amount: number;
+  reserved: number;
   locked_contributions: LockedContribution[];
 }
 
@@ -46,12 +47,12 @@ export interface WalletInfo {
 }
 
 export interface OpenNode {
-  bls_pubkey: string;
-  cancelled: boolean;
   contract: string;
-  contributions: Array<Contributor>;
+  contract_state: string;
+  contributors: Array<Contributor>;
   fee: number;
-  finalized: boolean;
+  operator: string;
+  pubkey_bls: string;
   service_node_pubkey: string;
   service_node_signature: string;
   total_contributions: number;
@@ -64,12 +65,15 @@ export interface GetOpenNodesResponse {
 /** GET /stakes/<32 byte address> */
 export type StakeContributor = {
   address: string;
+  beneficiary?: string;
   amount: number;
   reserved: number;
 };
 
 export type Stake = {
+  unique_id: string;
   contract_id: number;
+  contract: string | null;
   contributors: Array<StakeContributor>;
   deregistration_unlock_height: number | null;
   earned_downtime_blocks: number;

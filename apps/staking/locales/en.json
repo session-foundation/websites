@@ -10,6 +10,7 @@
     "you": "You",
     "emptySlot": "Empty Contributor Slot",
     "notFound": "Not Found",
+    "nodeNotFound": "Node Not Found",
     "soon": "Soon",
     "now": "now"
   },
@@ -176,8 +177,8 @@
       "description": "Nodes that are open for staking. <link>Learn more</link>",
       "noNodesP1": "There are currently no Open Session Nodes available to stake to.",
       "noNodesP2": "Check out the <link>docs</link> to learn about setting up and registering your own Session Node.",
-      "landingP1": "Once Multi-Contributor Nodes are enabled on the Session Testnet, you'll be able to choose an Open Session Node to stake test {tokenSymbol} to. ",
-      "landingP2": "Testnet participants can currently run and stake to their own Single Contributor Nodes.",
+      "landingP1": "Stake your {tokenSymbol} to multicontributor nodes and help secure the network. ",
+      "landingP2": "You can also set up your own multicontributor node for others to stake to.",
       "landingP1Mainnet": "Click on an Open Session Node to stake {tokenSymbol} and earn rewards for securing the network.",
       "landingP2Mainnet": "Want to run your own Session Node?",
       "learnMoreButtonText": "Learn More",
@@ -187,7 +188,7 @@
     "nodeRegistrations": {
       "title": "Your Prepared Registrations",
       "showHiddenText": "Show Hidden",
-      "landingP1": "Click on a node you have prepared to stake and confirm registration.",
+      "landingP1": "Select a node to complete registration and start staking.",
       "noWalletP1": "Connect your wallet to view Session Nodes that you have prepared registrations for.",
       "noNodesP1": "You have not prepared registrations for any Session Nodes.",
       "noNodesP2": "Learn how to prepare registration for your Session Node <link>here</link>.",
@@ -282,9 +283,11 @@
       "publicKeyDescription": "The identifier for the Session Node.",
       "operatorAddress": "Operator Address",
       "operatorAddressTooltip": "The wallet address of the node operator.",
+      "beneficiaryAddress": "Beneficiary Address",
+      "beneficiaryAddressTooltip": "The wallet address rewards are sent to.",
       "operatorFee": "Operator Fee",
       "operatorFeeShort": "Fee",
-      "operatorFeeDescription": "The percentage of rewards the operator takes before splitting the rest with contributors.",
+      "operatorFeeDescription": "Operators of multi-contributor nodes can set an operator fee to help cover operating costs. The operator fee is a percentage of the total node rewards. After this fee is deducted, the remaining rewards are distributed to all contributors, including the operator, based on their respective stake amounts.",
       "rawData": "Raw Data"
     },
     "staking": {
@@ -305,12 +308,51 @@
       "stakeAmount": "Stake Amount",
       "stakeAmountDescription": "Amount of {tokenSymbol} to stake to the Session node."
     },
+    "stakeAmount": {
+      "validation": {
+        "underMinOperator": "Node operators must stake at least {min} (25%)",
+        "underMin": "You must stake at least {min}",
+        "overMax": "You cannot stake more than {max}"
+      }
+    },
+    "operatorFee": {
+      "validation": {
+        "underMin": "Operator fee must be at least {min}",
+        "overMax": "Operator fee cannot be more than {max}",
+        "unableToParse": "Unable to parse operator fee, please re-enter the value"
+      }
+    },
+    "beneficiaryAddress": {
+      "validation": {
+        "invalidAddress": "Invalid beneficiary address, please re-enter the value"
+      }
+    },
     "register": {
       "title": "Register a New Node",
       "preparedAtTimestamp": "Registration Prepared",
       "preparedAtTimestampDescription": "When the node was prepared for registration",
+      "minContribution": "Min: <text-bold>{min}</text-bold>",
+      "maxContribution": "Max: <text-bold>{max}</text-bold>",
+      "feeNA": "N/A",
+      "feeNADescription": "Single contributor nodes cannot have an operator fee, as the operator already receives all rewards.",
+      "disabled": "Registrations are disabled",
+      "advancedOptions": {
+        "title": "Advanced Options",
+        "autoRegister": "Auto-Register",
+        "autoRegisterDescription": "Automatically registers the node once the full stake is reached.",
+        "beneficiary": "Rewards Beneficiary Address",
+        "beneficiaryDescription": "Enter the beneficiary address where staking rewards should be sent. If left empty, rewards will be sent to your wallet address."
+      },
       "button": {
-        "submit": "Register and Stake {amount}"
+        "submitSolo": "Register Solo Node and Stake {amount}",
+        "submitMultiRegisterAndStake": "Create & Stake to Multi-Contributor Node",
+        "submitMultiRegisterOnly": "Create Multi-Contributor Node",
+        "submitMultiStake": "Stake {amount} to Multi-Contributor Node",
+        "addReserved": "Add Reserved Slots",
+        "addReservedDisabledDescription": "Reserved slots are currently disabled. Please try again later.",
+        "submitMultiRegisterDisabledDescription": "Multi-contributor registrations are currently disabled. Please try again later.",
+        "submitMultiRegisterDisabledIsSoloDescription": "You can't create a multi-contributor node if you are staking the full amount.",
+        "submitSoloDisabledNotSolo": "You must stake the full amount to register a solo node."
       },
       "description": "Please start the registration process from your client or select from the list of open Session Node.",
       "notFound": {
@@ -321,7 +363,7 @@
       },
       "notEnoughTokensAlert": "It looks like you don't have enough {tokenSymbol} to stake to this node. It looks like your wallet has {walletAmount}, please make sure you have at least {tokenAmount} in your wallet before registering.",
       "goToMyStakes": "The Session Node has been successfully registered and joined the network. It will appear on <link></link> soon",
-      "stage": {
+      "stageSolo": {
         "validate": {
           "idle": "Validating registration",
           "pending": "Validating registration",
@@ -362,6 +404,51 @@
             "template": "Session node failed to join the network, {reason}, please try again later"
           }
         }
+      },
+      "stageMulti": {
+        "create": {
+          "idle": "Creating Open Node contract",
+          "pending": "Creating Open Node contract",
+          "success": "Created Open Node contract",
+          "errorTemplate": "Failed to create Open Node contract, {reason}",
+          "errors": {
+          }
+        },
+        "address": {
+          "idle": "Finalising Open Node contract address",
+          "pending": "Finalising Open Node contract address",
+          "success": " Finalised Node contract address. <link>View on Arbiscan</link>",
+          "errorTemplate": "Failed to finalise Open Node contract address, {reason}",
+          "errors": {
+          }
+        },
+        "validate": {
+          "idle": "Validating registration",
+          "pending": "Validating registration",
+          "success": "Registration validated",
+          "errorTemplate": "Failed to validate registration, {reason}",
+          "errors": {
+            "InvalidBLSSignature": "invalid BLS signature, try again later"
+          }
+        },
+        "approve": {
+          "idle": "Requesting permission to stake {tokenAmount}",
+          "pending": "Requesting permission to stake {tokenAmount} waiting for user approval",
+          "success": "Permission to stake {tokenSymbol} granted",
+          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
+          "errors": {
+            "UserRejectedRequest": "user rejected the request"
+          }
+        },
+        "contribute": {
+          "idle": "Contributing {tokenAmount} to Open Node contract",
+          "pending": "Contributing {tokenAmount} to Open Node contract",
+          "success": "Contributed {tokenAmount} to Open Node contract",
+          "errorTemplate": "Failed to contribute {tokenAmount} to Open Node contract, {reason}",
+          "errors": {
+            "UserRejectedRequest": "user rejected the request"
+          }
+        }
       }
     },
     "node": {
@@ -387,13 +474,18 @@
       "viewButton": {
         "text": "View",
         "ariaLabel": "View the node details in the side panel"
-      }
+      },
+      "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
+      "stakedTo": "Staked",
+      "stakedToTooltip": "You have staked {tokenAmount}"
     },
     "pending": {
       "type": "Type",
       "typeDescription": "The node type",
       "solo": "Single Contributor Node",
       "multi": "Multi Contributor Node",
+      "soloDescription": "A single contributor node is a node that has the full stake amount contributed by the node operator.",
+      "multiDescription": "A multi contributor node is a node that has a stake amount contributed by multiple contributors.",
       "registerButton": {
         "text": "View",
         "ariaLabel": "View the node registration details in the side panel"

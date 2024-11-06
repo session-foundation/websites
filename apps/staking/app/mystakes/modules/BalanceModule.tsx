@@ -16,7 +16,6 @@ import type { QUERY_STATUS } from '@/lib/query';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
-import { generateMockNodeData } from '@session/sent-staking-js/test';
 
 const getTotalStakedAmount = ({ stakes }: { stakes: Array<Stake> }) =>
   formatSENTBigInt(
@@ -52,7 +51,7 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     if (!address || showNoNodes) {
       return [];
     } else if (showMockNodes) {
-      return generateMockNodeData({ userAddress: address }).stakes;
+      return [];
     }
     return data?.stakes ?? [];
   }, [data, showMockNodes, showNoNodes]);

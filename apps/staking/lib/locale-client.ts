@@ -64,3 +64,14 @@ export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions
   const locale = useLocale();
   return new Intl.ListFormat(locale, options).format(list);
 };
+
+export type DecimalDelimiter = '.' | ',';
+
+export const getDecimalDelimiter = (): DecimalDelimiter => {
+  const locale = useLocale();
+  const decimal = Intl.NumberFormat(locale)
+    .formatToParts(1.1)
+    ?.find((part) => part.type === 'decimal')?.value;
+  if (decimal) return decimal as DecimalDelimiter;
+  return (1.1).toLocaleString().substring(1, 2) as DecimalDelimiter;
+};

@@ -9,12 +9,12 @@ import { getOpenNodes } from '@/lib/queries/getOpenNodes';
 
 interface NodePageParams {
   params: {
-    nodeId: string;
+    contract: string;
   };
 }
 
 export default function NodePage({ params }: NodePageParams) {
-  const { nodeId } = params;
+  const { contract } = params;
   const dictionary = useTranslations('actionModules.node');
 
   const { queryClient } = stakingBackendPrefetchQuery(getOpenNodes);
@@ -26,7 +26,7 @@ export default function NodePage({ params }: NodePageParams) {
       headerAction={
         <HydrationBoundary state={dehydrate(queryClient)}>
           <Suspense fallback={<BlockExplorerLinkText />}>
-            <BlockExplorerLink nodeId={nodeId} />
+            <BlockExplorerLink contract={contract} />
           </Suspense>
         </HydrationBoundary>
       }
@@ -34,7 +34,7 @@ export default function NodePage({ params }: NodePageParams) {
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<NodeStakingFormSkeleton />}>
-          <NodeStaking nodeId={nodeId} />
+          <NodeStaking contract={contract} />
         </Suspense>
       </HydrationBoundary>
     </ActionModule>

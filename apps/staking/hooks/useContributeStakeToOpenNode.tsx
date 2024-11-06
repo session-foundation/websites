@@ -1,31 +1,29 @@
 'use client';
 
-import { addresses } from '@session/contracts';
 import { useProxyApproval } from '@session/contracts/hooks/SENT';
-import { useAddBLSPubKey } from '@session/contracts/hooks/ServiceNodeRewards';
 import { useEffect, useMemo, useState } from 'react';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { useTranslations } from 'next-intl';
+import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
+import type { Address } from 'viem';
 
-export default function useRegisterNode({
-  blsPubKey,
-  blsSignature,
-  nodePubKey,
-  userSignature,
+export default function useContributeStakeToOpenNode({
   stakeAmount,
+  userAddress,
+  beneficiary,
+  contractAddress,
 }: {
-  blsPubKey: string;
-  blsSignature: string;
-  nodePubKey: string;
-  userSignature: string;
   stakeAmount: bigint;
+  userAddress: Address;
+  beneficiary?: Address;
+  contractAddress: Address | null;
 }) {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const stageDictKey = 'actionModules.register.stageSolo' as const;
+  const stageDictKey = 'actionModules.register.stageMulti' as const;
   const dictionary = useTranslations(stageDictKey);
   const dictionaryGeneral = useTranslations('general');
 
@@ -40,30 +38,28 @@ export default function useRegisterNode({
     transactionError: approveTransactionError,
   } = useProxyApproval({
     // TODO: Create network provider to handle network specific logic
-    contractAddress: addresses.ServiceNodeRewards.testnet,
+    contractAddress,
     tokenAmount: stakeAmount,
   });
 
   const {
-    addBLSPubKey,
-    contractCallStatus: addBLSStatusRaw,
-    simulateError: addBLSSimulateError,
-    writeError: addBLSWriteError,
-    transactionError: addBLSTransactionError,
-  } = useAddBLSPubKey({
-    blsPubKey,
-    blsSignature,
-    nodePubKey,
-    userSignature,
+    contributeFunds,
+    contractCallStatus: contributeFundsStatusRaw,
+    simulateError: contributeFundsSimulateError,
+    writeError: contributeFundsWriteError,
+    transactionError: contributeFundsTransactionError,
+  } = useContributeFunds({
+    amount: stakeAmount,
+    beneficiary: beneficiary ?? userAddress,
   });
 
-  const registerAndStake = () => {
+  const contributeStake = () => {
     setEnabled(true);
     approve();
   };
 
-  const resetRegisterAndStake = () => {
-    if (addBLSStatusRaw !== 'idle') return;
+  const resetContributeStake = () => {
+    if (contributeFundsStatusRaw !== 'idle') return;
     setEnabled(false);
     resetApprove();
     approveWrite();
@@ -83,18 +79,18 @@ export default function useRegisterNode({
     [approveSimulateError, approveWriteError, approveTransactionError]
   );
 
-  const addBLSErrorMessage = useMemo(
+  const contributeFundsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
         parentDictKey: stageDictKey,
-        errorGroupDictKey: 'arbitrum',
+        errorGroupDictKey: 'contribute',
         dictionary,
         dictionaryGeneral,
-        simulateError: addBLSSimulateError,
-        writeError: addBLSWriteError,
-        transactionError: addBLSTransactionError,
+        simulateError: contributeFundsSimulateError,
+        writeError: contributeFundsWriteError,
+        transactionError: contributeFundsTransactionError,
       }),
-    [addBLSSimulateError, addBLSWriteError, addBLSTransactionError]
+    [contributeFundsSimulateError, contributeFundsWriteError, contributeFundsTransactionError]
   );
 
   const allowanceReadStatus = useMemo(
@@ -107,26 +103,26 @@ export default function useRegisterNode({
     [approveWriteStatusRaw]
   );
 
-  const addBLSStatus = useMemo(
-    () => parseContractStatusToProgressStatus(addBLSStatusRaw),
-    [addBLSStatusRaw]
+  const contributeFundsStatus = useMemo(
+    () => parseContractStatusToProgressStatus(contributeFundsStatusRaw),
+    [contributeFundsStatusRaw]
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
   useEffect(() => {
-    if (enabled && approveWriteStatusRaw === 'success') {
-      addBLSPubKey();
+    if (enabled && approveWriteStatusRaw === 'success' && contractAddress) {
+      contributeFunds(contractAddress);
     }
-  }, [enabled, approveWriteStatusRaw]);
+  }, [enabled, approveWriteStatusRaw, contractAddress]);
 
   return {
-    registerAndStake,
-    resetRegisterAndStake,
+    contributeStake,
+    resetContributeStake,
     allowanceReadStatus,
     approveWriteStatus,
     approveErrorMessage,
-    addBLSErrorMessage,
-    addBLSStatus,
+    contributeFundsErrorMessage,
+    contributeFundsStatus,
     enabled,
   };
 }

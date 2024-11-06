@@ -91,6 +91,7 @@ export default {
         indicator: {
           black: 'var(--indicator-black)',
           grey: 'var(--indicator-grey)',
+          'grey-lighter': 'var(--indicator-grey-lighter)',
           green: 'var(--indicator-green)',
           blue: 'var(--indicator-blue)',
           yellow: 'var(--indicator-yellow)',

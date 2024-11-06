@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
+import { forwardRef, type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Circle } from './shapes/circle';
 import { cn } from '../../lib/utils';
@@ -11,7 +11,7 @@ export enum PROGRESS_STATUS {
 }
 
 type Step = {
-  text: Partial<Record<PROGRESS_STATUS, string>> & { [PROGRESS_STATUS.IDLE]: string };
+  text: Partial<Record<PROGRESS_STATUS, ReactNode>> & { [PROGRESS_STATUS.IDLE]: ReactNode };
   status: PROGRESS_STATUS;
 };
 
@@ -44,7 +44,7 @@ function ProgressStep({
   isLast: boolean;
   status: PROGRESS_STATUS;
   circleRadius: number;
-  text: Partial<Record<PROGRESS_STATUS, string>> & { [PROGRESS_STATUS.IDLE]: string };
+  text: Partial<Record<PROGRESS_STATUS, ReactNode>> & { [PROGRESS_STATUS.IDLE]: ReactNode };
 }) {
   const circleVariant = useMemo(() => {
     switch (status) {

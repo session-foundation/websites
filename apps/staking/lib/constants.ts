@@ -111,9 +111,10 @@ export enum QUERY {
   STALE_TIME_REMOTE_FEATURE_FLAGS = 60 * 1000,
 }
 
+/** 20,000 SENT  */
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+
 export enum SESSION_NODE {
-  /** 20,000 SENT  */
-  FULL_STAKE_AMOUNT = '20000000000000',
   /** Average millisecond per block (~2 minutes per block) */
   MS_PER_BLOCK = 2 * 60 * 1000,
 }
