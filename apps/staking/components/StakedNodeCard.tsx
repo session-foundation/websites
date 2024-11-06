@@ -40,7 +40,6 @@ import { ActionModuleDivider } from '@/components/ActionModule';
 import { Address } from 'viem';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import Link from 'next/link';
-import NodeOperatorStartButton from '@/components/StakedNode/NodeOperatorStartButton';
 
 type StakeInContract = Stake & {
   contract_id: NonNullable<Stake['contract_id']>;
@@ -119,7 +118,7 @@ const hasRequestedUnlockHeight = (node: Stake): node is NodeRequestingExit =>
  * as long as the backend is doing its job well. BUT if people host their own backend there is no
  * guarantee the database has the node in it so the `contract_id` might be `null`.
  */
-const hasExited = (stake: Stake): stake is ExitedNode =>
+const hasExited = (stake: Stake): boolean =>
   stake.exited || ('contract_id' in stake && stake.contract_id === null);
 
 /**
@@ -445,7 +444,7 @@ const NodeSummary = ({
 }: NodeSummaryProps) => {
   const allTimers = [];
 
-  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS && hasExited(node)) {
+  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS) {
     return (
       <NodeContributorList
         contributors={node.contributors}
