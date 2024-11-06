@@ -118,7 +118,7 @@ const hasRequestedUnlockHeight = (node: Stake): node is NodeRequestingExit =>
  * as long as the backend is doing its job well. BUT if people host their own backend there is no
  * guarantee the database has the node in it so the `contract_id` might be `null`.
  */
-const hasExited = (stake: Stake): stake is ExitedNode =>
+const hasExited = (stake: Stake): boolean =>
   stake.exited || ('contract_id' in stake && stake.contract_id === null);
 
 /**
@@ -134,6 +134,14 @@ export const isRequestingToExit = (
   !hasExited(stake) &&
   hasRequestedUnlockHeight(stake) &&
   stake.requested_unlock_height >= blockHeight;
+
+export const isBeingExitedByDeregistration = (
+  stake: Stake,
+  blockHeight: number
+): stake is NodeRequestingExit =>
+  !hasExited(stake) &&
+  hasDeregistrationUnlockHeight(stake) &&
+  stake.deregistration_unlock_height >= blockHeight;
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -166,6 +174,7 @@ function getNodeStatus(state: NODE_STATE): VariantProps<typeof statusVariants>['
   switch (state) {
     case NODE_STATE.RUNNING:
       return 'green';
+    case NODE_STATE.AWAITING_OPERATOR_START:
     case NODE_STATE.AWAITING_CONTRIBUTORS:
       return 'blue';
     case NODE_STATE.DECOMMISSIONED:
@@ -419,6 +428,7 @@ type NodeSummaryProps = {
   liquidationDate: Date | null;
   liquidationTime: string | null;
   showAllTimers?: boolean;
+  isOperator?: boolean;
 };
 
 const NodeSummary = ({
@@ -433,8 +443,19 @@ const NodeSummary = ({
   liquidationDate,
   liquidationTime,
   showAllTimers,
+  isOperator,
 }: NodeSummaryProps) => {
   const allTimers = [];
+
+  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS) {
+    return (
+      <NodeContributorList
+        contributors={node.contributors}
+        data-testid={StakedNodeDataTestId.Contributor_List}
+      />
+    );
+  }
+
   if (isReadyToExit(node, blockHeight)) {
     const readyToExitTimer = (
       <>
@@ -658,7 +679,6 @@ const StakedNodeCard = forwardRef<
     ref
   ) => {
     const dictionary = useTranslations('nodeCard.staked');
-    const dictionaryOpenNode = useTranslations('nodeCard.open');
     const generalDictionary = useTranslations('general');
     const generalNodeDictionary = useTranslations('sessionNodes.general');
     const stakingNodeDictionary = useTranslations('sessionNodes.staking');
@@ -700,7 +720,7 @@ const StakedNodeCard = forwardRef<
       return !areHexesEqual(contributor.beneficiary, contributor.address)
         ? contributor.beneficiary
         : null;
-    }, [contributors]);
+    }, [contributors, walletAddress]);
 
     const {
       lastUptimeDate,
@@ -719,6 +739,7 @@ const StakedNodeCard = forwardRef<
     const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
 
     const isSoloNode = contributors.length === 1;
+    const isOperator = walletAddress ? isNodeOperator(node, walletAddress) : false;
 
     return (
       <NodeCard
@@ -747,6 +768,7 @@ const StakedNodeCard = forwardRef<
           liquidationTime={liquidationTime}
           requestedUnlockTime={requestedUnlockTime}
           requestedUnlockDate={requestedUnlockDate}
+          isOperator={isOperator}
         />
         <ToggleCardExpansionButton htmlFor={toggleId} />
         {showAllTimers ? (
@@ -763,6 +785,7 @@ const StakedNodeCard = forwardRef<
               requestedUnlockTime={requestedUnlockTime}
               requestedUnlockDate={requestedUnlockDate}
               showAllTimers={showAllTimers}
+              isOperator={isOperator}
             />
           </CollapsableContent>
         ) : null}
@@ -775,7 +798,9 @@ const StakedNodeCard = forwardRef<
             />
           </CollapsableContent>
         ) : null}
-        {state !== NODE_STATE.RUNNING && state !== NODE_STATE.AWAITING_CONTRIBUTORS ? (
+        {state !== NODE_STATE.RUNNING &&
+        state !== NODE_STATE.AWAITING_CONTRIBUTORS &&
+        node.state !== NODE_STATE.AWAITING_OPERATOR_START ? (
           <CollapsableContent size="xs">
             <Tooltip
               tooltipContent={dictionary('lastRewardDescription', {
@@ -815,7 +840,7 @@ const StakedNodeCard = forwardRef<
         ) : null}
         {/** NOTE - ensure any changes here still work with the pubkey component */}
         <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {walletAddress && isNodeOperator(node, walletAddress) ? (
+          {isOperator ? (
             <>
               <NodeOperatorIndicator />
               <TextSeparator className="separator mx-1 font-medium" />{' '}
@@ -885,48 +910,95 @@ const StakedNodeCard = forwardRef<
           </>
         ) : null}
         {!hideButton ? (
-          isReadyToExit(node, blockHeight) ? (
-            <NodeExitButtonDialog node={node} />
-          ) : (isRequestingToExit(node, blockHeight) && !isBeingDeregistered(node)) ||
-            hasDeregistrationUnlockHeight(node) ? (
-            <Tooltip
-              tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
-                relativeTime: deregistrationUnlockTime ?? requestedUnlockTime ?? notFoundString,
-                date: deregistrationUnlockDate
-                  ? formatDate(deregistrationUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-                  : requestedUnlockDate
-                    ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-                    : notFoundString,
-              })}
-            >
-              <NodeExitButton disabled />
-            </Tooltip>
-          ) : !hasExited(node) ? (
-            <NodeRequestExitButton node={node} />
-          ) : state === NODE_STATE.AWAITING_CONTRIBUTORS && contract ? (
-            <CollapsableContent
-              className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
-              size="buttonMd"
-            >
-              <Link href={`/stake/${contract}`}>
-                <Button
-                  rounded="md"
-                  size="md"
-                  variant="outline"
-                  className="uppercase"
-                  aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
-                  data-testid={ButtonDataTestId.Node_Card_View}
-                >
-                  {dictionaryOpenNode('viewButton.text')}
-                </Button>
-              </Link>
-            </CollapsableContent>
-          ) : null
+          <StakeNodeCardButton
+            stake={node}
+            blockHeight={blockHeight}
+            deregistrationUnlockDate={deregistrationUnlockDate}
+            deregistrationUnlockTime={deregistrationUnlockTime}
+            requestedUnlockDate={requestedUnlockDate}
+            requestedUnlockTime={requestedUnlockTime}
+            notFoundString={notFoundString}
+          />
         ) : null}
       </NodeCard>
     );
   }
 );
 StakedNodeCard.displayName = 'StakedNodeCard';
+
+function StakeNodeCardButton({
+  stake,
+  blockHeight,
+  notFoundString,
+  requestedUnlockDate,
+  deregistrationUnlockDate,
+  requestedUnlockTime,
+  deregistrationUnlockTime,
+}: {
+  stake: Stake;
+  blockHeight: number;
+  deregistrationUnlockTime?: string | null;
+  deregistrationUnlockDate?: Date | null;
+  requestedUnlockDate?: Date | null;
+  requestedUnlockTime?: string | null;
+  notFoundString?: string;
+}) {
+  const dictionary = useTranslations('nodeCard.staked');
+  const dictionaryOpenNode = useTranslations('nodeCard.open');
+
+  if (
+    stake.contract &&
+    (stake.state === NODE_STATE.AWAITING_CONTRIBUTORS ||
+      stake.state == NODE_STATE.AWAITING_OPERATOR_START)
+  ) {
+    return (
+      <CollapsableContent
+        className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
+        size="buttonMd"
+      >
+        <Link href={`/stake/${stake.contract}`}>
+          <Button
+            rounded="md"
+            size="md"
+            variant="outline"
+            className="uppercase"
+            aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
+            data-testid={ButtonDataTestId.Node_Card_View}
+          >
+            {dictionaryOpenNode('viewButton.text')}
+          </Button>
+        </Link>
+      </CollapsableContent>
+    );
+  }
+
+  if (hasExited(stake)) {
+    return null;
+  }
+
+  if (isReadyToExit(stake, blockHeight)) return <NodeExitButtonDialog node={stake} />;
+
+  if (
+    (isRequestingToExit(stake, blockHeight) && !isBeingDeregistered(stake)) ||
+    isBeingExitedByDeregistration(stake, blockHeight)
+  ) {
+    return (
+      <Tooltip
+        tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
+          relativeTime: deregistrationUnlockTime ?? requestedUnlockTime ?? notFoundString,
+          date: deregistrationUnlockDate
+            ? formatDate(deregistrationUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
+            : requestedUnlockDate
+              ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
+              : notFoundString,
+        })}
+      >
+        <NodeExitButton disabled />
+      </Tooltip>
+    );
+  }
+
+  return <NodeRequestExitButton node={stake} />;
+}
 
 export { StakedNodeCard };

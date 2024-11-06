@@ -19,6 +19,7 @@ interface NetworkInfoResponse {
 export enum NODE_STATE {
   RUNNING = 'Running',
   AWAITING_CONTRIBUTORS = 'Awaiting Contributors',
+  AWAITING_OPERATOR_START = 'Awaiting Operator Start',
   CANCELLED = 'Cancelled',
   DECOMMISSIONED = 'Decommissioned',
   DEREGISTERED = 'Deregistered',
