@@ -39,20 +39,7 @@ export const formatNumber = (value: number, decimals = 4): string => {
 export const bigIntToNumber = (value: bigint, decimals: number): number => {
   if (decimals === 0) return Number(value);
 
-  let str = value.toString();
-
-  const isNegative = str.startsWith('-');
-  if (isNegative) {
-    str = str.slice(1);
-  }
-
-  if (str.length <= decimals) {
-    str = ['0', str.padStart(decimals, '0')].join('.');
-  } else {
-    str = [str.slice(0, -decimals), str.slice(-decimals)].join('.');
-  }
-
-  const floatValueWithDecimals = parseFloat(`${isNegative ? '-' : ''}${str}`);
+  const floatValueWithDecimals = parseFloat(bigIntToString(value, decimals));
 
   if (
     floatValueWithDecimals > Number.MAX_SAFE_INTEGER ||
@@ -101,17 +88,24 @@ export const numberToBigInt = (value: number): bigint => {
 };
 
 export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter = '.'): string => {
-  if (decimals === 0) {
-    return value.toString();
+  let str = value.toString();
+  if (decimals === 0) return str;
+
+  const isNegative = str.startsWith('-');
+  if (isNegative) str = str.slice(1);
+
+  if (str.length <= decimals) {
+    // Turn the int into a decimal string by padding with zeros until the decimal size, the remove the trailing zeros
+    const dec = str.padStart(decimals, '0').replace(/0+$/, '');
+    str = ['0', dec].join(decimalDelimiter);
+  } else {
+    const int = str.slice(0, -decimals);
+    // Get the decimal part of the string and remove the trailing zeros
+    const dec = str.slice(-decimals).replace(/0+$/, '');
+    str = dec ? [int, dec].join(decimalDelimiter) : int;
   }
 
-  const integer = value / BigInt(10) ** BigInt(decimals);
-  const fraction = value % BigInt(10) ** BigInt(decimals);
-
-  if (fraction === 0n) {
-    return integer.toString();
-  }
-  return `${integer}${decimalDelimiter}${fraction.toString()}`;
+  return `${isNegative ? '-' : ''}${str}`;
 };
 
 /**

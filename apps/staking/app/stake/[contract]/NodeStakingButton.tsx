@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useEffect } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -51,10 +51,10 @@ export function NodeStakingButton({
     contractAddress: openNodeContractAddress,
   });
 
-  const formattedWatchedStakeAmount = formatSENTBigInt(
+  const formattedWatchedStakeAmount = formatSENTBigIntNoRounding(
     stringToBigInt(watchedStakeAmount, SENT_DECIMALS)
   );
-  const tokenAmount = formData?.stakeAmount ? formatSENTBigInt(formData.stakeAmount, 0) : '';
+  const tokenAmount = formatSENTBigIntNoRounding(formData?.stakeAmount);
 
   useEffect(() => {
     if (formData && !isOpenNodeContributionDisabled) {

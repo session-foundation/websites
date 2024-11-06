@@ -41,3 +41,5 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 *.db
+
+rss.xml
