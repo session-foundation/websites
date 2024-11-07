@@ -742,7 +742,7 @@ const StakedNodeCard = forwardRef<
     const deregistrationUnlockTime = useRelativeTime(deregistrationUnlockDate, { addSuffix: true });
     const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
 
-    const isSoloNode = contributors.length === 1;
+    const isSoloNode = contributors.length === 1 && !node.contract;
     const isOperator = walletAddress ? isNodeOperator(node, walletAddress) : false;
 
     return (
