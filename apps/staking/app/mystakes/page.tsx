@@ -30,9 +30,9 @@ export default function Page() {
           <ComingSoonModule />
           <UnclaimedTokensModule />
           <TotalRewardsModule />
-          <ClaimTokensModule />
           <DailyNodeReward />
           <TestnetPointsModule />
+          <ClaimTokensModule />
         </ModuleGrid>
         {chain === CHAIN.TESTNET ? <ReferralModule /> : <PriceModule />}
       </div>
