@@ -29,6 +29,8 @@ export enum ButtonDataTestId {
   Staked_Node_Exit_Dialog_Submit = 'button:staked-node-exit-dialog-submit',
   Stake_Amount_Min = 'button:stake-amount-min',
   Stake_Amount_Max = 'button:stake-amount-max',
+  Show_Referral_Link = 'button:show-referral-link',
+  Copy_Referral_Link = 'button:copy-referral-link',
 }
 
 export enum SpecialDataTestId {
