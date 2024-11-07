@@ -37,7 +37,7 @@ export function Faucet({ code }: { code?: string }) {
           <h2 className="text-lg font-semibold">{dictionary('walletRequirementTitle')}</h2>
           <p>{dictionary.rich('walletRequirementDescription')}</p>
         </div>
-        <div className="h-max min-h-[400px]">
+        <div className="mt-6 h-max min-h-[400px] w-full max-w-3xl">
           <AuthModule code={code} />
         </div>
       </div>
