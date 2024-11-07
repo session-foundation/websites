@@ -2,7 +2,6 @@ import Database, * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
 import { Address } from 'viem';
 import { isProduction } from '@/lib/env';
-import { encodeAddressToHashId } from '@/lib/hashid';
 
 export enum TABLE {
   TRANSACTIONS = 'transactions',
@@ -26,8 +25,8 @@ export enum TRANSACTIONS_TABLE {
   DISCORD = 'discord',
   TELEGRAM = 'telegram',
   OPERATOR = 'operator',
-  WALLET = 'wallet',
   CODE = 'code',
+  WALLET = 'wallet',
   ETHHASH = 'ethhash',
   ETHAMOUNT = 'ethamount',
 }
@@ -677,24 +676,20 @@ export function createWalletReferralCodes({ params }: CreateWalletReferralCodesP
   }
 }
 
-const test: Array<{ address: Address; uses: number }> = [
-  { address: '0x501bcb8d257b8115dc6c5048bA34A4B9E668d46e', uses: 1 },
-  { address: '0xd2A954dE41b04E999d1B94dB56B27AFaF4389053', uses: 1 },
-  { address: '0x9EbDB42452eA9c01BeBaA4955ad3b875C461E065', uses: 1 },
-  { address: '0x6Be297b19d6dEDDC4Cd61a54A01f054670F8703E', uses: 2 },
-  { address: '0x349c2968926fdE3bb357eBD92519cE5Ec35E270A', uses: 3 },
-  { address: '0xEaA90e3f8801B9797435C6A026deB1f4A018B83f', uses: 4 },
-];
-
-export function createWalletCodes() {
-  const params: Array<AddReferralCodesParams> = test.map(({ address, uses }) => ({
-    codes: new Set([encodeAddressToHashId(address)]),
-    creatorWallet: address,
-    maxUses: uses,
-    drip: 5000000000000n,
-  }));
-  createWalletReferralCodes({ params });
-}
+//
+// const test: Array<{ address: Address; uses: number }> = [
+//
+// ];
+//
+// export function createWalletCodes() {
+//   const params: Array<AddReferralCodesParams> = test.map(({ address, uses }) => ({
+//     codes: new Set([encodeAddressToHashId(address)]),
+//     creatorWallet: address,
+//     maxUses: uses,
+//     drip: 5000000000000n,
+//   }));
+//   createWalletReferralCodes({ params });
+// }
 
 /* 
 interface NodeOperatorScoreResponse {

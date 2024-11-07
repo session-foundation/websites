@@ -47,7 +47,7 @@ export default function ActionModule({
       </ModuleGridContent>
       <div
         className={cn(
-          'absolute -z-10 h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg xl:opacity-100 xl:blur-0'
+          'absolute -z-10 -ml-2 -mt-2 h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg lg:-ml-10 lg:-mt-10 xl:opacity-100 xl:blur-0'
         )}
         style={background ? actionModuleBackground[background] : undefined}
       />
