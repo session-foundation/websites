@@ -22,6 +22,8 @@ export enum URL {
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = 'https://token.getsession.org/testnet-incentive-program',
   INCENTIVE_PROGRAM_TOS = 'https://token.getsession.org/incentive-program-terms',
   BUG_BOUNTY_PROGRAM = 'https://token.getsession.org/bug-bounty-program',
+  TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
+  TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
   BUG_BOUNTY_TOS = 'https://token.getsession.org/bug-bounty-terms',
   SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
@@ -63,6 +65,10 @@ export enum FAUCET_ERROR {
   INVALID_OXEN_ADDRESS = 'invalidOxenAddress',
   ALREADY_USED = 'alreadyUsed',
   ALREADY_USED_SERVICE = 'alreadyUsedService',
+  INVALID_REFERRAL_CODE = 'invalidReferralCode',
+  REFERRAL_CODE_CANT_BE_USED_BY_CREATOR = 'referralCodeCantBeUsedByCreator',
+  REFERRAL_CODE_OUT_OF_USES = 'referralCodeOutOfUses',
+  REFERRAL_CODE_ALREADY_USED = 'referralCodeAlreadyUsed',
 }
 
 export enum TICKER {

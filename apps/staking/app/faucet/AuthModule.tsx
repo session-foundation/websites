@@ -57,12 +57,13 @@ export const getFaucetFormSchema = () => {
     }),
     discordId: z.string().optional(),
     telegramId: z.string().optional(),
+    code: z.string().optional(),
   });
 };
 
 export type FaucetFormSchema = z.infer<ReturnType<typeof getFaucetFormSchema>>;
 
-export const AuthModule = () => {
+export const AuthModule = ({ code }: { code?: string }) => {
   const dictionary = useTranslations('faucet.form');
   const generalDictionary = useTranslations('general');
   const [submitAttemptCounter, setSubmitAttemptCounter] = useState<number>(0);
@@ -88,6 +89,7 @@ export const AuthModule = () => {
       walletAddress: '',
       discordId: '',
       telegramId: '',
+      code: code ?? '',
     },
     reValidateMode: 'onChange',
   });
@@ -195,6 +197,12 @@ export const AuthModule = () => {
       });
     }
   }, [address, ethAmount, form]); */
+
+  useEffect(() => {
+    if (code) {
+      toast.info(dictionary('referralCodeAdded'));
+    }
+  }, [code]);
 
   useEffect(() => {
     if (walletStatus === WALLET_STATUS.CONNECTED && address) {
@@ -345,10 +353,12 @@ export const AuthModule = () => {
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
           <WalletModalButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
-          <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
-            {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
-            {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
-          </span>
+          {!code ? (
+            <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
+              {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
+              {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
+            </span>
+          ) : null}
         </>
       ) : null}
 
