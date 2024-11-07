@@ -29,7 +29,7 @@ export default function ReferralModule() {
   }, [address]);
 
   return (
-    <Module size="lg" className="hidden flex-grow lg:flex">
+    <Module size="lg" className="flex flex-grow">
       <ModuleHeader>
         <ModuleText>{dictionary('title')}</ModuleText>
         <p className="mt-2">
