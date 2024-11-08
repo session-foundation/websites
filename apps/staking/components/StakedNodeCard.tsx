@@ -42,7 +42,6 @@ import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import Link from 'next/link';
 import { SENT_DECIMALS } from '@session/contracts';
 
-
 type StakeInContract = Stake & {
   contract_id: NonNullable<Stake['contract_id']>;
   staked_balance: NonNullable<Stake['staked_balance']>;
@@ -743,7 +742,7 @@ const StakedNodeCard = forwardRef<
     const deregistrationUnlockTime = useRelativeTime(deregistrationUnlockDate, { addSuffix: true });
     const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
 
-    const isSoloNode = contributors.length === 1;
+    const isSoloNode = contributors.length === 1 && !node.contract;
     const isOperator = walletAddress ? isNodeOperator(node, walletAddress) : false;
 
     return (
@@ -883,7 +882,12 @@ const StakedNodeCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
             </RowLabel>
-            {operatorFee !== null ? formatPercentage(operatorFee / 1000000) : notFoundString}
+            {/** TODO: remove the fee divisor awaiting contributor change when the backend is updated to return the correct amount */}
+            {operatorFee !== null
+              ? formatPercentage(
+                  operatorFee / (state === NODE_STATE.AWAITING_CONTRIBUTORS ? 10000 : 1000000)
+                )
+              : notFoundString}
           </CollapsableContent>
         ) : null}
         {showRawNodeData ? (

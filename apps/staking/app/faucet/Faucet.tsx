@@ -11,6 +11,8 @@ export function Faucet({ code }: { code?: string }) {
       <div className="lg:-mt-header-displacement max-w-screen-3xl mx-auto flex w-screen flex-col-reverse items-center justify-around gap-16 px-4 py-16 align-middle xl:grid xl:h-dvh xl:grid-cols-2 xl:p-32 xl:py-0">
         <div className="flex h-max flex-col gap-4 text-start">
           <h1 className="text-5xl font-semibold">{dictionary('title')}</h1>
+          <h2 className="text-lg font-semibold">{dictionary('referralTitle')}</h2>
+          <p>{dictionary('referralDescription')}</p>
           <h2 className="text-lg font-semibold">{dictionary('communityTitle')}</h2>
           <p>
             {dictionary.rich('communityDescription', {
@@ -35,7 +37,7 @@ export function Faucet({ code }: { code?: string }) {
           <h2 className="text-lg font-semibold">{dictionary('walletRequirementTitle')}</h2>
           <p>{dictionary.rich('walletRequirementDescription')}</p>
         </div>
-        <div className="h-max min-h-[400px]">
+        <div className="mt-6 h-max min-h-[400px] w-full max-w-3xl">
           <AuthModule code={code} />
         </div>
       </div>
