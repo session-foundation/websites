@@ -1,5 +1,5 @@
 import { siteMetadata } from '@/lib/metadata';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { HomeIcon } from '@session/ui/icons/HomeIcon';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
@@ -23,7 +23,7 @@ export default function NotFound() {
         <div className="bg-text-primary m-0 hidden h-full w-px p-0 lg:block" />
         <div className="flex h-full flex-col justify-between gap-4 md:gap-0">
           <p className="max-w-[380px] text-xl md:text-2xl">{dictionary('description')}</p>
-          <Link href="/" prefetch={false}>
+          <Link href="/" prefetch={false} data-testid={LinkDataTestId.Not_Found_Return_Home}>
             <Button
               size="lg"
               variant="outline"

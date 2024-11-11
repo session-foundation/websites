@@ -1,6 +1,6 @@
 import { Footer } from '@/components/Footer';
 import { LANDING_BUTTON_URL } from '@/lib/constants';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
@@ -11,8 +11,19 @@ const PrimaryButton = ({ size, className }: { size: 'sm' | 'lg'; className?: str
   const dictionary = useTranslations('home');
 
   return (
-    <Link href={LANDING_BUTTON_URL.PRIMARY} prefetch className={className}>
-      <Button size={size} data-testid={ButtonDataTestId.Home_Primary} className="uppercase">
+    <Link
+      href={LANDING_BUTTON_URL.PRIMARY}
+      data-testid={size === 'sm' ? LinkDataTestId.Home_Primary_Mobile : LinkDataTestId.Home_Primary}
+      prefetch
+      className={className}
+    >
+      <Button
+        size={size}
+        data-testid={
+          size === 'sm' ? ButtonDataTestId.Home_Primary_Mobile : ButtonDataTestId.Home_Primary
+        }
+        className="uppercase"
+      >
         {dictionary('buttons.primary')}
       </Button>
     </Link>
@@ -23,10 +34,20 @@ const SecondaryButton = ({ size, className }: { size: 'sm' | 'lg'; className?: s
   const dictionary = useTranslations('home');
 
   return (
-    <Link href={LANDING_BUTTON_URL.SECONDARY} target="_blank" prefetch className={className}>
+    <Link
+      href={LANDING_BUTTON_URL.SECONDARY}
+      data-testid={
+        size === 'sm' ? LinkDataTestId.Home_Secondary_Mobile : LinkDataTestId.Home_Secondary
+      }
+      target="_blank"
+      prefetch
+      className={className}
+    >
       <Button
         size={size}
-        data-testid={ButtonDataTestId.Home_Secondary}
+        data-testid={
+          size === 'sm' ? ButtonDataTestId.Home_Secondary_Mobile : ButtonDataTestId.Home_Secondary
+        }
         variant="outline"
         className="uppercase"
       >

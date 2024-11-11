@@ -1,6 +1,6 @@
 import { URL } from '@/lib/constants';
 import { siteMetadata } from '@/lib/metadata';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ export default function Page() {
       <p>{dictionary('landingP2')}</p>
       <Link
         href={URL.SESSION_NODE_SOLO_SETUP_DOCS}
+        data-testid={LinkDataTestId.Node_Setup_Docs}
         prefetch
         target="_blank"
         referrerPolicy="no-referrer"

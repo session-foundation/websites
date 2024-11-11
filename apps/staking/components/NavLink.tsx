@@ -7,6 +7,7 @@ import { ReactNode } from 'react';
 
 export type NavLinkProps = {
   href: string;
+  dataTestId?: string;
   label?: string;
   children?: ReactNode;
   ariaLabel?: string;
@@ -24,13 +25,14 @@ function isExternalLink(href: string): boolean {
   return href.startsWith('https://');
 }
 
-export function NavLink({ href, label, children, ariaLabel }: NavLinkProps) {
+export function NavLink({ dataTestId, href, label, children, ariaLabel }: NavLinkProps) {
   const pathname = usePathname();
   return (
     <Link
       href={href}
       className={cn('hover:text-session-green', pathname.startsWith(href) && 'text-session-green')}
       aria-label={ariaLabel}
+      data-testid={dataTestId}
       {...(isExternalLink(href)
         ? {
             target: '_blank',

@@ -15,6 +15,7 @@ import {
 } from '@/components/ModuleDynamic';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { Address } from 'viem';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const { address: connectedAddress } = useWallet();
@@ -65,7 +66,12 @@ export default function UnclaimedTokensModule({ addressOverride }: { addressOver
   return (
     <Module>
       <ModuleTooltip>
-        {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_UNCLAIMED_REWARDS) })}
+        {dictionary.rich('description', {
+          link: externalLink({
+            href: URL.LEARN_MORE_UNCLAIMED_REWARDS,
+            dataTestId: LinkDataTestId.Unclaimed_Tokens_Tooltip,
+          }),
+        })}
       </ModuleTooltip>
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicQueryText

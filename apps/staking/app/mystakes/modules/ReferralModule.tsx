@@ -9,7 +9,7 @@ import { encodeAddressToHashId } from '@/lib/hashid';
 import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import { toast } from '@session/ui/lib/toast';
 import { externalLink } from '@/lib/locale-defaults';
@@ -36,10 +36,20 @@ export default function ReferralModule() {
           {dictionary('description1')}
           <br />
           <br />
-          {dictionary.rich('description2', { link: externalLink(URL.TESTNET_REFERRALS) })}
+          {dictionary.rich('description2', {
+            link: externalLink({
+              href: URL.TESTNET_REFERRALS,
+              dataTestId: LinkDataTestId.Paragraph_Testnet_Referral,
+            }),
+          })}
           <br />
           <br />
-          {dictionary.rich('description3', { link: externalLink(URL.TESTNET_REFERRALS_TOS) })}
+          {dictionary.rich('description3', {
+            link: externalLink({
+              href: URL.TESTNET_REFERRALS_TOS,
+              dataTestId: LinkDataTestId.Paragraph_Testnet_Referral_ToS,
+            }),
+          })}
         </p>
       </ModuleHeader>
       <ModuleContent className="h-full min-h-12">

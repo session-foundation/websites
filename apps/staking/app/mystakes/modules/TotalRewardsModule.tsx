@@ -15,6 +15,7 @@ import type { QUERY_STATUS } from '@/lib/query';
 import { useMemo } from 'react';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { Address } from 'viem';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default function TotalRewardsModule(params?: { addressOverride?: Address }) {
   const dictionary = useTranslations('modules.totalRewards');
@@ -45,7 +46,12 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
   return (
     <Module>
       <ModuleTooltip>
-        {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_TOTAL_REWARDS) })}
+        {dictionary.rich('description', {
+          link: externalLink({
+            href: URL.LEARN_MORE_TOTAL_REWARDS,
+            dataTestId: LinkDataTestId.Total_Rewards_Tooltip,
+          }),
+        })}
       </ModuleTooltip>
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicQueryText

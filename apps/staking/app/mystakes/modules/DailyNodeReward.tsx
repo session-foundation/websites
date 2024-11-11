@@ -11,6 +11,7 @@ import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Modul
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default function DailyNodeReward() {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();
@@ -29,7 +30,12 @@ export default function DailyNodeReward() {
   return (
     <Module>
       <ModuleTooltip>
-        {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_DAILY_REWARDS) })}
+        {dictionary.rich('description', {
+          link: externalLink({
+            href: URL.LEARN_MORE_DAILY_REWARDS,
+            dataTestId: LinkDataTestId.Daily_Node_Reward_Tooltip,
+          }),
+        })}
       </ModuleTooltip>
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicContractReadText

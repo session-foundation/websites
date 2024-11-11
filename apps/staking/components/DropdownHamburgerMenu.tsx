@@ -9,7 +9,7 @@ import {
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
 import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
 import { EXTERNAL_ROUTES, ROUTES } from '@/lib/constants';
 
@@ -51,6 +51,7 @@ export function DropdownHamburgerMenu() {
       <DropdownMenuContent className="w-max">
         {routes.map(({ dictionaryKey, href }) => (
           <DropdownMenuItemNavLink
+            dataTestId={LinkDataTestId.Hamburger_Dropdown_Item}
             key={href}
             href={href}
             label={navDictionary(dictionaryKey)}
@@ -58,7 +59,12 @@ export function DropdownHamburgerMenu() {
           />
         ))}
         {EXTERNAL_ROUTES.map(({ dictionaryKey, href }) => (
-          <DropdownMenuItemNavLink key={href} href={href} label={navDictionary(dictionaryKey)} />
+          <DropdownMenuItemNavLink
+            dataTestId={LinkDataTestId.Hamburger_Dropdown_Item}
+            key={href}
+            href={href}
+            label={navDictionary(dictionaryKey)}
+          />
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

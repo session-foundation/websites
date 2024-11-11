@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from '@session/ui/lib/toast';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { formatNumber } from '@/lib/locale-client';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 const noPointsObject = {
   score: 0,
@@ -62,7 +63,10 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
     <Module>
       <ModuleTooltip>
         {dictionary.rich('description', {
-          link: externalLink(URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT),
+          link: externalLink({
+            href: URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT,
+            dataTestId: LinkDataTestId.Testnet_Points_Tooltip,
+          }),
         })}
       </ModuleTooltip>
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>

@@ -15,6 +15,7 @@ import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWith
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default function NodeRegistrations() {
   const showOneMockNode = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_ONE);
@@ -125,7 +126,12 @@ function NoWallet() {
     <ModuleGridInfoContent>
       <p>{dictionary('noWalletP1')}</p>
       <p>
-        {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
+        {dictionary.rich('noNodesP2', {
+          link: externalLink({
+            href: URL.SESSION_NODE_SOLO_SETUP_DOCS,
+            dataTestId: LinkDataTestId.Registration_No_Wallet_Setup_Docs,
+          }),
+        })}
       </p>
       <WalletModalButtonWithLocales rounded="md" size="lg" />
     </ModuleGridInfoContent>
@@ -138,7 +144,12 @@ function NoNodes() {
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
       <p>
-        {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
+        {dictionary.rich('noNodesP2', {
+          link: externalLink({
+            href: URL.SESSION_NODE_SOLO_SETUP_DOCS,
+            dataTestId: LinkDataTestId.Registration_No_Nodes_Setup_Docs,
+          }),
+        })}
       </p>
     </ModuleGridInfoContent>
   );

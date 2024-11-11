@@ -9,6 +9,7 @@ import { Stake } from '@session/sent-staking-js/client';
 import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 import { SENT_SYMBOL } from '@session/contracts';
 import { useMemo } from 'react';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default function NodeActionModuleInfo({
   node,
@@ -56,7 +57,10 @@ export default function NodeActionModuleInfo({
         <ActionModuleRow
           label={feeEstimateText ?? dictionaryActionModulesNode('feeEstimate')}
           tooltip={dictionaryActionModulesNode.rich('feeEstimateTooltip', {
-            link: externalLink(URL.GAS_INFO),
+            link: externalLink({
+              href: URL.GAS_INFO,
+              dataTestId: LinkDataTestId.Fee_Gas_Info_Tooltip,
+            }),
           })}
         >
           <span className="inline-flex flex-row items-center gap-1.5 align-middle">

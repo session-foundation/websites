@@ -12,6 +12,7 @@ import { useMemo } from 'react';
 import type { OpenNode } from '@session/sent-staking-js/client';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import type { Address } from 'viem';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export const sortAndGroupOpenNodes = (nodes: Array<OpenNode>, address?: Address) => {
   nodes.sort((a, b) => {
@@ -58,7 +59,14 @@ function NoNodes() {
   return (
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
-      <p>{dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_DOCS) })}</p>
+      <p>
+        {dictionary.rich('noNodesP2', {
+          link: externalLink({
+            href: URL.SESSION_NODE_DOCS,
+            dataTestId: LinkDataTestId.Open_No_Nodes_Setup_Docs,
+          }),
+        })}
+      </p>
     </ModuleGridInfoContent>
   );
 }

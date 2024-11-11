@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { TransactionHistory } from './utils';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 interface TransactionRow {
   date: Date;
@@ -90,7 +91,11 @@ export function FaucetTransactions({
                 {` ${token}`}
               </TableCell>
               <TableCell className="text-right">
-                <Link href={`/explorer/tx/${hash}`} target="_blank">
+                <Link
+                  href={`/explorer/tx/${hash}`}
+                  target="_blank"
+                  data-testid={LinkDataTestId.Faucet_Explorer_Transaction}
+                >
                   <span className="text-session-green fill-session-green inline-flex w-max items-center gap-1 align-middle">
                     <span className="hidden 2xl:flex">{dictionary('viewOnExplorer')}</span>
                     <span className="flex 2xl:hidden">{dictionary('viewOnExplorerShort')}</span>

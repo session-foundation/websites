@@ -4,7 +4,7 @@ import { ButtonModule, ModuleContent, ModuleText } from '@session/ui/components/
 import { PresentIcon } from '@session/ui/icons/PresentIcon';
 import { useUnclaimedTokens } from '@/app/mystakes/modules/UnclaimedTokensModule';
 import { cn } from '@session/ui/lib/utils';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -202,7 +202,10 @@ function ClaimTokensDialog({
         <ActionModuleRow
           label={dictionary('claimFee')}
           tooltip={dictionary.rich('claimFeeTooltip', {
-            link: externalLink(URL.GAS_INFO),
+            link: externalLink({
+              href: URL.GAS_INFO,
+              dataTestId: LinkDataTestId.Claim_Fee_Tooltip,
+            }),
           })}
         >
           <span className="inline-flex flex-row items-center gap-1.5 align-middle">

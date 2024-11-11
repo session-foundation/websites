@@ -10,7 +10,7 @@ import {
 } from '@/components/StakedNodeCard';
 import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import {
   ModuleGridContent,
   ModuleGridHeader,
@@ -152,8 +152,15 @@ function NoNodes() {
   return (
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
-      <p>{dictionary.rich('noNodesP2', { link: internalLink('/stake') })}</p>
-      <Link href="/stake" prefetch>
+      <p>
+        {dictionary.rich('noNodesP2', {
+          link: internalLink({
+            href: '/stake',
+            dataTestId: LinkDataTestId.No_Nodes_Stake_Now_In_Text,
+          }),
+        })}
+      </p>
+      <Link href="/stake" prefetch data-testid={LinkDataTestId.No_Nodes_Stake_Now}>
         <Button
           aria-label={dictionary('stakeNowButtonAria')}
           data-testid={ButtonDataTestId.My_Stakes_Stake_Now}

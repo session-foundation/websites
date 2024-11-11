@@ -8,6 +8,7 @@ import {
 } from '@/lib/locale-client';
 import {
   ButtonDataTestId,
+  LinkDataTestId,
   NodeCardDataTestId,
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
@@ -333,7 +334,10 @@ const ReadyForExitNotification = ({
         isLiquidationSoon ? 'exitTimerDescriptionNow' : 'exitTimerDescription',
         {
           relativeTime,
-          link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
+          link: externalLink({
+            href: URL.NODE_LIQUIDATION_LEARN_MORE,
+            dataTestId: LinkDataTestId.Exit_Timer_Liquidation_Learn_More,
+          }),
         }
       )}
     >
@@ -694,8 +698,6 @@ const StakedNodeCard = forwardRef<
     );
 
     const {
-      state,
-      contract,
       unique_id,
       service_node_pubkey: pubKey,
       operator_fee: operatorFee,
@@ -705,6 +707,17 @@ const StakedNodeCard = forwardRef<
       last_reward_block_height: lastRewardBlock,
       last_uptime_proof: lastUptimeProofSeconds,
     } = node;
+
+    const state = useMemo(() => {
+      if (
+        node.exited &&
+        node.state !== NODE_STATE.EXITED &&
+        node.state !== NODE_STATE.DEREGISTERED
+      ) {
+        node.state = NODE_STATE.UNKNOWN_EXIT;
+      }
+      return node.state;
+    }, [node]);
 
     const toggleId = `toggle-${unique_id}`;
 
@@ -804,7 +817,7 @@ const StakedNodeCard = forwardRef<
         ) : null}
         {state !== NODE_STATE.RUNNING &&
         state !== NODE_STATE.AWAITING_CONTRIBUTORS &&
-        node.state !== NODE_STATE.AWAITING_OPERATOR_START ? (
+        state !== NODE_STATE.AWAITING_OPERATOR_START ? (
           <CollapsableContent size="xs">
             <Tooltip
               tooltipContent={dictionary('lastRewardDescription', {

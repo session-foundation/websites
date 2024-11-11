@@ -7,6 +7,7 @@ import { WalletNetworkDropdownWithLocales } from './WalletNetworkDropdownWithLoc
 import { NavLink } from '@/components/NavLink';
 import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import { getTranslations } from 'next-intl/server';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default async function Header() {
   const dictionary = await getTranslations('navigation');
@@ -32,7 +33,12 @@ export default async function Header() {
         </Link>
         <div className="hidden flex-row gap-10 lg:flex">
           {routes.map(({ dictionaryKey, href }) => (
-            <NavLink key={href} href={href} label={dictionary(dictionaryKey)} />
+            <NavLink
+              dataTestId={LinkDataTestId.Header_Nav_Link_Item}
+              key={href}
+              href={href}
+              label={dictionary(dictionaryKey)}
+            />
           ))}
         </div>
       </div>

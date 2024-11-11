@@ -1,4 +1,4 @@
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
 import { CollapsableButton } from '@/components/StakedNodeCard';
 import {
@@ -128,7 +128,10 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
           exit_time: formatLocalizedTimeFromSeconds(
             SESSION_NODE_TIME(chain).EXIT_GRACE_TIME_SECONDS
           ),
-          link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
+          link: externalLink({
+            href: URL.NODE_LIQUIDATION_LEARN_MORE,
+            dataTestId: LinkDataTestId.Request_Exit_Liquidation_Learn_More,
+          }),
         })}
         <br />
         <br />

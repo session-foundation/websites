@@ -14,7 +14,7 @@ import { toast } from '@session/ui/lib/toast';
 import { RegistrationPausedInfo } from '@/components/RegistrationPausedInfo';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import type { ParsedRegistrationData } from '@/app/register/[nodeId]/NodeRegistrationForm';
 import { externalLink } from '@/lib/locale-defaults';
 
@@ -265,7 +265,10 @@ export function RegisterMultiNodeButton({
                 [PROGRESS_STATUS.IDLE]: dictionaryStage('address.idle'),
                 [PROGRESS_STATUS.PENDING]: dictionaryStage('address.pending'),
                 [PROGRESS_STATUS.SUCCESS]: dictionaryStage.rich('address.success', {
-                  link: externalLink(`/explorer/address/${openNodeContractAddress}`),
+                  link: externalLink({
+                    href: `/explorer/address/${openNodeContractAddress}`,
+                    dataTestId: LinkDataTestId.Multi_Node_Explorer_Address,
+                  }),
                 }),
                 [PROGRESS_STATUS.ERROR]: createNodeContractErrorMessage,
               },

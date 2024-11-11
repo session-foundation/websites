@@ -5,21 +5,44 @@ import { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { FAUCET, NETWORK, SESSION_NODE_TIME_STATIC, SOCIALS, TICKER, URL } from './constants';
+import { LinkDataTestId } from '@/testing/data-test-ids';
 
-export const internalLink = (href: string, prefetch?: boolean) => {
+export const internalLink = ({
+  href,
+  dataTestId,
+  prefetch,
+}: {
+  href: string;
+  dataTestId: string;
+  prefetch?: boolean;
+}) => {
   return (children: ReactNode) => (
-    <Link href={href} prefetch={prefetch} className="text-session-green cursor-pointer underline">
+    <Link
+      href={href}
+      prefetch={prefetch}
+      data-testid={dataTestId}
+      className="text-session-green cursor-pointer underline"
+    >
       {children}
     </Link>
   );
 };
 
-export const externalLink = (href: string, className?: string) => {
+export const externalLink = ({
+  href,
+  dataTestId,
+  className,
+}: {
+  href: string;
+  dataTestId: string;
+  className?: string;
+}) => {
   return (children: ReactNode) => (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      data-testid={dataTestId}
       className={className ?? 'text-session-green cursor-pointer'}
     >
       {children}
@@ -27,8 +50,24 @@ export const externalLink = (href: string, className?: string) => {
   );
 };
 
-const defaultExternalLink = (href: string, text: string, className?: string) => () =>
-  externalLink(href, className ?? 'text-white underline')(text);
+const defaultExternalLink =
+  ({
+    href,
+    text,
+    dataTestId,
+    className,
+  }: {
+    href: string;
+    text: string;
+    dataTestId: string;
+    className?: string;
+  }) =>
+  () =>
+    externalLink({
+      href,
+      dataTestId,
+      className: className ?? 'text-white underline',
+    })(text);
 
 type FontWeight =
   | 'font-extralight'
@@ -53,31 +92,47 @@ export const defaultTranslationElements = {
   'text-bold': text('font-bold'),
   'text-extrabold': text('font-extrabold'),
   'text-black': text('font-black'),
-  'discord-server-link': defaultExternalLink(
-    SOCIALS[Social.Discord].link,
-    "Session Token's Discord server"
-  ),
-  'contact-support-link': defaultExternalLink(
-    SOCIALS[Social.Discord].link,
-    'contact the Session team via Discord.'
-  ),
-  'incentive-program-link': defaultExternalLink(
-    URL.INCENTIVE_PROGRAM,
-    'Session Testnet Incentive Program'
-  ),
-  'gas-faucet-link': externalLink(URL.ARB_SEP_FAUCET, 'text-session-green'),
-  'gas-info-link': externalLink(URL.GAS_INFO, 'text-session-green'),
-  'oxen-program-link': defaultExternalLink(
-    URL.OXEN_SERVICE_NODE_BONUS_PROGRAM,
-    'Oxen Service Node Bonus program',
-    'text-session-green'
-  ),
-  'session-token-community-snapshot-link': defaultExternalLink(
-    URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT,
-    'Snapshot',
-    'text-session-green'
-  ),
-  'my-stakes-link': internalLink('/mystakes'),
+  'discord-server-link': defaultExternalLink({
+    href: SOCIALS[Social.Discord].link,
+    text: "Session Token's Discord server",
+    dataTestId: LinkDataTestId.I18n_Discord_Server,
+  }),
+  'contact-support-link': defaultExternalLink({
+    href: SOCIALS[Social.Discord].link,
+    text: 'contact the Session team via Discord.',
+    dataTestId: LinkDataTestId.I18n_Contact_Support,
+  }),
+  'incentive-program-link': defaultExternalLink({
+    href: URL.INCENTIVE_PROGRAM,
+    text: 'Session Testnet Incentive Program',
+    dataTestId: LinkDataTestId.I18n_Incentive_Program,
+  }),
+  'gas-faucet-link': externalLink({
+    href: URL.ARB_SEP_FAUCET,
+    dataTestId: LinkDataTestId.I18n_Gas_Faucet,
+    className: 'text-session-green',
+  }),
+  'gas-info-link': externalLink({
+    href: URL.GAS_INFO,
+    dataTestId: LinkDataTestId.I18n_Gas_Info,
+    className: 'text-session-green',
+  }),
+  'oxen-program-link': defaultExternalLink({
+    href: URL.OXEN_SERVICE_NODE_BONUS_PROGRAM,
+    text: 'Oxen Service Node Bonus program',
+    dataTestId: LinkDataTestId.I18n_Oxen_Program,
+    className: 'text-session-green',
+  }),
+  'session-token-community-snapshot-link': defaultExternalLink({
+    href: URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT,
+    text: 'Snapshot',
+    dataTestId: LinkDataTestId.I18n_Session_Token_Community_Snapshot,
+    className: 'text-session-green',
+  }),
+  'my-stakes-link': internalLink({
+    href: '/mystakes',
+    dataTestId: LinkDataTestId.I18n_My_Stakes,
+  }),
 } satisfies RichTranslationValues;
 
 export const defaultTranslationVariables = {

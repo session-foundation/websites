@@ -25,6 +25,7 @@ export enum NODE_STATE {
   DEREGISTERED = 'Deregistered',
   AWAITING_EXIT = 'Awaiting Exit',
   EXITED = 'Exited',
+  UNKNOWN_EXIT = 'Unknown Exit',
 }
 
 export interface LockedContribution {
