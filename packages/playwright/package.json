@@ -1,0 +1,36 @@
+{
+  "name": "@session/playwright",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint-staged": "lint-staged",
+    "test": "jest",
+    "playwright": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.1",
+    "@session/eslint-config": "workspace:*",
+    "@session/testing": "workspace:*",
+    "@session/typescript-config": "workspace:*",
+    "@session/staking": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9",
+    "yarn": "use pnpm",
+    "npm": "use pnpm"
+  },
+  "description": "",
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
