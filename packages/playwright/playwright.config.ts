@@ -6,13 +6,14 @@ export default defineConfig({
   reporter: 'list',
   testDir: './tests',
   use: {
-    baseURL: 'https://stake-dev.getsession.org',
+    baseURL: 'http://localhost:3000',
     screenshot: 'only-on-failure',
-    httpCredentials: {
-      username: 'dev',
-      password: 'yoyo-FAD-ivory',
-    },
+    headless: false,
+    // httpCredentials: {
+    //   username: process.env.HTTP_CREDENTIALS_USERNAME,
+    //   password: process.env.HTTP_CREDENTIALS_PASSWORD,
+    // },
   },
 });
 
-export const BASE_URL = 'https://stake-dev.getsession.org';
+export const BASE_URL = 'http://localhost:3000';
