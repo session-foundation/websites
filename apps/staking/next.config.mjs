@@ -44,9 +44,7 @@ const nextConfig = {
     '@session/feature-flags',
     'better-sqlite3-multiple-ciphers',
   ],
-  experimental: {
-    serverComponentsExternalPackages: ['pino', 'pino-pretty'],
-  },
+  serverExternalPackages: ['pino', 'pino-pretty'],
   webpack: (config) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     if (process.env.NO_MINIFY?.toLowerCase() === 'true') {

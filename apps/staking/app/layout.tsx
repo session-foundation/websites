@@ -32,7 +32,7 @@ const buildInfo = getBuildInfo();
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, direction, messages } = await getLocalizationData();
-  const initialWagmiState = cookieToInitialState(wagmiConfig, headers().get('cookie'));
+  const initialWagmiState = cookieToInitialState(wagmiConfig, (await headers()).get('cookie'));
 
   return (
     <html
