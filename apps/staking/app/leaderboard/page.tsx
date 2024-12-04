@@ -52,7 +52,7 @@ export default function PointsPage() {
   });
 
   return (
-    <div className="mt-10 flex flex-col items-center gap-4">
+    <div className="mt-10 flex flex-col items-center gap-6">
       <div className="flex max-w-xl flex-col items-center gap-4 text-center">
         <Typography variant="h1">Testnet Leaderboard</Typography>
         <Typography variant="p">
@@ -72,7 +72,7 @@ export default function PointsPage() {
       ) : isError ? (
         <span>Something went wrong</span>
       ) : (
-        <Table className="w-max max-w-xl">
+        <Table className="w-max max-w-[90vw] md:max-w-xl">
           <TableHeader>
             <TableRow>
               <TableHead>Wallet Address</TableHead>
@@ -87,7 +87,7 @@ export default function PointsPage() {
                 className={
                   areHexesEqual(wallet, address)
                     ? 'bg-session-green text-session-black hover:bg-session-green-dark'
-                    : 'hover:bg-session-green hover:text-session-black'
+                    : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
                 }
               >
                 <TableCell>
