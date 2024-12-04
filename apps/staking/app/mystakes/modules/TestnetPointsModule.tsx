@@ -15,7 +15,7 @@ import { Address } from 'viem';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from '@session/ui/lib/toast';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatNumber } from '@/lib/locale-client';
+import { formatNumber, formatPercentage } from '@/lib/locale-client';
 
 const noPointsObject = {
   score: 0,
@@ -56,7 +56,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
     },
   });
 
-  const points = data?.score ? `${formatNumber(data.score)} points` : null;
+  const points = `${formatNumber(data?.score ?? 0)} points`;
 
   return (
     <Module>
@@ -65,7 +65,10 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
           link: externalLink(URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT),
         })}
       </ModuleTooltip>
-      <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
+      <ModuleTitle>
+        {titleFormat('format', { title })}
+        {` (${formatPercentage((data?.percent ?? 0) / 10000)})`}
+      </ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
