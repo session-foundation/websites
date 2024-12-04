@@ -76,7 +76,7 @@ export default function PointsPage() {
         <Table className="w-max max-w-[90vw]">
           <TableHeader>
             <TableRow className="text-sm md:text-lg">
-              <TableHead className="hidden sm:block">Rank</TableHead>
+              <TableHead className="hidden sm:table-cell">Rank</TableHead>
               <TableHead>Wallet Address</TableHead>
               <TableHead>Points</TableHead>
               <TableHead className="text-right">Percent</TableHead>
