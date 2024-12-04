@@ -16,6 +16,7 @@ import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import { areHexesEqual } from '@session/util-crypto/string';
 import Link from 'next/link';
 import { Loading } from '@session/ui/components/loading';
+import { cn } from '@session/ui/lib/utils';
 
 // TODO: Delete route after testnet incentive program is over
 
@@ -72,25 +73,28 @@ export default function PointsPage() {
       ) : isError ? (
         <span>Something went wrong</span>
       ) : (
-        <Table className="w-max max-w-[90vw] md:max-w-xl">
+        <Table className="w-max max-w-[90vw]">
           <TableHeader>
-            <TableRow>
+            <TableRow className="text-lg md:text-xl">
+              <TableHead>Rank</TableHead>
               <TableHead>Wallet Address</TableHead>
               <TableHead>Points</TableHead>
               <TableHead className="text-right">Percent</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.map(([wallet, { score, percent }]) => (
+            {data?.map(([wallet, { score, percent }], i) => (
               <TableRow
                 key={wallet}
-                className={
+                className={cn(
+                  'text-base md:text-lg [&>td]:md:px-8',
                   areHexesEqual(wallet, address)
                     ? 'bg-session-green text-session-black hover:bg-session-green-dark'
                     : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
-                }
+                )}
               >
-                <TableCell>
+                <TableCell className="px-0 font-bold">{i + 1}</TableCell>
+                <TableCell className="w-max">
                   <PubKey pubKey={wallet} />
                 </TableCell>
                 <TableCell>{formatNumber(score)}</TableCell>
