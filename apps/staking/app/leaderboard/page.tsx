@@ -75,7 +75,7 @@ export default function PointsPage() {
       ) : (
         <Table className="w-max max-w-[90vw]">
           <TableHeader>
-            <TableRow className="text-lg md:text-xl">
+            <TableRow className="text-base md:text-lg">
               <TableHead>Rank</TableHead>
               <TableHead>Wallet Address</TableHead>
               <TableHead>Points</TableHead>
@@ -87,7 +87,7 @@ export default function PointsPage() {
               <TableRow
                 key={wallet}
                 className={cn(
-                  'text-base md:text-lg [&>td]:md:px-8',
+                  'text-sm md:text-base [&>td]:md:px-8',
                   areHexesEqual(wallet, address)
                     ? 'bg-session-green text-session-black hover:bg-session-green-dark'
                     : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
