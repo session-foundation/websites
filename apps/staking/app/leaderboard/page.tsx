@@ -76,7 +76,7 @@ export default function PointsPage() {
         <Table className="w-max max-w-[90vw]">
           <TableHeader>
             <TableRow className="text-sm md:text-lg">
-              <TableHead className="hidden sm:table-cell">Rank</TableHead>
+              <TableHead className="hidden md:table-cell">Rank</TableHead>
               <TableHead>Wallet Address</TableHead>
               <TableHead>Points</TableHead>
               <TableHead className="text-right">Percent</TableHead>
@@ -93,7 +93,7 @@ export default function PointsPage() {
                     : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
                 )}
               >
-                <TableCell className="hidden font-bold sm:block">{i + 1}</TableCell>
+                <TableCell className="hidden font-bold md:block">{i + 1}</TableCell>
                 <TableCell className="w-max">
                   <PubKey pubKey={wallet} />
                 </TableCell>
