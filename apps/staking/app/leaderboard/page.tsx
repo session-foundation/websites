@@ -21,7 +21,7 @@ import { cn } from '@session/ui/lib/utils';
 // TODO: Delete route after testnet incentive program is over
 
 function smartFormatPercentage(decimalPercent: number) {
-  const maximumFractionDigits = decimalPercent > 0.0001 ? 4 : 6;
+  const maximumFractionDigits = decimalPercent > 0.01 ? 2 : decimalPercent > 0.0001 ? 4 : 6;
   return formatPercentage(decimalPercent, { maximumFractionDigits });
 }
 
@@ -99,7 +99,7 @@ export default function PointsPage() {
                 </TableCell>
                 <TableCell>{formatNumber(score)}</TableCell>
                 <TableCell className="p-0 py-4 pr-1 text-right md:pe-1">
-                  {smartFormatPercentage(percent / 10000)}
+                  {smartFormatPercentage(percent / 100)}
                 </TableCell>
               </TableRow>
             ))}

@@ -67,7 +67,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
       </ModuleTooltip>
       <ModuleTitle>
         {titleFormat('format', { title })}
-        {` (${formatPercentage((data?.percent ?? 0) / 10000)})`}
+        {` (${formatPercentage((data?.percent ?? 0) / 100)})`}
       </ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
