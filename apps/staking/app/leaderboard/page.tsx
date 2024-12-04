@@ -87,18 +87,18 @@ export default function PointsPage() {
               <TableRow
                 key={wallet}
                 className={cn(
-                  'text-sm md:text-base [&>td]:md:px-8',
+                  'text-sm md:text-base',
                   areHexesEqual(wallet, address)
                     ? 'bg-session-green text-session-black hover:bg-session-green-dark'
                     : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
                 )}
               >
-                <TableCell className="px-0 font-bold">{i + 1}</TableCell>
+                <TableCell className="font-bold">{i + 1}</TableCell>
                 <TableCell className="w-max">
                   <PubKey pubKey={wallet} />
                 </TableCell>
                 <TableCell>{formatNumber(score)}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="p-0 py-4 pr-1 text-right md:pe-1">
                   {smartFormatPercentage(percent / 10000)}
                 </TableCell>
               </TableRow>
