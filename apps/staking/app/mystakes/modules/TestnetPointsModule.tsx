@@ -69,6 +69,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

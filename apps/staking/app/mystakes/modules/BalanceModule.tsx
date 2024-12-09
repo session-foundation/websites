@@ -39,12 +39,14 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     [params?.addressOverride, connectedAddress]
   );
 
+  const enabled = !!address;
+
   const { data, refetch, status } = useStakingBackendQueryWithParams(
     getStakedNodes,
     {
       address: address!,
     },
-    { enabled: !!address }
+    { enabled }
   );
 
   const stakes = useMemo(() => {
@@ -61,11 +63,11 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     [stakes]
   );
 
-  return { totalStakedAmount, status, refetch };
+  return { totalStakedAmount, status, refetch, enabled };
 }
 
 export default function BalanceModule({ addressOverride }: { addressOverride?: Address }) {
-  const { totalStakedAmount, status, refetch } = useTotalStakedAmount({ addressOverride });
+  const { totalStakedAmount, status, refetch, enabled } = useTotalStakedAmount({ addressOverride });
   const dictionary = useTranslations('modules.balance');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
@@ -76,6 +78,7 @@ export default function BalanceModule({ addressOverride }: { addressOverride?: A
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
+        enabled={enabled}
         fallback={0}
         errorToast={{
           messages: {

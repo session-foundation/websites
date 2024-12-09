@@ -473,3 +473,28 @@ async function connectFaucetWallet() {
   }
   return { faucetAddress, faucetWallet };
 }
+
+export async function getReferralCodeInfo({ code }: { code: string }) {
+  let db: BetterSql3.Database | undefined;
+  try {
+    const db = openDatabase();
+    const { maxuses: maxUses, drip } = getReferralCodeDetails({ db, code });
+    const codeTransactionHistory = getCodeUseTransactionHistory({ db, code });
+
+    const outOfUses = codeTransactionHistory.length >= (maxUses ?? 1);
+
+    return {
+      maxUses,
+      uses: codeTransactionHistory.length,
+      drip,
+      outOfUses,
+    };
+  } catch (error) {
+    console.error('Error getting referral code info:', error);
+    return null;
+  } finally {
+    if (db) {
+      db.close();
+    }
+  }
+}

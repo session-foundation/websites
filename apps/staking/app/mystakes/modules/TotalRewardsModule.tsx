@@ -28,13 +28,15 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
     [params?.addressOverride, connectedAddress]
   );
 
+  const enabled = !!address;
+
   const { data, status, refetch } = useStakingBackendQueryWithParams(
     getStakedNodes,
     {
       address: address!,
     },
     {
-      enabled: !!address,
+      enabled,
     }
   );
 
@@ -51,6 +53,7 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled={enabled}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),
