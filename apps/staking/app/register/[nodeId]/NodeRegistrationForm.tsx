@@ -9,7 +9,6 @@ import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import { useRegisteredNode } from '@/hooks/useRegisteredNode';
-import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import {

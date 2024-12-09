@@ -4,7 +4,6 @@ import { formatPercentage } from '@/lib/locale-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { OpenNode } from '@session/sent-staking-js/client';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
 import { forwardRef, type HTMLAttributes, useMemo } from 'react';
 import {
   InfoNodeCard,

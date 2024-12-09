@@ -4,7 +4,6 @@ import type { GetOpenNodesResponse } from '@session/sent-staking-js/client';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
-import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActionModuleRow,

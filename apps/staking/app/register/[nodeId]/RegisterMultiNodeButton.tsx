@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useAccount } from 'wagmi';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';

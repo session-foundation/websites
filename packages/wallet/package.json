@@ -14,8 +14,8 @@
   },
   "devDependencies": {
     "@session/eslint-config": "workspace:*",
-    "@session/typescript-config": "workspace:*",
     "@session/testing": "workspace:*",
+    "@session/typescript-config": "workspace:*",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "react": "19.0.0-rc-66855b96-20241106"
@@ -24,11 +24,10 @@
     "@session/contracts": "workspace:*",
     "@session/util-js": "workspace:*",
     "@session/util-crypto": "workspace:*",
-    "@session/ui": "workspace:*",
+    "@session/util-js": "workspace:*",
     "@tanstack/react-query": "5.61.5",
     "@web3modal/wagmi": "4.2.3",
-    "viem": "2.21.51",
-    "wagmi": "2.13.2"
+    "viem": "2.21.54"
   },
   "engines": {
     "node": ">=22",

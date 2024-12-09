@@ -4,7 +4,6 @@ import { NETWORK } from '@/lib/constants';
 import WalletNetworkDropdown from '@session/wallet/components/WalletNetworkDropdown';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { SwitchChainErrorType } from 'viem';
 import { toast } from '@session/ui/lib/toast';
 
 export function WalletNetworkDropdownWithLocales({ className }: { className?: string }) {
@@ -12,7 +11,7 @@ export function WalletNetworkDropdownWithLocales({ className }: { className?: st
   const dictionary = useTranslations('wallet.networkDropdown');
 
   // TODO - handle specific errors
-  const handleError = (error: SwitchChainErrorType) => {
+  const handleError = (error: Error) => {
     toast.error(dictionary('errorNotSupported'));
   };
 

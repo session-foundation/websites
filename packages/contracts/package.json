@@ -20,8 +20,8 @@
     "@session/util-js": "workspace:*",
     "@session/util-crypto": "workspace:*",
     "@tanstack/react-query": "5.61.5",
-    "viem": "2.21.51",
-    "wagmi": "2.13.2"
+    "viem": "2.21.54",
+    "wagmi": "2.13.4"
   },
   "devDependencies": {
     "@session/eslint-config": "workspace:*",

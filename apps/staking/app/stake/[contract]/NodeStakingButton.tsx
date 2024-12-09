@@ -1,6 +1,5 @@
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
 import { useEffect } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';

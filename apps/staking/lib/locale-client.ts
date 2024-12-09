@@ -42,8 +42,7 @@ export const formatLocalizedTimeFromSeconds = (
   formatLocalizedRelativeTimeClient(getDateFromUnixTimestampSeconds(seconds), new Date(0), options);
 
 export const formatNumber = (num: number, options?: Intl.NumberFormatOptions) => {
-  const locale = useLocale();
-  return new Intl.NumberFormat(locale, options).format(num);
+  return new Intl.NumberFormat(undefined, options).format(num);
 };
 
 export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions) => {

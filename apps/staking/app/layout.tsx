@@ -7,6 +7,7 @@ import { DevSheet } from '@/components/DevSheet';
 import { siteMetadata, wagmiMetadata } from '@/lib/metadata';
 import '@session/ui/styles';
 import { createWagmiConfig } from '@session/wallet/lib/wagmi';
+import { type ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { cookieToInitialState } from 'wagmi';
 import ChainBanner from '@/components/ChainBanner';
@@ -30,7 +31,7 @@ export async function generateMetadata() {
 
 const buildInfo = getBuildInfo();
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, direction, messages } = await getLocalizationData();
   const initialWagmiState = cookieToInitialState(wagmiConfig, (await headers()).get('cookie'));
 

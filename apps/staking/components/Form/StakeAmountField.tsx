@@ -8,7 +8,6 @@ import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Input } from '@session/ui/ui/input';
 import { Slider, SliderLineCircle } from '@session/ui/ui/slider';
-import * as React from 'react';
 import type { DecimalDelimiter } from '@/lib/locale-client';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';

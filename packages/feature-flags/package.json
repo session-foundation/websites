@@ -23,7 +23,7 @@
     "@session/testing": "workspace:*",
     "@session/util-js": "workspace:*",
     "better-sqlite3-multiple-ciphers": "11.1.2",
-    "next": "15.0.3"
+    "next": "15.0.4"
   },
   "engines": {
     "node": ">=22",
