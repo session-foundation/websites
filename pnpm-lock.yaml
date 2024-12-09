@@ -324,9 +324,6 @@ importers:
       '@session/util-js':
         specifier: workspace:*
         version: link:../util-js
-      '@session/wallet':
-        specifier: workspace:*
-        version: link:../wallet
       '@tanstack/react-query':
         specifier: 5.61.5
         version: 5.61.5(react@19.0.0-rc-66855b96-20241106)
