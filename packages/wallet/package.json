@@ -21,8 +21,8 @@
     "react": "19.0.0-rc-66855b96-20241106"
   },
   "dependencies": {
-    "@session/contracts": "workspace:*",
-    "@session/util-js": "workspace:*",
+    "@session/feature-flags": "workspace:*",
+    "@session/ui": "workspace:*",
     "@session/util-crypto": "workspace:*",
     "@session/util-js": "workspace:*",
     "@tanstack/react-query": "5.61.5",
