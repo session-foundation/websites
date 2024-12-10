@@ -448,7 +448,7 @@ const NodeSummary = ({
 }: NodeSummaryProps) => {
   const allTimers = [];
 
-  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS) {
+  if (node.state === NODE_STATE.AWAITING_CONTRIBUTORS) {
     return (
       <NodeContributorList
         contributors={node.contributors}
