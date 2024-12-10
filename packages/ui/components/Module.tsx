@@ -7,7 +7,7 @@ import { Tooltip } from './ui/tooltip';
 import { Button, type ButtonProps } from './ui/button';
 
 export const outerModuleVariants = cva(
-  'rounded-3xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
+  'rounded-2xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
   {
     variants: {
       variant: {
@@ -28,7 +28,7 @@ export const outerModuleVariants = cva(
 
 const innerModuleVariants = cva(
   cn(
-    'rounded-3xl w-full h-full flex align-middle flex-col bg-module',
+    'rounded-2xl w-full h-full flex align-middle flex-col bg-module',
     '[&>span]:font-medium [&>*>span]:font-medium'
   ),
   {
@@ -224,13 +224,15 @@ const ModuleContent = forwardRef<HTMLDivElement, ModuleContentProps>(
 );
 
 const ModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <Tooltip ref={ref} tooltipContent={children}>
-      <div className={cn('absolute right-5 top-4 cursor-pointer', className)} {...props}>
-        <QuestionIcon className="fill-session-text h-4 w-4" />
-      </div>
-    </Tooltip>
-  )
+  ({ className, children, ...props }, ref) => {
+    return (
+      <Tooltip ref={ref} tooltipContent={children}>
+        <div className={cn('absolute right-5 top-4 cursor-pointer', className)} {...props}>
+          <QuestionIcon className="fill-session-text h-4 w-4" />
+        </div>
+      </Tooltip>
+    );
+  }
 );
 ModuleTooltip.displayName = 'ModuleTooltip';
 
