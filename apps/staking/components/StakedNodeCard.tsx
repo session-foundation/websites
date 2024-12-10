@@ -531,15 +531,12 @@ const NodeSummary = ({
     }
   }
 
-  if (
-    (node.state === NODE_STATE.AWAITING_CONTRIBUTORS || node.state === NODE_STATE.RUNNING) &&
-    !showAllTimers
-  ) {
+  if (node.state === NODE_STATE.RUNNING && !showAllTimers) {
     return (
       <NodeContributorList
         contributors={node.contributors}
-        showEmptySlots={node.state === NODE_STATE.AWAITING_CONTRIBUTORS}
         data-testid={StakedNodeDataTestId.Contributor_List}
+        showEmptySlots
       />
     );
   }
