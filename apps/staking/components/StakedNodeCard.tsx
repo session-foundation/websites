@@ -453,6 +453,7 @@ const NodeSummary = ({
       <NodeContributorList
         contributors={node.contributors}
         data-testid={StakedNodeDataTestId.Contributor_List}
+        showEmptySlots
       />
     );
   }
@@ -536,7 +537,6 @@ const NodeSummary = ({
       <NodeContributorList
         contributors={node.contributors}
         data-testid={StakedNodeDataTestId.Contributor_List}
-        showEmptySlots
       />
     );
   }
