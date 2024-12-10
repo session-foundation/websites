@@ -3,10 +3,10 @@
 import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { Input } from '@session/ui/ui/input';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import { useRef, useState } from 'react';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { encodeAddressToHashId } from '@/lib/hashid';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { ButtonDataTestId } from '@/testing/data-test-ids';

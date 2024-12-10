@@ -20,7 +20,7 @@ import { LoadingText } from '@session/ui/components/loading-text';
 import { QUERY, TICKER, URL } from '@/lib/constants';
 import useClaimRewards from '@/hooks/useClaimRewards';
 import { useEffect, useMemo } from 'react';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { externalLink } from '@/lib/locale-defaults';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
 import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';

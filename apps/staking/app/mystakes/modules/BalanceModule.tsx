@@ -6,7 +6,7 @@ import {
 } from '@/components/ModuleDynamic';
 import type { Stake } from '@session/sent-staking-js/client';
 import { Module, ModuleTitle } from '@session/ui/components/Module';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
@@ -55,7 +55,10 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     } else if (showMockNodes) {
       return [];
     }
-    return data?.stakes ?? [];
+    if (data && 'stakes' in data && Array.isArray(data.stakes)) {
+      return data.stakes;
+    }
+    return [];
   }, [data, showMockNodes, showNoNodes]);
 
   const totalStakedAmount = useMemo(

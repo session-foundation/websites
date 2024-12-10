@@ -1,10 +1,11 @@
-import { CHAIN, chains, SENT_SYMBOL } from '@session/contracts';
+import { SENT_SYMBOL } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
 import { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { FAUCET, NETWORK, SESSION_NODE_TIME_STATIC, SOCIALS, TICKER, URL } from './constants';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 export const internalLink = (href: string, prefetch?: boolean) => {
   return (children: ReactNode) => (
@@ -86,8 +87,8 @@ export const defaultTranslationVariables = {
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
   testnetName: NETWORK.TESTNET,
-  mainNetworkChain: chains[CHAIN.MAINNET].name,
-  testNetworkChain: chains[CHAIN.TESTNET].name,
+  mainNetworkChain: arbitrum.name,
+  testNetworkChain: arbitrumSepolia.name,
   minimumFaucetGasAmount: FAUCET.MIN_ETH_BALANCE,
   faucetDrip: FAUCET.DRIP,
   oxenProgram: 'Oxen Service Node Bonus program',

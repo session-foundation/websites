@@ -14,7 +14,7 @@ import {
 } from '@/components/InfoNodeCard';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { usePathname } from 'next/navigation';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { getContributionRangeFromContributors } from '@/lib/maths';
@@ -108,7 +108,7 @@ const OpenNodeCard = forwardRef<
             <AlertTooltip tooltipContent={dictionary('youOperatorNotStaked')} />
           ) : (
             <>
-              <NodeOperatorIndicator hideTextOnMobile />
+              <NodeOperatorIndicator />
               <NodeItemSeparator className="ms-2 hidden md:block" />
             </>
           )}
