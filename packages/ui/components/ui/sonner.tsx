@@ -15,14 +15,13 @@ function renderToastNode(node: ToastT['description']) {
 type ToasterProps = ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const [showHistory, setShowHistory] = useState(false);
   const { theme = 'system' } = useTheme();
   const { toasts } = useSonner();
 
+  const [showHistory, setShowHistory] = useState(false);
   const [toastHistory, setToastHistory] = useState<Array<ToastT>>([]);
   const [toastIds] = useState<Set<string | number>>(new Set());
 
-  // Not a fun of this but it works, the map uses the id as the key so it automatically dedupes toasts.
   // The toast array from useSonner only contains the active toasts, which are removed when a user
   //   dismisses them or after the toast's duration has passed.
   useEffect(() => {
