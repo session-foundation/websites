@@ -28,6 +28,7 @@ export const useRegisteredNode = ({ pubKeyEd25519 }: { pubKeyEd25519?: string })
     }
     return null;
   }, [openData, pubKeyEd25519]);
+
   const runningNode = useMemo(() => {
     if (runningData && 'nodes' in runningData && Array.isArray(runningData.nodes)) {
       return runningData.nodes.find((node) =>
@@ -36,6 +37,7 @@ export const useRegisteredNode = ({ pubKeyEd25519 }: { pubKeyEd25519?: string })
     }
     return null;
   }, [runningData, pubKeyEd25519]);
+
   const stakedNode = useMemo(() => {
     if (stakedData && 'stakes' in stakedData && Array.isArray(stakedData.stakes)) {
       return stakedData.stakes.find((stake) =>
