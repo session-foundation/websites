@@ -84,7 +84,7 @@ export default function ReferralModule() {
                   {status === 'success' ? (
                     dictionary.rich('description4', {
                       uses: data?.uses ?? 0,
-                      remainingUses: data?.maxUses ?? 1 - (data?.uses ?? 0),
+                      remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
                       drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
                     })
                   ) : (
