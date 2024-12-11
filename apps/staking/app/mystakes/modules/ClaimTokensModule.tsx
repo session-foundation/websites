@@ -80,20 +80,22 @@ export default function ClaimTokensModule() {
       <AlertDialogTrigger asChild>
         <ButtonModule
           data-testid={ButtonDataTestId.Claim_Tokens_Open_Dialog}
-          className="group items-center transition-all duration-300"
+          className="group items-center transition-all duration-300 motion-reduce:transition-none"
           disabled={isDisabled}
           onClick={handleClick}
         >
           <ModuleContent className="flex h-full select-none flex-row items-center gap-2 p-0 py-3 align-middle font-bold">
             <ModuleText
               className={cn(
-                'inline-flex items-center gap-1.5 align-middle text-3xl transition-all duration-300',
-                isDisabled ? 'opacity-50' : 'text-session-green group-hover:text-black'
+                'inline-flex items-center gap-1.5 align-middle text-3xl transition-all duration-300 motion-reduce:transition-none',
+                isDisabled
+                  ? 'opacity-50'
+                  : 'text-session-green group-hover:text-session-black transition-all duration-300 motion-reduce:transition-none'
               )}
             >
               <PresentIcon
                 className={cn(
-                  'mb-1 h-7 w-7 transition-all duration-300',
+                  'mb-1 h-7 w-7 transition-all duration-300 motion-reduce:transition-none',
                   isDisabled
                     ? 'fill-session-text opacity-50'
                     : 'fill-session-green group-hover:fill-session-black'
