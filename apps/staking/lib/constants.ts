@@ -44,7 +44,7 @@ export const SOCIALS = {
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
-  [Social.Github]: { name: Social.Github, link: 'https://github.com/oxen-io/websites' },
+  [Social.Github]: { name: Social.Github, link: 'https://github.com/session-foundation/websites' },
   [Social.RSS]: { name: Social.RSS, link: 'https://token.getsession.org/blog/feed' },
 } satisfies Partial<Record<Social, SocialLink>>;
 
