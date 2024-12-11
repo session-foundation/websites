@@ -458,6 +458,15 @@ const NodeSummary = ({
     );
   }
 
+  if (node.exited) {
+    return (
+      <NodeContributorList
+        contributors={node.contributors}
+        data-testid={StakedNodeDataTestId.Contributor_List}
+      />
+    );
+  }
+
   if (isReadyToExit(node, blockHeight)) {
     const readyToExitTimer = (
       <>
