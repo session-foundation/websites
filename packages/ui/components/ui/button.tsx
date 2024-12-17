@@ -27,10 +27,11 @@ const buttonVariants = cva(
       size: {
         xs: 'h-6 px-2 text-xs',
         sm: 'h-9 px-3 text-sm',
-        md: 'px-4 py-2 text-sm',
+        md: 'h-11 px-4 py-2 text-sm',
         lg: 'h-12 px-8 text-base',
         xl: 'h-14 px-10 text-lg',
         icon: 'h-10 w-10',
+        collapse: '',
       },
       rounded: {
         full: 'rounded-full',
@@ -42,7 +43,7 @@ const buttonVariants = cva(
     defaultVariants: {
       variant: 'default',
       size: 'md',
-      rounded: 'full',
+      rounded: 'md',
     },
   }
 );
@@ -63,6 +64,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(buttonVariants({ variant, size, rounded, className }))}
         ref={ref}
+        type="button"
         {...props}
         data-testid={props['data-testid'] ?? BaseDataTestId.Button}
       />

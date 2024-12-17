@@ -1,10 +1,10 @@
 // #region - getBuildInfo
 
 import type { Contributor } from '@session/sent-staking-js/client';
-import { CHAIN, chains } from '@session/contracts';
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
 import { getContributionRangeFromContributors } from '../lib/maths';
 import { createPublicClient, http } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 
 const address = '0x63528ae9247165fd89f093a591238009720fb422';
 
@@ -27,7 +27,7 @@ const operators = operatorContributorAmounts.map((amount) => createContributor(a
 
 async function getMinContributionFromContract(contributors: Array<Contributor>) {
   const client = createPublicClient({
-    chain: chains[CHAIN.TESTNET],
+    chain: arbitrumSepolia,
     transport: http('http://10.24.0.1/arb_sepolia'),
   });
 

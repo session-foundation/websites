@@ -1,6 +1,6 @@
 'use client';
 
-import { addresses } from '@session/contracts';
+import { addresses, isValidChainId } from '@session/contracts';
 import { useProxyApproval } from '@session/contracts/hooks/SENT';
 import { useAddBLSPubKey } from '@session/contracts/hooks/ServiceNodeRewards';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,6 +9,7 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { useTranslations } from 'next-intl';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export default function useRegisterNode({
   blsPubKey,
@@ -24,6 +25,7 @@ export default function useRegisterNode({
   stakeAmount: bigint;
 }) {
   const [enabled, setEnabled] = useState<boolean>(false);
+  const { chainId } = useWallet();
 
   const stageDictKey = 'actionModules.register.stageSolo' as const;
   const dictionary = useTranslations(stageDictKey);
@@ -39,8 +41,7 @@ export default function useRegisterNode({
     simulateError: approveSimulateError,
     transactionError: approveTransactionError,
   } = useProxyApproval({
-    // TODO: Create network provider to handle network specific logic
-    contractAddress: addresses.ServiceNodeRewards.testnet,
+    contractAddress: isValidChainId(chainId) ? addresses.ServiceNodeRewards[chainId] : null,
     tokenAmount: stakeAmount,
   });
 

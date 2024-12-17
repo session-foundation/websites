@@ -8,9 +8,8 @@ import { notFound } from 'next/navigation';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { isProduction } from '@/lib/env';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import {
   NodeRegistrationForm,
   NodeRegistrationFormSkeleton,
@@ -36,34 +35,25 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       }
     );
 
-  const { data: stakesData, isLoading: isLoadingStakes } = useStakingBackendQueryWithParams(
-    getStakedNodes,
-    { address: address! },
-    {
-      enabled: isConnected,
-      staleTime: isProduction
-        ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-        : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-    }
-  );
-
   const node = useMemo(() => {
-    if (isLoadingRegistrations || isLoadingStakes) {
+    if (isLoadingRegistrations) {
       return null;
     }
 
-    const stakedNodeEd25519Pubkeys = stakesData?.stakes.map(
-      ({ service_node_pubkey }) => service_node_pubkey
-    );
+    if (
+      !registrationsData ||
+      !('registrations' in registrationsData) ||
+      !Array.isArray(registrationsData.registrations)
+    ) {
+      return null;
+    }
 
-    return registrationsData?.registrations
-      .filter(({ pubkey_ed25519 }) => !stakedNodeEd25519Pubkeys?.includes(pubkey_ed25519))
-      .find((node) => areHexesEqual(node.pubkey_ed25519, nodeId));
+    return registrationsData?.registrations.find((node) =>
+      areHexesEqual(node.pubkey_ed25519, nodeId)
+    );
   }, [
     isLoadingRegistrations,
-    isLoadingStakes,
-    registrationsData?.registrations,
-    stakesData?.stakes,
+    registrationsData,
     showMockRegistration,
     showOneMockNode,
     showTwoMockNodes,
@@ -72,7 +62,7 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
     nodeId,
   ]);
 
-  return isLoadingRegistrations || isLoadingStakes ? (
+  return isLoadingRegistrations ? (
     <NodeRegistrationFormSkeleton />
   ) : node ? (
     <NodeRegistrationForm node={node} />

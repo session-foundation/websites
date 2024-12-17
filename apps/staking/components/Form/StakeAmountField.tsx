@@ -2,8 +2,7 @@ import { SENT_DECIMALS } from '@session/contracts';
 import { bigIntToNumber, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { FormControl, FormItem, FormMessage } from '@session/ui/ui/form';
 import { ActionModuleTooltip } from '@/components/ActionModule';
-import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Input } from '@session/ui/ui/input';
@@ -12,7 +11,7 @@ import type { DecimalDelimiter } from '@/lib/locale-client';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 type GetStakeAmountFormFieldSchemaArgs = {
   minStake: bigint;
@@ -71,7 +70,7 @@ export default function StakeAmountField({
   const fullStakeString = bigIntToString(fullStake, SENT_DECIMALS, decimalDelimiter);
   const dictionary = useTranslations('actionModules.register');
   const actionModuleSharedDictionary = useTranslations('actionModules.shared');
-  const { tokenBalance, isConnected } = useWallet();
+  const { isConnected } = useWallet();
 
   const thousandsSeparator = decimalDelimiter === '.' ? ',' : '.';
   const formatInputText = (value: string) => {
@@ -116,18 +115,18 @@ export default function StakeAmountField({
               <ActionModuleTooltip>
                 {actionModuleSharedDictionary('stakeAmountDescription')}
               </ActionModuleTooltip>
-              {watchedStakeAmount &&
-              tokenBalance &&
-              tokenBalance < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (
-                <AlertTooltip
-                  tooltipContent={dictionary('notEnoughTokensAlert', {
-                    walletAmount: formatSENTBigInt(tokenBalance),
-                    tokenAmount: formatSENTBigInt(
-                      stringToBigInt(watchedStakeAmount, SENT_DECIMALS)
-                    ),
-                  })}
-                />
-              ) : null}
+              {/*{watchedStakeAmount &&*/}
+              {/*tokenBalance &&*/}
+              {/*tokenBalance < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (*/}
+              {/*  <AlertTooltip*/}
+              {/*    tooltipContent={dictionary('notEnoughTokensAlert', {*/}
+              {/*      walletAmount: formatSENTBigInt(tokenBalance),*/}
+              {/*      tokenAmount: formatSENTBigInt(*/}
+              {/*        stringToBigInt(watchedStakeAmount, SENT_DECIMALS)*/}
+              {/*      ),*/}
+              {/*    })}*/}
+              {/*  />*/}
+              {/*) : null}*/}
             </span>
             <div className="self-end">
               <Button

@@ -31,6 +31,7 @@
     "register": "Register",
     "faucet": "Faucet",
     "explorer": "Explorer",
+    "leaderboard": "Leaderboard",
     "hamburgerDropdown": {
       "ariaLabel": "Open navigation menu",
       "language": "Change language",
@@ -295,6 +296,7 @@
       "description1": "Grow the Session Network by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
       "description2": "Learn more <link>here</link>.",
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
+      "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",
       "showButton": "Show referral link"
     }
   },
@@ -534,6 +536,11 @@
       "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered {relativeTime} ({date})",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
+      "finalize": {
+        "buttonText": "Start Node",
+        "buttonAria": "Start the node on the network",
+        "successToast": "Node start success, node will be registered in a few minutes"
+      },
       "exit": {
         "buttonText": "Exit",
         "buttonAria": "Exit the node from the network",

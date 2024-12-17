@@ -3,7 +3,7 @@ import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
 export const BASE_URL = `https://session.foundation`;
 
 export const SOCIALS = {
-  [Social.Github]: { name: Social.Github, link: 'https://github.com/oxen-io/websites' },
+  [Social.Github]: { name: Social.Github, link: 'https://github.com/session-foundation/websites' },
 } satisfies Partial<Record<Social, SocialLink>>;
 
 export enum SANITY_SCHEMA_URL {
