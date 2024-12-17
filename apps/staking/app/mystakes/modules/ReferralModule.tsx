@@ -3,16 +3,20 @@
 import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { Input } from '@session/ui/ui/input';
-import { useMemo, useRef, useState } from 'react';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useRef, useState } from 'react';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { encodeAddressToHashId } from '@/lib/hashid';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import { toast } from '@session/ui/lib/toast';
 import { externalLink } from '@/lib/locale-defaults';
+import { useQuery } from '@tanstack/react-query';
+import { getReferralCodeInfo } from '@/app/faucet/actions';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 
 export default function ReferralModule() {
   const [hidden, setHidden] = useState<boolean>(true);
@@ -22,11 +26,23 @@ export default function ReferralModule() {
 
   const { address } = useWallet();
 
-  const referralLink = useMemo(() => {
-    if (!address) return null;
-    const hashId = encodeAddressToHashId(address);
-    return `${BASE_URL}/faucet/${hashId}`;
-  }, [address]);
+  const hashId = address ? encodeAddressToHashId(address) : '';
+  const referralLink = address ? `${BASE_URL}/faucet/${hashId}` : `${BASE_URL}/faucet`;
+
+  const { data, status } = useQuery({
+    queryKey: ['referral', address],
+    enabled: !hidden,
+    queryFn: async () => {
+      try {
+        const res = await getReferralCodeInfo({ code: hashId });
+        if (!res) throw new Error('No referral code found');
+        return res;
+      } catch (error) {
+        toast.error('Failed to get referral code info');
+        return null;
+      }
+    },
+  });
 
   return (
     <Module size="lg" className="flex flex-grow">
@@ -46,23 +62,36 @@ export default function ReferralModule() {
         {address ? (
           <div className="w-full">
             {!hidden && referralLink ? (
-              <div className="flex w-full flex-row items-center gap-2 align-middle">
-                <Input
-                  readOnly
-                  ref={inputRef}
-                  value={referralLink}
-                  className="w-full select-all"
-                  onFocus={(e) => e.target.select()}
-                />
-                <CopyToClipboardButton
-                  textToCopy={referralLink}
-                  data-testid={ButtonDataTestId.Copy_Referral_Link}
-                  onCopyComplete={() => {
-                    inputRef.current?.select();
-                    toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
-                  }}
-                />
-              </div>
+              <>
+                <div className="flex w-full flex-row items-center gap-2 align-middle">
+                  <Input
+                    readOnly
+                    ref={inputRef}
+                    value={referralLink}
+                    className="w-full select-all"
+                    onFocus={(e) => e.target.select()}
+                  />
+                  <CopyToClipboardButton
+                    textToCopy={referralLink}
+                    data-testid={ButtonDataTestId.Copy_Referral_Link}
+                    onCopyComplete={() => {
+                      inputRef.current?.select();
+                      toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
+                    }}
+                  />
+                </div>
+                <div className="text-session-text-secondary mt-2 text-xs">
+                  {status === 'success' ? (
+                    dictionary.rich('description4', {
+                      uses: data?.uses ?? 0,
+                      remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
+                      drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
+                    })
+                  ) : (
+                    <LoadingText />
+                  )}
+                </div>
+              </>
             ) : (
               <Button
                 data-testid={ButtonDataTestId.Show_Referral_Link}
@@ -75,7 +104,7 @@ export default function ReferralModule() {
             )}
           </div>
         ) : (
-          <WalletModalButtonWithLocales rounded="md" size="lg" />
+          <WalletButtonWithLocales rounded="md" size="lg" />
         )}
       </ModuleContent>
     </Module>

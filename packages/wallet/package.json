@@ -13,22 +13,23 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@session/eslint-config": "workspace:*",
-    "@session/typescript-config": "workspace:*",
+    "@session/eslint-config": "workspace:^",
     "@session/testing": "workspace:*",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.0",
-    "react": "18.3.1"
+    "@session/typescript-config": "workspace:*",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "react": "19.0.0-rc-66855b96-20241106"
   },
   "dependencies": {
-    "@session/contracts": "workspace:*",
-    "@session/util-js": "workspace:*",
-    "@session/util-crypto": "workspace:*",
+    "@session/feature-flags": "workspace:*",
     "@session/ui": "workspace:*",
-    "@tanstack/react-query": "^5.32.1",
-    "@web3modal/wagmi": "4.2.3",
-    "viem": "2.21.34",
-    "wagmi": "2.12.25"
+    "@session/util-crypto": "workspace:*",
+    "@session/util-js": "workspace:*",
+    "@tanstack/react-query": "5.61.5",
+    "@web3sheet/core": "^0.0.4",
+    "@web3sheet/ui": "^0.0.2",
+    "@web3sheet/wallet": "^0.0.3",
+    "viem": "2.21.54"
   },
   "engines": {
     "node": ">=22",

@@ -15,7 +15,7 @@ export const NodeExitButton = forwardRef<
   return (
     <CollapsableContent
       className={cn('bottom-4 right-6 flex items-end min-[500px]:absolute', className)}
-      size="buttonMd"
+      size="buttonSm"
       width="w-max"
       {...props}
       ref={ref}
@@ -25,7 +25,7 @@ export const NodeExitButton = forwardRef<
         data-testid={ButtonDataTestId.Staked_Node_Exit}
         disabled={disabled}
         rounded="md"
-        size="md"
+        size="sm"
         variant="destructive-outline"
         className="uppercase"
       >

@@ -1,25 +1,24 @@
-import { NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
-import FeatureFlagProvider from '@/providers/feature-flag-provider';
+import { FeatureFlagProvider } from '@/lib/feature-flags-client';
 import LocalizationProvider, { LocalizationProviderProps } from '@/providers/localization-provider';
 import '@session/ui/styles';
-import { WalletButtonProvider } from '@session/wallet/providers/wallet-button-provider';
-import {
-  Web3ModalProvider,
-  Web3ModalProviderProps,
-} from '@session/wallet/providers/web3-modal-provider';
 import QueryProvider from '@/providers/query-provider';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import TOSProvider from '@/providers/tos-provider';
+import {
+  Web3WalletProvider,
+  type Web3WalletProviderProps,
+} from '@session/wallet/providers/web3wallet-provider';
+import { NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
+import { WalletButtonProvider } from '@session/wallet/providers/wallet-button-provider';
 
-type GlobalProviderParams = Omit<Web3ModalProviderProps, 'projectId'> &
+type GlobalProviderParams = Omit<Web3WalletProviderProps, 'projectId'> &
   Pick<LocalizationProviderProps, 'locale' | 'messages'> & {
     children: ReactNode;
   };
 
 export async function GlobalProvider({
   children,
-  wagmiMetadata,
-  initialState,
+  wagmiCookie,
   messages,
   locale,
 }: GlobalProviderParams) {
@@ -28,13 +27,12 @@ export async function GlobalProvider({
       <FeatureFlagProvider>
         <LocalizationProvider messages={messages} locale={locale}>
           <WalletButtonProvider>
-            <Web3ModalProvider
-              initialState={initialState}
-              wagmiMetadata={wagmiMetadata}
+            <Web3WalletProvider
+              wagmiCookie={wagmiCookie}
               projectId={NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
             >
               <TOSProvider>{children}</TOSProvider>
-            </Web3ModalProvider>
+            </Web3WalletProvider>
           </WalletButtonProvider>
         </LocalizationProvider>
       </FeatureFlagProvider>

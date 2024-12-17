@@ -1,28 +1,18 @@
-import { isProduction, NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
-import { getLocalizationData } from '@/lib/locale-server';
-import { Toaster } from '@session/ui/components/ui/sonner';
 import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
-
-import { DevSheet } from '@/components/DevSheet';
-import { siteMetadata, wagmiMetadata } from '@/lib/metadata';
+import { siteMetadata } from '@/lib/metadata';
 import '@session/ui/styles';
-import { createWagmiConfig } from '@session/wallet/lib/wagmi';
-import { headers } from 'next/headers';
-import { cookieToInitialState } from 'wagmi';
-import ChainBanner from '@/components/ChainBanner';
-import { GlobalProvider } from '@/providers/global-provider';
-import { TOSHandler } from '@/components/TOSHandler';
 import { getBuildInfo } from '@session/util-js/build';
-import { FeatureFlagProvider } from '@/lib/feature-flags-client';
-import RemoteBanner from '@/components/RemoteBanner';
 import Header from '@/components/Header';
-import { Suspense } from 'react';
+import { type ReactNode } from 'react';
 import { cn } from '@session/ui/lib/utils';
-
-const wagmiConfig = createWagmiConfig({
-  projectId: NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-  metadata: wagmiMetadata,
-});
+import { getLocalizationData } from '@/lib/locale-server';
+import { headers } from 'next/headers';
+import { GlobalProvider } from '@/providers/global-provider';
+import WalletUserSheet from '@session/wallet/components/WalletUserSheet';
+import { isProduction } from '@/lib/env';
+import { DevSheet } from '@/components/DevSheet';
+import { TOSHandler } from '@/components/TOSHandler';
+import { Toaster } from '@session/ui/ui/sonner';
 
 export async function generateMetadata() {
   return siteMetadata({});
@@ -30,9 +20,9 @@ export async function generateMetadata() {
 
 const buildInfo = getBuildInfo();
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, direction, messages } = await getLocalizationData();
-  const initialWagmiState = cookieToInitialState(wagmiConfig, headers().get('cookie'));
+  const wagmiCookie = (await headers()).get('cookie');
 
   return (
     <html
@@ -40,28 +30,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={direction}
       className={cn(RobotoFlex.variable, MonumentExtended.variable)}
     >
-      <FeatureFlagProvider>
-        <GlobalProvider
-          messages={messages}
-          locale={locale}
-          initialState={initialWagmiState}
-          wagmiMetadata={wagmiMetadata}
-        >
-          <body className="bg-session-black font-roboto-flex text-session-text overflow-x-hidden">
-            <ChainBanner />
-            <Suspense>
-              <RemoteBanner />
-            </Suspense>
-            <Suspense>
-              <Header />
-            </Suspense>
-            <main>{children}</main>
-            {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
-            <TOSHandler />
-          </body>
+      <GlobalProvider messages={messages} locale={locale} wagmiCookie={wagmiCookie}>
+        <body className="bg-session-black font-roboto-flex text-session-text overflow-x-hidden">
+          {/*<ChainBanner />*/}
+          {/*<Suspense>*/}
+          {/*  <RemoteBanner />*/}
+          {/*</Suspense>*/}
+          <Header />
+          <main>{children}</main>
+          <WalletUserSheet />
+          {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
+          <TOSHandler />
           <Toaster />
-        </GlobalProvider>
-      </FeatureFlagProvider>
+        </body>
+      </GlobalProvider>
     </html>
   );
 }

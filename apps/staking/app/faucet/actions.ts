@@ -1,13 +1,13 @@
 'use server';
 
 import { COMMUNITY_DATE, FAUCET, FAUCET_ERROR, TICKER } from '@/lib/constants';
-import { addresses, CHAIN, isChain, SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { addresses, SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
 import { SENTAbi } from '@session/contracts/abis';
 import { ETH_DECIMALS } from '@session/wallet/lib/eth';
 import { createPublicWalletClient, createServerWallet } from '@session/wallet/lib/server-wallet';
 import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { type Address, formatEther, isAddress as isAddressViem } from 'viem';
+import { type Address, type Chain, formatEther, isAddress as isAddressViem } from 'viem';
 import { FaucetFormSchema } from './AuthModule';
 import {
   codeExists,
@@ -22,6 +22,7 @@ import {
   TransactionHistory,
 } from './utils';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { arbitrumSepolia } from 'viem/chains';
 
 class FaucetError extends Error {
   faucetError: FAUCET_ERROR;
@@ -86,18 +87,16 @@ const isPrivateKey = (key?: string): key is Address => {
   return !!key && key.startsWith('0x');
 };
 
-export async function getEthBalance({ address, chain }: { address?: Address; chain: CHAIN }) {
+export async function getEthBalance({ address, chain }: { address?: Address; chain: Chain }) {
   if (!isAddress(address)) {
     throw new Error('Address is required');
   }
 
   const client = createPublicWalletClient(chain);
 
-  const balance = await client.getBalance({
+  return client.getBalance({
     address,
   });
-
-  return balance;
 }
 
 export async function getSessionTokenBalance({
@@ -105,7 +104,7 @@ export async function getSessionTokenBalance({
   chain,
 }: {
   address?: Address;
-  chain: CHAIN;
+  chain: Chain;
 }) {
   if (!isAddress(address)) {
     throw new Error('Address is required');
@@ -113,19 +112,12 @@ export async function getSessionTokenBalance({
 
   const client = createPublicWalletClient(chain);
 
-  // TODO: Change this to be a list of all valid session token chains
-  if (chain !== CHAIN.TESTNET && chain !== CHAIN.MAINNET) {
-    throw new Error('Invalid chain');
-  }
-
-  const balance = await client.readContract({
-    address: addresses.SENT[chain],
+  return client.readContract({
+    address: addresses.SENT[arbitrumSepolia.id],
     abi: SENTAbi,
     functionName: 'balanceOf',
     args: [address],
   });
-
-  return balance;
 }
 
 setupDatababse();
@@ -150,13 +142,7 @@ export async function transferTestTokens({
       );
     }
 
-    /**
-     * NOTE: This enforces a set chain but its locked to {@see CHAIN.TESTNET} for now this should be changed to allow for multiple chains.
-     */
-    const chain = process.env.FAUCET_CHAIN;
-    if (!chain || !isChain(chain) || chain !== CHAIN.TESTNET) {
-      throw new FaucetError(FAUCET_ERROR.INCORRECT_CHAIN, dictionary(FAUCET_ERROR.INCORRECT_CHAIN));
-    }
+    const chain = arbitrumSepolia;
 
     const { faucetAddress, faucetWallet } = await connectFaucetWallet();
 
@@ -369,7 +355,7 @@ export async function transferTestTokens({
 
     // TODO: extract the simulate -> write logic into a separate reusable library
     const sessionTokenTxHash = await faucetWallet.writeContract({
-      address: addresses.SENT[chain],
+      address: addresses.SENT[arbitrumSepolia.id],
       abi: SENTAbi,
       functionName: 'transfer',
       args: [targetAddress, faucetTokenDrip],
@@ -465,11 +451,36 @@ async function connectFaucetWallet() {
     throw new Error('Invalid faucet wallet private key');
   }
 
-  const faucetWallet = createServerWallet(privateKey, CHAIN.TESTNET);
+  const faucetWallet = createServerWallet(privateKey, arbitrumSepolia);
   const faucetAddress = (await faucetWallet.getAddresses())[0];
 
   if (!isAddress(faucetAddress)) {
     throw new Error('Faucet wallet address is required');
   }
   return { faucetAddress, faucetWallet };
+}
+
+export async function getReferralCodeInfo({ code }: { code: string }) {
+  let db: BetterSql3.Database | undefined;
+  try {
+    const db = openDatabase();
+    const { maxuses: maxUses, drip } = getReferralCodeDetails({ db, code });
+    const codeTransactionHistory = getCodeUseTransactionHistory({ db, code });
+
+    const outOfUses = codeTransactionHistory.length >= (maxUses ?? 1);
+
+    return {
+      maxUses,
+      uses: codeTransactionHistory.length,
+      drip,
+      outOfUses,
+    };
+  } catch (error) {
+    console.error('Error getting referral code info:', error);
+    return null;
+  } finally {
+    if (db) {
+      db.close();
+    }
+  }
 }

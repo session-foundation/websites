@@ -2,18 +2,19 @@ import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
 import { BlockExplorerLink, BlockExplorerLinkText } from '@/components/BlockExplorerLink';
 import NodeStaking, { NodeStakingFormSkeleton } from './NodeStaking';
-import { Suspense } from 'react';
+import { Suspense, use } from 'react';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { stakingBackendPrefetchQuery } from '@/lib/sent-staking-backend-server';
 import { getOpenNodes } from '@/lib/queries/getOpenNodes';
 
 interface NodePageParams {
-  params: {
+  params: Promise<{
     contract: string;
-  };
+  }>;
 }
 
-export default function NodePage({ params }: NodePageParams) {
+export default function NodePage(props: NodePageParams) {
+  const params = use(props.params);
   const { contract } = params;
   const dictionary = useTranslations('actionModules.node');
 

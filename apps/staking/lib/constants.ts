@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
-import { CHAIN } from '@session/contracts/chains';
 import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
 import { LocaleKey } from './locale-util';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
-
-/** TODO - Change this to MAINNET when we launch mainnet */
-export const preferredChain = CHAIN.TESTNET as const;
+import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -47,7 +44,7 @@ export const SOCIALS = {
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
-  [Social.Github]: { name: Social.Github, link: 'https://github.com/oxen-io/websites' },
+  [Social.Github]: { name: Social.Github, link: 'https://github.com/session-foundation/websites' },
   [Social.RSS]: { name: Social.RSS, link: 'https://token.getsession.org/blog/feed' },
 } satisfies Partial<Record<Social, SocialLink>>;
 
@@ -98,6 +95,7 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'support', href: '/support', linkType: 'external' },
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
   { dictionaryKey: 'explorer', href: 'https://stagenet.oxen.observer', linkType: 'external' },
+  { dictionaryKey: 'leaderboard', href: '/leaderboard', linkType: 'internal' },
 ] as const;
 
 export enum QUERY {
@@ -150,13 +148,15 @@ enum SESSION_NODE_TIME_MAINNET {
   DEREGISTRATION_LOCKED_STAKE_SECONDS = 30 * 24 * 60 * 60,
 }
 
-export const SESSION_NODE_TIME = (chain: CHAIN) => {
-  switch (chain) {
-    case CHAIN.TESTNET:
+export const SESSION_NODE_TIME = (chainId?: number) => {
+  switch (chainId) {
+    case arbitrumSepolia.id:
+    case sepolia.id:
       return SESSION_NODE_TIME_TESTNET;
 
     default:
-    case CHAIN.MAINNET:
+    case arbitrum.id:
+    case mainnet.id:
       return SESSION_NODE_TIME_MAINNET;
   }
 };

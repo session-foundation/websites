@@ -1,5 +1,4 @@
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
-import { useChain } from './useChain';
 import { useMemo, useState } from 'react';
 import type { Address } from 'viem';
 
@@ -15,7 +14,6 @@ export function useContributeFunds({
   beneficiary: Address;
 }): UseCreateOpenNode {
   const [contractAddress, setContractAddress] = useState<Address | null>(null);
-  const chain = useChain();
   const defaultArgs = useMemo(() => {
     return [amount, beneficiary] as const;
   }, [amount, beneficiary]);
@@ -23,7 +21,6 @@ export function useContributeFunds({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeContribution',
     functionName: 'contributeFunds',
-    chain,
     defaultArgs: defaultArgs,
     addressOverride: contractAddress,
   });

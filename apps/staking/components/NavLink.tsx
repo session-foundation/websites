@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { cn } from '@session/ui/lib/utils';
 import { usePathname } from 'next/navigation';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export type NavLinkProps = {
   href: string;

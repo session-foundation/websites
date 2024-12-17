@@ -1,5 +1,5 @@
 import { siteMetadata } from '@/lib/metadata';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata() {
   return siteMetadata({

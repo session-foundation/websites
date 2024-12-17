@@ -3,10 +3,8 @@ import useCreateOpenNodeRegistration, {
 } from '@/hooks/useCreateOpenNodeRegistration';
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { useTranslations } from 'next-intl';
-import { useAccount } from 'wagmi';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
@@ -17,6 +15,7 @@ import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { ParsedRegistrationData } from '@/app/register/[nodeId]/NodeRegistrationForm';
 import { externalLink } from '@/lib/locale-defaults';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 type RegisterMultiNodeButtonProps = {
   blsPubKey: string;
@@ -49,7 +48,7 @@ export function RegisterMultiNodeButton({
 }: RegisterMultiNodeButtonProps) {
   const dictionary = useTranslations('actionModules.register');
   const dictionaryStage = useTranslations('actionModules.register.stageMulti');
-  const { address } = useAccount();
+  const { address } = useWallet();
 
   const { enabled: isMultiRegDisabled } = useRemoteFeatureFlagQuery(
     REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_MULTI

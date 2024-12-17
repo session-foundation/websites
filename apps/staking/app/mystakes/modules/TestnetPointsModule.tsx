@@ -4,7 +4,7 @@ import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import {
   getVariableFontSizeForSmallModule,
   ModuleDynamicQueryText,
@@ -72,6 +72,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

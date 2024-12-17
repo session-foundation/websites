@@ -1,6 +1,5 @@
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
 import { useEffect } from 'react';
 import useContributeStakeToOpenNode from '@/hooks/useContributeStakeToOpenNode';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
@@ -11,8 +10,8 @@ import type { Address } from 'viem';
 import type { ParsedStakeData } from '@/app/stake/[contract]/NodeStaking';
 import { stringToBigInt } from '@session/util-crypto/maths';
 import { SENT_DECIMALS } from '@session/contracts';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 type NodeStakingButtonProps = {
   disabled?: boolean;
@@ -79,12 +78,7 @@ export function NodeStakingButton({
   return (
     <>
       {!isConnected ? (
-        <WalletModalButtonWithLocales
-          rounded="md"
-          size="lg"
-          className="items-center"
-          type="button"
-        />
+        <WalletButtonWithLocales rounded="md" size="lg" className="items-center" type="button" />
       ) : !isOpenNodeContributionDisabled ? (
         <Button
           data-testid={ButtonDataTestId.Stake_Submit_Multi}

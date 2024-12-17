@@ -2,7 +2,6 @@ import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { useTranslations } from 'next-intl';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
-import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 import useRegisterNode from '@/hooks/useRegisterNode';
 import { toast } from '@session/ui/lib/toast';

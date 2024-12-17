@@ -1,6 +1,5 @@
 import type { useTranslations } from 'next-intl';
-import type { SimulateContractErrorType, TransactionExecutionErrorType } from 'viem';
-import type { WriteContractErrorType } from 'wagmi/actions';
+import type { SimulateContractErrorType, TransactionExecutionErrorType, WriteContractErrorType } from 'viem';
 import { getContractErrorName } from '@session/contracts';
 import { toast } from '@session/ui/lib/toast';
 import { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';

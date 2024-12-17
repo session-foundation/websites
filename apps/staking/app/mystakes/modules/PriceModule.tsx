@@ -8,13 +8,21 @@ import {
   ModuleTitle,
 } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { arbitrumSepolia } from 'viem/chains';
+import ReferralModule from '@/app/mystakes/modules/ReferralModule';
 
 export default function PriceModule() {
+  const { chainId } = useWallet();
   const dictionary = useTranslations('modules.price');
   const generalDictionary = useTranslations('general');
   const titleFormat = useTranslations('modules.title');
 
   const title = dictionary('title');
+
+  if (chainId === arbitrumSepolia.id) {
+    return <ReferralModule />;
+  }
 
   return (
     <Module size="lg" className="hidden flex-grow lg:flex">

@@ -1,5 +1,4 @@
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
-import { useChain } from './useChain';
 import { useMemo, useState } from 'react';
 import {
   encodeBlsPubKey,
@@ -9,9 +8,9 @@ import {
 } from '../util';
 import type { Address } from 'viem';
 import { useWatchContractEvent } from 'wagmi';
-import { addresses } from '../constants';
-import { chains } from '../chains';
+import { addresses, isValidChainId } from '../constants';
 import { ServiceNodeContributionFactoryAbi } from '../abis';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export type UseCreateOpenNode = ContractWriteQueryProps & {
   createOpenNode: () => void;
@@ -38,7 +37,6 @@ export function useCreateOpenNode({
   }>;
   fee: number;
 }): UseCreateOpenNode {
-  const chain = useChain();
   const { pubKey } = encodeED25519PubKey(nodePubKey);
 
   const defaultArgs = useMemo(() => {
@@ -66,7 +64,6 @@ export function useCreateOpenNode({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeContributionFactory',
     functionName: 'deploy',
-    chain,
     defaultArgs: defaultArgs,
   });
 
@@ -83,19 +80,21 @@ export type UseWatchForNewOpenNode = {
   openNodeContractAddress: Address | null;
 };
 
+// TODO: remove this and use the v2 backend info instead
 export function useWatchForNewOpenNode({
   encodedNodePubKey,
 }: {
   encodedNodePubKey: bigint;
 }): UseWatchForNewOpenNode {
   const [openNodeContractAddress, setOpenNodeContractAddress] = useState<Address | null>(null);
-  const chain = useChain();
+  const { chainId, config } = useWallet();
 
   useWatchContractEvent({
-    // enabled: !openNodeContractAddress,
-    address: addresses.ServiceNodeContributionFactory[chain],
+    address: isValidChainId(chainId)
+      ? addresses.ServiceNodeContributionFactory[chainId]
+      : undefined,
     eventName: 'NewServiceNodeContributionContract',
-    chainId: chains[chain].id,
+    chainId,
     abi: ServiceNodeContributionFactoryAbi,
     batch: false,
     onLogs: (logs) => {
@@ -108,6 +107,7 @@ export function useWatchForNewOpenNode({
     },
     poll: true,
     pollingInterval: 1000,
+    config,
   });
 
   return {

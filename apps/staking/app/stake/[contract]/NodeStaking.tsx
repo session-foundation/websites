@@ -2,9 +2,8 @@
 
 import type { GetOpenNodesResponse } from '@session/sent-staking-js/client';
 import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
-import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActionModuleRow,
@@ -18,7 +17,7 @@ import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { Form, FormField, FormItem, FormMessage } from '@session/ui/ui/form';
 import { SENT_DECIMALS } from '@session/contracts';
 import StakeAmountField, {
@@ -42,6 +41,8 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { getContributionRangeFromContributors } from '@/lib/maths';
+import { useRegisteredNode } from '@/hooks/useRegisteredNode';
+import { StakedNodeCard } from '@/components/StakedNodeCard';
 
 export default function NodeStaking({ contract }: { contract: string }) {
   const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
@@ -102,7 +103,7 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
   const sessionNodeStakingDictionary = useTranslations('sessionNodes.staking');
   const actionModuleDictionary = useTranslations('actionModules');
-  const { tokenBalance, isConnected } = useWallet();
+  const { isConnected } = useWallet();
   const { setIsBalanceVisible } = useWalletButton();
 
   const { enabled: isOpenNodeContributionDisabled } = useRemoteFeatureFlagQuery(
@@ -123,6 +124,10 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
     node.contributors
   );
 
+  const { stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
+    pubKeyEd25519: node.service_node_pubkey,
+  });
+
   const FormSchema = getStakeFormSchema({
     minStake,
     maxStake,
@@ -132,11 +137,7 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      stakeAmount: bigIntToString(
-        bigIntMin(maxStake, tokenBalance),
-        SENT_DECIMALS,
-        decimalDelimiter
-      ),
+      stakeAmount: bigIntToString(maxStake, SENT_DECIMALS, decimalDelimiter),
     },
     reValidateMode: 'onChange',
     mode: 'onChange',
@@ -174,6 +175,26 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {stakedNode ? (
+          <>
+            <span className="mb-4 text-lg font-medium">
+              {dictionary.rich('notFound.foundRunningNode')}
+            </span>
+            <StakedNodeCard node={stakedNode} networkTime={networkTime} blockHeight={blockHeight} />
+          </>
+        ) : runningNode ? (
+          <>
+            <span className="mb-4 text-lg font-medium">
+              {dictionary('notFound.foundRunningNodeOtherOperator')}
+            </span>
+            <StakedNodeCard
+              node={runningNode}
+              networkTime={networkTime}
+              blockHeight={blockHeight}
+              hideButton
+            />
+          </>
+        ) : null}
         <ActionModuleRow
           label={actionModuleDictionary('node.contributors')}
           tooltip={actionModuleDictionary('node.contributorsTooltip')}

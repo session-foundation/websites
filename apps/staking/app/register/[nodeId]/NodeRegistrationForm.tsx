@@ -1,15 +1,14 @@
 'use client';
 
-import type { LoadRegistrationsResponse } from '@session/sent-staking-js/client';
+import { type LoadRegistrationsResponse, NODE_STATE } from '@session/sent-staking-js/client';
 import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import { useRegisteredNode } from '@/hooks/useRegisteredNode';
-import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import {
@@ -31,7 +30,7 @@ import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@session/ui/ui/form';
 import { SENT_DECIMALS } from '@session/contracts';
 import StakeAmountField, {
@@ -122,7 +121,7 @@ export function NodeRegistrationForm({
   const registerCardDictionary = useTranslations('nodeCard.pending');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
   const actionModuleDictionary = useTranslations('actionModules');
-  const { tokenBalance, isConnected } = useWallet();
+  const { isConnected } = useWallet();
   const { setIsBalanceVisible } = useWalletButton();
 
   const [finalisedFormData, setFinalisedFormData] = useState<ParsedRegistrationData | null>(null);
@@ -155,7 +154,7 @@ export function NodeRegistrationForm({
   const preparationDate = getDateFromUnixTimestampSeconds(node.timestamp);
 
   const { found, openNode, stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
-    nodeId: node.pubkey_ed25519,
+    pubKeyEd25519: node.pubkey_ed25519,
   });
 
   const FormSchema = getRegistrationFormSchema({
@@ -167,11 +166,7 @@ export function NodeRegistrationForm({
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      stakeAmount: bigIntToString(
-        bigIntMin(maxStake, tokenBalance),
-        SENT_DECIMALS,
-        decimalDelimiter
-      ),
+      stakeAmount: bigIntToString(maxStake, SENT_DECIMALS, decimalDelimiter),
       autoRegister: true,
       reservedContributors: [],
     },
@@ -233,14 +228,14 @@ export function NodeRegistrationForm({
         {!isRemoteFlagLoading && isRegistrationPausedFlagEnabled ? (
           <span>{dictionary('disabled')}</span>
         ) : null}
-        {stakedNode ? (
+        {stakedNode && stakedNode.state === NODE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary.rich('notFound.foundRunningNode')}
             </span>
             <StakedNodeCard node={stakedNode} networkTime={networkTime} blockHeight={blockHeight} />
           </>
-        ) : runningNode ? (
+        ) : runningNode && runningNode.state === NODE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary('notFound.foundRunningNodeOtherOperator')}
