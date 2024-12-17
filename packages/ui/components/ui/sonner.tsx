@@ -3,7 +3,7 @@
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner, type ToastT, useSonner } from 'sonner';
 import { cn } from '../../lib/utils';
-import { type ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, Fragment, useEffect, useState } from 'react';
 import { ListChecks, ListX, XCircleIcon } from 'lucide-react';
 import { Button } from './button';
 import { ButtonDataTestId } from '../../data-test-ids';
@@ -27,9 +27,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
   //   dismisses them or after the toast's duration has passed.
   useEffect(() => {
     toasts.forEach((toast) => {
-      if (!toastIds.has(toast.id)) {
-        toastIds.add(toast.id);
+      const toastIdx = toastHistory.findIndex((t) => t.id === toast.id);
+      if (toastIdx === -1) {
         setToastHistory((prev) => [...prev, toast]);
+        toastIds.add(toast.id);
+      } else {
+        toastHistory[toastIdx] = toast;
       }
     });
   }, [toasts]);
@@ -68,7 +71,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             error: 'toast-error bg-session-black text-destructive border border-destructive',
             warning: 'toast-warning bg-session-black text-warning border border-warning',
             closeButton:
-              'bg-session-black border-current group-hover:opacity-100 opacity-0 group-[.toast-success]:hover:bg-session-green group-[.toast-error]:bg-session-black group-[.toast-error]:hover:bg-destructive group-[.toast-warning]:hover:bg-warning group-[.toaster]:hover:text-session-black group-[.toaster]:hover:border-transparent',
+              'bg-session-black border-current group-hover:opacity-100 opacity-0 group-[.toast]:bg-session-black group-[.toast]:hover:bg-session-white group-[.toaster]:hover:text-session-black group-[.toaster]:hover:border-transparent',
           },
         }}
         position="bottom-right"
@@ -76,15 +79,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
         {...props}
       />
       {/* Note: Has to be z-index higher than Sonner, the sonner is 999999999 */}
-      <div className="absolute bottom-2 right-14 z-[9999999999] flex flex-col items-end gap-2">
+      <div className="absolute bottom-2 z-[9999999999] mx-6 flex w-[90vw] flex-col items-end gap-2 md:right-14 md:w-auto">
         {showHistory && toastHistory.length ? (
-          <div className="bg-session-black border-session-white max-h-96 w-[40vh] overflow-y-auto rounded-md border">
+          <div className="bg-session-black border-session-white max-h-96 overflow-y-auto rounded-md border md:w-[40vh]">
             {toastHistory.map((toast, index) => (
-              <>
+              <Fragment key={toast.id}>
                 <div
-                  key={toast.id}
                   className={cn(
-                    'text-session-text relative ms-3 flex flex-col px-5 py-5 text-sm font-normal',
+                    'text-session-text flex flex-row gap-1.5 py-4 pe-4 ps-2 text-sm font-normal',
                     toast.type === 'success' && 'text-session-green',
                     toast.type === 'error' && 'text-destructive',
                     toast.type === 'warning' && 'text-warning',
@@ -96,10 +98,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
                     size="xs"
                     rounded="full"
                     variant="ghost"
-                    className="absolute -left-3 top-2"
+                    className="text-destructive h-5 w-5 px-0.5"
                     onClick={() => {
                       setToastHistory((prev) => prev.filter((t) => t.id !== toast.id));
                       toastIds.delete(toast.id);
+                      if (!toastIds.size) setShowHistory(false);
                     }}
                   >
                     <XCircleIcon className="h-5 w-5" />
@@ -108,13 +111,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
                   <span>{renderToastNode(toast.description)}</span>
                 </div>
                 <div
-                  key={`${toast.id}-divider`}
                   className={cn(
                     'border-session-text w-full border-b',
                     index === toastHistory.length - 1 && 'hidden'
                   )}
                 />
-              </>
+              </Fragment>
             ))}
           </div>
         ) : null}
@@ -123,6 +125,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             variant="ghost"
             size="icon"
             rounded="full"
+            className="self-end"
             onClick={() => setShowHistory(!showHistory)}
             data-testid={ButtonDataTestId.Toggle_Show_Toaster_History}
           >

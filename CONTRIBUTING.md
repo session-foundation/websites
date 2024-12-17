@@ -6,11 +6,11 @@ Start small. The PRs most likely to be merged are the ones that make small, easi
 specific intentions.
 
 It's a good idea to gauge interest in your intended work by finding or creating
-a [GitHub Issue](https://github.com/oxen-io/websites/issues) for it.
+a [GitHub Issue](https://github.com/session-foundation/websites/issues) for it.
 
 You're most likely to have your pull request accepted if it addresses an
-existing [GitHub Issue](https://github.com/oxen-io/websites/issues) marked with
-the [good-first-issue](https://github.com/oxen-io/websites/labels/good%20first%20issue)
+existing [GitHub Issue](https://github.com/session-foundation/websites/issues) marked with
+the [good-first-issue](https://github.com/session-foundation/websites/labels/good%20first%20issue)
 tag.
 
 Of course, we encourage community developers to work on ANY issue, regardless of how it’s tagged, however, if you pick

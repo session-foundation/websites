@@ -7,7 +7,7 @@ import { Tooltip } from './ui/tooltip';
 import { Button, type ButtonProps } from './ui/button';
 
 export const outerModuleVariants = cva(
-  'rounded-2xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
+  'rounded-2xl transition-all overflow-hidden ease-in-out bg-blend-lighten shadow-md p-px',
   {
     variants: {
       variant: {
@@ -18,17 +18,22 @@ export const outerModuleVariants = cva(
         default: 'col-span-1',
         lg: 'col-span-1 sm:col-span-2',
       },
+      outline: {
+        true: 'bg-module-outline',
+        false: '',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      outline: true,
     },
   }
 );
 
 const innerModuleVariants = cva(
   cn(
-    'rounded-2xl w-full h-full flex align-middle flex-col bg-module',
+    'rounded-[15px] w-full h-full flex align-middle flex-col bg-module',
     '[&>span]:font-medium [&>*>span]:font-medium'
   ),
   {
@@ -105,33 +110,45 @@ export interface ButtonModuleProps
 }
 
 const ButtonModule = forwardRef<HTMLButtonElement, ButtonModuleProps>(
-  ({ className, variant, size, loading, children, noPadding, ...props }, ref) => {
+  ({ className, variant, size, loading, children, noPadding, disabled, ...props }, ref) => {
     return (
-      <div className={cn(outerModuleVariants({ size, variant, className }))}>
-        <Button
+      <Button
+        className={cn(
+          outerModuleVariants({ size, variant, outline: disabled, className }),
+          'relative h-full transition-all duration-300 disabled:opacity-100 group-hover:shadow-none motion-reduce:transition-none',
+          !disabled &&
+            'border-session-green group-hover:bg-session-green hover:bg-session-green border-2',
+          noPadding && 'p-0'
+        )}
+        variant="ghost"
+        ref={ref}
+        {...props}
+        style={
+          variant === 'hero'
+            ? {
+                background: 'url(/images/module-hero.png)',
+                backgroundPositionX: '35%',
+                backgroundPositionY: '35%',
+                backgroundSize: '135%',
+              }
+            : undefined
+        }
+        disabled={disabled}
+      >
+        <div
           className={cn(
-            innerModuleVariants({ size, variant, className }),
-            'relative disabled:opacity-100',
-            !props.disabled && 'hover:bg-session-green border-session-green border',
-            noPadding && 'p-0'
+            innerModuleVariants({
+              size,
+              variant,
+              className,
+            }),
+            !disabled &&
+              'transition-all duration-300 group-hover:bg-none group-hover:shadow-none motion-reduce:transition-none'
           )}
-          variant="ghost"
-          ref={ref}
-          {...props}
-          style={
-            variant === 'hero'
-              ? {
-                  background: 'url(/images/module-hero.png)',
-                  backgroundPositionX: '35%',
-                  backgroundPositionY: '35%',
-                  backgroundSize: '135%',
-                }
-              : undefined
-          }
         >
           {loading ? <Loading /> : children}
-        </Button>
-      </div>
+        </div>
+      </Button>
     );
   }
 );

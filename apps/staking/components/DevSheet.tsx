@@ -144,6 +144,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
           </SheetDescription>
           <PageSpecificFeatureFlags />
           {/*<ContractActions />*/}
+          <ToastWorkshop />
         </SheetHeader>
       </SheetContent>
     </Sheet>
@@ -406,4 +407,92 @@ async function ejectNodes({
 
   console.log(`Total: ${total}`);
   console.log(`Actual: ${idsToBoot.length}`);
+}
+
+const toastWorkshopFallbackText = 'Toast Workshop 🍞';
+const toastWorkshopBigText = toastWorkshopFallbackText.repeat(20);
+
+function ToastWorkshop() {
+  const [customText, setCustomText] = useState<string>('');
+  const [useBigText, setUseBigText] = useState(false);
+
+  const text = useBigText ? toastWorkshopBigText : customText || toastWorkshopFallbackText;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SheetTitle>{toastWorkshopFallbackText}</SheetTitle>
+      <Input
+        placeholder="Custom Text"
+        value={customText}
+        onChange={(e) => setCustomText(e.target.value)}
+      />
+      <span className="flex flex-row items-center gap-2">
+        <Switch checked={useBigText} onCheckedChange={(checked) => setUseBigText(checked)} />
+        Use Big Text
+      </span>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.success(text);
+        }}
+      >
+        Success
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.error(text);
+        }}
+      >
+        Error
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.info(text);
+        }}
+      >
+        Info
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.warning(text);
+        }}
+      >
+        Warning
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.promise(new Promise((resolve) => setTimeout(resolve, 5000)), {
+            loading: 'Loading...',
+            success: text,
+          });
+        }}
+      >
+        Success 5s
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.handleError(new Error(text));
+        }}
+      >
+        Error
+      </Button>
+    </div>
+  );
 }
