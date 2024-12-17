@@ -2,11 +2,9 @@ import { ROUTES } from '@/lib/constants';
 import { cn } from '@session/ui/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { WalletModalButtonWithLocales } from './WalletModalButtonWithLocales';
-import { WalletNetworkDropdownWithLocales } from './WalletNetworkDropdownWithLocales';
 import { NavLink } from '@/components/NavLink';
-import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import { getTranslations } from 'next-intl/server';
+import HeaderClient from '@/components/HeaderClient';
 
 export default async function Header() {
   const dictionary = await getTranslations('navigation');
@@ -36,11 +34,7 @@ export default async function Header() {
           ))}
         </div>
       </div>
-      <div className="flex flex-row items-center justify-end gap-3">
-        <WalletModalButtonWithLocales />
-        <WalletNetworkDropdownWithLocales className="hidden h-full px-5 py-3 lg:flex" />
-        <DropdownHamburgerMenu />
-      </div>
+      <HeaderClient />
     </nav>
   );
 }

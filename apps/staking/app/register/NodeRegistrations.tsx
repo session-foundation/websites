@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
 import { useTranslations } from 'next-intl';
@@ -11,7 +11,7 @@ import { isProduction } from '@/lib/env';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { externalLink } from '@/lib/locale-defaults';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
@@ -82,22 +82,41 @@ export default function NodeRegistrations() {
       return [];
     }
 
-    if (!stakesData || !stakesData?.stakes?.length) {
-      return registrationsData?.registrations ?? [];
+    if (
+      !stakesData ||
+      ('stakes' in stakesData && Array.isArray(stakesData.stakes) && !stakesData?.stakes?.length)
+    ) {
+      if (
+        registrationsData &&
+        'registrations' in registrationsData &&
+        Array.isArray(registrationsData.registrations)
+      ) {
+        return registrationsData.registrations;
+      }
+      return [];
     }
 
-    const stakedNodeEd25519Pubkeys = stakesData?.stakes?.map(
-      ({ service_node_pubkey }) => service_node_pubkey
-    );
+    const stakedNodeEd25519Pubkeys =
+      stakesData && 'stakes' in stakesData && stakesData.stakes && Array.isArray(stakesData.stakes)
+        ? stakesData.stakes.map(({ service_node_pubkey }) => service_node_pubkey)
+        : [];
 
-    return registrationsData?.registrations.filter(
-      ({ pubkey_ed25519 }) => !stakedNodeEd25519Pubkeys.includes(pubkey_ed25519)
-    );
+    if (
+      registrationsData &&
+      'registrations' in registrationsData &&
+      Array.isArray(registrationsData.registrations)
+    ) {
+      return registrationsData?.registrations.filter(
+        ({ pubkey_ed25519 }) => !stakedNodeEd25519Pubkeys.includes(pubkey_ed25519)
+      );
+    }
+
+    return [];
   }, [
     isLoadingRegistrations,
     isLoadingStakes,
-    registrationsData?.registrations,
-    stakesData?.stakes,
+    registrationsData,
+    stakesData,
     address,
     showNoNodes,
     showOneMockNode,
@@ -127,7 +146,7 @@ function NoWallet() {
       <p>
         {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
       </p>
-      <WalletModalButtonWithLocales rounded="md" size="lg" />
+      <WalletButtonWithLocales rounded="md" size="lg" />
     </ModuleGridInfoContent>
   );
 }

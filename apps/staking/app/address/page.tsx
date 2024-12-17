@@ -1,6 +1,6 @@
 'use client';
 
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { AddressInfo } from '@/app/address/[address]/addressInfo';
 
 export default function Page() {

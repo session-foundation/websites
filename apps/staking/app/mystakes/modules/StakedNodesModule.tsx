@@ -8,7 +8,7 @@ import {
   isRequestingToExit,
   StakedNodeCard,
 } from '@/components/StakedNodeCard';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@session/ui/components/ModuleGrid';
 import { Button } from '@session/ui/ui/button';
 import { Switch } from '@session/ui/ui/switch';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -81,10 +81,23 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
       return [[], null, null];
     }
 
+    const stakes = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];
+
+    const historicalStakes =
+      'historical_stakes' in data && Array.isArray(data.historical_stakes)
+        ? data.historical_stakes
+        : [];
+
+    const blockHeight =
+      'network' in data && 'block_height' in data.network ? data.network.block_height : 0;
+
+    const networkTime =
+      'network' in data && 'block_timestamp' in data.network ? data.network.block_timestamp : 0;
+
     return [
-      sortAndGroupStakes([...data.stakes, ...data.historical_stakes], data.network.block_height),
-      data.network.block_height,
-      data.network.block_timestamp,
+      sortAndGroupStakes([...stakes, ...historicalStakes], blockHeight),
+      blockHeight,
+      networkTime,
     ];
   }, [data, showMockNodes, showNoNodes]);
 
@@ -142,7 +155,7 @@ function NoWallet() {
     <ModuleGridInfoContent>
       <p>{dictionary('noWalletP1')}</p>
       <p>{dictionary('noWalletP2')}</p>
-      <WalletModalButtonWithLocales rounded="md" size="lg" />
+      <WalletButtonWithLocales rounded="md" size="lg" />
     </ModuleGridInfoContent>
   );
 }

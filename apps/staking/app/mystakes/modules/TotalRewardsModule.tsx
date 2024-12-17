@@ -6,7 +6,7 @@ import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Modul
 import { useTranslations } from 'next-intl';
 import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import {
   getVariableFontSizeForSmallModule,
   ModuleDynamicQueryText,

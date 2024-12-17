@@ -10,7 +10,7 @@ import { getOpenNodes } from '@/lib/queries/getOpenNodes';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useMemo } from 'react';
 import type { OpenNode } from '@session/sent-staking-js/client';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { Address } from 'viem';
 
 export const sortAndGroupOpenNodes = (nodes: Array<OpenNode>, address?: Address) => {

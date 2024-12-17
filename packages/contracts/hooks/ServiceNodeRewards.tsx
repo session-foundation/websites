@@ -5,7 +5,6 @@ import { ServiceNodeRewardsAbi } from '../abis';
 import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
 import { useMemo } from 'react';
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
-import { useChain } from './useChain';
 import type { Address } from 'viem';
 import {
   encodeBlsPubKey,
@@ -13,6 +12,8 @@ import {
   encodeED25519PubKey,
   encodeED25519Signature,
 } from '../util';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 export type ClaimRewardsQuery = ContractWriteQueryProps & {
   /** Claim rewards */
@@ -20,11 +21,9 @@ export type ClaimRewardsQuery = ContractWriteQueryProps & {
 };
 
 export function useClaimRewardsQuery(): ClaimRewardsQuery {
-  const chain = useChain();
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'claimRewards',
-    chain,
   });
 
   return {
@@ -51,8 +50,6 @@ export function useUpdateRewardsBalanceQuery({
   blsSignature,
   excludedSigners,
 }: UseUpdateRewardsBalanceQueryParams): UpdateRewardsBalanceQuery {
-  const chain = useChain();
-
   const defaultArgs = useMemo(() => {
     const encodedBlsSignature = blsSignature ? encodeBlsSignature(blsSignature) : null;
 
@@ -62,7 +59,6 @@ export function useUpdateRewardsBalanceQuery({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'updateRewardsBalance',
-    chain,
     // TODO: update the types to better reflect optional args as default
     // @ts-expect-error -- This is fine as the args change once the query is ready to execute.
     defaultArgs,
@@ -80,11 +76,12 @@ export type TotalNodesQuery = ContractReadQueryProps & {
 };
 
 export function useTotalNodesQuery(): TotalNodesQuery {
-  const chain = useChain();
+  const { chainId } = useWallet();
+
   const { data: totalNodes, ...rest } = useContractReadQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'totalNodes',
-    chain,
+    chainIdOverride: chainId === arbitrumSepolia.id ? arbitrumSepolia.id : arbitrum.id,
   });
 
   return {
@@ -110,7 +107,6 @@ export function useAddBLSPubKey({
   userSignature: string;
   fee?: number;
 }): UseAddBLSPubKeyReturn {
-  const chain = useChain();
   const defaultArgs = useMemo(() => {
     const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
     const encodedBlsSignature = encodeBlsSignature(blsSignature);
@@ -130,7 +126,6 @@ export function useAddBLSPubKey({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'addBLSPublicKey',
-    chain,
     defaultArgs,
   });
 
@@ -149,14 +144,11 @@ export function useInitiateRemoveBLSPublicKey({
 }: {
   contractId: number;
 }): UseInitiateRemoveBLSPublicKeyReturn {
-  const chain = useChain();
-
   const defaultArgs = useMemo(() => [BigInt(contractId ?? 0)] as [bigint], [contractId]);
 
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'initiateExitBLSPublicKey',
-    chain,
     defaultArgs,
   });
 
@@ -181,7 +173,6 @@ export function useRemoveBLSPublicKeyWithSignature({
   blsSignature: string;
   excludedSigners?: Array<bigint>;
 }): UseRemoveBLSPublicKeyWithSignatureReturn {
-  const chain = useChain();
   const defaultArgs = useMemo(() => {
     const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
     const encodedBlsSignature = encodeBlsSignature(blsSignature);
@@ -193,7 +184,6 @@ export function useRemoveBLSPublicKeyWithSignature({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'exitBLSPublicKeyWithSignature',
-    chain,
     defaultArgs,
   });
 
