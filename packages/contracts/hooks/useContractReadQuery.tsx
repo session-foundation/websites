@@ -4,9 +4,9 @@ import type { Abi, ContractFunctionArgs, ContractFunctionName, ReadContractError
 import { useReadContract } from 'wagmi';
 import { ReadContractData } from 'wagmi/query';
 import { ContractAbis, Contracts } from '../abis';
-import { CHAIN, chains } from '../chains';
-import { addresses, type ContractName } from '../constants';
+import { addresses, type ChainId, type ContractName, isValidChainId } from '../constants';
 import type { GenericContractStatus } from './useContractWriteQuery';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export type ContractReadQueryProps = {
   /** The status of the read contract */
@@ -27,8 +27,6 @@ export type UseContractRead<Data> = ContractReadQueryProps & {
 export type ContractReadQueryFetchOptions = {
   /** Set enabled to true to enable automatic fetching when the query mounts or changes query keys. To manually fetch the query, use the readContract method returned from the useContractReadQuery instance. Defaults to false. */
   enabled?: boolean;
-  /** Chain the contract is on */
-  chain: CHAIN;
 };
 
 export function useContractReadQuery<
@@ -41,22 +39,31 @@ export function useContractReadQuery<
   contract,
   functionName,
   enabled,
+  chainIdOverride,
   args,
-  chain,
 }: {
   contract: T;
   args?: Args;
   functionName: FName;
+  chainIdOverride?: ChainId;
 } & ContractReadQueryFetchOptions): UseContractRead<Data> {
-  const abi = useMemo(() => Contracts[contract], [contract]);
-  const address = useMemo(() => addresses[contract][chain], [contract, chain]);
+  const { config, chainId: walletChainId } = useWallet();
+  const chainId = chainIdOverride ?? walletChainId;
+
+  const abi = useMemo(() => Contracts[contract] as Abi, [contract]);
+
+  const address = useMemo(
+    () => (isValidChainId(chainId) ? addresses[contract][chainId] : undefined),
+    [contract, chainId]
+  );
 
   const { data, status, refetch, error } = useReadContract({
-    address: address,
-    abi: abi as Abi,
-    functionName: functionName,
+    config,
+    address,
+    abi,
+    functionName,
     args: args as ContractFunctionArgs,
-    chainId: chains[chain].id,
+    chainId,
     query: {
       enabled,
       refetchOnWindowFocus: false,

@@ -6,7 +6,7 @@ import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Modul
 import { useTranslations } from 'next-intl';
 import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import {
   getVariableFontSizeForSmallModule,
   ModuleDynamicQueryText,
@@ -28,13 +28,15 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
     [params?.addressOverride, connectedAddress]
   );
 
+  const enabled = !!address;
+
   const { data, status, refetch } = useStakingBackendQueryWithParams(
     getStakedNodes,
     {
       address: address!,
     },
     {
-      enabled: !!address,
+      enabled,
     }
   );
 
@@ -51,6 +53,7 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled={enabled}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

@@ -35,6 +35,7 @@ export default function DailyNodeReward() {
       <ModuleDynamicContractReadText
         status={status}
         fallback={0}
+        enabled
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),
@@ -44,7 +45,7 @@ export default function DailyNodeReward() {
           refetch,
         }}
         style={{
-          fontSize: getVariableFontSizeForSmallModule(formattedDailyNodeRewardAmount.length),
+          fontSize: getVariableFontSizeForSmallModule(formattedDailyNodeRewardAmount.length ?? 1),
         }}
       >
         {formattedDailyNodeRewardAmount}

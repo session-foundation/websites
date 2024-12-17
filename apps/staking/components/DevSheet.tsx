@@ -30,13 +30,6 @@ import {
   useSetFeatureFlag,
 } from '@/lib/feature-flags-client';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import {
-  formatSENTBigInt,
-  useAllowanceQuery,
-  useProxyApproval,
-} from '@session/contracts/hooks/SENT';
-import { addresses, CHAIN, chains, SENT_DECIMALS } from '@session/contracts';
-import { LoadingText } from '@session/ui/components/loading-text';
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
 import { nonceManager, privateKeyToAccount } from 'viem/accounts';
@@ -48,6 +41,7 @@ import { Loading } from '@session/ui/components/loading';
 import { Checkbox } from '@session/ui/ui/checkbox';
 import { PubKey } from '@session/ui/components/PubKey';
 import { toast } from '@session/ui/lib/toast';
+import { arbitrumSepolia } from 'viem/chains';
 
 export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -149,7 +143,8 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
             ))}
           </SheetDescription>
           <PageSpecificFeatureFlags />
-          <ContractActions />
+          {/*<ContractActions />*/}
+          <ToastWorkshop />
         </SheetHeader>
       </SheetContent>
     </Sheet>
@@ -207,67 +202,68 @@ function FeatureFlagToggle({
   );
 }
 
-function ContractActions() {
-  const [value, setValue] = useState<string>('0');
-  const serviceNodeRewardsAddress = addresses.ServiceNodeRewards.testnet;
-
-  const tokenAmount = useMemo(() => BigInt(value) * BigInt(10 ** SENT_DECIMALS), [value]);
-
-  const {
-    allowance,
-    refetch,
-    status: allowanceStatus,
-  } = useAllowanceQuery({
-    contractAddress: serviceNodeRewardsAddress,
-  });
-
-  const { approveWrite, resetApprove, status } = useProxyApproval({
-    contractAddress: serviceNodeRewardsAddress,
-    tokenAmount,
-  });
-
-  const handleClick = () => {
-    if (status !== 'idle') {
-      resetApprove();
-    }
-    approveWrite();
-  };
-
-  useEffect(() => {
-    if (status === 'success') refetch();
-  }, [status]);
-
-  return (
-    <>
-      <SheetTitle>Contract Actions 🚀</SheetTitle>
-      <span className="inline-flex justify-start gap-1 align-middle">
-        <span className="inline-flex justify-start gap-1 align-middle">
-          {'Allowance:'}
-          <span className="text-session-green">
-            {allowanceStatus === 'success' ? formatSENTBigInt(allowance) : <LoadingText />}
-          </span>
-        </span>
-      </span>
-      <Input type="number" value={value} onChange={(e) => setValue(e.target.value)} />
-      <Button
-        data-testid="button:reset-allowance"
-        onClick={handleClick}
-        size="sm"
-        rounded="md"
-        disabled={status === 'pending' || tokenAmount === allowance}
-      >
-        {status === 'pending' ? (
-          <LoadingText />
-        ) : tokenAmount > BigInt(0) ? (
-          'Set Allowance'
-        ) : (
-          'Reset Allowance'
-        )}
-      </Button>
-      <ExitNodes />
-    </>
-  );
-}
+//
+// function ContractActions() {
+//   const [value, setValue] = useState<string>('0');
+//   const serviceNodeRewardsAddress = addresses.ServiceNodeRewards[arbitrumSepolia.id];
+//
+//   const tokenAmount = useMemo(() => BigInt(value) * BigInt(10 ** SENT_DECIMALS), [value]);
+//
+//   const {
+//     allowance,
+//     refetch,
+//     status: allowanceStatus,
+//   } = useAllowanceQuery({
+//     contractAddress: serviceNodeRewardsAddress,
+//   });
+//
+//   const { approveWrite, resetApprove, status } = useProxyApproval({
+//     contractAddress: serviceNodeRewardsAddress,
+//     tokenAmount,
+//   });
+//
+//   const handleClick = () => {
+//     if (status !== 'idle') {
+//       resetApprove();
+//     }
+//     approveWrite();
+//   };
+//
+//   useEffect(() => {
+//     if (status === 'success') refetch();
+//   }, [status]);
+//
+//   return (
+//     <>
+//       <SheetTitle>Contract Actions 🚀</SheetTitle>
+//       <span className="inline-flex justify-start gap-1 align-middle">
+//         <span className="inline-flex justify-start gap-1 align-middle">
+//           {'Allowance:'}
+//           <span className="text-session-green">
+//             {allowanceStatus === 'success' ? formatSENTBigInt(allowance) : <LoadingText />}
+//           </span>
+//         </span>
+//       </span>
+//       <Input type="number" value={value} onChange={(e) => setValue(e.target.value)} />
+//       <Button
+//         data-testid="button:reset-allowance"
+//         onClick={handleClick}
+//         size="sm"
+//         rounded="md"
+//         disabled={status === 'pending' || tokenAmount === allowance}
+//       >
+//         {status === 'pending' ? (
+//           <LoadingText />
+//         ) : tokenAmount > BigInt(0) ? (
+//           'Set Allowance'
+//         ) : (
+//           'Reset Allowance'
+//         )}
+//       </Button>
+//       <ExitNodes />
+//     </>
+//   );
+// }
 
 export function getExitLiquidationList(client: SessionStakingClient) {
   return client.exitLiquidationList();
@@ -365,7 +361,7 @@ function createWallet({ privateKey }: { privateKey: Address }) {
   const account = privateKeyToAccount(privateKey, { nonceManager });
   return createWalletClient({
     account,
-    chain: chains[CHAIN.TESTNET],
+    chain: arbitrumSepolia,
     transport: http(),
   });
 }
@@ -411,4 +407,92 @@ async function ejectNodes({
 
   console.log(`Total: ${total}`);
   console.log(`Actual: ${idsToBoot.length}`);
+}
+
+const toastWorkshopFallbackText = 'Toast Workshop 🍞';
+const toastWorkshopBigText = toastWorkshopFallbackText.repeat(20);
+
+function ToastWorkshop() {
+  const [customText, setCustomText] = useState<string>('');
+  const [useBigText, setUseBigText] = useState(false);
+
+  const text = useBigText ? toastWorkshopBigText : customText || toastWorkshopFallbackText;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SheetTitle>{toastWorkshopFallbackText}</SheetTitle>
+      <Input
+        placeholder="Custom Text"
+        value={customText}
+        onChange={(e) => setCustomText(e.target.value)}
+      />
+      <span className="flex flex-row items-center gap-2">
+        <Switch checked={useBigText} onCheckedChange={(checked) => setUseBigText(checked)} />
+        Use Big Text
+      </span>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.success(text);
+        }}
+      >
+        Success
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.error(text);
+        }}
+      >
+        Error
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.info(text);
+        }}
+      >
+        Info
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.warning(text);
+        }}
+      >
+        Warning
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.promise(new Promise((resolve) => setTimeout(resolve, 5000)), {
+            loading: 'Loading...',
+            success: text,
+          });
+        }}
+      >
+        Success 5s
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.handleError(new Error(text));
+        }}
+      >
+        Error
+      </Button>
+    </div>
+  );
 }

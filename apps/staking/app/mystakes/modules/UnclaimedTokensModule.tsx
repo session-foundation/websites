@@ -4,7 +4,7 @@ import { DYNAMIC_MODULE, HANDRAIL_THRESHOLD, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useMemo } from 'react';
@@ -23,14 +23,14 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
     [params?.addressOverride, connectedAddress]
   );
 
+  const enabled = !!address;
+
   const { data, status, refetch } = useStakingBackendQueryWithParams(
     getStakedNodes,
     {
       address: address!,
     },
-    {
-      enabled: !!address,
-    }
+    { enabled }
   );
 
   const unclaimedRewards = useMemo(
@@ -49,7 +49,7 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
       unclaimedRewards >= BigInt(HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT)
   );
 
-  return { status, refetch, unclaimedRewards, formattedUnclaimedRewardsAmount, canClaim };
+  return { status, refetch, unclaimedRewards, formattedUnclaimedRewardsAmount, canClaim, enabled };
 };
 
 export default function UnclaimedTokensModule({ addressOverride }: { addressOverride?: Address }) {
@@ -58,7 +58,7 @@ export default function UnclaimedTokensModule({ addressOverride }: { addressOver
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
 
-  const { formattedUnclaimedRewardsAmount, status, refetch } = useUnclaimedTokens({
+  const { formattedUnclaimedRewardsAmount, status, refetch, enabled } = useUnclaimedTokens({
     addressOverride,
   });
 
@@ -71,6 +71,7 @@ export default function UnclaimedTokensModule({ addressOverride }: { addressOver
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled={enabled}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

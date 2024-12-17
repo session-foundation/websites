@@ -6,7 +6,7 @@ import {
 } from '@/components/ModuleDynamic';
 import type { Stake } from '@session/sent-staking-js/client';
 import { Module, ModuleTitle } from '@session/ui/components/Module';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
@@ -39,12 +39,14 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     [params?.addressOverride, connectedAddress]
   );
 
+  const enabled = !!address;
+
   const { data, refetch, status } = useStakingBackendQueryWithParams(
     getStakedNodes,
     {
       address: address!,
     },
-    { enabled: !!address }
+    { enabled }
   );
 
   const stakes = useMemo(() => {
@@ -53,7 +55,10 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     } else if (showMockNodes) {
       return [];
     }
-    return data?.stakes ?? [];
+    if (data && 'stakes' in data && Array.isArray(data.stakes)) {
+      return data.stakes;
+    }
+    return [];
   }, [data, showMockNodes, showNoNodes]);
 
   const totalStakedAmount = useMemo(
@@ -61,11 +66,11 @@ function useTotalStakedAmount(params?: { addressOverride?: Address }) {
     [stakes]
   );
 
-  return { totalStakedAmount, status, refetch };
+  return { totalStakedAmount, status, refetch, enabled };
 }
 
 export default function BalanceModule({ addressOverride }: { addressOverride?: Address }) {
-  const { totalStakedAmount, status, refetch } = useTotalStakedAmount({ addressOverride });
+  const { totalStakedAmount, status, refetch, enabled } = useTotalStakedAmount({ addressOverride });
   const dictionary = useTranslations('modules.balance');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
@@ -76,6 +81,7 @@ export default function BalanceModule({ addressOverride }: { addressOverride?: A
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
+        enabled={enabled}
         fallback={0}
         errorToast={{
           messages: {

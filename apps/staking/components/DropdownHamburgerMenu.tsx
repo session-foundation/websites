@@ -40,12 +40,13 @@ export function DropdownHamburgerMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          size="md"
           data-testid={ButtonDataTestId.Dropdown_Hamburger_Menu}
-          className="group p-1"
+          className="group p-0"
           aria-label={dictionary('ariaLabel')}
           variant="outline"
         >
-          <HamburgerIcon className="stroke-session-green group-hover:stroke-session-black h-9 w-9" />
+          <HamburgerIcon className="stroke-session-green group-hover:stroke-session-black m-1.5 h-8 w-8" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-max">

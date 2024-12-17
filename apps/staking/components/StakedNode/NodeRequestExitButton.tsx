@@ -13,7 +13,6 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
 import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
-import { useChain } from '@session/contracts/hooks/useChain';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 import { ETH_DECIMALS } from '@session/wallet/lib/eth';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
@@ -28,6 +27,7 @@ import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { SENT_SYMBOL } from '@session/contracts';
 import { Stake } from '@session/sent-staking-js/client';
 import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 enum EXIT_REQUEST_STATE {
   ALERT,
@@ -104,7 +104,8 @@ function RequestNodeExitDisabled() {
 }
 
 function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () => void }) {
-  const chain = useChain();
+  const { chainId } = useWallet();
+
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog');
 
   return (
@@ -113,7 +114,7 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
       <p>
         {dictionary('description2', {
           request_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_REQUEST_TIME_SECONDS,
+            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
               addSuffix: true,
             }
@@ -123,10 +124,10 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
         <br />
         {dictionary.rich('description3', {
           request_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_REQUEST_TIME_SECONDS
+            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS
           ),
           exit_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_GRACE_TIME_SECONDS
+            SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS
           ),
           link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
         })}

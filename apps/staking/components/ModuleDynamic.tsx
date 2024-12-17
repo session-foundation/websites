@@ -14,6 +14,7 @@ type GenericQueryProps = {
 
 type ModuleContractReadTextProps = HTMLAttributes<HTMLSpanElement> & {
   status: GenericContractStatus;
+  enabled?: boolean;
 } & GenericQueryProps;
 
 export const getVariableFontSizeForLargeModule = (
@@ -39,7 +40,7 @@ export const getVariableFontSize = (
   `clamp(${minTextSize}px, min(${maxTextSize + 2 - stringLength}px, ${moduleViewportWidth}vw), ${maxTextSize}px)`;
 
 const ModuleDynamicContractReadText = forwardRef<HTMLSpanElement, ModuleContractReadTextProps>(
-  ({ className, children, status, fallback, errorToast, ...props }, ref) => {
+  ({ className, children, status, fallback, errorToast, enabled, ...props }, ref) => {
     const toastId = useId();
 
     if (status === 'error') {
@@ -54,6 +55,8 @@ const ModuleDynamicContractReadText = forwardRef<HTMLSpanElement, ModuleContract
           children ?? fallback
         ) : status === 'error' ? (
           fallback
+        ) : !enabled ? (
+          fallback
         ) : (
           <LoadingText />
         )}
@@ -65,10 +68,11 @@ ModuleDynamicContractReadText.displayName = 'ModuleDynamicContractReadText';
 
 type ModuleQueryTextProps = HTMLAttributes<HTMLSpanElement> & {
   status: QUERY_STATUS;
+  enabled?: boolean;
 } & GenericQueryProps;
 
 const ModuleDynamicQueryText = forwardRef<HTMLSpanElement, ModuleQueryTextProps>(
-  ({ className, children, status, fallback, errorToast, ...props }, ref) => {
+  ({ className, children, status, fallback, errorToast, enabled, ...props }, ref) => {
     const toastId = useId();
     if (status === QUERY_STATUS.ERROR) {
       toastErrorRefetch({
@@ -81,6 +85,8 @@ const ModuleDynamicQueryText = forwardRef<HTMLSpanElement, ModuleQueryTextProps>
         {status === QUERY_STATUS.SUCCESS ? (
           children ?? fallback
         ) : status === QUERY_STATUS.ERROR ? (
+          fallback
+        ) : !enabled ? (
           fallback
         ) : (
           <LoadingText />

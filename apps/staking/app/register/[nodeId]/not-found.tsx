@@ -11,7 +11,7 @@ export default function NotFound() {
   const registerDictionary = useTranslations('actionModules.register');
   const pathname = usePathname();
   const { found, openNode, stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
-    nodeId: pathname.split('/').at(-1),
+    pubKeyEd25519: pathname.split('/').at(-1),
   });
 
   return (

@@ -1,7 +1,6 @@
 'use client';
 
 import { Address, SimulateContractErrorType, TransactionExecutionErrorType } from 'viem';
-import { useAccount } from 'wagmi';
 import { ReadContractData } from 'wagmi/query';
 import { SENTAbi } from '../abis';
 import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
@@ -15,8 +14,7 @@ import {
   useContractWriteQuery,
   type WriteContractStatus,
 } from './useContractWriteQuery';
-import { useChain } from './useChain';
-import type { CHAIN } from '../chains';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
   formatSENTBigInt(value, SENT_DECIMALS, hideSymbol);
@@ -34,21 +32,12 @@ export type SENTBalanceQuery = ContractReadQueryProps & {
   balance: SENTBalance;
 };
 
-export function useSENTBalanceQuery({
-  address,
-  overrideChain,
-}: {
-  address?: Address;
-  overrideChain?: CHAIN;
-}): SENTBalanceQuery {
-  const chain = useChain();
-
+export function useSENTBalanceQuery({ address }: { address?: Address }): SENTBalanceQuery {
   const { data: balance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'balanceOf',
     args: [address!],
     enabled: !!address,
-    chain: overrideChain ?? chain,
   });
 
   return {
@@ -69,14 +58,12 @@ export function useAllowanceQuery({
 }: {
   contractAddress?: Address | null;
 }): SENTAllowanceQuery {
-  const { address } = useAccount();
-  const chain = useChain();
+  const { address } = useWallet();
   const { data: allowance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'allowance',
     args: [address!, contractAddress!],
     enabled: !!address && !!contractAddress,
-    chain,
   });
 
   return {
@@ -107,8 +94,7 @@ export function useProxyApproval({
   const [allowanceReadStatusOverride, setAllowanceReadStatusOverride] =
     useState<GenericContractStatus | null>(null);
 
-  const chain = useChain();
-  const { address } = useAccount();
+  const { address } = useWallet();
   const {
     allowance,
     status: readStatusRaw,
@@ -138,7 +124,6 @@ export function useProxyApproval({
   } = useContractWriteQuery({
     contract: 'SENT',
     functionName: 'approve',
-    chain,
   });
 
   const approve = () => {

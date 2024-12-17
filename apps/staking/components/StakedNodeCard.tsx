@@ -26,11 +26,9 @@ import { Button } from '@session/ui/ui/button';
 import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
-import { useChain } from '@session/contracts/hooks/useChain';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
 import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
 import { externalLink } from '@/lib/locale-defaults';
-import { TextSeparator } from '@session/ui/components/Separator';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
@@ -38,7 +36,7 @@ import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 import { ActionModuleDivider } from '@/components/ActionModule';
 import { Address } from 'viem';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import Link from 'next/link';
 import { SENT_DECIMALS } from '@session/contracts';
 
@@ -267,16 +265,10 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
   )
 );
 
-export const NodeOperatorIndicator = forwardRef<
-  HTMLDivElement,
-  HTMLAttributes<HTMLDivElement> & {
-    hideTextOnMobile?: boolean;
-  }
->(({ className, hideTextOnMobile, ...props }, ref) => {
-  const dictionary = useTranslations('nodeCard.staked');
-
-  return (
-    <>
+export const NodeOperatorIndicator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    const dictionary = useTranslations('nodeCard.staked');
+    return (
       <Tooltip tooltipContent={dictionary('operatorTooltip')}>
         <div
           ref={ref}
@@ -287,16 +279,11 @@ export const NodeOperatorIndicator = forwardRef<
           {...props}
         >
           <SpannerAndScrewdriverIcon className="fill-session-green h-3.5 w-3.5" />
-          {hideTextOnMobile ? (
-            <span className="hidden md:block">{dictionary('operator')}</span>
-          ) : (
-            dictionary('operator')
-          )}
         </div>
       </Tooltip>
-    </>
-  );
-});
+    );
+  }
+);
 
 /**
  * Checks if a given date is in the past or `soon`
@@ -387,7 +374,7 @@ const DeregisteringNotification = ({
   date: Date | null;
   timeString: string | null;
 }) => {
-  const chain = useChain();
+  const { chainId } = useWallet();
   const dictionary = useTranslations('nodeCard.staked');
   const generalDictionary = useTranslations('general');
   const notFoundString = generalDictionary('notFound');
@@ -403,7 +390,7 @@ const DeregisteringNotification = ({
     <Tooltip
       tooltipContent={dictionary('deregistrationTimerDescription', {
         lockedStakeTime: formatLocalizedTimeFromSeconds(
-          SESSION_NODE_TIME(chain).DEREGISTRATION_LOCKED_STAKE_SECONDS,
+          SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS,
           { unit: 'day' }
         ),
         relativeTime,
@@ -558,7 +545,8 @@ const collapsableContentVariants = cva(
       size: {
         xs: 'text-xs md:text-xs peer-checked:max-h-4',
         base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
-        buttonMd: cn('peer-checked:max-h-10'),
+        buttonMd: cn('peer-checked:max-h-11'),
+        buttonSm: cn('peer-checked:max-h-9'),
       },
       width: {
         'w-full': 'w-full',
@@ -600,14 +588,14 @@ export const CollapsableButton = forwardRef<
 >(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
   <CollapsableContent
     className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
-    size="buttonMd"
+    size="buttonSm"
   >
     <Button
       data-testid={dataTestId}
       aria-label={ariaLabel}
       disabled={disabled}
       rounded="md"
-      size="md"
+      size="sm"
       variant="destructive-outline"
       className="uppercase"
       ref={ref}
@@ -844,17 +832,12 @@ const StakedNodeCard = forwardRef<
         ) : null}
         {/** NOTE - ensure any changes here still work with the pubkey component */}
         <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {isOperator ? (
-            <>
-              <NodeOperatorIndicator />
-              <TextSeparator className="separator mx-1 font-medium" />{' '}
-            </>
-          ) : null}
+          {isOperator ? <NodeOperatorIndicator className="me-0.5" /> : null}
           <span className="inline-flex flex-nowrap gap-1">
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
             </RowLabel>
-            <PubKey pubKey={pubKey} alwaysShowCopyButton />
+            <PubKey pubKey={pubKey} alwaysShowCopyButton leadingChars={8} trailingChars={4} />
           </span>
         </NodeCardText>
         <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
