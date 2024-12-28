@@ -7,6 +7,7 @@ import {
   FieldPath,
   FieldValues,
   FormProvider,
+  useForm as useReactHookFormState,
   useFormContext,
   useFormState,
 } from 'react-hook-form';
@@ -23,6 +24,8 @@ type FormFieldContextValue<
 > = {
   name: TName;
 };
+
+const useForm = useReactHookFormState;
 
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
 
@@ -202,4 +205,5 @@ export {
   FormMessage,
   FormSubmitButton,
   useFormField,
+  useForm,
 };
