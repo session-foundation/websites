@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
@@ -15,12 +15,11 @@ import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { Button } from '@session/ui/ui/button';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
 
 export default function NodeRegistrations() {
-  const showOneMockNode = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_ONE);
-  const showTwoMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_TWO);
-  const showThreeMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_THREE);
-  const showManyMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_MANY);
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
 
   // TODO: use once we have user preferences
@@ -32,35 +31,23 @@ export default function NodeRegistrations() {
 
    const [showHidden, setShowHidden] = useState<boolean>(false); */
 
-  if (
-    (showOneMockNode || showTwoMockNodes || showThreeMockNodes || showManyMockNodes) &&
-    showNoNodes
-  ) {
-    console.error('Cannot show mock nodes and no nodes at the same time');
-  }
-
-  if (
-    [showOneMockNode, showTwoMockNodes, showThreeMockNodes, showManyMockNodes].filter(Boolean)
-      .length > 1
-  ) {
-    console.error(
-      'You cant have multiple showMockNode flags enabled at once, ignoring all by the largest number'
-    );
-  }
-
   const { address, isConnected } = useWallet();
 
-  const { data: registrationsData, isLoading: isLoadingRegistrations } =
-    useStakingBackendQueryWithParams(
-      getNodeRegistrations,
-      { address: address! },
-      {
-        enabled: isConnected,
-        staleTime: isProduction
-          ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-          : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-      }
-    );
+  const {
+    data: registrationsData,
+    isLoading: isLoadingRegistrations,
+    isError,
+    refetch,
+  } = useStakingBackendQueryWithParams(
+    getNodeRegistrations,
+    { address: address! },
+    {
+      enabled: isConnected,
+      staleTime: isProduction
+        ? QUERY.STALE_TIME_REGISTRATIONS_LIST
+        : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
+    }
+  );
 
   const { data: stakesData, isLoading: isLoadingStakes } = useStakingBackendQueryWithParams(
     getStakedNodes,
@@ -119,13 +106,11 @@ export default function NodeRegistrations() {
     stakesData,
     address,
     showNoNodes,
-    showOneMockNode,
-    showTwoMockNodes,
-    showThreeMockNodes,
-    showManyMockNodes,
   ]);
 
-  return address ? (
+  return isError ? (
+    <ErrorMessage refetch={refetch} />
+  ) : address ? (
     isLoadingStakes || isLoadingRegistrations ? (
       <NodesListSkeleton />
     ) : nodes?.length ? (
@@ -159,6 +144,24 @@ function NoNodes() {
       <p>
         {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
       </p>
+    </ModuleGridInfoContent>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.nodeRegistrations');
+  return (
+    <ModuleGridInfoContent>
+      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
     </ModuleGridInfoContent>
   );
 }
