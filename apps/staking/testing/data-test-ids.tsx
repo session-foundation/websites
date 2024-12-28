@@ -27,10 +27,15 @@ export enum ButtonDataTestId {
   Staked_Node_Request_Exit_Dialog_Cancel = 'button:staked-node-request-exit-dialog-cancel',
   Staked_Node_Request_Exit_Write_Dialog_Submit = 'button:staked-node-request-exit-write-dialog-submit',
   Staked_Node_Exit_Dialog_Submit = 'button:staked-node-exit-dialog-submit',
+  My_Stakes_Error_Retry = 'button:my-stakes-error-retry',
+  Open_Nodes_Error_Retry = 'button:open-nodes-error-retry',
+  Claim_Tokens_Error_Retry = 'button:claim-tokens-error-retry',
+  Staked_Node_Start = 'button:staked-node-start',
   Stake_Amount_Min = 'button:stake-amount-min',
   Stake_Amount_Max = 'button:stake-amount-max',
   Show_Referral_Link = 'button:show-referral-link',
   Copy_Referral_Link = 'button:copy-referral-link',
+  Toggle_Show_Toaster_History = 'button:toggle-show-toaster-history',
 }
 
 export enum SpecialDataTestId {
