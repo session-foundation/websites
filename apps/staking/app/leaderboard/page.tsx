@@ -12,11 +12,11 @@ import {
   TableRow,
 } from '@session/ui/ui/table';
 import Typography from '@session/ui/components/Typography';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 import { areHexesEqual } from '@session/util-crypto/string';
 import Link from 'next/link';
 import { Loading } from '@session/ui/components/loading';
 import { cn } from '@session/ui/lib/utils';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 // TODO: Delete route after testnet incentive program is over
 
