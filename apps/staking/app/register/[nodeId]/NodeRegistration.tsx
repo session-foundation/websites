@@ -7,8 +7,10 @@ import { notFound } from 'next/navigation';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { isProduction } from '@/lib/env';
-import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationForm';
-import { Registration } from '@/app/register/[nodeId]/Registration';
+import {
+  NodeRegistrationForm,
+  NodeRegistrationFormSkeleton,
+} from '@/app/register/[nodeId]/NodeRegistrationForm';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   const { address } = useWallet();
@@ -35,12 +37,13 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   return isLoadingRegistrations ? (
     <NodeRegistrationFormSkeleton />
   ) : node ? (
-    <Registration
-      ed25519PubKey={node.pubkey_ed25519}
-      blsKey={node.pubkey_bls}
-      preparedAt={new Date(node.timestamp * 1000)}
-    />
+    <NodeRegistrationForm node={node} />
   ) : (
+    // <Registration
+    //   ed25519PubKey={node.pubkey_ed25519}
+    //   blsKey={node.pubkey_bls}
+    //   preparedAt={new Date(node.timestamp * 1000)}
+    // />
     notFound()
   );
 }
