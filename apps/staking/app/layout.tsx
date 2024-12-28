@@ -12,6 +12,7 @@ import WalletUserSheet from '@session/wallet/components/WalletUserSheet';
 import { isProduction } from '@/lib/env';
 import { DevSheet } from '@/components/DevSheet';
 import { TOSHandler } from '@/components/TOSHandler';
+import { StatusBar } from '@/components/StatusBar';
 import { Toaster } from '@session/ui/ui/sonner';
 
 export async function generateMetadata() {
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
           <TOSHandler />
           <Toaster />
+          <StatusBar />
         </body>
       </GlobalProvider>
     </html>

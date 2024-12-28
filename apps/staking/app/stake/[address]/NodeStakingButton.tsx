@@ -7,7 +7,7 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Address } from 'viem';
-import type { ParsedStakeData } from '@/app/stake/[contract]/NodeStaking';
+import type { ParsedStakeData } from '@/app/stake/[address]/NodeStaking';
 import { stringToBigInt } from '@session/util-crypto/maths';
 import { SENT_DECIMALS } from '@session/contracts';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
