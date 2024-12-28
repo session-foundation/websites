@@ -23,7 +23,7 @@ import { useEffect, useMemo } from 'react';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { externalLink } from '@/lib/locale-defaults';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getRewardsClaimSignature } from '@/lib/queries/getRewardsClaimSignature';
 import type { Address } from 'viem';
 import { Loading } from '@session/ui/components/loading';
@@ -32,6 +32,7 @@ import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { toast } from '@session/ui/lib/toast';
 import { ClaimRewardsDisabledInfo } from '@/components/ClaimRewardsDisabledInfo';
 import { Progress, PROGRESS_STATUS } from '@session/ui/components/motion/progress';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 
 export default function ClaimTokensModule() {
   const { address } = useWallet();
@@ -47,6 +48,7 @@ export default function ClaimTokensModule() {
     data: rewardsClaimData,
     refetch,
     isStale,
+    isError,
   } = useStakingBackendQueryWithParams(
     getRewardsClaimSignature,
     { address: address! },
@@ -67,8 +69,10 @@ export default function ClaimTokensModule() {
   };
 
   const [rewards, blsSignature, excludedSigners] = useMemo(() => {
-    if (!rewardsClaimData) return [null, null, null];
-    const { amount, signature, non_signer_indices } = rewardsClaimData.result;
+    if (!rewardsClaimData || !('rewards' in rewardsClaimData) || !rewardsClaimData.rewards) {
+      return [null, null, null];
+    }
+    const { amount, signature, non_signer_indices } = rewardsClaimData.rewards;
 
     return [BigInt(amount), signature, non_signer_indices.map(BigInt)];
   }, [rewardsClaimData]);
@@ -107,7 +111,9 @@ export default function ClaimTokensModule() {
         </ButtonModule>
       </AlertDialogTrigger>
       <AlertDialogContent dialogTitle={dictionary('title')}>
-        {isReady ? (
+        {isError ? (
+          <ErrorMessage refetch={refetch} />
+        ) : isReady ? (
           <ClaimTokensDialog
             formattedUnclaimedRewardsAmount={formattedUnclaimedRewardsAmount}
             address={address}
@@ -120,6 +126,24 @@ export default function ClaimTokensModule() {
         )}
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.claim');
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <TriangleAlertIcon className="stroke-warning h-16 w-16" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.Claim_Tokens_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
+    </div>
   );
 }
 
@@ -136,6 +160,7 @@ function ClaimTokensDialog({
   blsSignature: string;
   excludedSigners: Array<bigint>;
 }) {
+  const { refetchClaimed } = useUnclaimedTokens();
   const dictionary = useTranslations('modules.claim.dialog');
   const dictionaryStage = useTranslations('modules.claim.stage');
 
@@ -195,6 +220,7 @@ function ClaimTokensDialog({
   useEffect(() => {
     if (claimRewardsStatus === PROGRESS_STATUS.SUCCESS) {
       toast.success(dictionary('successToast', { tokenAmount: formattedUnclaimedRewardsAmount }));
+      void refetchClaimed();
     }
   }, [claimRewardsStatus]);
 

@@ -24,6 +24,7 @@ const noPointsObject = {
 
 export default function TestnetPointsModule(params?: { addressOverride?: Address }) {
   const dictionary = useTranslations('modules.points');
+  const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
@@ -70,6 +71,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
         status={status as QUERY_STATUS}
         fallback={0}
         enabled
+        errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

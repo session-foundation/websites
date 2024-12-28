@@ -15,6 +15,7 @@ import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 export default function DailyNodeReward() {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();
   const dictionary = useTranslations('modules.dailyRewards');
+  const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
 
@@ -36,6 +37,7 @@ export default function DailyNodeReward() {
         status={status}
         fallback={0}
         enabled
+        errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

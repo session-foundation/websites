@@ -182,10 +182,23 @@ export const preferenceStorageKey = 'stake';
 
 export enum PREFERENCE {
   BACKEND_URL = 'backendUrl',
+  PREF_REGISTRATION_MODE = 'prefRegistrationMode',
 }
 
 export const preferenceStorageDefaultItems = {
   [PREFERENCE.BACKEND_URL]: '/api/ssb',
+  [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
+} as const;
+
+export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
+  [REG_TAB.START]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.STAKE_AMOUNT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.OPERATOR_FEE]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS_INPUT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.AUTO_ACTIVATE]: 'https://docs.getsession.org/TBD',
 } as const;
 
 export enum LAST_UPDATED_BEHIND_TRIGGER {
