@@ -28,6 +28,14 @@ export const externalLink = (href: string, className?: string) => {
   );
 };
 
+export const clickableText = (onClick: () => void) => {
+  return (children: ReactNode) => (
+    <span className="text-session-green cursor-pointer underline" onClick={onClick}>
+      {children}
+    </span>
+  );
+};
+
 const defaultExternalLink = (href: string, text: string, className?: string) => () =>
   externalLink(href, className ?? 'text-white underline')(text);
 

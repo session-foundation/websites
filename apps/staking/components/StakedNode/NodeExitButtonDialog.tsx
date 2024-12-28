@@ -17,14 +17,13 @@ import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 import { ETH_DECIMALS } from '@session/wallet/lib/eth';
 import { Button } from '@session/ui/ui/button';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getNodeExitSignatures } from '@/lib/queries/getNodeExitSignatures';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
-import { SENT_SYMBOL } from '@session/contracts';
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import useExitNode from '@/hooks/useExitNode';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { Stake } from '@session/staking-api-js/client';
+import { formattedTotalStakedInContract } from '@/lib/contracts';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
@@ -122,11 +121,6 @@ function NodeExitContractWriteDialog({
     [fee]
   );
 
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
-  );
-
   const handleClick = () => {
     if (simulateEnabled) {
       resetContract();
@@ -155,7 +149,7 @@ function NodeExitContractWriteDialog({
           rounded="md"
           size="lg"
           aria-label={dictionary('buttons.submitAria', {
-            tokenAmount: stakedAmount,
+            tokenAmount: formattedTotalStakedInContract(node.contributors),
             gasAmount: feeEstimate ?? 0,
           })}
           className="w-full"

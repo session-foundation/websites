@@ -4,6 +4,7 @@ import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
 import { LocaleKey } from './locale-util';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
+import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -117,6 +118,8 @@ export enum QUERY {
 
 /** 20,000 SENT  */
 export const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+export const SESSION_NODE_MIN_STAKE_MULTI = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO = SESSION_NODE_FULL_STAKE_AMOUNT;
 
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
@@ -173,4 +176,21 @@ export enum DYNAMIC_MODULE {
 export enum HANDRAIL_THRESHOLD {
   /** 0.005 SENT */
   CLAIM_REWARDS_AMOUNT = '5000000',
+}
+
+export const preferenceStorageKey = 'stake';
+
+export enum PREFERENCE {
+  BACKEND_URL = 'backendUrl',
+}
+
+export const preferenceStorageDefaultItems = {
+  [PREFERENCE.BACKEND_URL]: '/api/ssb',
+} as const;
+
+export enum LAST_UPDATED_BEHIND_TRIGGER {
+  /** 2.5 minutes */
+  BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
+  /** 4 minutes */
+  BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
 }
