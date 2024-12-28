@@ -1,4 +1,4 @@
-type NetworkInfo = {
+export type NetworkInfo = {
   block_height: number;
   block_timestamp: number;
   block_top_hash: string;
@@ -16,17 +16,6 @@ interface NetworkInfoResponse {
   t: number;
 }
 
-export enum NODE_STATE {
-  RUNNING = 'Running',
-  AWAITING_CONTRIBUTORS = 'Awaiting Contributors',
-  AWAITING_OPERATOR_START = 'Awaiting Operator Start',
-  CANCELLED = 'Cancelled',
-  DECOMMISSIONED = 'Decommissioned',
-  DEREGISTERED = 'Deregistered',
-  AWAITING_EXIT = 'Awaiting Exit',
-  EXITED = 'Exited',
-}
-
 export interface LockedContribution {
   amount: number;
   key_image: string;
@@ -41,26 +30,9 @@ export interface Contributor {
   locked_contributions: LockedContribution[];
 }
 
-export interface WalletInfo {
-  contract_claimed: bigint;
-  contract_rewards: bigint;
-  rewards: bigint;
-}
-
-export interface OpenNode {
-  contract: string;
-  contract_state: string;
-  contributors: Array<Contributor>;
-  fee: number;
-  operator: string;
-  pubkey_bls: string;
-  service_node_pubkey: string;
-  service_node_signature: string;
-  total_contributions: number;
-}
-
-export interface GetOpenNodesResponse {
-  nodes: OpenNode[];
+export interface GetContributionContractsResponse {
+  network: NetworkInfo;
+  contracts: ContributorContractInfo[];
 }
 
 /** GET /stakes/<32 byte address> */
@@ -71,31 +43,98 @@ export type StakeContributor = {
   reserved: number;
 };
 
-export type Stake = {
-  unique_id: string;
+export type NodeInfo = {
+  active: boolean;
   contract_id: number;
-  contract: string | null;
-  contributors: Array<StakeContributor>;
-  deregistration_unlock_height: number | null;
+  decommission_count: number;
+  deregistration_height: number | null;
   earned_downtime_blocks: number;
-  exited: boolean;
-  last_reward_block_height: number | null;
-  last_uptime_proof: number | null;
+  exit_type: string | null;
+  fetched_block_height: number;
+  funded: boolean;
+  is_liquidatable: boolean;
+  is_removable: boolean;
+  last_reward_block_height: number;
+  last_uptime_proof: number;
   liquidation_height: number | null;
+  lokinet_version: [number, number, number] | null;
   operator_address: string;
-  operator_fee: number | null;
-  requested_unlock_height: number | null;
+  operator_fee: number;
+  payable: boolean;
+  pubkey_bls: string;
+  pubkey_ed25519: string;
+  public_ip: string | null;
+  pulse_votes: any | null;
+  quorumnet_port: number | null;
+  registration_height: number;
+  registration_hf_version: string;
+  requested_unlock_height: number;
   service_node_pubkey: string;
-  staked_balance: number | null;
-  state: NODE_STATE;
+  service_node_version: [number, number, number] | null;
+  staking_requirement: number;
+  state_height: number;
+  storage_lmq_port: number | null;
+  storage_port: number | null;
+  storage_server_version: [number, number, number] | null;
+  swarm: string;
+  swarm_id: string;
+  total_contributed: number;
+  contributors: Array<StakeContributor>;
+};
+
+// NOTE: This is a duplicate of the same enum in the ServiceNodeContribution.sol contract
+// Definitions
+// Track the status of the multi-contribution contract. At any point in the
+// contract's lifetime, `reset` can be invoked to set the contract back to
+// `WaitForOperatorContrib`.
+export enum CONTRIBUTION_CONTRACT_STATUS {
+  // Contract is initialised w/ no contributions. Call `contributeFunds`
+  // to transition into `OpenForPublicContrib`
+  WaitForOperatorContrib,
+
+  // Contract has been initially funded by operator. Public and reserved
+  // contributors can now call `contributeFunds`. When the contract is
+  // collaterialised with exactly the staking requirement, the contract
+  // transitions into `WaitForFinalized` state.
+  OpenForPublicContrib,
+
+  // Operator must invoke `finalizeNode` to transfer the tokens and the
+  // node registration details to the `stakingRewardsContract` to
+  // transition to `Finalized` state.
+  WaitForFinalized,
+
+  // Contract interactions are blocked until `reset` is called.
+  Finalized,
+}
+
+export type ContributorContractInfo = {
+  address: string;
+  contributors: Array<StakeContributor>;
+  fee: number;
+  operator_address: string;
+  pubkey_bls: string;
+  service_node_pubkey: string;
+  service_node_signature: string;
+  status: CONTRIBUTION_CONTRACT_STATUS;
+};
+
+export type ArbitrumEvent = {
+  args: any;
+  block: number;
+  main_arg: string | null;
+  name: string;
+  timestamp: number | null;
+  tx: string;
+};
+
+export type Stake = NodeInfo & {
+  events: Array<ArbitrumEvent>;
 };
 
 export interface GetStakesResponse {
   network: NetworkInfo;
+  contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
-  historical_stakes: Array<Stake>;
-  wallet: WalletInfo;
-  error_stakes: Array<{ contract_id: number; error: string }>;
 }
 
 /** /store */
@@ -167,11 +206,23 @@ export interface GetExitLiquidationListResponse {
   result: Array<Stake>;
 }
 
+/** GET /nodes/bls */
+export interface GetNodesBlsKeysResponse {
+  network: NetworkInfo;
+  bls_keys: Array<string>;
+}
+
+/** GET /rewards/<32 byte address> */
+export interface GetRewardsInfoResponse {
+  network: NetworkInfo;
+  rewards: number;
+}
+
 /** POST /rewards */
 
 export interface GetRewardsClaimSignatureResponse {
   network: NetworkInfo;
-  result: BlsRewardsResponse;
+  rewards: BlsRewardsResponse;
 }
 
 export type BlsRewardsResponse = {
@@ -229,7 +280,7 @@ export interface SSBClientConfig {
  * Client for interacting with the Session Staking Backend API.
  */
 export class SessionStakingClient {
-  private readonly baseUrl: string;
+  readonly baseUrl: string;
   private readonly debug?: boolean;
   private readonly logger: Logger = console;
   private readonly errorOn404: boolean = false;
@@ -305,12 +356,14 @@ export class SessionStakingClient {
     return this.request<NetworkInfoResponse>(options);
   }
 
-  public async getOpenNodes(): Promise<StakingBackendResponse<GetOpenNodesResponse>> {
+  public async getContributionContracts(): Promise<
+    StakingBackendResponse<GetContributionContractsResponse>
+  > {
     const options: RequestOptions = {
-      endpoint: `/nodes/open`,
+      endpoint: `/contract/contribution`,
       method: 'GET',
     };
-    return this.request<GetOpenNodesResponse>(options);
+    return this.request<GetContributionContractsResponse>(options);
   }
 
   /**
@@ -328,6 +381,26 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return this.request<GetStakesResponse>(options);
+  }
+
+  public async getNodesBlsKeys(): Promise<StakingBackendResponse<GetNodesBlsKeysResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/nodes/bls`,
+      method: 'GET',
+    };
+    return this.request<GetNodesBlsKeysResponse>(options);
+  }
+
+  public async getRewardsInfo({
+    address,
+  }: {
+    address: string;
+  }): Promise<StakingBackendResponse<GetRewardsInfoResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/rewards/${address}`,
+      method: 'GET',
+    };
+    return this.request<GetRewardsInfoResponse>(options);
   }
 
   public async getRewardsClaimSignature({

@@ -174,7 +174,7 @@ importers:
         version: link:../../packages/logger
       '@session/staking-api-js':
         specifier: workspace:*
-        version: link:../../packages/staking-backend-js
+        version: link:../../packages/staking-api-js
       '@session/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -523,7 +523,7 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
 
-  packages/staking-backend-js:
+  packages/staking-api-js:
     devDependencies:
       '@session/eslint-config':
         specifier: workspace:*

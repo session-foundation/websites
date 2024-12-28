@@ -18,7 +18,7 @@
     "@session/contracts": "workspace:*",
     "@session/feature-flags": "workspace:*",
     "@session/logger": "workspace:*",
-    "@session/sent-staking-js": "workspace:*",
+    "@session/staking-api-js": "workspace:*",
     "@session/ui": "workspace:*",
     "@session/util-crypto": "workspace:*",
     "@session/util-js": "workspace:*",

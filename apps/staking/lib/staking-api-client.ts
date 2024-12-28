@@ -1,35 +1,42 @@
 'use client';
 
-import { createSessionStakingClient, SessionStakingClient } from '@session/sent-staking-js/client';
+import { createSessionStakingClient, SessionStakingClient } from '@session/staking-api-js/client';
 import {
   getStakingBackendQueryArgs,
   getStakingBackendQueryWithParamsArgs,
   type QueryOptions,
   StakingBackendQuery,
   StakingBackendQueryWithParams,
-} from '@/lib/sent-staking-backend';
+} from '@/lib/staking-api';
 import { isProduction } from '@/lib/env';
 import { useMemo } from 'react';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { usePreferences } from 'usepref';
+import { PREFERENCE, preferenceStorageDefaultItems } from '@/lib/constants';
 
 let client: SessionStakingClient | undefined;
 
-function getStakingBackendBrowserClient() {
-  if (client) {
-    return client;
+export function useStakingBackendBrowserClient() {
+  const { getItem, setItem } = usePreferences();
+  let baseUrl = getItem<string>(PREFERENCE.BACKEND_URL);
+
+  if (!baseUrl) {
+    const defaultBackendUrl = preferenceStorageDefaultItems[PREFERENCE.BACKEND_URL];
+    setItem(PREFERENCE.BACKEND_URL, defaultBackendUrl);
+    baseUrl = defaultBackendUrl;
   }
 
-  client = createSessionStakingClient({
-    baseUrl: '/api/ssb',
-    debug: !isProduction,
-    errorOn404: !isProduction,
-  });
+  return useMemo(() => {
+    if (!client || client.baseUrl !== baseUrl) {
+      client = createSessionStakingClient({
+        baseUrl,
+        debug: !isProduction,
+        errorOn404: !isProduction,
+      });
+    }
 
-  return client;
-}
-
-export function useStakingBackendBrowserClient() {
-  return useMemo(getStakingBackendBrowserClient, []);
+    return client;
+  }, [baseUrl]);
 }
 
 export function useStakingBackendSuspenseQuery<Q extends StakingBackendQuery>(query: Q) {
