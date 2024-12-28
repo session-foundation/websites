@@ -6,8 +6,10 @@ import { cn } from '../../lib/utils';
 import {
   type ComponentProps,
   createContext,
+  type Dispatch,
   Fragment,
   type ReactNode,
+  type SetStateAction,
   useContext,
   useEffect,
   useState,
@@ -134,9 +136,9 @@ export const Toaster = ({ ...props }: ToasterProps) => {
 
 type ToasterContext = {
   toastHistory: Array<ToastT>;
-  setToastHistory: (toastHistory: Array<ToastT>) => void;
+  setToastHistory: Dispatch<SetStateAction<Array<ToastT>>>;
   showHistory: boolean;
-  setShowHistory: (showHistory: boolean) => void;
+  setShowHistory: Dispatch<SetStateAction<boolean>>;
 };
 
 const ToasterContext = createContext<ToasterContext | undefined>(undefined);
