@@ -49,6 +49,7 @@ import {
   useProxyApproval,
 } from '@session/contracts/hooks/SENT';
 import { LoadingText } from '@session/ui/components/loading-text';
+import { useContractReadQuery } from '@session/contracts/hooks/useContractReadQuery';
 
 export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -280,18 +281,59 @@ function ExitNodes() {
   const [selectedContractIds, setSelectedContractIds] = useState<Array<number>>([]);
   const { data, status } = useStakingBackendSuspenseQuery(getExitLiquidationList);
 
+  const { data: blsKeyContractIdMapData, status: blsKeyContractIdMapStatus } = useContractReadQuery(
+    {
+      contract: 'ServiceNodeRewards',
+      functionName: 'allServiceNodeIDs',
+      enabled: status === 'success',
+    }
+  );
+
   const nodes = useMemo(() => {
-    if (status === 'success' && data) {
-      return data.result
-        .map((node) => ({ contractId: node.contract_id, pubKey: node.service_node_pubkey }))
-        .filter(({ contractId }) => contractId)
-        .sort((a, b) => a.contractId! - b.contractId!) as Array<{
-        contractId: number;
-        pubKey: string;
-      }>;
+    if (
+      status === 'success' &&
+      data &&
+      blsKeyContractIdMapStatus === 'success' &&
+      blsKeyContractIdMapData
+    ) {
+      const [ids, blsKeys] = blsKeyContractIdMapData;
+
+      // Create an object that maps "<x:064x><y:064x>" to the contractId
+      const result: Record<string, number> = {};
+
+      for (let i = 0; i < ids.length; i++) {
+        const contractId = ids[i];
+        if (!contractId) {
+          console.warn('Unexpected null contractId');
+          continue;
+        }
+        const blsKeyPair = blsKeys[i];
+        if (!blsKeyPair) {
+          console.warn('Unexpected null blsKeyPair');
+          continue;
+        }
+        const { X, Y } = blsKeyPair;
+
+        // Convert x and y to 64-char hex strings and concatenate
+        const key = `${X.toString(16).padStart(64, '0')}${Y.toString(16).padStart(64, '0')}`;
+        result[key] = parseInt(contractId.toString());
+      }
+
+      const nodeList = [];
+
+      for (const node of data.result) {
+        const contractId = result[node.info.bls_public_key];
+        if (!contractId) {
+          console.warn('No contractId found for blsKey', node.info.bls_public_key);
+          continue;
+        }
+        nodeList.push({ contractId, pubKey: node.service_node_pubkey });
+      }
+
+      return nodeList.sort((a, b) => a.contractId - b.contractId);
     }
     return [];
-  }, [data?.result, status]);
+  }, [data, status, blsKeyContractIdMapStatus, blsKeyContractIdMapData]);
 
   const handleEjectNodes = async () => {
     if (selectedContractIds.length === 0) return;
