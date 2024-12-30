@@ -113,14 +113,12 @@ export function sortContracts(
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  if (operatorA && operatorB) {
-    const priorityA = contractStateSortOrderIfOperator[a.status] ?? 999;
-    const priorityB = contractStateSortOrderIfOperator[b.status] ?? 999;
+  const priorityA = operatorA ? contractStateSortOrderIfOperator[a.status] ?? 999 : 999;
+  const priorityB = operatorB ? contractStateSortOrderIfOperator[b.status] ?? 999 : 999;
 
-    if (priorityA !== priorityB) {
-      // Priority ascending
-      return priorityA - priorityB;
-    }
+  if (priorityA !== priorityB) {
+    // Priority ascending
+    return priorityA - priorityB;
   }
 
   const stakeSort = sortingTotalStakedDesc(a, b, address);
