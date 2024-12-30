@@ -28,10 +28,9 @@ import { Button, ButtonSkeleton } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@session/ui/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, useForm } from '@session/ui/ui/form';
 import { SENT_DECIMALS } from '@session/contracts';
 import StakeAmountField, {
   getStakeAmountFormFieldSchema,
@@ -229,7 +228,7 @@ export function NodeRegistrationForm({
         {!isRemoteFlagLoading && isRegistrationPausedFlagEnabled ? (
           <span>{dictionary('disabled')}</span>
         ) : null}
-        {stakedNode && parseStakeState(stakedNode) === STAKE_STATE.RUNNING ? (
+        {stakedNode && parseStakeState(stakedNode, blockHeight) === STAKE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary.rich('notFound.foundRunningNode')}
@@ -241,7 +240,7 @@ export function NodeRegistrationForm({
               blockHeight={blockHeight}
             />
           </>
-        ) : runningNode && parseStakeState(runningNode) === STAKE_STATE.RUNNING ? (
+        ) : runningNode && parseStakeState(runningNode, blockHeight) === STAKE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary('notFound.foundRunningNodeOtherOperator')}
