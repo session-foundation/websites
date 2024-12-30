@@ -29,7 +29,7 @@ import {
 } from '@session/staking-api-js/client';
 import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
+import { isStakeRequestingExit, parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
 import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { useNetworkStatus } from '@/components/StatusBar';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
@@ -68,12 +68,20 @@ const contractStateSortOrderIfOperator = {
  * NOTE: If both stakes are {@link STAKE_STATE.DECOMMISSIONED} then they are sorted by earned_downtime_blocks ascending
  * NOTE: If both stakes are {@link STAKE_STATE.AWAITING_EXIT} then they are sorted by requested_unlock_height ascending
  */
-function sortStakes(a: Stake, b: Stake, address?: Address) {
-  const stateA = parseStakeState(a);
-  const stateB = parseStakeState(b);
+function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight: number = 0) {
+  const stateA = parseStakeState(a, blockHeight);
+  const stateB = parseStakeState(b, blockHeight);
 
-  const priorityA = stakeStateSortOrder[stateA] ?? 999;
-  const priorityB = stakeStateSortOrder[stateB] ?? 999;
+  let priorityA = stakeStateSortOrder[stateA] ?? 999;
+  let priorityB = stakeStateSortOrder[stateB] ?? 999;
+
+  if (isStakeRequestingExit(a) && stateA !== STAKE_STATE.DEREGISTERED) {
+    priorityA = stakeStateSortOrder[STAKE_STATE.AWAITING_EXIT] + 0.1;
+  }
+
+  if (isStakeRequestingExit(b) && stateB !== STAKE_STATE.DEREGISTERED) {
+    priorityB = stakeStateSortOrder[STAKE_STATE.AWAITING_EXIT] + 0.1;
+  }
 
   if (priorityA !== priorityB) {
     // Priority ascending
@@ -82,12 +90,12 @@ function sortStakes(a: Stake, b: Stake, address?: Address) {
 
   // NOTE: By definition, if the priorities are the same the state is the same
 
-  if (stateA === STAKE_STATE.DECOMMISSIONED) {
+  if (stateA === STAKE_STATE.DECOMMISSIONED || stateB === STAKE_STATE.DECOMMISSIONED) {
     // earned_downtime_blocks ascending
     return (a.earned_downtime_blocks ?? Infinity) - (b.earned_downtime_blocks ?? Infinity);
   }
 
-  if (stateA === STAKE_STATE.AWAITING_EXIT) {
+  if (isStakeRequestingExit(a) || isStakeRequestingExit(b)) {
     // requested_unlock_height ascending
     return (a.requested_unlock_height ?? Infinity) - (b.requested_unlock_height ?? Infinity);
   }
@@ -154,7 +162,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         ? data.network.block_timestamp
         : 0;
 
-    stakesArray.sort((a, b) => sortStakes(a, b, address));
+    stakesArray.sort((a, b) => sortStakes(a, b, address, blockHeight));
     contractsArray.sort((a, b) => sortContracts(a, b, address));
 
     const stakeBlsKeys = new Set(stakesArray.map(({ service_node_pubkey }) => service_node_pubkey));
