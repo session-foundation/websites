@@ -48,17 +48,20 @@ export default function OpenNodes() {
       'bls_keys' in blsKeysData && Array.isArray(blsKeysData.bls_keys) ? blsKeysData.bls_keys : [];
     return new Set(blsKeysArray);
   }, [blsKeysData]);
-  console.log('blsKeys', blsKeys);
+
+  const filteredContracts = useMemo(() => {
+    if (!contracts) return [];
+    return contracts
+      .filter(({ status }) => status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib)
+      .filter(({ pubkey_bls }) => !blsKeys.has(pubkey_bls.slice(2)));
+  }, [contracts, blsKeys]);
 
   return isError ? (
     <ErrorMessage refetch={refetch} />
   ) : isLoadingContracts || isLoadingBlsKeys ? (
     <NodesListSkeleton />
-  ) : contracts?.length ? (
-    contracts
-      .filter(({ status }) => status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib)
-      .filter(({ pubkey_bls }) => !blsKeys.has(pubkey_bls.slice(2)))
-      .map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)
+  ) : filteredContracts?.length ? (
+    filteredContracts.map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)
   ) : (
     <NoNodes />
   );
