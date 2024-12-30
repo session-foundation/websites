@@ -537,6 +537,7 @@
       "lastUptimeDescription": "The last time the node provided a proof of availability. Block {blockNumber} ({date})",
       "lastReward": "Last Reward: {relativeTime}",
       "lastRewardDescription": "The last time the node received rewards. Block {blockNumber} ({date})",
+      "exitUnlockTimerProcessing": "Exit request is being processed",
       "exitUnlockTimerNotification": "Exit available {relativeTime}",
       "exitUnlockTimerDescription": "Time left until the node is available for exit. Return {relativeTime} ({date}) to exit the node.",
       "exitTimerNotification": "Exit available. Exit {relativeTime} to avoid penalty.",
