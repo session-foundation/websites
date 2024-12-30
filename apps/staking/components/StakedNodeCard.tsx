@@ -31,21 +31,31 @@ import { ActionModuleDivider } from '@/components/ActionModule';
 import { Address } from 'viem';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
-import { parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
+import {
+  isStakeRequestingExit,
+  parseStakeEventState,
+  parseStakeState,
+  STAKE_EVENT_STATE,
+  STAKE_STATE,
+} from '@/components/StakedNode/state';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
  * @param state - The stake state.
+ * @param eventState - The stake event state.
  * @param unlockHeight - The unlock height.
  * @param blockHeight - The current block height.
  */
 export const isReadyToExitByUnlock = (
   state: STAKE_STATE,
+  eventState: STAKE_EVENT_STATE,
   unlockHeight?: number,
   blockHeight?: number
 ) =>
   !!(
     state === STAKE_STATE.AWAITING_EXIT &&
+    eventState !== STAKE_EVENT_STATE.EXITED &&
+    eventState !== STAKE_EVENT_STATE.LIQUIDATED &&
     unlockHeight &&
     blockHeight &&
     unlockHeight <= blockHeight
@@ -53,12 +63,15 @@ export const isReadyToExitByUnlock = (
 
 export const useIsReadyToExitByDeregistrationUnlock = (
   state: STAKE_STATE,
+  eventState: STAKE_EVENT_STATE,
   deregistrationHeight?: number | null,
   blockHeight?: number
 ) => {
   const { chainId } = useWallet();
   return !!(
     state === STAKE_STATE.DEREGISTERED &&
+    eventState !== STAKE_EVENT_STATE.EXITED &&
+    eventState !== STAKE_EVENT_STATE.LIQUIDATED &&
     deregistrationHeight &&
     blockHeight &&
     deregistrationHeight +
@@ -206,7 +219,7 @@ const ExitUnlockTimerNotification = ({
 
   const isExitableSoon = useMemo(() => isDateSoonOrPast(date), [date]);
   const relativeTime = useMemo(
-    () => (!isExitableSoon ? timeString : soonString) ?? notFoundString,
+    () => (!isExitableSoon ? timeString : soonString),
     [isExitableSoon, timeString, soonString, notFoundString]
   );
 
@@ -218,7 +231,9 @@ const ExitUnlockTimerNotification = ({
       })}
     >
       <NodeNotification level="warning" className={className}>
-        {dictionary('exitUnlockTimerNotification', { relativeTime })}
+        {relativeTime
+          ? dictionary('exitUnlockTimerNotification', { relativeTime })
+          : dictionary('exitUnlockTimerProcessing')}
       </NodeNotification>
     </Tooltip>
   );
@@ -290,6 +305,10 @@ const NodeSummary = ({
   liquidationDate,
   liquidationTime,
 }: NodeSummaryProps) => {
+  const eventState = parseStakeEventState(node);
+  const isExited =
+    eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED;
+
   if (state === STAKE_STATE.DEREGISTERED) {
     return (
       <>
@@ -297,22 +316,29 @@ const NodeSummary = ({
           contributors={node.contributors}
           data-testid={StakedNodeDataTestId.Contributor_List}
         />
-        <ExitUnlockTimerNotification
-          date={deregistrationUnlockDate}
-          timeString={deregistrationUnlockTime}
-        />
+        {!isExited ? (
+          <ExitUnlockTimerNotification
+            date={deregistrationUnlockDate}
+            timeString={deregistrationUnlockTime}
+          />
+        ) : null}
       </>
     );
   }
 
-  if (state === STAKE_STATE.AWAITING_EXIT) {
+  if (isStakeRequestingExit(node)) {
     return (
       <>
         <NodeContributorList
           contributors={node.contributors}
           data-testid={StakedNodeDataTestId.Contributor_List}
         />
-        {isReadyToExitByUnlock(state, node.requested_unlock_height, blockHeight) ? (
+        {isExited ? null : isReadyToExitByUnlock(
+            state,
+            eventState,
+            node.requested_unlock_height,
+            blockHeight
+          ) ? (
           <ReadyForExitNotification date={liquidationDate} timeString={liquidationTime} />
         ) : (
           <ExitUnlockTimerNotification
@@ -461,14 +487,14 @@ const StakedNodeCard = forwardRef<
 
   const isSoloNode = contributors.length === 1;
 
-  const state = parseStakeState(stake);
+  const state = parseStakeState(stake, blockHeight);
 
   return (
     <StakeCard
       ref={ref}
       {...props}
       data-testid={NodeCardDataTestId.Staked_Node}
-      title={parseStakeState(stake)}
+      title={state}
       statusIndicatorColor={getNodeStatus(state)}
       publicKey={stake.service_node_pubkey}
       isOperator={areHexesEqual(stake.operator_address, address)}
@@ -635,17 +661,28 @@ function StakeNodeCardButton({
   notFoundString?: string;
 }) {
   const dictionary = useTranslations('nodeCard.staked');
+
+  const eventState = parseStakeEventState(stake);
   const isReadyToExitByDeregistrationUnlock = useIsReadyToExitByDeregistrationUnlock(
     state,
+    eventState,
     stake.deregistration_height,
     blockHeight
   );
 
-  if (state === STAKE_STATE.EXITED) {
+  if (
+    state === STAKE_STATE.EXITED ||
+    eventState === STAKE_EVENT_STATE.EXITED ||
+    eventState === STAKE_EVENT_STATE.LIQUIDATED
+  ) {
     return null;
   }
 
-  if (isReadyToExitByDeregistrationUnlock) {
+  if (state === STAKE_STATE.DEREGISTERED) {
+    if (isReadyToExitByDeregistrationUnlock) {
+      return <NodeExitButton />;
+    }
+
     return (
       <Tooltip
         tooltipContent={dictionary('exit.disabledButtonTooltipContent', {

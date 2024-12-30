@@ -1,6 +1,7 @@
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
+  EXIT_TYPE,
   type Stake,
 } from '@session/staking-api-js/client';
 
@@ -11,7 +12,7 @@ enum EVENT {
   ServiceNodeLiquidated = 'ServiceNodeLiquidated',
 }
 
-enum STAKE_EVENT_STATE {
+export enum STAKE_EVENT_STATE {
   UNKNOWN,
   ACTIVE,
   EXIT_REQUESTED,
@@ -64,13 +65,25 @@ export enum STAKE_STATE {
 
 export function isStakeDeregistered(stake: Stake) {
   return !!(
-    stake.exit_type === 'deregistration' &&
+    stake.exit_type === EXIT_TYPE.DEREGISTER &&
     stake.deregistration_height &&
     stake.deregistration_height > 0
   );
 }
 
-export function parseStakeState(stake: Stake) {
+export function isStakeRequestingExit(stake: Stake) {
+  const eventState = parseStakeEventState(stake);
+  return eventState === STAKE_EVENT_STATE.EXIT_REQUESTED;
+}
+
+export function isStakeReadyToExit(stake: Stake, blockHeight: number) {
+  const eventState = parseStakeEventState(stake);
+  return (
+    eventState === STAKE_EVENT_STATE.EXIT_REQUESTED && stake.requested_unlock_height < blockHeight
+  );
+}
+
+export function parseStakeState(stake: Stake, blockHeight: number) {
   const eventState = parseStakeEventState(stake);
 
   if (eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED) {
@@ -82,7 +95,7 @@ export function parseStakeState(stake: Stake) {
   }
 
   if (eventState === STAKE_EVENT_STATE.EXIT_REQUESTED) {
-    return STAKE_STATE.AWAITING_EXIT;
+    return isStakeReadyToExit(stake, blockHeight) ? STAKE_STATE.AWAITING_EXIT : STAKE_STATE.RUNNING;
   }
 
   if (eventState === STAKE_EVENT_STATE.ACTIVE) {

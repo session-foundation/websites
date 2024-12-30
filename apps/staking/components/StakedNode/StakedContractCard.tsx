@@ -132,6 +132,7 @@ const StakedContractCard = forwardRef<
       title={parseStakeContractState(contract)}
       statusIndicatorColor={getContractStatusColor(state)}
       publicKey={contract.service_node_pubkey}
+      isOperator={isOperator}
       summary={<ContractSummary contract={contract} state={state} isOperator={isOperator} />}
       collapsableFirstChildren={<></>}
       collapsableLastChildren={
