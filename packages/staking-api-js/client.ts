@@ -43,13 +43,18 @@ export type StakeContributor = {
   reserved: number;
 };
 
+export enum EXIT_TYPE {
+  /** The node is deregistered by consensus */
+  DEREGISTER = 'deregister',
+}
+
 export type NodeInfo = {
   active: boolean;
   contract_id: number;
   decommission_count: number;
   deregistration_height: number | null;
   earned_downtime_blocks: number;
-  exit_type: string | null;
+  exit_type: EXIT_TYPE | null;
   fetched_block_height: number;
   funded: boolean;
   is_liquidatable: boolean;
@@ -200,10 +205,21 @@ export interface GetNodeLiquidationResponse {
   result: BlsLiquidationResponse;
 }
 
+type ExitLiquidationListItem = {
+  info: {
+    bls_public_key: string;
+  };
+  height: number;
+  liquidation_height: number;
+  service_node_pubkey: string;
+  type: string;
+  version: string;
+};
+
 /** GET /exit_liquidation_list */
 export interface GetExitLiquidationListResponse {
   network: NetworkInfo;
-  result: Array<Stake>;
+  result: Array<ExitLiquidationListItem>;
 }
 
 /** GET /nodes/bls */
