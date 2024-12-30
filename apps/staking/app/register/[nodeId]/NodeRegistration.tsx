@@ -3,7 +3,6 @@
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { QUERY } from '@/lib/constants';
-import { notFound } from 'next/navigation';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { isProduction } from '@/lib/env';
@@ -44,6 +43,6 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
     //   blsKey={node.pubkey_bls}
     //   preparedAt={new Date(node.timestamp * 1000)}
     // />
-    notFound()
+    <span>Not Found</span>
   );
 }
