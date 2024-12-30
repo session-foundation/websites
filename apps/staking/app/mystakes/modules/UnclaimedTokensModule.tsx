@@ -17,6 +17,7 @@ import { Address } from 'viem';
 import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
 import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
 import { safeTrySync } from '@session/util-js/try';
+import { bigIntMax } from '@session/util-crypto/maths';
 
 export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const { address: connectedAddress } = useWallet();
@@ -39,13 +40,14 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const { claimed, refetch: refetchClaimed } = useGetRecipients({ address: address! });
 
   const unclaimedRewards = useMemo(() => {
-    if (!claimed || !data || !('rewards' in data) || !data.rewards) return undefined;
+    if (claimed === undefined || !data || !('rewards' in data) || data.rewards === undefined) {
+      return undefined;
+    }
 
     const [err, rewards] = safeTrySync(() => BigInt(data.rewards));
     if (err) return undefined;
 
-    const claimable = BigInt(rewards) - claimed;
-    return claimable > BigInt(0) ? claimable : BigInt(0);
+    return bigIntMax(rewards - claimed, 0n);
   }, [data, claimed]);
 
   const formattedUnclaimedRewardsAmount = useMemo(
