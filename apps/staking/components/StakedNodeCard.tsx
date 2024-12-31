@@ -697,26 +697,25 @@ function StakeNodeCardButton({
     );
   }
 
-  if (state === STAKE_STATE.AWAITING_EXIT) {
-    if (isReadyToExitByUnlock(state, stake.requested_unlock_height, blockHeight)) {
-      return <NodeExitButtonDialog node={stake} />;
-    }
-
-    return (
-      <Tooltip
-        tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
-          relativeTime: requestedUnlockTime ?? notFoundString,
-          date: requestedUnlockDate
-            ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-            : notFoundString,
-        })}
-      >
-        <NodeExitButton disabled />
-      </Tooltip>
-    );
+  if (isReadyToExitByUnlock(state, stake.requested_unlock_height, blockHeight)) {
+    return <NodeExitButtonDialog node={stake} />;
   }
 
   if (state === STAKE_STATE.RUNNING) {
+    if (isStakeRequestingExit(stake)) {
+      return (
+        <Tooltip
+          tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
+            relativeTime: requestedUnlockTime ?? notFoundString,
+            date: requestedUnlockDate
+              ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
+              : notFoundString,
+          })}
+        >
+          <NodeExitButton disabled />
+        </Tooltip>
+      );
+    }
     return <NodeRequestExitButton node={stake} />;
   }
 }
