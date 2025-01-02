@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDate, formatLocalizedTimeFromSeconds, formatNumber, formatPercentage } from '@/lib/locale-client';
-import { NodeCardDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { ButtonDataTestId, NodeCardDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { Stake } from '@session/staking-api-js/client';
 import { statusVariants } from '@session/ui/components/StatusIndicator';
 import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
@@ -38,6 +38,7 @@ import {
   STAKE_EVENT_STATE,
   STAKE_STATE,
 } from '@/components/StakedNode/state';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -175,13 +176,12 @@ const ReadyForExitNotification = ({
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
-  const notFoundString = dictionaryGeneral('notFound');
   const soonString = dictionaryGeneral('soon');
 
   const isLiquidationSoon = useMemo(() => isDateSoonOrPast(date), [date]);
   const relativeTime = useMemo(
-    () => (!isLiquidationSoon ? timeString : soonString) ?? notFoundString,
-    [isLiquidationSoon, timeString, soonString, notFoundString]
+    () => (!isLiquidationSoon ? timeString : soonString) ?? '',
+    [isLiquidationSoon, timeString, soonString]
   );
 
   return (
@@ -309,18 +309,33 @@ const NodeSummary = ({
   const isExited =
     eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED;
 
+  const isReadyToUnlockByDeregistration = useIsReadyToExitByDeregistrationUnlock(
+    state,
+    eventState,
+    node.deregistration_height,
+    blockHeight
+  );
+
+  const contributors = (
+    <NodeContributorList
+      contributors={node.contributors}
+      data-testid={StakedNodeDataTestId.Contributor_List}
+    />
+  );
+
   if (state === STAKE_STATE.DEREGISTERED) {
     return (
       <>
-        <NodeContributorList
-          contributors={node.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
+        {contributors}
         {!isExited ? (
-          <ExitUnlockTimerNotification
-            date={deregistrationUnlockDate}
-            timeString={deregistrationUnlockTime}
-          />
+          isReadyToUnlockByDeregistration ? (
+            <ReadyForExitNotification date={liquidationDate} timeString={liquidationTime} />
+          ) : (
+            <ExitUnlockTimerNotification
+              date={deregistrationUnlockDate}
+              timeString={deregistrationUnlockTime}
+            />
+          )
         ) : null}
       </>
     );
@@ -329,10 +344,7 @@ const NodeSummary = ({
   if (isStakeRequestingExit(node)) {
     return (
       <>
-        <NodeContributorList
-          contributors={node.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
+        {contributors}
         {isExited ? null : isReadyToExitByUnlock(
             state,
             eventState,
@@ -354,14 +366,7 @@ const NodeSummary = ({
     return <DeregisteringNotification date={deregistrationDate} timeString={deregistrationTime} />;
   }
 
-  if (state === STAKE_STATE.RUNNING) {
-    return (
-      <NodeContributorList
-        contributors={node.contributors}
-        data-testid={StakedNodeDataTestId.Contributor_List}
-      />
-    );
-  }
+  return contributors;
 };
 
 const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) => {
@@ -566,14 +571,14 @@ const StakedNodeCard = forwardRef<
       }
       collapsableLastChildren={
         <>
-          <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+          <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
             <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
           </CollapsableContent>
           {beneficiaryAddress ? (
-            <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+            <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
               <RowLabel>
                 {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
               </RowLabel>
@@ -585,6 +590,10 @@ const StakedNodeCard = forwardRef<
               {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
             </RowLabel>
             {formattedStakedBalance}
+            <CopyToClipboardButton
+              textToCopy={formattedStakedBalance}
+              data-testid={ButtonDataTestId.Staked_Node_Copy_Staked_Balance}
+            />
           </CollapsableContent>
           {!isSoloNode ? (
             <CollapsableContent>
@@ -680,7 +689,7 @@ function StakeNodeCardButton({
 
   if (state === STAKE_STATE.DEREGISTERED) {
     if (isReadyToExitByDeregistrationUnlock) {
-      return <NodeExitButton />;
+      return <NodeExitButtonDialog node={stake} />;
     }
 
     return (
@@ -697,7 +706,7 @@ function StakeNodeCardButton({
     );
   }
 
-  if (isReadyToExitByUnlock(state, stake.requested_unlock_height, blockHeight)) {
+  if (isReadyToExitByUnlock(state, eventState, stake.requested_unlock_height, blockHeight)) {
     return <NodeExitButtonDialog node={stake} />;
   }
 

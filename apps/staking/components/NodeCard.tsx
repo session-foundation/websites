@@ -295,7 +295,7 @@ export const RowLabel = ({ children }: { children: ReactNode }) => (
 );
 
 const collapsableContentVariants = cva(
-  'h-full max-h-0 select-none gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
+  'inline-flex flex-wrap h-full max-h-0 select-none gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
   {
     variants: {
       size: {

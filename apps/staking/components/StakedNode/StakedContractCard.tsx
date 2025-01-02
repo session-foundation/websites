@@ -137,14 +137,14 @@ const StakedContractCard = forwardRef<
       collapsableFirstChildren={<></>}
       collapsableLastChildren={
         <>
-          <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+          <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
             <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
           </CollapsableContent>
           {beneficiaryAddress ? (
-            <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+            <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
               <RowLabel>
                 {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
               </RowLabel>
