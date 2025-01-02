@@ -157,7 +157,7 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
 }
 
 export function useNetworkStatus(
-  networkInfo?: NetworkInfo,
+  networkInfo?: NetworkInfo | null,
   isFetching?: boolean,
   refetch?: () => void
 ) {
