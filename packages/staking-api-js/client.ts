@@ -116,6 +116,7 @@ export type ContributorContractInfo = {
   address: string;
   contributors: Array<StakeContributor>;
   fee: number;
+  node_add_timestamp: number | null;
   operator_address: string;
   pubkey_bls: string;
   service_node_pubkey: string;
