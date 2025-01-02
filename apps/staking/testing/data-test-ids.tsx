@@ -27,6 +27,7 @@ export enum ButtonDataTestId {
   Staked_Node_Request_Exit_Dialog_Cancel = 'button:staked-node-request-exit-dialog-cancel',
   Staked_Node_Request_Exit_Write_Dialog_Submit = 'button:staked-node-request-exit-write-dialog-submit',
   Staked_Node_Exit_Dialog_Submit = 'button:staked-node-exit-dialog-submit',
+  Staked_Node_Copy_Staked_Balance = 'button:staked-node-copy-staked-balance',
   My_Stakes_Error_Retry = 'button:my-stakes-error-retry',
   Open_Nodes_Error_Retry = 'button:open-nodes-error-retry',
   Claim_Tokens_Error_Retry = 'button:claim-tokens-error-retry',
