@@ -11,11 +11,11 @@ import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useMemo } from 'react';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { sortContracts } from '@/app/mystakes/modules/StakedNodesModule';
 import { getNodesBlsKeys } from '@/lib/queries/getNodesBlsKeys';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { sortContracts } from '@/hooks/useStakes';
 
 export default function OpenNodes() {
   const {
