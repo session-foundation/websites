@@ -16,6 +16,7 @@ import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { sortContracts } from '@/hooks/useStakes';
+import { safeTrySync } from '@session/util-js/try';
 
 export default function OpenNodes() {
   const {
@@ -44,9 +45,19 @@ export default function OpenNodes() {
 
   const blsKeys = useMemo(() => {
     if (!blsKeysData) return new Set();
-    const blsKeysArray =
-      'bls_keys' in blsKeysData && Array.isArray(blsKeysData.bls_keys) ? blsKeysData.bls_keys : [];
-    return new Set(blsKeysArray);
+    const blsKeysObject =
+      'bls_keys' in blsKeysData && typeof blsKeysData.bls_keys === 'object'
+        ? blsKeysData.bls_keys
+        : {};
+
+    const [err, keySet] = safeTrySync(() => new Set(Object.values(blsKeysObject)));
+
+    if (err) {
+      console.error(err);
+      return new Set();
+    }
+
+    return keySet;
   }, [blsKeysData]);
 
   const filteredContracts = useMemo(() => {

@@ -226,7 +226,7 @@ export interface GetExitLiquidationListResponse {
 /** GET /nodes/bls */
 export interface GetNodesBlsKeysResponse {
   network: NetworkInfo;
-  bls_keys: Array<string>;
+  bls_keys: Record<number, string>;
 }
 
 /** GET /rewards/<32 byte address> */
