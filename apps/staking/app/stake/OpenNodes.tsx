@@ -44,17 +44,17 @@ export default function OpenNodes() {
   }, [contractsData, address]);
 
   const blsKeys = useMemo(() => {
-    if (!blsKeysData) return new Set();
+    if (!blsKeysData) return new Set<string>();
     const blsKeysObject =
       'bls_keys' in blsKeysData && typeof blsKeysData.bls_keys === 'object'
         ? blsKeysData.bls_keys
         : {};
 
-    const [err, keySet] = safeTrySync(() => new Set(Object.values(blsKeysObject)));
+    const [err, keySet] = safeTrySync(() => new Set(Object.keys(blsKeysObject)));
 
     if (err) {
       console.error(err);
-      return new Set();
+      return new Set<string>();
     }
 
     return keySet;
