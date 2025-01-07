@@ -21,7 +21,6 @@ import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitBu
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
-import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
 import { externalLink } from '@/lib/locale-defaults';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
@@ -39,6 +38,7 @@ import {
   STAKE_STATE,
 } from '@/components/StakedNode/state';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.

@@ -179,8 +179,8 @@ export enum DYNAMIC_MODULE {
 }
 
 export enum HANDRAIL_THRESHOLD {
-  /** 0.005 SENT */
-  CLAIM_REWARDS_AMOUNT = '5000000',
+  /** 0.5 SENT */
+  CLAIM_REWARDS_AMOUNT = '500000000',
 }
 
 export const preferenceStorageKey = 'stake';
