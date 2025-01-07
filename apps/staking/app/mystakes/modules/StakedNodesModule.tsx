@@ -24,7 +24,6 @@ import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { useNetworkStatus } from '@/components/StatusBar';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { useStakes } from '@/hooks/useStakes';
-import { data } from 'autoprefixer';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
   const {
@@ -45,7 +44,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     return () => {
       setNetworkStatusVisible(false);
     };
-  }, [data]);
+  }, []);
 
   return (
     <ModuleGridContent className="h-full md:overflow-y-auto">
