@@ -39,7 +39,7 @@ export const externalLink = (href: string, className?: string) => {
   );
 };
 
-export const clickableText = (onClick: () => void, role?: AriaRole = 'button') => {
+export const clickableText = (onClick: () => void, role: AriaRole = 'button') => {
   return (children: ReactNode) => (
     <span className="text-session-green cursor-pointer underline" onClick={onClick} role={role}>
       {children}
