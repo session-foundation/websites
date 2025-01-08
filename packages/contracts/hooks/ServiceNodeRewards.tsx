@@ -94,18 +94,25 @@ export type UseAddBLSPubKeyReturn = ContractWriteQueryProps & {
   addBLSPubKey: () => void;
 };
 
+export type RegisterNodeContributor = {
+  staker: { addr: Address; beneficiary: Address };
+  stakedAmount: bigint;
+};
+
 export function useAddBLSPubKey({
   blsPubKey,
   blsSignature,
   nodePubKey,
   userSignature,
   fee = 0,
+  contributors = [],
 }: {
   blsPubKey: string;
   blsSignature: string;
   nodePubKey: string;
   userSignature: string;
   fee?: number;
+  contributors?: Array<RegisterNodeContributor>;
 }): UseAddBLSPubKeyReturn {
   const defaultArgs = useMemo(() => {
     const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
@@ -120,7 +127,7 @@ export function useAddBLSPubKey({
       fee,
     };
 
-    return [encodedBlsPubKey, encodedBlsSignature, encodedNodeParams, []] as const;
+    return [encodedBlsPubKey, encodedBlsSignature, encodedNodeParams, contributors] as const;
   }, [blsPubKey, blsSignature, nodePubKey, userSignature]);
 
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({

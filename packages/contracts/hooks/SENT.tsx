@@ -55,15 +55,24 @@ export type SENTAllowanceQuery = ContractReadQueryProps & {
 
 export function useAllowanceQuery({
   contractAddress,
+  gcTime,
 }: {
   contractAddress?: Address | null;
+  gcTime?: number;
 }): SENTAllowanceQuery {
   const { address } = useWallet();
+
+  const args = useMemo(
+    () => (address && contractAddress ? ([address, contractAddress] as const) : undefined),
+    [address, contractAddress]
+  );
+
   const { data: allowance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'allowance',
-    args: [address!, contractAddress!],
-    enabled: !!address && !!contractAddress,
+    args,
+    enabled: !!args,
+    gcTime,
   });
 
   return {
@@ -86,9 +95,11 @@ export type UseProxyApprovalReturn = {
 export function useProxyApproval({
   contractAddress,
   tokenAmount,
+  gcTime,
 }: {
   contractAddress?: Address | null;
   tokenAmount: bigint;
+  gcTime?: number;
 }): UseProxyApprovalReturn {
   const [hasEnoughAllowance, setHasEnoughAllowance] = useState<boolean>(false);
   const [allowanceReadStatusOverride, setAllowanceReadStatusOverride] =
@@ -101,12 +112,15 @@ export function useProxyApproval({
     refetch: refetchRaw,
   } = useAllowanceQuery({
     contractAddress,
+    gcTime,
   });
 
   const refetchAllowance = async () => {
-    setAllowanceReadStatusOverride('pending');
-    await refetchRaw();
-    setAllowanceReadStatusOverride(null);
+    if (contractAddress) {
+      setAllowanceReadStatusOverride('pending');
+      await refetchRaw();
+      setAllowanceReadStatusOverride(null);
+    }
   };
 
   const readStatus = useMemo(
@@ -133,7 +147,9 @@ export function useProxyApproval({
   };
 
   const resetApprove = () => {
-    resetContract();
+    if (contractAddress) {
+      resetContract();
+    }
   };
 
   const approveWrite = () => {
@@ -174,10 +190,12 @@ export function useProxyApproval({
     if (readStatus === 'success' && tokenAmount > BigInt(0) && contractAddress) {
       approveWrite();
     }
-  }, [readStatus, contractAddress]);
+  }, [readStatus, contractAddress, tokenAmount]);
 
   useEffect(() => {
-    void refetchAllowance();
+    if (contractAddress && (readStatusRaw === 'success' || readStatusRaw === 'error')) {
+      void refetchAllowance();
+    }
   }, [contractAddress]);
 
   return {

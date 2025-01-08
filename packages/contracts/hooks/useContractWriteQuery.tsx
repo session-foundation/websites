@@ -3,7 +3,6 @@ import {
   type Address,
   type ContractFunctionArgs,
   type ContractFunctionName,
-  isAddress,
   type SimulateContractErrorType,
   type TransactionExecutionErrorType,
 } from 'viem';
@@ -105,46 +104,38 @@ export function useContractWriteQuery<
     hash,
   });
 
-  const contractDetails = useMemo(() => {
-    if (!isValidChainId(chainId)) return null;
-    const contractAddress = isValidChainId(chainId) ? addresses[contract][chainId] : undefined;
+  const abi = useMemo(() => Contracts[contract] as Abi, [contract]);
+  const contractAddress = useMemo(
+    () => (isValidChainId(chainId) ? addresses[contract][chainId] : undefined),
+    [contract, chainId]
+  );
 
-    if (!contractAddress || !isAddress(contractAddress)) return null;
-
-    const abi = Contracts[contract] as Abi;
-    if (!abi) return null;
-
-    return {
-      address: addressOverride ?? contractAddress,
-      abi,
-      functionName,
-      args: contractArgs as ContractFunctionArgs,
-      chainId,
-    };
-  }, [contract, chainId, functionName, contractArgs, addressOverride]);
-
-  const simulateContractDetails = useMemo(() => {
-    return {
-      ...contractDetails,
-      config,
-      query: {
-        enabled: simulateEnabled,
-        refetchOnWindowFocus: false,
-      },
-    };
-  }, [contractDetails, config, simulateEnabled]);
+  const address = addressOverride ?? contractAddress;
 
   const {
     data,
     status: simulateStatusRaw,
     error: simulateError,
     refetch: refetchRaw,
-  } = useSimulateContract(simulateContractDetails);
+  } = useSimulateContract({
+    address,
+    abi,
+    functionName,
+    args: contractArgs as ContractFunctionArgs,
+    chainId,
+    config,
+    query: {
+      enabled: simulateEnabled,
+      refetchOnWindowFocus: false,
+    },
+  });
 
   const refetchSimulate = async () => {
-    setSimulateStatusOverride('pending');
-    await refetchRaw();
-    setSimulateStatusOverride(null);
+    if (simulateEnabled) {
+      setSimulateStatusOverride('pending');
+      await refetchRaw();
+      setSimulateStatusOverride(null);
+    }
   };
 
   const simulateStatus = useMemo(
@@ -184,9 +175,15 @@ export function useContractWriteQuery<
   const writeContractWithoutSimulating: WriteContractFunction<Args> = (args) => {
     if (args) setContractArgs(args);
 
-    if (!contractDetails) throw new Error('Contract details are not defined');
+    if (!address) throw new Error('Contract address is not defined');
 
-    writeContract(contractDetails);
+    writeContract({
+      address,
+      abi,
+      functionName,
+      args: contractArgs as ContractFunctionArgs,
+      chainId,
+    });
   };
 
   const resetContract = () => {

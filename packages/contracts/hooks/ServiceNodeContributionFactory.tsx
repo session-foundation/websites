@@ -1,5 +1,5 @@
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   encodeBlsPubKey,
   encodeBlsSignature,
@@ -7,25 +7,12 @@ import {
   encodeED25519Signature,
 } from '../util';
 import type { Address } from 'viem';
-import { useWatchContractEvent } from 'wagmi';
-import { addresses, isValidChainId } from '../constants';
-import { ServiceNodeContributionFactoryAbi } from '../abis';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export type UseCreateOpenNode = ContractWriteQueryProps & {
   createOpenNode: () => void;
-  openNodeContractAddress: Address | null;
 };
 
-export function useCreateOpenNode({
-  blsPubKey,
-  blsSignature,
-  nodePubKey,
-  userSignature,
-  autoStart,
-  reservedContributors,
-  fee,
-}: {
+type UseCreateOpenNodeParams = {
   blsPubKey: string;
   blsSignature: string;
   nodePubKey: string;
@@ -36,7 +23,17 @@ export function useCreateOpenNode({
     amount: bigint;
   }>;
   fee: number;
-}): UseCreateOpenNode {
+};
+
+export function useCreateOpenNode({
+  blsPubKey,
+  blsSignature,
+  nodePubKey,
+  userSignature,
+  autoStart,
+  reservedContributors,
+  fee,
+}: UseCreateOpenNodeParams): UseCreateOpenNode {
   const { pubKey } = encodeED25519PubKey(nodePubKey);
 
   const defaultArgs = useMemo(() => {
@@ -67,50 +64,8 @@ export function useCreateOpenNode({
     defaultArgs: defaultArgs,
   });
 
-  const { openNodeContractAddress } = useWatchForNewOpenNode({ encodedNodePubKey: pubKey });
-
   return {
     createOpenNode: simulateAndWriteContract,
-    openNodeContractAddress,
     ...rest,
-  };
-}
-
-export type UseWatchForNewOpenNode = {
-  openNodeContractAddress: Address | null;
-};
-
-// TODO: remove this and use the v2 backend info instead
-export function useWatchForNewOpenNode({
-  encodedNodePubKey,
-}: {
-  encodedNodePubKey: bigint;
-}): UseWatchForNewOpenNode {
-  const [openNodeContractAddress, setOpenNodeContractAddress] = useState<Address | null>(null);
-  const { chainId, config } = useWallet();
-
-  useWatchContractEvent({
-    address: isValidChainId(chainId)
-      ? addresses.ServiceNodeContributionFactory[chainId]
-      : undefined,
-    eventName: 'NewServiceNodeContributionContract',
-    chainId,
-    abi: ServiceNodeContributionFactoryAbi,
-    batch: false,
-    onLogs: (logs) => {
-      if (
-        logs[0]?.args.serviceNodePubkey === encodedNodePubKey &&
-        logs[0]?.args.contributorContract
-      ) {
-        setOpenNodeContractAddress(logs[0].args.contributorContract);
-      }
-    },
-    poll: true,
-    pollingInterval: 1000,
-    config,
-  });
-
-  return {
-    openNodeContractAddress,
   };
 }

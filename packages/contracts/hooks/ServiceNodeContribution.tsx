@@ -26,6 +26,7 @@ export function useContributeFunds({
   });
 
   const contributeFunds = (contractAddress: Address) => {
+    if (!contractAddress) throw new Error('Contract address is not defined');
     setContractAddress(contractAddress);
     return simulateAndWriteContract();
   };
