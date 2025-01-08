@@ -1,14 +1,14 @@
 'use client';
 
+import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import {
+  type FormatDistanceStrictOptions,
+  type FormatDistanceToNowStrictOptions,
   formatDistanceStrict,
-  FormatDistanceStrictOptions,
   formatDistanceToNowStrict,
-  FormatDistanceToNowStrictOptions,
 } from 'date-fns';
 import { useLocale as _useLocale } from 'next-intl';
-import { getDateFnsLocale, type Locale } from './locale-util';
-import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { type Locale, getDateFnsLocale } from './locale-util';
 
 export const useLocale = _useLocale as () => Locale;
 
@@ -66,7 +66,7 @@ export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions
 
 export type DecimalDelimiter = '.' | ',';
 
-export const getDecimalDelimiter = (): DecimalDelimiter => {
+export const useDecimalDelimiter = (): DecimalDelimiter => {
   const locale = useLocale();
   const decimal = Intl.NumberFormat(locale)
     .formatToParts(1.1)

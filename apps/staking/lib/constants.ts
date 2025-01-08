@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
-import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
-import { LocaleKey } from './locale-util';
+import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
+import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
-import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
+import type { LocaleKey } from './locale-util';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -124,6 +124,14 @@ export const SESSION_NODE_MIN_STAKE_SOLO = SESSION_NODE_FULL_STAKE_AMOUNT;
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
   MS_PER_BLOCK = 2 * 60 * 1000,
+  /** The number of confirmations required to register a node */
+  GOAL_REGISTRATION_CONFIRMATIONS = 5,
+  /** 5 minutes */
+  REGISTRATION_MS_PER_CONFIRMATION_ESTIMATE = 5 * 60 * 1000,
+  /** Min Operator Fee */
+  MIN_OPERATOR_FEE = 0,
+  /** Max Operator Fee */
+  MAX_OPERATOR_FEE = 100,
 }
 
 export enum SESSION_NODE_TIME_STATIC {
@@ -188,11 +196,13 @@ export const preferenceStorageKey = 'stake';
 export enum PREFERENCE {
   BACKEND_URL = 'backendUrl',
   PREF_REGISTRATION_MODE = 'prefRegistrationMode',
+  SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
 }
 
 export const preferenceStorageDefaultItems = {
   [PREFERENCE.BACKEND_URL]: '/api/ssb',
   [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: false,
 } as const;
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
@@ -201,6 +211,7 @@ export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
   [REG_TAB.OPERATOR_FEE]: 'https://docs.getsession.org/TBD',
   [REG_TAB.REWARDS_ADDRESS]: 'https://docs.getsession.org/TBD',
   [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]: 'https://docs.getsession.org/TBD',
   [REG_TAB.RESERVE_SLOTS]: 'https://docs.getsession.org/TBD',
   [REG_TAB.RESERVE_SLOTS_INPUT]: 'https://docs.getsession.org/TBD',
   [REG_TAB.AUTO_ACTIVATE]: 'https://docs.getsession.org/TBD',
@@ -211,4 +222,8 @@ export enum LAST_UPDATED_BEHIND_TRIGGER {
   BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
   /** 4 minutes */
   BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
+  /** 2.5 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
 }
