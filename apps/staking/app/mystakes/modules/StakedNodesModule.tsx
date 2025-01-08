@@ -6,7 +6,6 @@ import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
-  ModuleGridContent,
   ModuleGridHeader,
   ModuleGridInfoContent,
   ModuleGridTitle,
@@ -24,6 +23,7 @@ import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { useNetworkStatus } from '@/components/StatusBar';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { useStakes } from '@/hooks/useStakes';
+import { NodeListModuleContent } from '@/components/NodesListModule';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
   const {
@@ -47,7 +47,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
   }, []);
 
   return (
-    <ModuleGridContent className="h-full md:overflow-y-auto">
+    <NodeListModuleContent>
       {isError ? (
         <ErrorMessage refetch={refetch} />
       ) : isLoading ? (
@@ -80,7 +80,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
       ) : (
         <NoNodes />
       )}
-    </ModuleGridContent>
+    </NodeListModuleContent>
   );
 }
 
