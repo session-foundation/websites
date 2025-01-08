@@ -58,7 +58,7 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const canClaim = Boolean(
     status === 'success' &&
       unclaimedRewards &&
-      unclaimedRewards >= BigInt(HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT)
+      unclaimedRewards >= HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT
   );
 
   return {
