@@ -1,31 +1,32 @@
 'use client';
 
-import { useProxyApproval } from '@session/contracts/hooks/SENT';
-import { useEffect, useMemo, useState } from 'react';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
-import { useTranslations } from 'next-intl';
+import { useProxyApproval } from '@session/contracts/hooks/SENT';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import type { Address } from 'viem';
+
+export type UseContributeStakeToOpenNodeParams = {
+  stakeAmount: bigint;
+  userAddress: Address;
+  beneficiary?: Address;
+  contractAddress: Address | null;
+};
 
 export default function useContributeStakeToOpenNode({
   stakeAmount,
   userAddress,
   beneficiary,
   contractAddress,
-}: {
-  stakeAmount: bigint;
-  userAddress: Address;
-  beneficiary?: Address;
-  contractAddress: Address | null;
-}) {
+}: UseContributeStakeToOpenNodeParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const stageDictKey = 'actionModules.register.stageMulti' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('actionModules.register.stageMulti');
+  const dictGeneral = useTranslations('general');
 
   const {
     approve,
@@ -40,6 +41,7 @@ export default function useContributeStakeToOpenNode({
     // TODO: Create network provider to handle network specific logic
     contractAddress,
     tokenAmount: stakeAmount,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const {
@@ -68,10 +70,9 @@ export default function useContributeStakeToOpenNode({
   const approveErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'approve',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: approveSimulateError,
         writeError: approveWriteError,
         transactionError: approveTransactionError,
@@ -82,10 +83,9 @@ export default function useContributeStakeToOpenNode({
   const contributeFundsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'contribute',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: contributeFundsSimulateError,
         writeError: contributeFundsWriteError,
         transactionError: contributeFundsTransactionError,
@@ -124,5 +124,11 @@ export default function useContributeStakeToOpenNode({
     contributeFundsErrorMessage,
     contributeFundsStatus,
     enabled,
+    approveWriteError,
+    approveSimulateError,
+    approveTransactionError,
+    contributeFundsSimulateError,
+    contributeFundsWriteError,
+    contributeFundsTransactionError,
   };
 }

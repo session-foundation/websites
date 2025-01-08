@@ -26,8 +26,8 @@ export default function useClaimRewards({
   const [skipUpdateBalance, setSkipUpdateBalance] = useState<boolean>(false);
 
   const stageDictKey = 'modules.claim.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations(stageDictKey);
+  const dictGeneral = useTranslations('general');
 
   const {
     updateRewardsBalance,
@@ -83,10 +83,9 @@ export default function useClaimRewards({
   const updateRewardsBalanceErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'balance',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: updateBalanceSimulateError,
         writeError: updateBalanceWriteError,
         transactionError: updateBalanceTransactionError,
@@ -97,10 +96,9 @@ export default function useClaimRewards({
   const claimRewardsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'claim',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: claimSimulateError,
         writeError: claimWriteError,
         transactionError: claimTransactionError,

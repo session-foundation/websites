@@ -11,9 +11,8 @@ type UseRequestNodeExitParams = {
 };
 
 export default function useRequestNodeExit({ contractId }: UseRequestNodeExitParams) {
-  const stageDictKey = 'nodeCard.staked.requestExit.dialog.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('nodeCard.staked.requestExit.dialog.stage');
+  const dictGeneral = useTranslations('general');
 
   const {
     initiateRemoveBLSPublicKey,
@@ -32,10 +31,9 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
   const errorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'arbitrum',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError,
         writeError,
         transactionError,
