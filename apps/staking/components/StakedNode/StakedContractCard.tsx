@@ -216,7 +216,7 @@ function StakedContractCardButton({
 
   return (
     <CollapsableContent
-      className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
+      className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
       size="buttonMd"
     >
       <Link href={`/stake/${contract.address}`}>
