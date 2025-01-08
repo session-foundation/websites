@@ -2,6 +2,8 @@ export type NetworkInfo = {
   block_height: number;
   block_timestamp: number;
   block_top_hash: string;
+  l2_height: number;
+  l2_height_timestamp: number;
   hard_fork: number;
   max_stakers: number;
   min_operator_stake: number;
@@ -33,6 +35,12 @@ export interface Contributor {
 export interface GetContributionContractsResponse {
   network: NetworkInfo;
   contracts: ContributorContractInfo[];
+}
+
+/** GET /contract/contribution/<sn key> */
+export interface GetContributionContractForNodePubkeyResponse {
+  network: NetworkInfo;
+  contract: ContributorContractInfo;
 }
 
 /** GET /stakes/<32 byte address> */
@@ -381,6 +389,18 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return this.request<GetContributionContractsResponse>(options);
+  }
+
+  public async getContributionContractForNodePubkey({
+    nodePubKey,
+  }: {
+    nodePubKey: string;
+  }): Promise<StakingBackendResponse<GetContributionContractForNodePubkeyResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/contract/contribution/${nodePubKey}`,
+      method: 'GET',
+    };
+    return this.request<GetContributionContractForNodePubkeyResponse>(options);
   }
 
   /**
