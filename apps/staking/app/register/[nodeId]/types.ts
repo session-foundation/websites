@@ -1,21 +1,19 @@
 export enum REG_TAB {
-  START,
+  START = 0,
   //
-  REWARDS_ADDRESS_INPUT_SOLO,
-  SUBMIT_SOLO,
-  SUCCESS_SOLO,
-  ERROR_SOLO,
+  REWARDS_ADDRESS_INPUT_SOLO = 1,
+  SUBMIT_SOLO = 2,
+  SUCCESS_SOLO = 3,
   //
-  STAKE_AMOUNT,
-  OPERATOR_FEE,
-  REWARDS_ADDRESS,
-  REWARDS_ADDRESS_INPUT_MULTI,
-  RESERVE_SLOTS,
-  RESERVE_SLOTS_INPUT,
-  AUTO_ACTIVATE,
-  SUBMIT_MULTI,
-  SUCCESS_MULTI,
-  ERROR_MULTI,
+  STAKE_AMOUNT = 4,
+  OPERATOR_FEE = 5,
+  REWARDS_ADDRESS = 6,
+  REWARDS_ADDRESS_INPUT_MULTI = 7,
+  RESERVE_SLOTS = 8,
+  RESERVE_SLOTS_INPUT = 9,
+  AUTO_ACTIVATE = 10,
+  SUBMIT_MULTI = 11,
+  SUCCESS_MULTI = 12,
 }
 
 export function parseTab(tab: REG_TAB) {
@@ -27,6 +25,8 @@ export function parseTab(tab: REG_TAB) {
       return 'rewardsAddressInputSolo';
     case REG_TAB.SUBMIT_SOLO:
       return 'submitSolo';
+    case REG_TAB.SUCCESS_SOLO:
+      return 'successSolo';
     // MULTI
     case REG_TAB.REWARDS_ADDRESS_INPUT_MULTI:
       return 'rewardsAddressInputMulti';
@@ -46,8 +46,6 @@ export function parseTab(tab: REG_TAB) {
       return 'submitMulti';
     case REG_TAB.SUCCESS_MULTI:
       return 'successMulti';
-    case REG_TAB.ERROR_MULTI:
-      return 'errorMulti';
     default:
       throw new Error(`Unknown tab: ${tab}`);
   }

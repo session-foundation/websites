@@ -1,15 +1,13 @@
 'use client';
 
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
+import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationForm';
+import { Registration } from '@/app/register/[nodeId]/Registration';
 import { QUERY } from '@/lib/constants';
+import { isProduction } from '@/lib/env';
+import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { isProduction } from '@/lib/env';
-import {
-  NodeRegistrationForm,
-  NodeRegistrationFormSkeleton,
-} from '@/app/register/[nodeId]/NodeRegistrationForm';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   const { address } = useWallet();
@@ -26,7 +24,7 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       }
     );
 
-  const node =
+  const registration =
     registrationsData &&
     'registrations' in registrationsData &&
     Array.isArray(registrationsData.registrations)
@@ -35,14 +33,15 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
 
   return isLoadingRegistrations ? (
     <NodeRegistrationFormSkeleton />
-  ) : node ? (
-    <NodeRegistrationForm node={node} />
+  ) : registration ? (
+    <Registration
+      ed25519PubKey={registration.pubkey_ed25519}
+      ed25519Signature={registration.sig_ed25519}
+      blsKey={registration.pubkey_bls}
+      blsSignature={registration.sig_bls}
+      preparedAt={new Date(registration.timestamp * 1000)}
+    />
   ) : (
-    // <Registration
-    //   ed25519PubKey={node.pubkey_ed25519}
-    //   blsKey={node.pubkey_bls}
-    //   preparedAt={new Date(node.timestamp * 1000)}
-    // />
     <span>Not Found</span>
   );
 }
