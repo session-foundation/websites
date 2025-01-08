@@ -171,19 +171,19 @@ export function useNetworkStatus(
     if (networkInfo) {
       context.setNetworkInfo(networkInfo);
     }
-  }, [networkInfo]);
+  }, [networkInfo, context.setNetworkInfo]);
 
   useEffect(() => {
     if (isFetching !== undefined) {
       context.setNetworkInfoIsFetching(isFetching);
     }
-  }, [isFetching]);
+  }, [isFetching, context.setNetworkInfoIsFetching]);
 
   useEffect(() => {
     if (refetch) {
       context.setRefetch(() => refetch);
     }
-  }, [refetch]);
+  }, [refetch, context.setRefetch]);
 
   return context;
 }
