@@ -31,6 +31,12 @@ export function getContractErrorName(
 ) {
   let reason = error.name;
 
+  // uncomment this to log the object, trust me it's useful
+  // console.log({
+  //   error,
+  //   errorKeys: Object.keys(error),
+  // });
+
   if (error?.cause && typeof error.cause === 'object') {
     if (
       'data' in error.cause &&
@@ -51,6 +57,21 @@ export function getContractErrorName(
       typeof error.cause.cause.name === 'string'
     ) {
       reason = error.cause.cause.name;
+    } else if ('name' in error.cause && error.cause.name && typeof error.cause.name === 'string') {
+      reason = error.cause.name;
+      if (
+        reason === 'ContractFunctionRevertedError' &&
+        'reason' in error.cause &&
+        error.cause.reason &&
+        typeof error.cause.reason === 'string'
+      ) {
+        const reasonLower = error.cause.reason.toLowerCase();
+        if (reasonLower.includes('reject') && reasonLower.includes('user')) {
+          reason = 'UserRejectedRequest';
+        } else if (reasonLower.includes('internal') && reasonLower.includes('rpc')) {
+          reason = 'InternalRpc';
+        }
+      }
     }
   }
 
