@@ -1,23 +1,23 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
-import { useTranslations } from 'next-intl';
+import { NodesListSkeleton } from '@/components/NodesListModule';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { QUERY, URL } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
-import { NodesListSkeleton } from '@/components/NodesListModule';
-import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
-import { externalLink } from '@/lib/locale-defaults';
-import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { externalLink } from '@/lib/locale-defaults';
+import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
+import { useStakes } from '@/hooks/useStakes';
 
 export default function NodeRegistrations() {
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
@@ -33,12 +33,7 @@ export default function NodeRegistrations() {
 
   const { address, isConnected } = useWallet();
 
-  const {
-    data: registrationsData,
-    isLoading: isLoadingRegistrations,
-    isError,
-    refetch,
-  } = useStakingBackendQueryWithParams(
+  const { data, isLoading, isError, refetch } = useStakingBackendQueryWithParams(
     getNodeRegistrations,
     { address: address! },
     {
@@ -49,69 +44,27 @@ export default function NodeRegistrations() {
     }
   );
 
-  const { data: stakesData, isLoading: isLoadingStakes } = useStakingBackendQueryWithParams(
-    getStakedNodes,
-    { address: address! },
-    {
-      enabled: isConnected,
-      staleTime: isProduction
-        ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-        : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-    }
-  );
+  const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
   const nodes = useMemo(() => {
-    if (showNoNodes) {
-      return [];
-    }
-
-    if (isLoadingRegistrations || isLoadingStakes) {
-      return [];
-    }
-
     if (
-      !stakesData ||
-      ('stakes' in stakesData && Array.isArray(stakesData.stakes) && !stakesData?.stakes?.length)
+      showNoNodes ||
+      !data ||
+      !('registrations' in data) ||
+      !Array.isArray(data.registrations) ||
+      isLoadingStakes ||
+      !addedBlsKeys
     ) {
-      if (
-        registrationsData &&
-        'registrations' in registrationsData &&
-        Array.isArray(registrationsData.registrations)
-      ) {
-        return registrationsData.registrations;
-      }
       return [];
     }
 
-    const stakedNodeEd25519Pubkeys =
-      stakesData && 'stakes' in stakesData && stakesData.stakes && Array.isArray(stakesData.stakes)
-        ? stakesData.stakes.map(({ service_node_pubkey }) => service_node_pubkey)
-        : [];
-
-    if (
-      registrationsData &&
-      'registrations' in registrationsData &&
-      Array.isArray(registrationsData.registrations)
-    ) {
-      return registrationsData?.registrations.filter(
-        ({ pubkey_ed25519 }) => !stakedNodeEd25519Pubkeys.includes(pubkey_ed25519)
-      );
-    }
-
-    return [];
-  }, [
-    isLoadingRegistrations,
-    isLoadingStakes,
-    registrationsData,
-    stakesData,
-    address,
-    showNoNodes,
-  ]);
+    return data.registrations.filter(({ pubkey_bls }) => !addedBlsKeys.has(pubkey_bls));
+  }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
   return isError ? (
     <ErrorMessage refetch={refetch} />
   ) : address ? (
-    isLoadingStakes || isLoadingRegistrations ? (
+    isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
     ) : nodes?.length ? (
       nodes.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)

@@ -1,17 +1,17 @@
+import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
+import { isStakeRequestingExit, parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
+import { CONTRIBUTION_CONTRACT } from '@/lib/constants';
+import { getStakedNodes } from '@/lib/queries/getStakedNodes';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
   type Stake,
 } from '@session/staking-api-js/client';
-import { Address } from 'viem';
-import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { isStakeRequestingExit, parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useMemo } from 'react';
-import { CONTRIBUTION_CONTRACT } from '@/lib/constants';
+import type { Address } from 'viem';
 
 export const sortingTotalStakedDesc = (
   a: Stake | ContributorContractInfo,
@@ -45,7 +45,7 @@ const contractStateSortOrderIfOperator = {
  * NOTE: If both stakes are {@link STAKE_STATE.DECOMMISSIONED} then they are sorted by earned_downtime_blocks ascending
  * NOTE: If both stakes are {@link STAKE_STATE.AWAITING_EXIT} then they are sorted by requested_unlock_height ascending
  */
-export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight: number = 0) {
+export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight = 0) {
   const stateA = parseStakeState(a, blockHeight);
   const stateB = parseStakeState(b, blockHeight);
 
@@ -69,12 +69,18 @@ export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight: n
 
   if (stateA === STAKE_STATE.DECOMMISSIONED || stateB === STAKE_STATE.DECOMMISSIONED) {
     // earned_downtime_blocks ascending
-    return (a.earned_downtime_blocks ?? Infinity) - (b.earned_downtime_blocks ?? Infinity);
+    return (
+      (a.earned_downtime_blocks ?? Number.POSITIVE_INFINITY) -
+      (b.earned_downtime_blocks ?? Number.POSITIVE_INFINITY)
+    );
   }
 
   if (isStakeRequestingExit(a) || isStakeRequestingExit(b)) {
     // requested_unlock_height ascending
-    return (a.requested_unlock_height ?? Infinity) - (b.requested_unlock_height ?? Infinity);
+    return (
+      (a.requested_unlock_height ?? Number.POSITIVE_INFINITY) -
+      (b.requested_unlock_height ?? Number.POSITIVE_INFINITY)
+    );
   }
 
   const stakeSort = sortingTotalStakedDesc(a, b, address);
@@ -129,7 +135,7 @@ export function useStakes(overrideAddress?: Address) {
       { enabled }
     );
 
-  const [stakes, contracts, blockHeight, networkTime, network] = useMemo(() => {
+  const [stakes, contracts, addedBlsKeys, blockHeight, networkTime, network] = useMemo(() => {
     if (!address || !data) return [[], [], null, null, null];
     const stakesArr = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];
     const contractsArr = 'contracts' in data && Array.isArray(data.contracts) ? data.contracts : [];
@@ -142,25 +148,51 @@ export function useStakes(overrideAddress?: Address) {
     const networkTime =
       net && 'block_timestamp' in net && net.block_timestamp ? data.network.block_timestamp : 0;
 
-    const stakeBlsKeys = new Set(stakesArr.map(({ pubkey_bls }) => pubkey_bls));
+    const addedBlsKeysSet = new Set(
+      stakesArr
+        .filter((stake) => parseStakeState(stake, blockHeight) !== STAKE_STATE.EXITED)
+        .map(({ pubkey_bls }) => pubkey_bls)
+    );
 
     const limitAgeJoiningTimestamp = Date.now() - CONTRIBUTION_CONTRACT.MAX_AGE_JOINING_MS;
-    const filteredContracts = contractsArr
-      .filter(({ pubkey_bls }) => !stakeBlsKeys.has(pubkey_bls.slice(2)))
-      .filter(
-        ({ node_add_timestamp }) =>
-          !node_add_timestamp || node_add_timestamp * 1000 > limitAgeJoiningTimestamp
-      );
+
+    const addedAwaitingOperatorContracts = new Set();
+
+    const filteredContracts = contractsArr.filter(({ pubkey_bls, node_add_timestamp, status }) => {
+      switch (status) {
+        case CONTRIBUTION_CONTRACT_STATUS.Finalized:
+          // Should only include the finalised contracts that have no bls key added time or have an added time recently
+          return !node_add_timestamp || node_add_timestamp * 1000 > limitAgeJoiningTimestamp;
+
+        case CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib:
+          /**
+           * Only include one awaiting operator contract per bls key. This will should probably be
+           * the latest created contract based on database insert order on the backend.
+           */
+          if (
+            !addedBlsKeysSet.has(pubkey_bls.slice(2)) &&
+            !addedAwaitingOperatorContracts.has(pubkey_bls)
+          ) {
+            addedAwaitingOperatorContracts.add(pubkey_bls);
+            return true;
+          }
+          return false;
+
+        default:
+          return !addedBlsKeysSet.has(pubkey_bls.slice(2));
+      }
+    });
 
     stakesArr.sort((a, b) => sortStakes(a, b, address, blockHeight));
     filteredContracts.sort((a, b) => sortContracts(a, b, address));
 
-    return [stakesArr, filteredContracts, blockHeight, networkTime, net];
+    return [stakesArr, filteredContracts, addedBlsKeysSet, blockHeight, networkTime, net];
   }, [data, address]);
 
   return {
     stakes,
     contracts,
+    addedBlsKeys,
     network,
     blockHeight,
     networkTime,
