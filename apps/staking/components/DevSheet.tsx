@@ -442,7 +442,7 @@ async function ejectNodes({
     const arrBigInted = array.map(BigInt);
 
     const hash = await wallet.writeContract({
-      address: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
+      address: addresses.ServiceNodeRewards[arbitrumSepolia.id],
       abi: TestnetServiceNodeRewardsAbi,
       functionName: 'exitNodeBySNID',
       args: [arrBigInted],
