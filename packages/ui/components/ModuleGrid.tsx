@@ -13,7 +13,7 @@ const moduleGridVariants = cva('module-grid', {
         'shadow-md border-[2px] rounded-2xl border-[#668C83] border-opacity-80 flex flex-col overflow-hidden',
     },
     size: {
-      md: 'gap-2 md:gap-4 grid-cols-1 sm:grid-cols-2',
+      md: 'gap-1 md:gap-2 grid-cols-1 sm:grid-cols-2',
       lg: 'lg:gap-8 xl:grid-cols-3 grid-cols-1',
     },
     colSpan: {
@@ -75,8 +75,8 @@ const ModuleGridHeader = forwardRef<HTMLDivElement, ModuleGridHeaderProps>(
     <div
       ref={ref}
       className={cn(
-        'flex w-full flex-row items-center justify-between px-4 pt-6',
-        keepDesktopHeaderOnMobile ? 'relative top-0' : 'absolute -top-16 md:relative md:top-0',
+        'flex w-full flex-row items-center justify-between px-2 pt-4',
+        keepDesktopHeaderOnMobile ? 'relative top-0' : 'absolute -top-14 md:relative md:top-0',
         className
       )}
       {...props}
@@ -85,13 +85,53 @@ const ModuleGridHeader = forwardRef<HTMLDivElement, ModuleGridHeaderProps>(
 );
 ModuleGridHeader.displayName = 'ModuleGridHeader';
 
-const ModuleGridContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+export enum MODULE_GRID_ALIGNMENT {
+  /** Centers the content */
+  CENTER = 'center',
+  /** Aligns the content to the top */
+  TOP = 'top',
+  /** Aligns the content to the top with a 1/3 offset */
+  TOP_1_3 = 'top-1/3',
+}
+
+type ModuleGridContentProps = HTMLAttributes<HTMLDivElement> & {
+  containerClassName?: string;
+  /** The alignment of the content Defaults to {@link MODULE_GRID_ALIGNMENT.TOP_1_3} */
+  alignment?: MODULE_GRID_ALIGNMENT;
+};
+
+const ModuleGridContent = forwardRef<HTMLDivElement, ModuleGridContentProps>(
+  (
+    {
+      alignment = MODULE_GRID_ALIGNMENT.TOP_1_3,
+      className,
+      containerClassName,
+      children,
+      ...props
+    },
+    ref
+  ) => (
     <div
       ref={ref}
-      className={cn('flex flex-col gap-2 p-2 align-middle md:p-8 md:pt-0', className)}
+      className={cn(
+        'flex h-full flex-col overflow-y-auto',
+        alignment === MODULE_GRID_ALIGNMENT.CENTER
+          ? 'justify-center'
+          : 'justify-center md:justify-start',
+        containerClassName
+      )}
       {...props}
-    />
+    >
+      <div
+        className={cn(
+          'fade-to-transparent-b flex h-max flex-col gap-2 p-4 align-middle md:p-6',
+          alignment === MODULE_GRID_ALIGNMENT.TOP_1_3 ? 'md:pt-[20vh]' : '',
+          className
+        )}
+      >
+        {children}
+      </div>
+    </div>
   )
 );
 ModuleGridContent.displayName = 'ModuleGridContent';
@@ -105,8 +145,9 @@ function ModuleGridInfoContent({
 }) {
   return (
     <ModuleGridContent
+      alignment={MODULE_GRID_ALIGNMENT.CENTER}
       className={cn(
-        'text-session-text flex h-full w-1/2 flex-col items-center justify-center gap-6 self-center text-center text-xl',
+        'text-session-text max-w-xl flex w-full flex-col items-center gap-6 self-center text-center text-xl',
         className
       )}
     >

@@ -6,7 +6,7 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 
 import { cn } from '../../lib/utils';
 import { buttonVariants } from './button';
-import { ModuleGridContent, ModuleGridHeader } from '../ModuleGrid';
+import { MODULE_GRID_ALIGNMENT, ModuleGridContent, ModuleGridHeader } from '../ModuleGrid';
 import { Module } from '../Module';
 import { X } from 'lucide-react';
 
@@ -63,7 +63,10 @@ const AlertDialogContent = React.forwardRef<
           </AlertDialogPrimitive.Cancel>
         </ModuleGridHeader>
         <AlertDialogDescription asChild>
-          <ModuleGridContent className={cn('overflow-y-auto p-8', className)}>
+          <ModuleGridContent
+            className={cn('overflow-y-auto', className)}
+            alignment={MODULE_GRID_ALIGNMENT.TOP}
+          >
             {children}
           </ModuleGridContent>
         </AlertDialogDescription>
