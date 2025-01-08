@@ -134,7 +134,6 @@ const StakedContractCard = forwardRef<
       publicKey={contract.service_node_pubkey}
       isOperator={isOperator}
       summary={<ContractSummary contract={contract} state={state} isOperator={isOperator} />}
-      collapsableFirstChildren={<></>}
       collapsableLastChildren={
         <>
           <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
@@ -214,6 +213,7 @@ function StakedContractCardButton({
     return null;
   }
 
+  /** TODO: cleanup breakpoints */
   return (
     <CollapsableContent
       className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
