@@ -188,11 +188,13 @@ export const preferenceStorageKey = 'stake';
 export enum PREFERENCE {
   BACKEND_URL = 'backendUrl',
   PREF_REGISTRATION_MODE = 'prefRegistrationMode',
+  SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
 }
 
 export const preferenceStorageDefaultItems = {
   [PREFERENCE.BACKEND_URL]: '/api/ssb',
   [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: false,
 } as const;
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
@@ -211,4 +213,8 @@ export enum LAST_UPDATED_BEHIND_TRIGGER {
   BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
   /** 4 minutes */
   BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
+  /** 2.5 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
 }
