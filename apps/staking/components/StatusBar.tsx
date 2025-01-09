@@ -7,13 +7,13 @@ import { ListXIcon } from '@session/ui/icons/ListX';
 import { ListChecksIcon } from '@session/ui/icons/ListChecks';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { NetworkInfo } from '@session/staking-api-js/client';
-import { LAST_UPDATED_BEHIND_TRIGGER } from '@/lib/constants';
-import { cn } from '@session/ui/lib/utils';
+import { LAST_UPDATED_BEHIND_TRIGGER, PREFERENCE } from '@/lib/constants';
 import { StatusIndicator } from '@session/ui/components/StatusIndicator';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { clickableText } from '@/lib/locale-defaults';
+import { usePreferences } from 'usepref';
 
 export function StatusBar() {
   const now = Date.now();
@@ -21,8 +21,19 @@ export function StatusBar() {
   const { networkStatusVisible, networkInfo, networkInfoIsFetching, refetch } = useNetworkStatus();
   const dictionary = useTranslations('statusBar');
 
+  const { getItem } = usePreferences();
+  const showL2HeightOnStatusBarFlag = getItem<boolean>(PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR);
+  const showL2HeightOnStatusBar = showL2HeightOnStatusBarFlag === true;
+
   const blockRelativeTime = useRelativeTime(
     networkInfo?.block_timestamp ? new Date(networkInfo?.block_timestamp * 1000) : undefined,
+    { addSuffix: true }
+  );
+
+  const l2HeightRelativeTime = useRelativeTime(
+    networkInfo?.l2_height_timestamp
+      ? new Date(networkInfo?.l2_height_timestamp * 1000)
+      : undefined,
     { addSuffix: true }
   );
 
@@ -36,17 +47,92 @@ export function StatusBar() {
       now
     : false;
 
+  const showL2HeightBehindWarning = networkInfo
+    ? networkInfo.l2_height_timestamp * 1000 +
+        LAST_UPDATED_BEHIND_TRIGGER.BACKEND_L2_HEIGHT_WARNING <
+      now
+    : false;
+
+  const showL2HeightBehindError = networkInfo
+    ? networkInfo.l2_height_timestamp * 1000 + LAST_UPDATED_BEHIND_TRIGGER.BACKEND_L2_HEIGHT_ERROR <
+      now
+    : false;
+
   const handleClick = () => {
     if (
       !networkInfoIsFetching &&
-      (showNetworkBehindError || showNetworkBehindWarning || !networkInfo)
+      (showNetworkBehindError ||
+        showNetworkBehindWarning ||
+        showL2HeightBehindError ||
+        showL2HeightBehindWarning ||
+        !networkInfo)
     ) {
       refetch();
     }
   };
 
+  const networkStatusTextKey = networkInfoIsFetching
+    ? 'loading'
+    : showNetworkBehindError || (!showL2HeightOnStatusBar && showL2HeightBehindError)
+      ? 'network.errorTooltip'
+      : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
+        ? 'network.warningTooltip'
+        : networkInfo
+          ? 'network.infoTooltip'
+          : 'network.unreachableTooltip';
+
+  const networkStatusIndicatorStatus = networkInfoIsFetching
+    ? 'pending'
+    : showNetworkBehindError || (!showL2HeightOnStatusBar && showL2HeightBehindError)
+      ? 'red'
+      : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
+        ? 'yellow'
+        : networkInfo
+          ? 'green'
+          : 'red';
+
+  const networkStatusIndicatorClassName = networkInfoIsFetching
+    ? 'text-text-muted-foreground'
+    : showNetworkBehindError || (!showL2HeightOnStatusBar && showL2HeightBehindError)
+      ? 'text-destructive'
+      : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
+        ? 'text-warning'
+        : networkInfo
+          ? 'text-session-green'
+          : 'text-destructive';
+
+  const l2HeightStatusTextKey = networkInfoIsFetching
+    ? 'loading'
+    : showL2HeightBehindError
+      ? 'l2.errorTooltip'
+      : showL2HeightBehindWarning
+        ? 'l2.warningTooltip'
+        : networkInfo
+          ? 'l2.infoTooltip'
+          : 'l2.unreachableTooltip';
+
+  const l2HeightStatusIndicatorStatus = networkInfoIsFetching
+    ? 'pending'
+    : showL2HeightBehindError
+      ? 'red'
+      : showL2HeightBehindWarning
+        ? 'yellow'
+        : networkInfo
+          ? 'green'
+          : 'red';
+
+  const l2HeightStatusIndicatorClassName = networkInfoIsFetching
+    ? 'text-text-muted-foreground'
+    : showL2HeightBehindError
+      ? 'text-destructive'
+      : showL2HeightBehindWarning
+        ? 'text-warning'
+        : networkInfo
+          ? 'text-session-green'
+          : 'text-destructive';
+
   return (
-    <div className="absolute bottom-2 z-[9999999999] mx-6 flex w-[90vw] flex-row items-end gap-2 md:right-6 md:w-auto">
+    <div className="fixed bottom-2 z-[9999999999] mx-6 flex w-[90vw] flex-row items-end gap-2 md:right-6 md:w-auto">
       {toastHistory.length ? (
         <Button
           variant="ghost"
@@ -59,55 +145,52 @@ export function StatusBar() {
           {showHistory ? <ListXIcon className="h-4 w-4" /> : <ListChecksIcon className="h-4 w-4" />}
         </Button>
       ) : null}
-      {networkStatusVisible ? (
+      {networkStatusVisible && showL2HeightOnStatusBar ? (
         <Tooltip
-          tooltipContent={dictionary.rich(
-            networkInfoIsFetching
-              ? 'loading'
-              : showNetworkBehindError
-                ? 'network.errorTooltip'
-                : showNetworkBehindWarning
-                  ? 'network.warningTooltip'
-                  : networkInfo
-                    ? 'network.infoTooltip'
-                    : 'network.unreachableTooltip',
-            {
-              blockNumber: networkInfo?.block_height,
-              relativeTime: blockRelativeTime,
-              'clickable-text': clickableText(handleClick),
-            }
-          )}
-          triggerProps={{
-            onClick: handleClick,
-          }}
+          tooltipContent={dictionary.rich(l2HeightStatusTextKey, {
+            height: networkInfo?.l2_height,
+            heightRelativeTime: l2HeightRelativeTime,
+            'clickable-text': clickableText(handleClick),
+          })}
+          triggerProps={{ onClick: handleClick }}
         >
           <div className="flex flex-row items-center gap-1">
-            <StatusIndicator
-              status={
-                networkInfoIsFetching
-                  ? 'pending'
-                  : showNetworkBehindError
-                    ? 'red'
-                    : showNetworkBehindWarning
-                      ? 'yellow'
-                      : networkInfo
-                        ? 'green'
-                        : 'red'
-              }
-            />
-            <span
-              className={cn(
-                networkInfoIsFetching
-                  ? 'text-text-muted-foreground'
-                  : showNetworkBehindError
-                    ? 'text-destructive'
-                    : showNetworkBehindWarning
-                      ? 'text-warning'
-                      : networkInfo
-                        ? 'text-session-green'
-                        : 'text-destructive'
-              )}
-            >
+            <StatusIndicator status={l2HeightStatusIndicatorStatus} />
+            <span className={l2HeightStatusIndicatorClassName}>
+              {networkInfoIsFetching
+                ? dictionary('loading')
+                : networkInfo?.l2_height ?? dictionary('network.unreachable')}
+            </span>
+          </div>
+        </Tooltip>
+      ) : null}
+      {networkStatusVisible ? (
+        <Tooltip
+          tooltipContent={
+            <div className="flex flex-col gap-1">
+              <span>
+                {dictionary.rich(networkStatusTextKey, {
+                  blockNumber: networkInfo?.block_height,
+                  blockRelativeTime: blockRelativeTime,
+                  'clickable-text': clickableText(handleClick),
+                })}
+              </span>
+              {!showL2HeightOnStatusBar ? (
+                <span>
+                  {dictionary.rich(l2HeightStatusTextKey, {
+                    height: networkInfo?.l2_height,
+                    heightRelativeTime: l2HeightRelativeTime,
+                    'clickable-text': clickableText(handleClick),
+                  })}
+                </span>
+              ) : null}
+            </div>
+          }
+          triggerProps={{ onClick: handleClick }}
+        >
+          <div className="flex flex-row items-center gap-1">
+            <StatusIndicator status={networkStatusIndicatorStatus} />
+            <span className={networkStatusIndicatorClassName}>
               {networkInfoIsFetching
                 ? dictionary('loading')
                 : networkInfo?.block_height ?? dictionary('network.unreachable')}

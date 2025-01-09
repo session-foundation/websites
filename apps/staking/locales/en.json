@@ -659,10 +659,16 @@
     "loading": "Loading...",
     "network": {
       "unreachable": "Unreachable",
-      "infoTooltip": "Block {blockNumber} was {relativeTime}",
-      "warningTooltip": "Block {blockNumber} was {relativeTime}. <clickable-text>Click to refresh</clickable-text>",
-      "errorTooltip": "Block {blockNumber} was {relativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "infoTooltip": "Block {blockNumber} was {blockRelativeTime}",
+      "warningTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
       "unreachableTooltip": "Unable to reach the network. <clickable-text>Click to refresh</clickable-text>"
+    },
+    "l2": {
+      "infoTooltip": "L2 Height {height} was {heightRelativeTime}",
+      "warningTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "unreachableTooltip": "Unable to reach Arbitrum. <clickable-text>Click to refresh</clickable-text>"
     }
   }
 }
