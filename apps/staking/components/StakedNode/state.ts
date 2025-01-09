@@ -79,7 +79,9 @@ export function isStakeRequestingExit(stake: Stake) {
 export function isStakeReadyToExit(stake: Stake, blockHeight: number) {
   const eventState = parseStakeEventState(stake);
   return (
-    eventState === STAKE_EVENT_STATE.EXIT_REQUESTED && stake.requested_unlock_height < blockHeight
+    eventState === STAKE_EVENT_STATE.EXIT_REQUESTED &&
+    stake.requested_unlock_height &&
+    stake.requested_unlock_height < blockHeight
   );
 }
 
