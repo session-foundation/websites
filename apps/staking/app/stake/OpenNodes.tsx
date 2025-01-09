@@ -11,13 +11,13 @@ import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useMemo } from 'react';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
-import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { sortContracts, useStakes } from '@/hooks/useStakes';
 import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function OpenNodes() {
+  const dictionary = useTranslations('modules.openNodes');
   const {
     data: contractsData,
     isLoading: isLoadingContracts,
@@ -58,7 +58,12 @@ export default function OpenNodes() {
   }, [contracts, addedBlsKeys]);
 
   return isError ? (
-    <ErrorMessage refetch={refetch} />
+    <ErrorMessage
+      refetch={refetch}
+      message={dictionary.rich('error')}
+      buttonText={dictionary('errorButton')}
+      buttonDataTestId={ButtonDataTestId.Open_Nodes_Error_Retry}
+    />
   ) : (
       enabledPublicBlsKeysQuery ? isLoadingPublicBlsKeys && isLoadingContracts : isLoadingContracts
     ) ? (
@@ -76,24 +81,6 @@ function NoNodes() {
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
       <p>{dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_DOCS) })}</p>
-    </ModuleGridInfoContent>
-  );
-}
-
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('modules.openNodes');
-  return (
-    <ModuleGridInfoContent>
-      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
     </ModuleGridInfoContent>
   );
 }

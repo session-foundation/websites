@@ -11,8 +11,7 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/client';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
-import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
+import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -25,6 +24,7 @@ import { ETH_DECIMALS } from '@session/wallet/lib/eth';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useMemo } from 'react';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
@@ -70,25 +70,8 @@ function NodeExitDisabled() {
   );
 }
 
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('nodeCard.staked.exit');
-  return (
-    <div className="flex flex-col items-center gap-4 text-center">
-      <TriangleAlertIcon className="stroke-warning h-16 w-16" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.Exit_Node_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
-    </div>
-  );
-}
-
 function NodeExitDialog({ node }: { node: Stake }) {
+  const dictionary = useTranslations('nodeCard.staked.exit');
   const { data, isLoading, isError, isSuccess, refetch } = useStakingBackendQueryWithParams(
     getNodeExitSignatures,
     { nodePubKey: node.service_node_pubkey }
@@ -115,7 +98,12 @@ function NodeExitDialog({ node }: { node: Stake }) {
       ) : isLoading ? (
         <Loading />
       ) : isError ? (
-        <ErrorMessage refetch={refetch} />
+        <ErrorMessage
+          refetch={refetch}
+          message={dictionary.rich('error')}
+          buttonText={dictionary('errorButton')}
+          buttonDataTestId={ButtonDataTestId.Exit_Node_Error_Retry}
+        />
       ) : null}
     </>
   );

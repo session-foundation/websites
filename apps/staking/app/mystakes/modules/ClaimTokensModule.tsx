@@ -29,8 +29,8 @@ import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { toast } from '@session/ui/lib/toast';
 import { Progress, PROGRESS_STATUS } from '@session/ui/components/motion/progress';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export default function ClaimTokensModule() {
   const { address } = useWallet();
@@ -79,26 +79,9 @@ export default function ClaimTokensModule() {
   );
 }
 
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('modules.claim');
-  return (
-    <div className="flex flex-col items-center gap-4 text-center">
-      <TriangleAlertIcon className="stroke-warning h-16 w-16" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.Claim_Tokens_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
-    </div>
-  );
-}
-
 function ClaimTokensDialog() {
-  const dictionary = useTranslations('modules.claim.dialog');
+  const dictionary = useTranslations('modules.claim');
+  const dictionaryDialog = useTranslations('modules.claim.dialog');
   const dictionaryStage = useTranslations('modules.claim.stage');
 
   const { address } = useWallet();
@@ -183,7 +166,9 @@ function ClaimTokensDialog() {
 
   useEffect(() => {
     if (claimRewardsStatus === PROGRESS_STATUS.SUCCESS) {
-      toast.success(dictionary('successToast', { tokenAmount: formattedUnclaimedRewardsAmount }));
+      toast.success(
+        dictionaryDialog('successToast', { tokenAmount: formattedUnclaimedRewardsAmount })
+      );
       void refetch();
     }
   }, [claimRewardsStatus]);
@@ -191,22 +176,31 @@ function ClaimTokensDialog() {
   return (
     <>
       {isError ? (
-        <ErrorMessage refetch={refetch} />
+        <ErrorMessage
+          refetch={refetch}
+          message={dictionary.rich('error')}
+          buttonText={dictionary('errorButton')}
+          buttonDataTestId={ButtonDataTestId.Claim_Tokens_Error_Retry}
+        />
       ) : isSuccess ? (
         <>
           <div className="flex flex-col gap-4">
             <ActionModuleRow
-              label={dictionary('claimFee')}
-              tooltip={dictionary.rich('claimFeeTooltip', {
+              label={dictionaryDialog('claimFee')}
+              tooltip={dictionaryDialog.rich('claimFeeTooltip', {
                 link: externalLink(URL.GAS_INFO),
               })}
             >
               <span className="inline-flex flex-row items-center gap-1.5 align-middle">
                 {feeEstimate && !updateBalanceFee ? (
-                  <AlertTooltip tooltipContent={dictionary('alert.gasFetchFailedUpdateBalance')} />
+                  <AlertTooltip
+                    tooltipContent={dictionaryDialog('alert.gasFetchFailedUpdateBalance')}
+                  />
                 ) : null}
                 {feeEstimate && !claimFee ? (
-                  <AlertTooltip tooltipContent={dictionary('alert.gasFetchFailedClaimRewards')} />
+                  <AlertTooltip
+                    tooltipContent={dictionaryDialog('alert.gasFetchFailedClaimRewards')}
+                  />
                 ) : null}
                 {feeEstimate ? (
                   `${feeEstimate} ${TICKER.ETH}`
@@ -216,8 +210,8 @@ function ClaimTokensDialog() {
               </span>
             </ActionModuleRow>
             <ActionModuleRow
-              label={dictionary('amountClaimable')}
-              tooltip={dictionary('amountClaimableTooltip')}
+              label={dictionaryDialog('amountClaimable')}
+              tooltip={dictionaryDialog('amountClaimableTooltip')}
             >
               {formattedUnclaimedRewardsAmount}
             </ActionModuleRow>
@@ -227,7 +221,7 @@ function ClaimTokensDialog() {
               variant="outline"
               rounded="md"
               size="lg"
-              aria-label={dictionary('buttons.submitAria', {
+              aria-label={dictionaryDialog('buttons.submitAria', {
                 tokenAmount: formattedUnclaimedRewardsAmount,
                 gasAmount: feeEstimate ?? 0,
               })}
@@ -236,7 +230,7 @@ function ClaimTokensDialog() {
               disabled={isButtonDisabled}
               onClick={handleClick}
             >
-              {dictionary('buttons.submit', { tokenAmount: formattedUnclaimedRewardsAmount })}
+              {dictionaryDialog('buttons.submit', { tokenAmount: formattedUnclaimedRewardsAmount })}
             </Button>
             {enabled ? (
               <Progress
