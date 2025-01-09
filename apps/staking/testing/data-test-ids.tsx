@@ -31,6 +31,7 @@ export enum ButtonDataTestId {
   My_Stakes_Error_Retry = 'button:my-stakes-error-retry',
   Open_Nodes_Error_Retry = 'button:open-nodes-error-retry',
   Claim_Tokens_Error_Retry = 'button:claim-tokens-error-retry',
+  Exit_Node_Error_Retry = 'button:exit-node-error-retry',
   Staked_Node_Start = 'button:staked-node-start',
   Stake_Amount_Min = 'button:stake-amount-min',
   Stake_Amount_Max = 'button:stake-amount-max',

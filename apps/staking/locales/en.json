@@ -573,6 +573,8 @@
             "highGas": "The price of Gas is higher than usual."
           }
         },
+        "error": "An error occurred while fetching the signature to exit the node. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+        "errorButton": "Retry",
         "stage": {
           "arbitrum": {
             "idle": "Session node exit on Arbitrum submitting",
