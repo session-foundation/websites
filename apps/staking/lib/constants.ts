@@ -88,6 +88,7 @@ export const ROUTES: LinkItem[] = [
   { dictionaryKey: 'stake', href: '/stake' },
   { dictionaryKey: 'register', href: '/register' },
   { dictionaryKey: 'myStakes', href: '/mystakes' },
+  { dictionaryKey: 'leaderboard', href: '/leaderboard', linkType: 'internal' },
   { dictionaryKey: 'faucet', href: '/faucet' },
 ] as const;
 
@@ -96,7 +97,6 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'support', href: '/support', linkType: 'external' },
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
   { dictionaryKey: 'explorer', href: 'https://stagenet.oxen.observer', linkType: 'external' },
-  { dictionaryKey: 'leaderboard', href: '/leaderboard', linkType: 'internal' },
 ] as const;
 
 export enum QUERY {
