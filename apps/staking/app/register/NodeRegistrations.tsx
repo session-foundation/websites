@@ -18,6 +18,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { useStakes } from '@/hooks/useStakes';
+import type { Registration } from '@session/staking-api-js/client';
 
 export default function NodeRegistrations() {
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
@@ -46,7 +47,12 @@ export default function NodeRegistrations() {
 
   const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
-  const nodes = useMemo(() => {
+  /**
+   * - Sorted in descending order by the `timestamp` of the registration.
+   * - Remove registrations that have bls keys already in the smart contract.
+   * - Remove duplicate registrations, keeping only the most recent.
+   */
+  const registrations = useMemo(() => {
     if (
       showNoNodes ||
       !data ||
@@ -58,7 +64,16 @@ export default function NodeRegistrations() {
       return [];
     }
 
-    return data.registrations.filter(({ pubkey_bls }) => !addedBlsKeys.has(pubkey_bls));
+    const addedRegistrationBlsKeys = new Set();
+
+    return (data.registrations as Array<Registration>)
+      .sort(({ timestamp: tA }, { timestamp: tB }) => tB - tA)
+      .filter(({ pubkey_bls }) => {
+        if (!addedBlsKeys.has(pubkey_bls) && !addedRegistrationBlsKeys.has(pubkey_bls)) {
+          addedRegistrationBlsKeys.add(pubkey_bls);
+          return true;
+        }
+      });
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
   return isError ? (
@@ -66,8 +81,8 @@ export default function NodeRegistrations() {
   ) : address ? (
     isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
-    ) : nodes?.length ? (
-      nodes.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
+    ) : registrations?.length ? (
+      registrations.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
     ) : (
       <NoNodes />
     )

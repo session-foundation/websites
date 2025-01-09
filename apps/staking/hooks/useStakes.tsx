@@ -104,8 +104,8 @@ export function sortContracts(
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  const priorityA = operatorA ? contractStateSortOrderIfOperator[a.status] ?? 999 : 999;
-  const priorityB = operatorB ? contractStateSortOrderIfOperator[b.status] ?? 999 : 999;
+  const priorityA = operatorA ? (contractStateSortOrderIfOperator[a.status] ?? 999) : 999;
+  const priorityB = operatorB ? (contractStateSortOrderIfOperator[b.status] ?? 999) : 999;
 
   if (priorityA !== priorityB) {
     // Priority ascending
@@ -148,11 +148,12 @@ export function useStakes(overrideAddress?: Address) {
     const networkTime =
       net && 'block_timestamp' in net && net.block_timestamp ? data.network.block_timestamp : 0;
 
-    const addedBlsKeysSet = new Set(
-      stakesArr
-        .filter((stake) => parseStakeState(stake, blockHeight) !== STAKE_STATE.EXITED)
-        .map(({ pubkey_bls }) => pubkey_bls)
-    );
+    const blsKeysObject =
+      'added_bls_keys' in data && typeof data.added_bls_keys === 'object'
+        ? data.added_bls_keys
+        : {};
+
+    const addedBlsKeysSet = new Set(Object.keys(blsKeysObject));
 
     const limitAgeJoiningTimestamp = Date.now() - CONTRIBUTION_CONTRACT.MAX_AGE_JOINING_MS;
 

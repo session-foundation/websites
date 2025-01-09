@@ -5,17 +5,17 @@ import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useTranslations } from 'next-intl';
-import { useStakingBackendQuery, useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useMemo } from 'react';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { getNodesBlsKeys } from '@/lib/queries/getNodesBlsKeys';
 import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { Button } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { sortContracts } from '@/hooks/useStakes';
+import { sortContracts, useStakes } from '@/hooks/useStakes';
+import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
 
 export default function OpenNodes() {
   const {
@@ -24,9 +24,17 @@ export default function OpenNodes() {
     refetch,
     isError,
   } = useStakingBackendSuspenseQuery(getContributionContracts);
-  const { data: blsKeysData, isLoading: isLoadingBlsKeys } =
-    useStakingBackendQuery(getNodesBlsKeys);
+
+  const { addedBlsKeys: addedBlsKeysFromStakes } = useStakes();
+
   const { address } = useWallet();
+  const enabledPublicBlsKeysQuery = !address;
+  const { addedBlsKeys: addedBlsKeysPublic, isLoading: isLoadingPublicBlsKeys } =
+    useAddedBlsKeysPublic({ enabled: enabledPublicBlsKeysQuery });
+
+  /** The public list is for non-connected users, if a user is connected we use the data from their
+   *  stakes query and don't enable the public query */
+  const addedBlsKeys = addedBlsKeysFromStakes ?? addedBlsKeysPublic;
 
   const contracts = useMemo(() => {
     if (!contractsData) return null;
@@ -42,26 +50,18 @@ export default function OpenNodes() {
     return contractsArray;
   }, [contractsData, address]);
 
-  const blsKeys = useMemo(() => {
-    if (!blsKeysData) return new Set<string>();
-    const blsKeysObject =
-      'bls_keys' in blsKeysData && typeof blsKeysData.bls_keys === 'object'
-        ? blsKeysData.bls_keys
-        : {};
-
-    return new Set(Object.keys(blsKeysObject));
-  }, [blsKeysData]);
-
   const filteredContracts = useMemo(() => {
-    if (!contracts) return [];
+    if (!contracts || !addedBlsKeys) return [];
     return contracts
       .filter(({ status }) => status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib)
-      .filter(({ pubkey_bls }) => !blsKeys.has(pubkey_bls.slice(2)));
-  }, [contracts, blsKeys]);
+      .filter(({ pubkey_bls }) => !addedBlsKeys.has(pubkey_bls.slice(2)));
+  }, [contracts, addedBlsKeys]);
 
   return isError ? (
     <ErrorMessage refetch={refetch} />
-  ) : isLoadingContracts || isLoadingBlsKeys ? (
+  ) : (
+      enabledPublicBlsKeysQuery ? isLoadingPublicBlsKeys && isLoadingContracts : isLoadingContracts
+    ) ? (
     <NodesListSkeleton />
   ) : filteredContracts?.length ? (
     filteredContracts.map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)

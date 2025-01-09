@@ -35,6 +35,7 @@ export interface Contributor {
 export interface GetContributionContractsResponse {
   network: NetworkInfo;
   contracts: ContributorContractInfo[];
+  added_bls_keys: Record<number, string>;
 }
 
 /** GET /contract/contribution/<sn key> */
@@ -149,6 +150,7 @@ export interface GetStakesResponse {
   network: NetworkInfo;
   contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
+  added_bls_keys: Record<number, string>;
 }
 
 /** /store */
