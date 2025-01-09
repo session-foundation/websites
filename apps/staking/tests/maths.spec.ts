@@ -1,6 +1,6 @@
 // #region - getBuildInfo
 
-import type { Contributor } from '@session/sent-staking-js/client';
+import type { Contributor } from '@session/staking-api-js/client';
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
 import { getContributionRangeFromContributors } from '../lib/maths';
 import { createPublicClient, http } from 'viem';

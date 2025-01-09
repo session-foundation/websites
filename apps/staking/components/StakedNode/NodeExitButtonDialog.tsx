@@ -1,30 +1,30 @@
-import { useTranslations } from 'next-intl';
-import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
+import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
+import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
+import useExitNode from '@/hooks/useExitNode';
+import { SOCIALS } from '@/lib/constants';
+import { formattedTotalStakedInContract } from '@/lib/contracts';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
+import { getNodeExitSignatures } from '@/lib/queries/getNodeExitSignatures';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Stake } from '@session/staking-api-js/client';
+import { Social } from '@session/ui/components/SocialLinkList';
+import { Loading } from '@session/ui/components/loading';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { Loading } from '@session/ui/components/loading';
-import { type ReactNode, useEffect, useMemo } from 'react';
-import Link from 'next/link';
-import { SOCIALS } from '@/lib/constants';
-import { Social } from '@session/ui/components/SocialLinkList';
+import { Button } from '@session/ui/ui/button';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 import { ETH_DECIMALS } from '@session/wallet/lib/eth';
-import { Button } from '@session/ui/ui/button';
-import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { getNodeExitSignatures } from '@/lib/queries/getNodeExitSignatures';
-import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
-import { SENT_SYMBOL } from '@session/contracts';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
-import useExitNode from '@/hooks/useExitNode';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { type ReactNode, useEffect, useMemo } from 'react';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
@@ -32,28 +32,18 @@ export function NodeExitButtonDialog({ node }: { node: Stake }) {
     REMOTE_FEATURE_FLAG.DISABLE_NODE_EXIT
   );
 
-  const { data, status } = useStakingBackendQueryWithParams(getNodeExitSignatures, {
-    nodePubKey: node.service_node_pubkey,
-  });
-
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <NodeExitButton />
       </AlertDialogTrigger>
       <AlertDialogContent dialogTitle={dictionary('dialog.title')} className="text-center">
-        {isRemoteFlagLoading || !data || status !== 'success' ? (
+        {isRemoteFlagLoading ? (
           <Loading />
         ) : isNodeExitDisabled ? (
           <NodeExitDisabled />
         ) : (
-          <NodeExitContractWriteDialog
-            node={node}
-            blsPubKey={data.result.bls_pubkey}
-            timestamp={data.result.timestamp}
-            blsSignature={data.result.signature}
-            excludedSigners={data.result.non_signer_indices}
-          />
+          <NodeExitDialog node={node} />
         )}
       </AlertDialogContent>
     </AlertDialog>
@@ -80,6 +70,57 @@ function NodeExitDisabled() {
   );
 }
 
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('nodeCard.staked.exit');
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <TriangleAlertIcon className="stroke-warning h-16 w-16" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.Exit_Node_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
+    </div>
+  );
+}
+
+function NodeExitDialog({ node }: { node: Stake }) {
+  const { data, isLoading, isError, isSuccess, refetch } = useStakingBackendQueryWithParams(
+    getNodeExitSignatures,
+    { nodePubKey: node.service_node_pubkey }
+  );
+
+  const [blsPubKey, timestamp, blsSignature, excludedSigners] = useMemo(() => {
+    if (!data || !('result' in data) || !data.result)
+      return [undefined, undefined, undefined, undefined];
+    const { bls_pubkey, timestamp, signature, non_signer_indices } = data.result;
+
+    return [bls_pubkey, timestamp, signature, non_signer_indices.map(BigInt)];
+  }, [data]);
+
+  return (
+    <>
+      {isSuccess && blsPubKey && timestamp && blsSignature && excludedSigners ? (
+        <NodeExitContractWriteDialog
+          node={node}
+          blsPubKey={blsPubKey}
+          timestamp={timestamp}
+          blsSignature={blsSignature}
+          excludedSigners={excludedSigners}
+        />
+      ) : isLoading ? (
+        <Loading />
+      ) : isError ? (
+        <ErrorMessage refetch={refetch} />
+      ) : null}
+    </>
+  );
+}
+
 function NodeExitContractWriteDialog({
   node,
   blsPubKey,
@@ -91,7 +132,7 @@ function NodeExitContractWriteDialog({
   blsPubKey: string;
   timestamp: number;
   blsSignature: string;
-  excludedSigners?: Array<number>;
+  excludedSigners?: Array<bigint>;
 }) {
   const dictionary = useTranslations('nodeCard.staked.exit.dialog');
   const stageDictKey = 'nodeCard.staked.exit.stage' as const;
@@ -102,7 +143,7 @@ function NodeExitContractWriteDialog({
       blsPubKey,
       timestamp,
       blsSignature,
-      excludedSigners: excludedSigners?.map(BigInt),
+      excludedSigners,
     }),
     [blsPubKey, timestamp, blsSignature, excludedSigners]
   );
@@ -120,11 +161,6 @@ function NodeExitContractWriteDialog({
   const feeEstimate = useMemo(
     () => (fee !== null ? formatBigIntTokenValue(fee ?? BigInt(0), ETH_DECIMALS, 18) : null),
     [fee]
-  );
-
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
   );
 
   const handleClick = () => {
@@ -155,7 +191,7 @@ function NodeExitContractWriteDialog({
           rounded="md"
           size="lg"
           aria-label={dictionary('buttons.submitAria', {
-            tokenAmount: stakedAmount,
+            tokenAmount: formattedTotalStakedInContract(node.contributors),
             gasAmount: feeEstimate ?? 0,
           })}
           className="w-full"

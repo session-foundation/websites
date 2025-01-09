@@ -1,8 +1,10 @@
-import type { Contributor } from '@session/sent-staking-js/client';
+import type { StakeContributor } from '@session/staking-api-js/client';
 
 const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
 
-export const getContributionRangeFromContributors = (contributors: Array<Contributor> = []) => {
+export const getContributionRangeFromContributors = (
+  contributors: Array<StakeContributor> = []
+) => {
   let remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT;
   let totalStaked = 0n;
 

@@ -5,10 +5,8 @@ import { externalLink } from '@/lib/locale-defaults';
 import { TICKER, URL } from '@/lib/constants';
 import { LoadingText } from '@session/ui/components/loading-text';
 import { useTranslations } from 'next-intl';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
-import { SENT_SYMBOL } from '@session/contracts';
-import { useMemo } from 'react';
+import { Stake } from '@session/staking-api-js/client';
+import { formattedTotalStakedInContract } from '@/lib/contracts';
 
 export default function NodeActionModuleInfo({
   node,
@@ -22,11 +20,6 @@ export default function NodeActionModuleInfo({
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog.write');
   const dictionaryActionModulesNode = useTranslations('actionModules.node');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
-
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
-  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,7 +65,7 @@ export default function NodeActionModuleInfo({
         label={dictionary('amountStaked')}
         tooltip={dictionary('amountStakedTooltip')}
       >
-        {stakedAmount}
+        {formattedTotalStakedInContract(node.contributors)}
       </ActionModuleRow>
     </div>
   );

@@ -1,4 +1,4 @@
-# @session/sent-staking-js
+# @session/staking-api-js
 
 This package is a js library for interacting with the Session Token staking
 backend. The backend can be found in

@@ -1,4 +1,4 @@
-import { SessionStakingClient } from '@session/sent-staking-js/client';
+import { SessionStakingClient } from '@session/staking-api-js/client';
 
 export function getNodeExitSignatures(
   client: SessionStakingClient,

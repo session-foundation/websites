@@ -4,6 +4,8 @@ import { getContractErrorName } from '@session/contracts';
 import { toast } from '@session/ui/lib/toast';
 import { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
+import type { StakeContributor } from '@session/staking-api-js/client';
+import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 
 /**
  * Formats a localized contract error message based on the error type and the dictionary.
@@ -108,4 +110,12 @@ export const parseContractStatusToProgressStatus = (
     default:
       return PROGRESS_STATUS.IDLE;
   }
+};
+
+export const formattedTotalStakedInContract = (contributors: Array<StakeContributor>) => {
+  return formatSENTNumber(
+    contributors.reduce((acc, { amount }) => {
+      return acc + amount;
+    }, 0)
+  );
 };

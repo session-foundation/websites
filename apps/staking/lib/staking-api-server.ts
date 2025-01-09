@@ -1,8 +1,8 @@
 import 'server-only';
 
-import { createSessionStakingClient } from '@session/sent-staking-js/client';
+import { createSessionStakingClient } from '@session/staking-api-js/client';
 import { isProduction, NEXT_PUBLIC_SENT_STAKING_API_URL } from '@/lib/env';
-import { getStakingBackendQueryArgs, StakingBackendQuery } from '@/lib/sent-staking-backend';
+import { getStakingBackendQueryArgs, StakingBackendQuery } from '@/lib/staking-api';
 import { createQueryClient } from '@/lib/query';
 
 export const createSessionStakingServerClient = () =>

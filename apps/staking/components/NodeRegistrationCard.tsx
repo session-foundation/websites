@@ -3,7 +3,7 @@
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
 import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import type { Registration } from '@session/sent-staking-js/client';
+import type { Registration } from '@session/staking-api-js/client';
 import { InfoNodeCard, NodeItem, NodeItemLabel, NodeItemValue } from '@/components/InfoNodeCard';
 import { usePathname } from 'next/navigation';
 import useRelativeTime from '@/hooks/useRelativeTime';

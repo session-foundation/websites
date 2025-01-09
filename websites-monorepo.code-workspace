@@ -13,8 +13,8 @@
       "path": "packages/ui",
     },
     {
-      "name": "📦 sent-staking-js",
-      "path": "packages/sent-staking-js",
+      "name": "📦 staking-api-js",
+      "path": "packages/staking-api-js",
     },
     {
       "name": "📦 wallet",

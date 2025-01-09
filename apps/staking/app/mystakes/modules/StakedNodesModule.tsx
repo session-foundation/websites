@@ -1,13 +1,7 @@
 'use client';
 
 import Loading from '@/app/loading';
-import {
-  hasDeregistrationUnlockHeight,
-  isBeingDeregistered,
-  isReadyToExit,
-  isRequestingToExit,
-  StakedNodeCard,
-} from '@/components/StakedNodeCard';
+import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -22,101 +16,67 @@ import { Switch } from '@session/ui/ui/switch';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { EXPERIMENTAL_FEATURE_FLAG, FEATURE_FLAG } from '@/lib/feature-flags';
-import { useExperimentalFeatureFlag, useFeatureFlag } from '@/lib/feature-flags-client';
+import { useEffect } from 'react';
+import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { Address } from 'viem';
-import { NODE_STATE, type Stake } from '@session/sent-staking-js/client';
-
-export const sortAndGroupStakes = (nodes: Array<Stake>, blockHeight: number) => {
-  nodes.sort((a, b) => {
-    if (a.staked_balance === b.staked_balance) return (a.operator_fee ?? 0) - (b.operator_fee ?? 0);
-    return (b.staked_balance ?? 0) - (a.staked_balance ?? 0);
-  });
-
-  const decommissioning = [];
-  const readyToExit = [];
-  const exiting = [];
-  const running = [];
-  const other = [];
-
-  for (const node of nodes) {
-    if (isBeingDeregistered(node)) decommissioning.push(node);
-    else if (isReadyToExit(node, blockHeight)) readyToExit.push(node);
-    else if (isRequestingToExit(node, blockHeight) || hasDeregistrationUnlockHeight(node)) {
-      exiting.push(node);
-    } else if (node.state === NODE_STATE.RUNNING) running.push(node);
-    else other.push(node);
-  }
-
-  decommissioning.sort(
-    (a, b) =>
-      (a.deregistration_unlock_height ?? a.requested_unlock_height ?? 0) -
-      (b.deregistration_unlock_height ?? b.requested_unlock_height ?? 0)
-  );
-
-  readyToExit.sort((a, b) => (a.requested_unlock_height ?? 0) - (b.requested_unlock_height ?? 0));
-
-  return [decommissioning, readyToExit, exiting, running, other].flat(1);
-};
+import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
+import { useNetworkStatus } from '@/components/StatusBar';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { useStakes } from '@/hooks/useStakes';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
-  const showMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_STAKED_NODES);
-  const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_STAKED_NODES);
+  const {
+    stakes,
+    contracts,
+    network,
+    blockHeight,
+    networkTime,
+    isLoading,
+    isFetching,
+    refetch,
+    isError,
+  } = useStakes(address);
+  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
 
-  if (showMockNodes && showNoNodes) {
-    console.error('Cannot show mock nodes and no nodes at the same time');
-  }
-
-  const { data, isLoading } = useStakingBackendQueryWithParams(getStakedNodes, {
-    address,
-  });
-
-  const [stakes, blockHeight, networkTime] = useMemo(() => {
-    if (showMockNodes) {
-      return [[], 0, 0];
-    } else if (!data || showNoNodes) {
-      return [[], null, null];
-    }
-
-    const stakes = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];
-
-    const historicalStakes =
-      'historical_stakes' in data && Array.isArray(data.historical_stakes)
-        ? data.historical_stakes
-        : [];
-
-    const blockHeight =
-      'network' in data && 'block_height' in data.network ? data.network.block_height : 0;
-
-    const networkTime =
-      'network' in data && 'block_timestamp' in data.network ? data.network.block_timestamp : 0;
-
-    return [
-      sortAndGroupStakes([...stakes, ...historicalStakes], blockHeight),
-      blockHeight,
-      networkTime,
-    ];
-  }, [data, showMockNodes, showNoNodes]);
+  useEffect(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, []);
 
   return (
     <ModuleGridContent className="h-full md:overflow-y-auto">
-      {isLoading ? (
+      {isError ? (
+        <ErrorMessage refetch={refetch} />
+      ) : isLoading ? (
         <Loading />
-      ) : stakes?.length && blockHeight && networkTime ? (
-        stakes.map((node) => {
-          return (
-            <StakedNodeCard
-              key={node.unique_id}
-              node={node}
-              blockHeight={blockHeight}
-              networkTime={networkTime}
-              targetWalletAddress={address}
-            />
-          );
-        })
+      ) : (stakes?.length || contracts?.length) && blockHeight && networkTime ? (
+        <>
+          {contracts.map((contract) => {
+            return (
+              <StakedContractCard
+                key={contract.address}
+                id={contract.address}
+                contract={contract}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+          {stakes.map((stake) => {
+            return (
+              <StakedNodeCard
+                key={stake.contract_id}
+                id={stake.contract_id.toString()}
+                stake={stake}
+                blockHeight={blockHeight}
+                networkTime={networkTime}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+        </>
       ) : (
         <NoNodes />
       )}
@@ -156,6 +116,24 @@ function NoWallet() {
       <p>{dictionary('noWalletP1')}</p>
       <p>{dictionary('noWalletP2')}</p>
       <WalletButtonWithLocales rounded="md" size="lg" />
+    </ModuleGridInfoContent>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.stakedNodes');
+  return (
+    <ModuleGridInfoContent>
+      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.My_Stakes_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
     </ModuleGridInfoContent>
   );
 }

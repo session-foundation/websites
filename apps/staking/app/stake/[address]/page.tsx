@@ -4,21 +4,21 @@ import { BlockExplorerLink, BlockExplorerLinkText } from '@/components/BlockExpl
 import NodeStaking, { NodeStakingFormSkeleton } from './NodeStaking';
 import { Suspense, use } from 'react';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { stakingBackendPrefetchQuery } from '@/lib/sent-staking-backend-server';
-import { getOpenNodes } from '@/lib/queries/getOpenNodes';
+import { stakingBackendPrefetchQuery } from '@/lib/staking-api-server';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 
 interface NodePageParams {
   params: Promise<{
-    contract: string;
+    address: string;
   }>;
 }
 
 export default function NodePage(props: NodePageParams) {
   const params = use(props.params);
-  const { contract } = params;
+  const { address } = params;
   const dictionary = useTranslations('actionModules.node');
 
-  const { queryClient } = stakingBackendPrefetchQuery(getOpenNodes);
+  const { queryClient } = stakingBackendPrefetchQuery(getContributionContracts);
 
   return (
     <ActionModule
@@ -27,7 +27,7 @@ export default function NodePage(props: NodePageParams) {
       headerAction={
         <HydrationBoundary state={dehydrate(queryClient)}>
           <Suspense fallback={<BlockExplorerLinkText />}>
-            <BlockExplorerLink contract={contract} />
+            <BlockExplorerLink address={address} />
           </Suspense>
         </HydrationBoundary>
       }
@@ -35,7 +35,7 @@ export default function NodePage(props: NodePageParams) {
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<NodeStakingFormSkeleton />}>
-          <NodeStaking contract={contract} />
+          <NodeStaking address={address} />
         </Suspense>
       </HydrationBoundary>
     </ActionModule>

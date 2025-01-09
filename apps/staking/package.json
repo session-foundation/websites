@@ -18,7 +18,7 @@
     "@session/contracts": "workspace:*",
     "@session/feature-flags": "workspace:*",
     "@session/logger": "workspace:*",
-    "@session/sent-staking-js": "workspace:*",
+    "@session/staking-api-js": "workspace:*",
     "@session/ui": "workspace:*",
     "@session/util-crypto": "workspace:*",
     "@session/util-js": "workspace:*",
@@ -40,6 +40,7 @@
     "server-only": "^0.0.1",
     "sharp": "0.32.6",
     "sqids": "^0.3.0",
+    "usepref": "^0.0.4",
     "utf-8-validate": "^6.0.5",
     "viem": "2.21.54",
     "zod": "^3.23.8"

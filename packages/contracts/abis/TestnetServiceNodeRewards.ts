@@ -124,13 +124,8 @@ export const TestnetServiceNodeRewardsAbi = [
         name: 'serviceNodeID',
         type: 'uint64',
       },
-      {
-        internalType: 'address',
-        name: 'contributor',
-        type: 'address',
-      },
     ],
-    name: 'EarlierLeaveRequestMade',
+    name: 'Ed25519PubkeyAlreadyExists',
     type: 'error',
   },
   {
@@ -196,7 +191,25 @@ export const TestnetServiceNodeRewardsAbi = [
     type: 'error',
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'X',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'Y',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct BN256G1.G1Point',
+        name: 'aggPubkey',
+        type: 'tuple',
+      },
+    ],
     name: 'InvalidBLSSignature',
     type: 'error',
   },
@@ -212,9 +225,41 @@ export const TestnetServiceNodeRewardsAbi = [
         name: 'serviceNodeID',
         type: 'uint64',
       },
+    ],
+    name: 'LeaveRequestNotInitiatedYet',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint64',
+        name: 'serviceNodeID',
+        type: 'uint64',
+      },
       {
         internalType: 'uint256',
-        name: 'timestamp',
+        name: 'endTimestamp',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'currTimestamp',
+        type: 'uint256',
+      },
+    ],
+    name: 'LeaveRequestTooEarly',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint64',
+        name: 'serviceNodeID',
+        type: 'uint64',
+      },
+      {
+        internalType: 'uint256',
+        name: 'addedTimestamp',
         type: 'uint256',
       },
       {
@@ -223,7 +268,7 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'uint256',
       },
     ],
-    name: 'LeaveRequestTooEarly',
+    name: 'LiquidationTooEarly',
     type: 'error',
   },
   {
@@ -258,7 +303,12 @@ export const TestnetServiceNodeRewardsAbi = [
   },
   {
     inputs: [],
-    name: 'NullPublicKey',
+    name: 'NullBLSPubkey',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NullEd25519Pubkey',
     type: 'error',
   },
   {
@@ -462,8 +512,14 @@ export const TestnetServiceNodeRewardsAbi = [
         ],
         indexed: false,
         internalType: 'struct BN256G1.G1Point',
-        name: 'pubkey',
+        name: 'blsPubkey',
         type: 'tuple',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'ed25519Pubkey',
+        type: 'uint256',
       },
     ],
     name: 'NewSeededServiceNode',
@@ -533,9 +589,21 @@ export const TestnetServiceNodeRewardsAbi = [
       {
         components: [
           {
-            internalType: 'address',
-            name: 'addr',
-            type: 'address',
+            components: [
+              {
+                internalType: 'address',
+                name: 'addr',
+                type: 'address',
+              },
+              {
+                internalType: 'address',
+                name: 'beneficiary',
+                type: 'address',
+              },
+            ],
+            internalType: 'struct IServiceNodeRewards.Staker',
+            name: 'staker',
+            type: 'tuple',
           },
           {
             internalType: 'uint256',
@@ -549,7 +617,7 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'tuple[]',
       },
     ],
-    name: 'NewServiceNode',
+    name: 'NewServiceNodeV2',
     type: 'event',
   },
   {
@@ -689,43 +757,6 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'address',
       },
       {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'X',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'Y',
-            type: 'uint256',
-          },
-        ],
-        indexed: false,
-        internalType: 'struct BN256G1.G1Point',
-        name: 'pubkey',
-        type: 'tuple',
-      },
-    ],
-    name: 'ServiceNodeLiquidated',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint64',
-        name: 'serviceNodeID',
-        type: 'uint64',
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-      {
         indexed: false,
         internalType: 'uint256',
         name: 'returnedAmount',
@@ -750,7 +781,7 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'tuple',
       },
     ],
-    name: 'ServiceNodeRemoval',
+    name: 'ServiceNodeExit',
     type: 'event',
   },
   {
@@ -787,7 +818,44 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'tuple',
       },
     ],
-    name: 'ServiceNodeRemovalRequest',
+    name: 'ServiceNodeExitRequest',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint64',
+        name: 'serviceNodeID',
+        type: 'uint64',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'X',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'Y',
+            type: 'uint256',
+          },
+        ],
+        indexed: false,
+        internalType: 'struct BN256G1.G1Point',
+        name: 'pubkey',
+        type: 'tuple',
+      },
+    ],
+    name: 'ServiceNodeLiquidated',
     type: 'event',
   },
   {
@@ -857,7 +925,33 @@ export const TestnetServiceNodeRewardsAbi = [
   },
   {
     inputs: [],
-    name: 'MAX_SERVICE_NODE_REMOVAL_WAIT_TIME',
+    name: 'MAX_SERVICE_NODE_EXIT_WAIT_TIME',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'MINIMUM_LIQUIDATION_AGE',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'MIN_TIME_BEFORE_REPEATED_LEAVE_REQUEST',
     outputs: [
       {
         internalType: 'uint256',
@@ -884,50 +978,6 @@ export const TestnetServiceNodeRewardsAbi = [
   {
     inputs: [],
     name: 'SMALL_CONTRIBUTOR_LEAVE_DELAY',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: '_aggregatePubkey',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'X',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'Y',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: '_lastHeightPubkeyWasAggregated',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: '_numPubkeyAggregationsForHeight',
     outputs: [
       {
         internalType: 'uint256',
@@ -1021,9 +1071,21 @@ export const TestnetServiceNodeRewardsAbi = [
       {
         components: [
           {
-            internalType: 'address',
-            name: 'addr',
-            type: 'address',
+            components: [
+              {
+                internalType: 'address',
+                name: 'addr',
+                type: 'address',
+              },
+              {
+                internalType: 'address',
+                name: 'beneficiary',
+                type: 'address',
+              },
+            ],
+            internalType: 'struct IServiceNodeRewards.Staker',
+            name: 'staker',
+            type: 'tuple',
           },
           {
             internalType: 'uint256',
@@ -1075,31 +1137,6 @@ export const TestnetServiceNodeRewardsAbi = [
         name: 'ids',
         type: 'uint64[]',
       },
-      {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'X',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'Y',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct BN256G1.G1Point[]',
-        name: 'pubkeys',
-        type: 'tuple[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'allServiceNodePubkeys',
-    outputs: [
       {
         components: [
           {
@@ -1233,6 +1270,126 @@ export const TestnetServiceNodeRewardsAbi = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'ed25519Pubkey',
+        type: 'uint256',
+      },
+    ],
+    name: 'ed25519ToServiceNodeID',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: 'serviceNodeID',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint64',
+        name: 'serviceNodeID',
+        type: 'uint64',
+      },
+    ],
+    name: 'exitBLSPublicKeyAfterWaitTime',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'X',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'Y',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct BN256G1.G1Point',
+        name: 'blsPubkey',
+        type: 'tuple',
+      },
+      {
+        internalType: 'uint256',
+        name: 'timestamp',
+        type: 'uint256',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'blsSignature',
+        type: 'tuple',
+      },
+      {
+        internalType: 'uint64[]',
+        name: 'ids',
+        type: 'uint64[]',
+      },
+    ],
+    name: 'exitBLSPublicKeyWithSignature',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint64[]',
+        name: 'ids',
+        type: 'uint64[]',
+      },
+    ],
+    name: 'exitNodeBySNID',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'exitTag',
+    outputs: [
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'foundationPool',
     outputs: [
@@ -1309,7 +1466,7 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'uint64',
       },
     ],
-    name: 'initiateRemoveBLSPublicKey',
+    name: 'initiateExitBLSPublicKey',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1322,6 +1479,19 @@ export const TestnetServiceNodeRewardsAbi = [
         internalType: 'bool',
         name: '',
         type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'lastHeightPubkeyWasAggregated',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -1456,6 +1626,19 @@ export const TestnetServiceNodeRewardsAbi = [
   },
   {
     inputs: [],
+    name: 'numPubkeyAggregationsForHeight',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'owner',
     outputs: [
       {
@@ -1565,101 +1748,7 @@ export const TestnetServiceNodeRewardsAbi = [
   },
   {
     inputs: [],
-    name: 'removalTag',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint64',
-        name: 'serviceNodeID',
-        type: 'uint64',
-      },
-    ],
-    name: 'removeBLSPublicKeyAfterWaitTime',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'X',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'Y',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct BN256G1.G1Point',
-        name: 'blsPubkey',
-        type: 'tuple',
-      },
-      {
-        internalType: 'uint256',
-        name: 'timestamp',
-        type: 'uint256',
-      },
-      {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'sigs0',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs1',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs2',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigs3',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
-        name: 'blsSignature',
-        type: 'tuple',
-      },
-      {
-        internalType: 'uint64[]',
-        name: 'ids',
-        type: 'uint64[]',
-      },
-    ],
-    name: 'removeBLSPublicKeyWithSignature',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint64[]',
-        name: 'ids',
-        type: 'uint64[]',
-      },
-    ],
-    name: 'removeNodeBySNID',
+    name: 'rederiveTotalNodesAndAggregatePubkey',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1679,7 +1768,7 @@ export const TestnetServiceNodeRewardsAbi = [
         type: 'uint64[]',
       },
     ],
-    name: 'requestRemoveNodeBySNID',
+    name: 'requestExitNodeBySNID',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1715,15 +1804,32 @@ export const TestnetServiceNodeRewardsAbi = [
               },
             ],
             internalType: 'struct BN256G1.G1Point',
-            name: 'pubkey',
+            name: 'blsPubkey',
             type: 'tuple',
+          },
+          {
+            internalType: 'uint256',
+            name: 'ed25519Pubkey',
+            type: 'uint256',
           },
           {
             components: [
               {
-                internalType: 'address',
-                name: 'addr',
-                type: 'address',
+                components: [
+                  {
+                    internalType: 'address',
+                    name: 'addr',
+                    type: 'address',
+                  },
+                  {
+                    internalType: 'address',
+                    name: 'beneficiary',
+                    type: 'address',
+                  },
+                ],
+                internalType: 'struct IServiceNodeRewards.Staker',
+                name: 'staker',
+                type: 'tuple',
               },
               {
                 internalType: 'uint256',
@@ -1750,7 +1856,7 @@ export const TestnetServiceNodeRewardsAbi = [
     inputs: [
       {
         internalType: 'bytes',
-        name: 'blsPublicKey',
+        name: 'blsPubkey',
         type: 'bytes',
       },
     ],
@@ -1806,7 +1912,7 @@ export const TestnetServiceNodeRewardsAbi = [
               },
             ],
             internalType: 'struct BN256G1.G1Point',
-            name: 'pubkey',
+            name: 'blsPubkey',
             type: 'tuple',
           },
           {
@@ -1821,15 +1927,32 @@ export const TestnetServiceNodeRewardsAbi = [
           },
           {
             internalType: 'uint256',
+            name: 'latestLeaveRequestTimestamp',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
             name: 'deposit',
             type: 'uint256',
           },
           {
             components: [
               {
-                internalType: 'address',
-                name: 'addr',
-                type: 'address',
+                components: [
+                  {
+                    internalType: 'address',
+                    name: 'addr',
+                    type: 'address',
+                  },
+                  {
+                    internalType: 'address',
+                    name: 'beneficiary',
+                    type: 'address',
+                  },
+                ],
+                internalType: 'struct IServiceNodeRewards.Staker',
+                name: 'staker',
+                type: 'tuple',
               },
               {
                 internalType: 'uint256',
@@ -1841,23 +1964,15 @@ export const TestnetServiceNodeRewardsAbi = [
             name: 'contributors',
             type: 'tuple[]',
           },
+          {
+            internalType: 'uint256',
+            name: 'ed25519Pubkey',
+            type: 'uint256',
+          },
         ],
         internalType: 'struct IServiceNodeRewards.ServiceNode',
         name: '',
         type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'serviceNodesLength',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'count',
-        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -2034,13 +2149,6 @@ export const TestnetServiceNodeRewardsAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'updateAggregatePubkey',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'address',
@@ -2091,8 +2199,63 @@ export const TestnetServiceNodeRewardsAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'updateServiceNodesLength',
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'X',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'Y',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct BN256G1.G1Point',
+        name: 'blsPubkey',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'sigs0',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs1',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs2',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'sigs3',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct IServiceNodeRewards.BLSSignatureParams',
+        name: 'blsSignature',
+        type: 'tuple',
+      },
+      {
+        internalType: 'address',
+        name: 'caller',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'serviceNodePubkey',
+        type: 'uint256',
+      },
+    ],
+    name: 'validateProofOfPossession',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

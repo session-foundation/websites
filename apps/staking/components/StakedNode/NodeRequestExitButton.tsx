@@ -1,6 +1,5 @@
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
-import { CollapsableButton } from '@/components/StakedNodeCard';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -24,10 +23,10 @@ import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
 import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import useRequestNodeExit from '@/hooks/useRequestNodeExit';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
-import { SENT_SYMBOL } from '@session/contracts';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { Stake } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { CollapsableButton } from '@/components/NodeCard';
+import { formattedTotalStakedInContract } from '@/lib/contracts';
 
 enum EXIT_REQUEST_STATE {
   ALERT,
@@ -189,11 +188,6 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
     [fee]
   );
 
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
-  );
-
   const handleClick = () => {
     if (simulateEnabled) {
       resetContract();
@@ -222,7 +216,7 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
           rounded="md"
           size="lg"
           aria-label={dictionary('buttons.submitAria', {
-            tokenAmount: stakedAmount,
+            tokenAmount: formattedTotalStakedInContract(node.contributors),
             gasAmount: feeEstimate ?? 0,
           })}
           className="w-full"

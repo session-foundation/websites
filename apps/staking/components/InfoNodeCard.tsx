@@ -68,7 +68,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
               <span className="text-nowrap font-normal">
                 {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
               </span>
-              <PubKey pubKey={pubKey} force="collapse" />
+              <PubKey pubKey={pubKey} force="collapse" leadingChars={8} trailingChars={4} />
             </NodeCardTitle>
           </div>
           <NodeCardText className="col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle text-xs font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row md:text-base">

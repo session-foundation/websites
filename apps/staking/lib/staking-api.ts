@@ -1,4 +1,4 @@
-import { SessionStakingClient, StakingBackendResponse } from '@session/sent-staking-js/client';
+import { SessionStakingClient, StakingBackendResponse } from '@session/staking-api-js/client';
 
 export type StakingBackendQuery = (
   stakingBackendClient: SessionStakingClient
