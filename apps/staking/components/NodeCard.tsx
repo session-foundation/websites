@@ -273,7 +273,7 @@ export const ToggleCardExpansionButton = forwardRef<
         expanded ? StakedNodeDataTestId.Collapse_Button : StakedNodeDataTestId.Expand_Button
       }
       className={cn(
-        'ml-auto flex w-max cursor-pointer select-none items-center align-middle peer-checked:[&>svg]:rotate-180',
+        'ms-auto flex w-max cursor-pointer select-none items-center align-middle peer-checked:[&>svg]:rotate-180',
         className
       )}
       {...props}
@@ -283,7 +283,7 @@ export const ToggleCardExpansionButton = forwardRef<
       </span>
       <ArrowDownIcon
         className={cn(
-          'fill-session-text stroke-session-text ml-1 h-4 w-4 transform transition-all duration-300 ease-in-out motion-reduce:transition-none'
+          'fill-session-text stroke-session-text ms-1 h-4 w-4 transform transition-all duration-300 ease-in-out motion-reduce:transition-none'
         )}
       />
     </label>
@@ -339,7 +339,7 @@ export const CollapsableButton = forwardRef<
   }
 >(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
   <CollapsableContent
-    className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
+    className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
     size="buttonSm"
   >
     <Button

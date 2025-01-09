@@ -2,6 +2,8 @@ export type NetworkInfo = {
   block_height: number;
   block_timestamp: number;
   block_top_hash: string;
+  l2_height: number;
+  l2_height_timestamp: number;
   hard_fork: number;
   max_stakers: number;
   min_operator_stake: number;

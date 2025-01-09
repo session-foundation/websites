@@ -14,7 +14,7 @@ export const NodeExitButton = forwardRef<
   const dictionary = useTranslations('nodeCard.staked.exit');
   return (
     <CollapsableContent
-      className={cn('bottom-4 right-6 flex items-end min-[500px]:absolute', className)}
+      className={cn('bottom-4 end-6 flex items-end min-[500px]:absolute', className)}
       size="buttonSm"
       width="w-max"
       {...props}
