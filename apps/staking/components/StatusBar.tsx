@@ -66,14 +66,16 @@ export function StatusBar() {
         showNetworkBehindWarning ||
         showL2HeightBehindError ||
         showL2HeightBehindWarning ||
-        !networkInfo)
+        !networkInfo ||
+        !networkInfo.block_height ||
+        !networkInfo.l2_height)
     ) {
       refetch();
     }
   };
 
   const networkStatusTextKey = networkInfoIsFetching
-    ? 'loading'
+    ? 'network.loading'
     : showNetworkBehindError || (!showL2HeightOnStatusBar && showL2HeightBehindError)
       ? 'network.errorTooltip'
       : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
@@ -103,7 +105,7 @@ export function StatusBar() {
           : 'text-session-green';
 
   const l2HeightStatusTextKey = networkInfoIsFetching
-    ? 'loading'
+    ? 'l2.loading'
     : showL2HeightBehindError
       ? 'l2.errorTooltip'
       : showL2HeightBehindWarning
@@ -155,11 +157,11 @@ export function StatusBar() {
           })}
           triggerProps={{ onClick: handleClick }}
         >
-          <div className="flex flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-2">
             <StatusIndicator status={l2HeightStatusIndicatorStatus} />
             <span className={l2HeightStatusIndicatorClassName}>
               {networkInfoIsFetching
-                ? dictionary('loading')
+                ? dictionary('l2.loading')
                 : networkInfo?.l2_height ?? dictionary('network.unreachable')}
             </span>
           </div>
@@ -168,7 +170,7 @@ export function StatusBar() {
       {networkStatusVisible ? (
         <Tooltip
           tooltipContent={
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               <span>
                 {dictionary.rich(networkStatusTextKey, {
                   blockNumber: networkInfo?.block_height,
@@ -189,11 +191,11 @@ export function StatusBar() {
           }
           triggerProps={{ onClick: handleClick }}
         >
-          <div className="flex flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-2">
             <StatusIndicator status={networkStatusIndicatorStatus} />
             <span className={networkStatusIndicatorClassName}>
               {networkInfoIsFetching
-                ? dictionary('loading')
+                ? dictionary('network.loading')
                 : networkInfo?.block_height ?? dictionary('network.unreachable')}
             </span>
           </div>
