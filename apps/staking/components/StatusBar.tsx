@@ -22,8 +22,9 @@ export function StatusBar() {
   const dictionary = useTranslations('statusBar');
 
   const { getItem } = usePreferences();
-  const showL2HeightOnStatusBarFlag = getItem<boolean>(PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR);
-  const showL2HeightOnStatusBar = showL2HeightOnStatusBarFlag === true;
+  const showL2HeightOnStatusBarFlag = getItem<string>(PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR);
+  // TODO: a bug in usePref makes this a string, this will be fixed soon, at which point we can remove this and use a boolean
+  const showL2HeightOnStatusBar = showL2HeightOnStatusBarFlag === 'true';
 
   const blockRelativeTime = useRelativeTime(
     networkInfo?.block_timestamp ? new Date(networkInfo?.block_timestamp * 1000) : undefined,
@@ -87,9 +88,9 @@ export function StatusBar() {
       ? 'red'
       : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
         ? 'yellow'
-        : networkInfo
-          ? 'green'
-          : 'red';
+        : !networkInfo?.block_height || (!showL2HeightOnStatusBar && !networkInfo.l2_height)
+          ? 'red'
+          : 'green';
 
   const networkStatusIndicatorClassName = networkInfoIsFetching
     ? 'text-text-muted-foreground'
@@ -97,9 +98,9 @@ export function StatusBar() {
       ? 'text-destructive'
       : showNetworkBehindWarning || (!showL2HeightOnStatusBar && showL2HeightBehindWarning)
         ? 'text-warning'
-        : networkInfo
-          ? 'text-session-green'
-          : 'text-destructive';
+        : !networkInfo?.block_height || (!showL2HeightOnStatusBar && !networkInfo.l2_height)
+          ? 'text-destructive'
+          : 'text-session-green';
 
   const l2HeightStatusTextKey = networkInfoIsFetching
     ? 'loading'
@@ -107,7 +108,7 @@ export function StatusBar() {
       ? 'l2.errorTooltip'
       : showL2HeightBehindWarning
         ? 'l2.warningTooltip'
-        : networkInfo
+        : networkInfo?.l2_height
           ? 'l2.infoTooltip'
           : 'l2.unreachableTooltip';
 
@@ -117,7 +118,7 @@ export function StatusBar() {
       ? 'red'
       : showL2HeightBehindWarning
         ? 'yellow'
-        : networkInfo
+        : networkInfo?.l2_height
           ? 'green'
           : 'red';
 
@@ -127,7 +128,7 @@ export function StatusBar() {
       ? 'text-destructive'
       : showL2HeightBehindWarning
         ? 'text-warning'
-        : networkInfo
+        : networkInfo?.l2_height
           ? 'text-session-green'
           : 'text-destructive';
 
