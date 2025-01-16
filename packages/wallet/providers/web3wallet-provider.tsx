@@ -78,7 +78,7 @@ const componentLibrary: Web3WalletComponentLibrary = {
 
 function TokenActionButton({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a href={href}>
+    <a href={href} target="_blank" rel="noreferrer">
       <Button size="xs" variant="outline" data-testid="button:token-action">
         {children}
       </Button>
@@ -87,7 +87,7 @@ function TokenActionButton({ href, children }: { href: string; children: ReactNo
 }
 
 const tokenDetailsArbitrum: DynamicTokenRowProps = {
-  tokenAddress: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+  tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   name: 'Session Token',
   iconSrc: '/images/token_logo.svg',
   network: {
@@ -99,7 +99,7 @@ const tokenDetailsArbitrum: DynamicTokenRowProps = {
 };
 
 const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
-  tokenAddress: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+  tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   name: 'Session Token',
   iconSrc: '/images/token_logo.svg',
   symbolPrefix: 't',
@@ -112,7 +112,7 @@ const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
 };
 
 const tokenDetailsEthereum: DynamicTokenRowProps = {
-  tokenAddress: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+  tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
   name: 'Session Token',
   iconSrc: '/images/token_logo.svg',
   network: {
@@ -125,7 +125,7 @@ const tokenDetailsEthereum: DynamicTokenRowProps = {
 };
 
 const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
-  tokenAddress: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+  tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
   name: 'Session Token',
   iconSrc: '/images/token_logo.svg',
   symbolPrefix: 't',

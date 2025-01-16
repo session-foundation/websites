@@ -6,7 +6,7 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { addresses, isValidChainId } from '@session/contracts';
-import { useProxyApproval } from '@session/contracts/hooks/SENT';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
 import {
   type RegisterNodeContributor,
   useAddBLSPubKey,

@@ -15,6 +15,7 @@ import {
   type WriteContractStatus,
 } from './useContractWriteQuery';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useEstimateContractFee } from './useEstimateContractFee';
 
 export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
   formatSENTBigInt(value, SENT_DECIMALS, hideSymbol);
@@ -34,7 +35,7 @@ export type SENTBalanceQuery = ContractReadQueryProps & {
 
 export function useSENTBalanceQuery({ address }: { address?: Address }): SENTBalanceQuery {
   const { data: balance, ...rest } = useContractReadQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'balanceOf',
     args: [address!],
     enabled: !!address,
@@ -68,7 +69,7 @@ export function useAllowanceQuery({
   );
 
   const { data: allowance, ...rest } = useContractReadQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'allowance',
     args,
     enabled: !!args,
@@ -90,6 +91,9 @@ export type UseProxyApprovalReturn = {
   simulateError: SimulateContractErrorType | Error | null;
   writeError: WriteContractErrorType | Error | null;
   transactionError: TransactionExecutionErrorType | Error | null;
+  fee: bigint | null;
+  gasAmount: bigint | null;
+  gasPrice: bigint | null;
 };
 
 export function useProxyApproval({
@@ -135,8 +139,11 @@ export function useProxyApproval({
     simulateError,
     writeError,
     transactionError,
+    fee,
+    gasAmount,
+    gasPrice,
   } = useContractWriteQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'approve',
   });
 
@@ -207,5 +214,19 @@ export function useProxyApproval({
     simulateError,
     writeError,
     transactionError,
+    fee,
+    gasAmount,
+    gasPrice,
   };
+}
+
+export function useProxyApprovalFeeEstimate({
+  contractAddress,
+  amount,
+}: { contractAddress: Address; amount: bigint }) {
+  return useEstimateContractFee({
+    contract: 'Token',
+    functionName: 'approve',
+    args: [contractAddress, amount],
+  });
 }

@@ -4,7 +4,7 @@ import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
-import { useProxyApproval } from '@session/contracts/hooks/SENT';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
@@ -25,7 +25,7 @@ export default function useContributeStakeToOpenNode({
 }: UseContributeStakeToOpenNodeParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const dict = useTranslations('actionModules.register.stageMulti');
+  const dict = useTranslations('actionModules.registration.submitMulti');
   const dictGeneral = useTranslations('general');
 
   const {
@@ -52,7 +52,7 @@ export default function useContributeStakeToOpenNode({
     transactionError: contributeFundsTransactionError,
   } = useContributeFunds({
     amount: stakeAmount,
-    beneficiary: beneficiary ?? userAddress,
+    beneficiary: beneficiary || userAddress,
   });
 
   const contributeStake = () => {
