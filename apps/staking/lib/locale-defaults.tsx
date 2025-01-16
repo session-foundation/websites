@@ -1,4 +1,4 @@
-import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { SENT_DECIMALS, SENT_SYMBOL, TOKEN } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
@@ -10,8 +10,8 @@ import {
   FAUCET,
   NETWORK,
   SESSION_NODE_FULL_STAKE_AMOUNT,
-  SESSION_NODE_MIN_STAKE_MULTI,
-  SESSION_NODE_MIN_STAKE_SOLO,
+  SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+  SESSION_NODE_MIN_STAKE_SOLO_OPERATOR,
   SESSION_NODE_TIME_STATIC,
   SOCIALS,
   TICKER,
@@ -107,7 +107,7 @@ export const defaultTranslationElements = {
 } satisfies RichTranslationValues;
 
 export const defaultTranslationVariables = {
-  tokenSymbol: SENT_SYMBOL,
+  tokenSymbol: TOKEN.SYMBOL,
   gasTokenSymbol: TICKER.ETH,
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
@@ -121,8 +121,8 @@ export const defaultTranslationVariables = {
   smallContributorLeaveRequestDelay:
     SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS,
   fullStateAmount: `${formatBigIntTokenValue(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
-  minStakeSolo: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_SOLO, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
-  minStakeMulti: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_MULTI, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeSolo: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_SOLO_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeMulti: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
 } satisfies RichTranslationValues;
 
 export const defaultTranslationValues: RichTranslationValues = {

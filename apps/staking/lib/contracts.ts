@@ -1,5 +1,5 @@
 import { getContractErrorName } from '@session/contracts';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
 import type { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
 import type { StakeContributor } from '@session/staking-api-js/client';
 import { toast } from '@session/ui/lib/toast';

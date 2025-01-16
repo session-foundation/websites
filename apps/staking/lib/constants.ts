@@ -37,7 +37,7 @@ export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register', '/faucet'];
 
 export enum COMMUNITY_DATE {
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = '2024-06-12',
-  OXEN_SERVICE_NODE_BONUS_PROGRAM = '2024-06-12',
+  OXEN_SERVICE_NODE_BONUS_PROGRAM = '2025-01-15',
 }
 
 export const SOCIALS = {
@@ -114,12 +114,19 @@ export enum QUERY {
   STALE_TIME_CLAIM_REWARDS = 2 * 60 * 1000,
   /** 60 seconds */
   STALE_TIME_REMOTE_FEATURE_FLAGS = 60 * 1000,
+  /** 5 seconds */
+  REFETCH_INTERVAL_REGISTRATION_GET_CONTRACT_ADDRESS = 5 * 1000,
 }
 
 /** 20,000 SENT  */
 export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
-export const SESSION_NODE_MIN_STAKE_MULTI = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
-export const SESSION_NODE_MIN_STAKE_SOLO = SESSION_NODE_FULL_STAKE_AMOUNT;
+export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
+
+export const SIGNIFICANT_FIGURES = {
+  GAS_FEE_TOTAL: 3,
+  GAS_FEE_BREAKDOWN: 4,
+};
 
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
@@ -139,6 +146,8 @@ export enum SESSION_NODE_TIME_STATIC {
   SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS = 2,
   /** isSoon amount in seconds for time based notifications (2 minutes) */
   SOON_TIME = 120_000,
+  /** 24 hours in ms */
+  NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS = 24 * 60 * 60 * 1000,
 }
 
 enum SESSION_NODE_TIME_TESTNET {
@@ -186,9 +195,31 @@ export enum DYNAMIC_MODULE {
   SENT_ROUNDED_DECIMALS = 2,
 }
 
+const MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024 = 67681024783n;
+const MEDIAN_GAS_PRICE_ARBITRUM_SEPOLIA_2024 = 1082870990n;
+
 export const HANDRAIL_THRESHOLD = {
   /** 0.005 SENT */
   CLAIM_REWARDS_AMOUNT: 5000000n,
+};
+
+export const HANDRAIL_THRESHOLD_TESTNET = {
+  GAS_PRICE: MEDIAN_GAS_PRICE_ARBITRUM_SEPOLIA_2024,
+};
+
+export const HANDRAIL_THRESHOLD_MAINNET = {
+  GAS_PRICE: MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024,
+};
+
+export const HANDRAIL_THRESHOLD_DYNAMIC = (chainId?: number) => {
+  switch (chainId) {
+    case arbitrumSepolia.id:
+    case sepolia.id:
+      return HANDRAIL_THRESHOLD_TESTNET;
+
+    default:
+      return HANDRAIL_THRESHOLD_MAINNET;
+  }
 };
 
 export const preferenceStorageKey = 'stake';
@@ -206,16 +237,32 @@ export const preferenceStorageDefaultItems = {
 } as const;
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
-  [REG_TAB.START]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.STAKE_AMOUNT]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.OPERATOR_FEE]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.REWARDS_ADDRESS]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.RESERVE_SLOTS]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.RESERVE_SLOTS_INPUT]: 'https://docs.getsession.org/TBD',
-  [REG_TAB.AUTO_ACTIVATE]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.START]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
+  [REG_TAB.STAKE_AMOUNT]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-session-tokens',
+  [REG_TAB.OPERATOR_FEE]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee ',
+  [REG_TAB.REWARDS_ADDRESS]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr ',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address ',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
+  [REG_TAB.RESERVE_SLOTS]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node ',
+  [REG_TAB.RESERVE_SLOTS_INPUT]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node ',
+  [REG_TAB.AUTO_ACTIVATE]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
 } as const;
+
+export enum BACKEND {
+  /** 30 seconds */
+  L2_TARGET_UPDATE_INTERVAL_SECONDS = 30,
+  /** 2 minutes */
+  NODE_TARGET_UPDATE_INTERVAL_SECONDS = 2 * 60,
+}
 
 export enum LAST_UPDATED_BEHIND_TRIGGER {
   /** 2.5 minutes */
