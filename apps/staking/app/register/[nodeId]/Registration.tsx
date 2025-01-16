@@ -2,7 +2,6 @@
 
 import { AutoActivateTab } from '@/app/register/[nodeId]/multi/AutoActivateTab';
 import { OperatorFeeTab } from '@/app/register/[nodeId]/multi/OperatorFeeTab';
-import { ReserveSlotsTab } from '@/app/register/[nodeId]/multi/ReserveSlotsTab';
 import { RewardsAddressInputMultiTab } from '@/app/register/[nodeId]/multi/RewardsAddressInputMultiTab';
 import { RewardsAddressTab } from '@/app/register/[nodeId]/multi/RewardsAddressTab';
 import { StakeAmountTab } from '@/app/register/[nodeId]/multi/StakeAmountTab';
@@ -10,7 +9,7 @@ import { SubmitMultiTab } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import { type RegistrationStartFormSchema, StartTab } from '@/app/register/[nodeId]/shared/Start';
 import { RewardsAddressInputSoloTab } from '@/app/register/[nodeId]/solo/RewardsAddressInputSoloTab';
 import { SubmitSoloTab } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
-import { SuccessMultiTab } from '@/app/register/[nodeId]/solo/SuccessMultiTab';
+import { SuccessMultiTab } from '@/app/register/[nodeId]/multi/SuccessMultiTab';
 import { SuccessSoloTab } from '@/app/register/[nodeId]/solo/SuccessSoloTab';
 import {
   isUserSelectableRegistrationMode,
@@ -35,14 +34,17 @@ import {
   REGISTRATION_LINKS,
   SESSION_NODE,
   SESSION_NODE_FULL_STAKE_AMOUNT,
-  SESSION_NODE_MIN_STAKE_MULTI,
+  SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
 } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
-import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import {
+  CONTRIBUTION_CONTRACT_STATUS,
+  type ContributorContractInfo,
+} from '@session/staking-api-js/client';
 import { useForm } from '@session/ui/ui/form';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
@@ -64,6 +66,10 @@ import { type Address, isAddress } from 'viem';
 import { z } from 'zod';
 import useQueryParams, { type UseQueryParamsReturn } from '@/hooks/useQueryParams';
 import { toast } from '@session/ui/lib/toast';
+import { useStakes } from '@/hooks/useStakes';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { AlreadyRegisteredMultiTab } from '@/app/register/[nodeId]/multi/AlreadyRegisteredMultiTab';
+import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
 
 type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   address: Address;
@@ -100,12 +106,16 @@ function RegistrationProvider({
   ed25519Signature,
   preparedAt,
 }: RegistrationProps & { children: ReactNode }) {
+  const { contracts, addedBlsKeys } = useStakes();
+
   const [backButtonClickCallback, setBackButtonClickCallback] = useState<null | (() => void)>(null);
   const [isError, setIsError] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [tabHistory, setTabHistory] = useState<Array<REG_TAB>>([]);
-  const [contract, setContract] = useState<ContributorContractInfo | null>(null);
+  const [contract, setContract] = useState<ContributorContractInfo | null>(
+    contracts.find(({ pubkey_bls }) => areHexesEqual(pubkey_bls, blsKey)) ?? null
+  );
 
   const { address } = useWallet();
   const { value: balanceValue } = useWalletTokenBalance();
@@ -121,13 +131,13 @@ function RegistrationProvider({
     stakeAmount: {
       isOperator: true,
       decimalDelimiter,
-      minStake: SESSION_NODE_MIN_STAKE_MULTI,
+      minStake: SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
       maxStake: SESSION_NODE_FULL_STAKE_AMOUNT,
-      underMinMessage: dictionaryStakeAmount('underMinOperator', {
-        min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI),
+      underMinMessage: dictionaryStakeAmount('underMin', {
+        min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR),
       }),
       underMinOperatorMessage: dictionaryStakeAmount('underMinOperator', {
-        min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI),
+        min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR),
       }),
       overMaxMessage: dictionaryStakeAmount('overMax', {
         max: formatSENTBigIntNoRounding(SESSION_NODE_FULL_STAKE_AMOUNT),
@@ -209,8 +219,9 @@ function RegistrationProvider({
           queryParamStartTab = REG_TAB.REWARDS_ADDRESS;
         } else if (data?.autoActivate === undefined) {
           queryParamStartTab = REG_TAB.AUTO_ACTIVATE;
-        } else if (data?.reservedContributors === undefined) {
-          queryParamStartTab = REG_TAB.RESERVE_SLOTS;
+          // TODO: implement the reserve slots tab
+          // } else if (data?.reservedContributors === undefined) {
+          //   queryParamStartTab = REG_TAB.RESERVE_SLOTS;
         } else {
           queryParamStartTab = REG_TAB.SUBMIT_MULTI;
         }
@@ -228,8 +239,21 @@ function RegistrationProvider({
       };
     }, []);
 
-  const [tab, setTab] = useState<REG_TAB>(queryParamStartTab ?? REG_TAB.START);
-  const [nodeType, setNodeType] = useState<NODE_TYPE>(queryParamNodeType ?? NODE_TYPE.SOLO);
+  const alreadyRegisteredMulti =
+    contract !== null &&
+    (contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib ||
+      contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib);
+
+  const [tab, setTab] = useState<REG_TAB>(
+    addedBlsKeys?.has(blsKey)
+      ? REG_TAB.ALREADY_REGISTERED_RUNNING
+      : alreadyRegisteredMulti
+        ? REG_TAB.ALREADY_REGISTERED_MULTI
+        : (queryParamStartTab ?? REG_TAB.START)
+  );
+  const [nodeType, setNodeType] = useState<NODE_TYPE>(
+    alreadyRegisteredMulti ? NODE_TYPE.MULTI : (queryParamNodeType ?? NODE_TYPE.SOLO)
+  );
   const [mode, setMode] = useState<REG_MODE>(queryParamMode ?? userPrefMode);
 
   function setStartData(data: z.infer<typeof RegistrationStartFormSchema>) {
@@ -237,7 +261,7 @@ function RegistrationProvider({
     pushQueryParam(REGISTRATION_QUERY_PARAM.MODE, data.mode);
 
     setNodeType(data.nodeType);
-    pushQueryParam(REGISTRATION_QUERY_PARAM.IS_MULTI, data.nodeType === NODE_TYPE.SOLO);
+    pushQueryParam(REGISTRATION_QUERY_PARAM.IS_MULTI, data.nodeType === NODE_TYPE.MULTI);
 
     changeTab(data.nodeType === NODE_TYPE.SOLO ? REG_TAB.SUBMIT_SOLO : REG_TAB.STAKE_AMOUNT);
   }
@@ -275,7 +299,7 @@ function RegistrationProvider({
       stakeAmount:
         queryParamFields?.stakeAmount ??
         bigIntToString(
-          bigIntMin(SESSION_NODE_MIN_STAKE_MULTI, balanceValue ?? 0n),
+          bigIntMin(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, balanceValue ?? 0n),
           SENT_DECIMALS,
           decimalDelimiter
         ),
@@ -362,16 +386,23 @@ function getTab(tab: REG_TAB) {
       return <RewardsAddressTab />;
     case REG_TAB.REWARDS_ADDRESS_INPUT_MULTI:
       return <RewardsAddressInputMultiTab />;
-    case REG_TAB.RESERVE_SLOTS:
-      return <ReserveSlotsTab />;
-    case REG_TAB.RESERVE_SLOTS_INPUT:
-      return <ReserveSlotsInputTab />;
+    // TODO: Implement the reserve slots
+    // case REG_TAB.RESERVE_SLOTS:
+    //   return <ReserveSlotsTab />;
+    // case REG_TAB.RESERVE_SLOTS_INPUT:
+    //   return <ReserveSlotsInputTab />;
     case REG_TAB.AUTO_ACTIVATE:
       return <AutoActivateTab />;
     case REG_TAB.SUBMIT_MULTI:
       return <SubmitMultiTab />;
     case REG_TAB.SUCCESS_MULTI:
       return <SuccessMultiTab />;
+
+    // Already Registered
+    case REG_TAB.ALREADY_REGISTERED_RUNNING:
+      return <AlreadyRegisteredRunningTab />;
+    case REG_TAB.ALREADY_REGISTERED_MULTI:
+      return <AlreadyRegisteredMultiTab />;
 
     default:
       throw new Error(`Unknown tab: ${tab}`);
@@ -460,7 +491,7 @@ export function RegistrationWizard() {
   );
 
   const titleKey =
-    tab === REG_TAB.START
+    tab === REG_TAB.START || tab === REG_TAB.ALREADY_REGISTERED_RUNNING
       ? 'registerANewNode'
       : nodeType === NODE_TYPE.SOLO
         ? 'singleContributorNode'
@@ -530,7 +561,9 @@ function parseRegistrationQueryParams(
   const data = {
     autoActivate,
     operatorFee: params.get(REGISTRATION_QUERY_PARAM.OPERATOR_FEE) ?? undefined,
-    reservedContributors: params.get(REGISTRATION_QUERY_PARAM.RESERVED_CONTRIBUTORS) ?? undefined,
+    // TODO: Implement the reserve slots
+    // reservedContributors: params.get(REGISTRATION_QUERY_PARAM.RESERVED_CONTRIBUTORS) ?? undefined,
+    reservedContributors: undefined,
     rewardsAddress: params.get(REGISTRATION_QUERY_PARAM.REWARDS_ADDRESS) ?? undefined,
     stakeAmount: params.get(REGISTRATION_QUERY_PARAM.STAKE_AMOUNT) ?? undefined,
   };

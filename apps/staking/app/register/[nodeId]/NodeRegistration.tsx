@@ -1,6 +1,5 @@
 'use client';
 
-import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationForm';
 import { Registration } from '@/app/register/[nodeId]/Registration';
 import { QUERY } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
@@ -8,6 +7,10 @@ import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useStakes } from '@/hooks/useStakes';
+import { useMemo } from 'react';
+
+import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/page';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   const { address } = useWallet();
@@ -24,14 +27,19 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       }
     );
 
-  const registration =
-    registrationsData &&
-    'registrations' in registrationsData &&
-    Array.isArray(registrationsData.registrations)
-      ? registrationsData.registrations.find((node) => areHexesEqual(node.pubkey_ed25519, nodeId))
-      : null;
+  const { isLoading: isLoadingStakes } = useStakes();
 
-  return isLoadingRegistrations ? (
+  const registration = useMemo(
+    () =>
+      registrationsData &&
+      'registrations' in registrationsData &&
+      Array.isArray(registrationsData.registrations)
+        ? registrationsData.registrations.find((node) => areHexesEqual(node.pubkey_ed25519, nodeId))
+        : null,
+    [registrationsData, nodeId]
+  );
+
+  return isLoadingRegistrations || isLoadingStakes ? (
     <NodeRegistrationFormSkeleton />
   ) : registration ? (
     <Registration

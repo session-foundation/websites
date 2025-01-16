@@ -14,6 +14,9 @@ export enum REG_TAB {
   AUTO_ACTIVATE = 10,
   SUBMIT_MULTI = 11,
   SUCCESS_MULTI = 12,
+  // Already Registered
+  ALREADY_REGISTERED_RUNNING = 13,
+  ALREADY_REGISTERED_MULTI = 14,
 }
 
 export function parseTab(tab: REG_TAB) {
@@ -46,6 +49,11 @@ export function parseTab(tab: REG_TAB) {
       return 'submitMulti';
     case REG_TAB.SUCCESS_MULTI:
       return 'successMulti';
+    // Already Registered
+    case REG_TAB.ALREADY_REGISTERED_RUNNING:
+      return 'alreadyRegisteredRunning';
+    case REG_TAB.ALREADY_REGISTERED_MULTI:
+      return 'alreadyRegisteredMulti';
     default:
       throw new Error(`Unknown tab: ${tab}`);
   }

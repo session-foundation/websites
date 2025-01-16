@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
-import { NodeStakingForm } from '@/app/stake/[address]/NodeStaking';
+import { NodeStakingForm } from '@/app/stake/[address]/Staking';
 import { usePathname } from 'next/navigation';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useRegisteredNode } from '@/hooks/useRegisteredNode';

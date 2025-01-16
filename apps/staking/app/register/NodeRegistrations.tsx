@@ -14,10 +14,11 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useStakes } from '@/hooks/useStakes';
 import type { Registration } from '@session/staking-api-js/client';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import { useNetworkStatus } from '@/components/StatusBar';
 
 export default function NodeRegistrations() {
   const dictionary = useTranslations('modules.nodeRegistrations');
@@ -34,7 +35,7 @@ export default function NodeRegistrations() {
 
   const { address, isConnected } = useWallet();
 
-  const { data, isLoading, isError, refetch } = useStakingBackendQueryWithParams(
+  const { data, isLoading, isError, refetch, isFetching } = useStakingBackendQueryWithParams(
     getNodeRegistrations,
     { address: address! },
     {
@@ -44,6 +45,13 @@ export default function NodeRegistrations() {
         : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
     }
   );
+
+  const network = useMemo(
+    () => (data && 'network' in data && data.network ? data.network : null),
+    [data]
+  );
+
+  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
 
   const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
@@ -73,8 +81,16 @@ export default function NodeRegistrations() {
           addedRegistrationBlsKeys.add(pubkey_bls);
           return true;
         }
+        return false;
       });
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
+
+  useEffect(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, []);
 
   return isError ? (
     <ErrorMessage
