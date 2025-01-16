@@ -2,9 +2,7 @@
 
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { useSession } from '@session/auth/client';
-import { DiscordAuthButton } from '@session/auth/components/DiscordAuthButton';
-import { TelegramAuthButton } from '@session/auth/components/TelegramAuthButton';
-import { ModuleGridHeader } from '@session/ui/components/ModuleGrid';
+import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
 import { useTranslations } from 'next-intl';
@@ -56,8 +54,8 @@ export const getFaucetFormSchema = () => {
     walletAddress: z.string().refine((value) => isAddress(value), {
       message: dictionary('error.invalidAddress', { example: '0x...' }),
     }),
-    discordId: z.string().optional(),
-    telegramId: z.string().optional(),
+    // discordId: z.string().optional(),
+    // telegramId: z.string().optional(),
     code: z.string().optional(),
   });
 };
@@ -88,8 +86,8 @@ export const AuthModule = ({ code }: { code?: string }) => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       walletAddress: '',
-      discordId: '',
-      telegramId: '',
+      // discordId: '',
+      // telegramId: '',
       code: code ?? '',
     },
     reValidateMode: 'onChange',
@@ -111,13 +109,13 @@ export const AuthModule = ({ code }: { code?: string }) => {
       });
     }
 
-    if (discordId) {
-      data.discordId = discordId;
-    }
-
-    if (telegramId) {
-      data.telegramId = telegramId;
-    }
+    // if (discordId) {
+    //   data.discordId = discordId;
+    // }
+    //
+    // if (telegramId) {
+    //   data.telegramId = telegramId;
+    // }
 
     const promise: Promise<Address> = new Promise((resolve, reject) =>
       transferTestTokens(data).then((res) => {
@@ -127,7 +125,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
 
         const { hash, error, faucetError, history } = res;
 
-        if (history && history.length) {
+        if (history?.length) {
           setTransactionHistory(history);
         }
 
@@ -233,7 +231,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
   }, [setIsBalanceVisible]);
 
   return (
-    <ActionModule contentClassName="gap-3">
+    <ActionModule contentClassName="gap-3" contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
       {formState !== FORM_STATE.LANDING && formState !== FORM_STATE.SUCCESS ? (
         <span
           className="text-session-text absolute left-6 top-4 inline-flex w-min gap-1 text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
@@ -292,33 +290,33 @@ export const AuthModule = ({ code }: { code?: string }) => {
                 })}
               </p>
 
-              {discordId ? (
-                <p className="text-center text-sm">
-                  {dictionary.rich('confirm.discordDisclaimer', {
-                    tooltip: (children) => (
-                      <FaucetTextTooltip
-                        tooltip={dictionary('confirm.discordDisclaimerUserIdTooltip')}
-                      >
-                        {children}
-                      </FaucetTextTooltip>
-                    ),
-                  })}
-                </p>
-              ) : null}
+              {/*{discordId ? (*/}
+              {/*  <p className="text-center text-sm">*/}
+              {/*    {dictionary.rich('confirm.discordDisclaimer', {*/}
+              {/*      tooltip: (children) => (*/}
+              {/*        <FaucetTextTooltip*/}
+              {/*          tooltip={dictionary('confirm.discordDisclaimerUserIdTooltip')}*/}
+              {/*        >*/}
+              {/*          {children}*/}
+              {/*        </FaucetTextTooltip>*/}
+              {/*      ),*/}
+              {/*    })}*/}
+              {/*  </p>*/}
+              {/*) : null}*/}
 
-              {telegramId ? (
-                <p className="text-center text-sm">
-                  {dictionary.rich('confirm.telegramDisclaimer', {
-                    tooltip: (children) => (
-                      <FaucetTextTooltip
-                        tooltip={dictionary('confirm.telegramDisclaimerUserIdTooltip')}
-                      >
-                        {children}
-                      </FaucetTextTooltip>
-                    ),
-                  })}
-                </p>
-              ) : null}
+              {/*{telegramId ? (*/}
+              {/*  <p className="text-center text-sm">*/}
+              {/*    {dictionary.rich('confirm.telegramDisclaimer', {*/}
+              {/*      tooltip: (children) => (*/}
+              {/*        <FaucetTextTooltip*/}
+              {/*          tooltip={dictionary('confirm.telegramDisclaimerUserIdTooltip')}*/}
+              {/*        >*/}
+              {/*          {children}*/}
+              {/*        </FaucetTextTooltip>*/}
+              {/*      ),*/}
+              {/*    })}*/}
+              {/*  </p>*/}
+              {/*) : null}*/}
             </div>
           ) : null}
 
@@ -362,12 +360,12 @@ export const AuthModule = ({ code }: { code?: string }) => {
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
           <WalletButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
-          {!code ? (
-            <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
-              {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
-              {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
-            </span>
-          ) : null}
+          {/*{!code ? (*/}
+          {/*  <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">*/}
+          {/*    {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}*/}
+          {/*    {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}*/}
+          {/*  </span>*/}
+          {/*) : null}*/}
         </>
       ) : null}
 

@@ -1,9 +1,9 @@
 'use server';
 
 import { COMMUNITY_DATE, FAUCET, FAUCET_ERROR, TICKER } from '@/lib/constants';
-import { addresses, SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { addresses, TOKEN } from '@session/contracts';
 import { SENTAbi } from '@session/contracts/abis';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
+import { ETH } from '@session/wallet/lib/eth';
 import { createPublicWalletClient, createServerWallet } from '@session/wallet/lib/server-wallet';
 import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -21,7 +21,7 @@ import {
   TABLE,
   TransactionHistory,
 } from './utils';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { arbitrumSepolia } from 'viem/chains';
 
 class FaucetError extends Error {
@@ -72,10 +72,10 @@ class FaucetResult {
   }
 }
 
-const faucetTokenWarning = BigInt(20000 * Math.pow(10, SENT_DECIMALS));
-const faucetGasWarning = BigInt(0.01 * Math.pow(10, ETH_DECIMALS));
+const faucetTokenWarning = BigInt(20000 * Math.pow(10, TOKEN.DECIMALS));
+const faucetGasWarning = BigInt(0.01 * Math.pow(10, ETH.DECIMALS));
 
-const minTargetEthBalance = BigInt(FAUCET.MIN_ETH_BALANCE * Math.pow(10, ETH_DECIMALS));
+const minTargetEthBalance = BigInt(FAUCET.MIN_ETH_BALANCE * Math.pow(10, ETH.DECIMALS));
 
 const hoursBetweenTransactions = parseInt(process.env.FAUCET_HOURS_BETWEEN_USES ?? '0');
 
@@ -113,7 +113,7 @@ export async function getSessionTokenBalance({
   const client = createPublicWalletClient(chain);
 
   return client.readContract({
-    address: addresses.SENT[arbitrumSepolia.id],
+    address: addresses.Token[arbitrumSepolia.id],
     abi: SENTAbi,
     functionName: 'balanceOf',
     args: [address],
@@ -124,15 +124,19 @@ setupDatababse();
 
 export async function transferTestTokens({
   walletAddress: targetAddress,
-  discordId,
-  telegramId,
+  // discordId,
+  // telegramId,
   code,
 }: FaucetFormSchema) {
   const dictionary = await getTranslations('faucet.form.error');
   const locale = await getLocale();
+
+  const discordId = null;
+  const telegramId = null;
+
   let result: FaucetResult = new FaucetResult({});
   let db: BetterSql3.Database | undefined;
-  let faucetTokenDrip = BigInt(FAUCET.DRIP * Math.pow(10, SENT_DECIMALS));
+  let faucetTokenDrip = BigInt(FAUCET.DRIP * Math.pow(10, TOKEN.DECIMALS));
 
   try {
     if (!isAddress(targetAddress)) {
@@ -176,7 +180,7 @@ export async function transferTestTokens({
      */
     if (faucetTokenBalance < faucetTokenWarning) {
       console.warn(
-        `Faucet wallet ${SENT_SYMBOL} balance (${formatSENTBigInt(faucetTokenBalance)}) is below the warning threshold (${formatSENTBigInt(faucetTokenWarning)})`
+        `Faucet wallet ${TOKEN.SYMBOL} balance (${formatSENTBigInt(faucetTokenBalance)}) is below the warning threshold (${formatSENTBigInt(faucetTokenWarning)})`
       );
     }
 
@@ -355,7 +359,7 @@ export async function transferTestTokens({
 
     // TODO: extract the simulate -> write logic into a separate reusable library
     const sessionTokenTxHash = await faucetWallet.writeContract({
-      address: addresses.SENT[arbitrumSepolia.id],
+      address: addresses.Token[arbitrumSepolia.id],
       abi: SENTAbi,
       functionName: 'transfer',
       args: [targetAddress, faucetTokenDrip],

@@ -3,7 +3,7 @@
 import { PubKey } from '@session/ui/components/PubKey';
 import { TICKER } from '@/lib/constants';
 import { formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
-import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { TOKEN } from '@session/contracts';
 import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import {
   Table,
@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@session/ui/ui/table';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
+import { ETH } from '@session/wallet/lib/eth';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -25,7 +25,7 @@ interface TransactionRow {
   date: Date;
   hash: string;
   amount: string;
-  token: typeof SENT_SYMBOL | typeof TICKER.ETH;
+  token: TOKEN.SYMBOL | TICKER.ETH;
 }
 
 export function FaucetTransactions({
@@ -54,7 +54,7 @@ export function FaucetTransactions({
           date: new Date(timestamp),
           hash,
           amount,
-          token: SENT_SYMBOL,
+          token: TOKEN.SYMBOL,
         });
       }
     });
@@ -85,7 +85,7 @@ export function FaucetTransactions({
               <TableCell>
                 {formatBigIntTokenValue(
                   BigInt(amount),
-                  token === SENT_SYMBOL ? SENT_DECIMALS : ETH_DECIMALS
+                  token === TOKEN.SYMBOL ? TOKEN.DECIMALS : ETH.DECIMALS
                 )}
                 {` ${token}`}
               </TableCell>
