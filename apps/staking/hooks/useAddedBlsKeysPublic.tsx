@@ -8,7 +8,7 @@ import { useStakingBackendQuery } from '@/lib/staking-api-client';
  * @param enabled - Whether the query should be enabled.
  */
 export function useAddedBlsKeysPublic({ enabled }: { enabled?: boolean }) {
-  const { data, isLoading } = useStakingBackendQuery(getNodesBlsKeys, { enabled });
+  const { data, isLoading, isFetching } = useStakingBackendQuery(getNodesBlsKeys, { enabled });
 
   const addedBlsKeys = useMemo(() => {
     if (!data) return null;
@@ -22,5 +22,6 @@ export function useAddedBlsKeysPublic({ enabled }: { enabled?: boolean }) {
   return {
     addedBlsKeys,
     isLoading,
+    isFetching,
   };
 }

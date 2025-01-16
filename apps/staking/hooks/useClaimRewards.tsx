@@ -32,8 +32,8 @@ export default function useClaimRewards({
   const {
     updateRewardsBalance,
     fee: updateBalanceFee,
-    estimateContractWriteFee: updateBalanceEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: updateBalanceRefetchContractWriteFeeEstimate,
+    gasPrice: updateBalanceGasPrice,
+    gasAmount: updateBalanceGasAmountEstimate,
     contractCallStatus: updateBalanceContractCallStatus,
     transactionStatus: updateBalanceTransactionStatus,
     estimateFeeError: updateBalanceEstimateFeeError,
@@ -45,8 +45,8 @@ export default function useClaimRewards({
   const {
     claimRewards,
     fee: claimFee,
-    estimateContractWriteFee: claimEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: claimRefetchContractWriteFeeEstimate,
+    gasPrice: claimGasPrice,
+    gasAmount: claimGasAmountEstimate,
     contractCallStatus: claimContractCallStatus,
     simulateError: claimSimulateError,
     writeError: claimWriteError,
@@ -62,16 +62,6 @@ export default function useClaimRewards({
     () => parseContractStatusToProgressStatus(claimContractCallStatus),
     [claimContractCallStatus]
   );
-
-  const estimateFee = () => {
-    updateBalanceEstimateContractWriteFee();
-    claimEstimateContractWriteFee();
-  };
-
-  const refetchFeeEstimate = () => {
-    claimRefetchContractWriteFeeEstimate();
-    updateBalanceRefetchContractWriteFeeEstimate();
-  };
 
   const updateBalanceAndClaimRewards = () => {
     setEnabled(true);
@@ -124,10 +114,12 @@ export default function useClaimRewards({
 
   return {
     updateBalanceAndClaimRewards,
-    refetchFeeEstimate,
     claimFee,
+    claimGasPrice,
+    claimGasAmountEstimate,
     updateBalanceFee,
-    estimateFee,
+    updateBalanceGasPrice,
+    updateBalanceGasAmountEstimate,
     updateRewardsBalanceStatus,
     claimRewardsStatus,
     enabled,

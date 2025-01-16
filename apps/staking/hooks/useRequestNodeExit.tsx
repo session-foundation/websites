@@ -17,6 +17,8 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
   const {
     initiateRemoveBLSPublicKey,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     contractCallStatus,
     simulateError,
@@ -49,6 +51,8 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
   return {
     initiateRemoveBLSPublicKey,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     simulateEnabled,
     resetContract,

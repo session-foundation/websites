@@ -25,6 +25,8 @@ export default function useExitNode({
   const {
     removeBLSPublicKeyWithSignature,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     contractCallStatus,
     simulateError,
@@ -60,6 +62,8 @@ export default function useExitNode({
   return {
     removeBLSPublicKeyWithSignature,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     simulateEnabled,
     resetContract,
