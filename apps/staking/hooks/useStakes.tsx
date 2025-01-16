@@ -104,8 +104,8 @@ export function sortContracts(
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  const priorityA = operatorA ? (contractStateSortOrderIfOperator[a.status] ?? 999) : 999;
-  const priorityB = operatorB ? (contractStateSortOrderIfOperator[b.status] ?? 999) : 999;
+  const priorityA = operatorA ? contractStateSortOrderIfOperator[a.status] ?? 999 : 999;
+  const priorityB = operatorB ? contractStateSortOrderIfOperator[b.status] ?? 999 : 999;
 
   if (priorityA !== priorityB) {
     // Priority ascending
@@ -169,7 +169,11 @@ export function useStakes(overrideAddress?: Address) {
            * will be null again. So a finalised contract with a null `node_add_timestamp`
            * relates to a node that once joined the network but has since exited.
            */
-          return node_add_timestamp && node_add_timestamp * 1000 > limitAgeJoiningTimestamp;
+          return (
+            node_add_timestamp &&
+            node_add_timestamp * 1000 > limitAgeJoiningTimestamp &&
+            !addedBlsKeysSet.has(pubkey_bls.slice(2))
+          );
 
         case CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib:
           /**
