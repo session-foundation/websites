@@ -70,8 +70,8 @@ export const PartyPopperIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, 
         y2="85.925"
         gradientUnits="userSpaceOnUse"
       >
-        <stop offset=".024" stop-color="#8F4700" />
-        <stop offset="1" stop-color="#703E2D" />
+        <stop offset=".024" stopColor="#8F4700" />
+        <stop offset="1" stopColor="#703E2D" />
       </linearGradient>
     </defs>
   </svg>

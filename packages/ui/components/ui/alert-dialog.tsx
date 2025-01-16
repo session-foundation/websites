@@ -51,13 +51,13 @@ const AlertDialogContent = React.forwardRef<
       {...props}
     >
       <Module noPadding>
-        <ModuleGridHeader keepDesktopHeaderOnMobile className="relative mb-4 flex items-center">
+        <ModuleGridHeader keepDesktopHeaderOnMobile className="relative flex items-center">
           {dialogTitle ? (
             <AlertDialogTitle className="my-2 w-full text-center text-lg font-medium leading-none tracking-tight md:block md:text-3xl">
               {dialogTitle}
             </AlertDialogTitle>
           ) : null}
-          <AlertDialogPrimitive.Cancel className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute right-8 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none">
+          <AlertDialogPrimitive.Cancel className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute right-8 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-session-green focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none">
             <X className="h-6 w-6" />
             <span className="sr-only">Close</span>
           </AlertDialogPrimitive.Cancel>
