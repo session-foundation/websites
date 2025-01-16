@@ -3,7 +3,7 @@ import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { type DecimalDelimiter, useDecimalDelimiter } from '@/lib/locale-client';
 import type { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { SENT_DECIMALS } from '@session/contracts';
-import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
 import { Button } from '@session/ui/ui/button';
 import { FormControl, FormItem, FormMessage } from '@session/ui/ui/form';
 import { Input } from '@session/ui/ui/input';

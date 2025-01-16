@@ -12,7 +12,7 @@ import {
   NodeItemSeparator,
   NodeItemValue,
 } from '@/components/InfoNodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { areHexesEqual } from '@session/util-crypto/string';

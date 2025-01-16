@@ -2,7 +2,6 @@ import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
 import useExitNode from '@/hooks/useExitNode';
 import { SOCIALS } from '@/lib/constants';
-import { formattedTotalStakedInContract } from '@/lib/contracts';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { getNodeExitSignatures } from '@/lib/queries/getNodeExitSignatures';
@@ -19,11 +18,9 @@ import {
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
 import { Button } from '@session/ui/ui/button';
-import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { type ReactNode, useEffect, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { ErrorMessage } from '@/components/ErrorMessage';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
@@ -139,17 +136,14 @@ function NodeExitContractWriteDialog({
   const {
     removeBLSPublicKeyWithSignature,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     simulateEnabled,
     resetContract,
     status,
     errorMessage,
   } = useExitNode(removeBlsPublicKeyWithSignatureArgs);
-
-  const feeEstimate = useMemo(
-    () => (fee !== null ? formatBigIntTokenValue(fee ?? BigInt(0), ETH_DECIMALS, 18) : null),
-    [fee]
-  );
 
   const handleClick = () => {
     if (simulateEnabled) {
@@ -160,28 +154,15 @@ function NodeExitContractWriteDialog({
 
   const isDisabled = !blsPubKey || !timestamp || !blsSignature;
 
-  useEffect(() => {
-    if (!isDisabled) {
-      estimateContractWriteFee();
-    }
-  }, [node.contract_id]);
-
   return (
     <>
-      <NodeActionModuleInfo
-        node={node}
-        feeEstimate={feeEstimate}
-        feeEstimateText={dictionary('requestFee')}
-      />
+      <NodeActionModuleInfo node={node} fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
       <AlertDialogFooter className="mt-4 flex flex-col gap-8 sm:flex-col">
         <Button
           variant="destructive"
           rounded="md"
           size="lg"
-          aria-label={dictionary('buttons.submitAria', {
-            tokenAmount: formattedTotalStakedInContract(node.contributors),
-            gasAmount: feeEstimate ?? 0,
-          })}
+          aria-label={dictionary('buttons.submitAria')}
           className="w-full"
           data-testid={ButtonDataTestId.Staked_Node_Exit_Dialog_Submit}
           disabled={isDisabled || simulateEnabled}

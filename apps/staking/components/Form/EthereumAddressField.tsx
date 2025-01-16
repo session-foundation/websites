@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
-type GetEthereumAddressFormFieldSchemaArgs = {
+export type GetEthereumAddressFormFieldSchemaArgs = {
   required?: boolean;
   invalidAddressMessage?: string;
 };

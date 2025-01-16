@@ -47,7 +47,7 @@ import {
   formatSENTBigInt,
   useAllowanceQuery,
   useProxyApproval,
-} from '@session/contracts/hooks/SENT';
+} from '@session/contracts/hooks/Token';
 import { LoadingText } from '@session/ui/components/loading-text';
 import { useContractReadQuery } from '@session/contracts/hooks/useContractReadQuery';
 

@@ -10,9 +10,15 @@ import { cn } from '@session/ui/lib/utils';
 import { Skeleton } from '@session/ui/ui/skeleton';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@session/ui/ui/accordion';
 
 type ActionModuleProps = {
-  title?: string;
+  title?: ReactNode;
   children?: ReactNode;
   headerAction?: ReactNode;
   background?: keyof typeof actionModuleBackground;
@@ -98,26 +104,73 @@ export const ActionModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTM
 );
 ActionModuleTooltip.displayName = 'ModuleTooltip';
 
+type ActionModuleRowContentProps = {
+  label: string;
+  tooltip: ReactNode;
+  children: ReactNode;
+  containerClassName?: string;
+};
+
+const ActionModuleRowContent = ({
+  label,
+  tooltip,
+  children,
+  containerClassName,
+}: ActionModuleRowContentProps) => (
+  <div className="flex flex-row flex-wrap items-center justify-between w-full">
+    <span className="inline-flex items-center gap-2 text-nowrap align-middle">
+      {label}
+      <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
+    </span>
+    <div className={cn('flex flex-row', containerClassName)}>{children}</div>
+  </div>
+);
+
+type ActionModuleRowProps = ActionModuleRowContentProps & {
+  last?: boolean;
+};
+
 export const ActionModuleRow = ({
   label,
   tooltip,
   children,
   containerClassName,
-}: {
-  label: string;
-  tooltip: ReactNode;
-  children: ReactNode;
-  containerClassName?: string;
+  last,
+}: ActionModuleRowProps) => (
+  <>
+    <ActionModuleRowContent label={label} tooltip={tooltip} containerClassName={containerClassName}>
+      {children}
+    </ActionModuleRowContent>
+    {!last ? <ActionModuleDivider /> : null}
+  </>
+);
+
+export const ActionModuleAccordionRow = ({
+  label,
+  tooltip,
+  children,
+  containerClassName,
+  accordionContent,
+  last,
+}: ActionModuleRowProps & {
+  accordionContent: ReactNode;
 }) => (
   <>
-    <div className="flex flex-row flex-wrap items-center justify-between">
-      <span className="inline-flex items-center gap-2 text-nowrap align-middle">
-        {label}
-        <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
-      </span>
-      <div className={cn('flex flex-row', containerClassName)}>{children}</div>
-    </div>
-    <ActionModuleDivider />
+    <Accordion type="single" collapsible className="-my-4">
+      <AccordionItem value="action-module-accordion-row" hideDivider>
+        <AccordionTrigger className="font-normal">
+          <ActionModuleRowContent
+            label={label}
+            tooltip={tooltip}
+            containerClassName={containerClassName}
+          >
+            {children}
+          </ActionModuleRowContent>
+        </AccordionTrigger>
+        <AccordionContent>{accordionContent}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+    {!last ? <ActionModuleDivider /> : null}
   </>
 );
 
