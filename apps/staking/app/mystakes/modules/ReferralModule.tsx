@@ -16,7 +16,7 @@ import { externalLink } from '@/lib/locale-defaults';
 import { useQuery } from '@tanstack/react-query';
 import { getReferralCodeInfo } from '@/app/faucet/actions';
 import { LoadingText } from '@session/ui/components/loading-text';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
 
 export default function ReferralModule() {
   const [hidden, setHidden] = useState<boolean>(true);

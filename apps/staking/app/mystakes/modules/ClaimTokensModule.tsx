@@ -13,15 +13,10 @@ import {
 import { useTranslations } from 'next-intl';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { Button } from '@session/ui/ui/button';
-import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
-import { LoadingText } from '@session/ui/components/loading-text';
-import { QUERY, TICKER, URL } from '@/lib/constants';
+import { HANDRAIL_THRESHOLD_DYNAMIC, QUERY, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import useClaimRewards from '@/hooks/useClaimRewards';
 import { useEffect, useMemo } from 'react';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { externalLink } from '@/lib/locale-defaults';
-import { AlertTooltip } from '@session/ui/ui/tooltip';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getRewardsClaimSignature } from '@/lib/queries/getRewardsClaimSignature';
 import { Loading } from '@session/ui/components/loading';
@@ -31,6 +26,9 @@ import { toast } from '@session/ui/lib/toast';
 import { Progress, PROGRESS_STATUS } from '@session/ui/components/motion/progress';
 import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { externalLink } from '@/lib/locale-defaults';
 
 export default function ClaimTokensModule() {
   const { address } = useWallet();
@@ -81,10 +79,11 @@ export default function ClaimTokensModule() {
 
 function ClaimTokensDialog() {
   const dictionary = useTranslations('modules.claim');
+  const dictionaryFee = useTranslations('fee');
   const dictionaryDialog = useTranslations('modules.claim.dialog');
   const dictionaryStage = useTranslations('modules.claim.stage');
 
-  const { address } = useWallet();
+  const { address, chainId } = useWallet();
   const { canClaim, refetch, formattedUnclaimedRewardsAmount } = useUnclaimedTokens();
 
   const {
@@ -122,8 +121,11 @@ function ClaimTokensDialog() {
   const {
     updateBalanceAndClaimRewards,
     claimFee,
+    claimGasPrice,
+    claimGasAmountEstimate,
     updateBalanceFee,
-    estimateFee,
+    updateBalanceGasPrice,
+    updateBalanceGasAmountEstimate,
     updateRewardsBalanceStatus,
     claimRewardsStatus,
     enabled,
@@ -132,16 +134,34 @@ function ClaimTokensDialog() {
     claimRewardsErrorMessage,
   } = useClaimRewards(claimRewardsArgs);
 
-  const feeEstimate = useMemo(
-    () =>
-      updateBalanceFee !== null || claimFee !== null
-        ? formatBigIntTokenValue(
-            (updateBalanceFee ?? BigInt(0)) + (claimFee ?? BigInt(0)),
-            ETH_DECIMALS,
-            18
-          )
+  const { feeFormatted: feeEstimateClaim, formula: feeFormulaClaim } = useNetworkFeeFormula({
+    fee: claimFee,
+    gasAmount: claimGasAmountEstimate,
+    gasPrice: claimGasPrice,
+    maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
+  });
+
+  const { feeFormatted: feeEstimateUpdate, formula: feeFormulaUpdate } = useNetworkFeeFormula({
+    fee: updateBalanceFee,
+    gasAmount: updateBalanceGasAmountEstimate,
+    gasPrice: updateBalanceGasPrice,
+    maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
+  });
+
+  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+    fee: updateBalanceFee || claimFee ? (updateBalanceFee ?? 0n) + (claimFee ?? 0n) : null,
+    gasAmount:
+      updateBalanceGasAmountEstimate || claimGasAmountEstimate
+        ? (updateBalanceGasAmountEstimate ?? 0n) + (claimGasAmountEstimate ?? 0n)
         : null,
-    [updateBalanceFee, claimFee]
+    gasPrice: updateBalanceGasPrice ?? claimGasPrice ?? null,
+    maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
+  });
+
+  const gasPrice = updateBalanceGasPrice ?? claimGasPrice;
+
+  const gasHighShowTooltip = !!(
+    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
   );
 
   const handleClick = () => {
@@ -157,12 +177,6 @@ function ClaimTokensDialog() {
         claimRewardsStatus === PROGRESS_STATUS.PENDING
       : updateRewardsBalanceStatus === PROGRESS_STATUS.SUCCESS ||
         updateRewardsBalanceStatus === PROGRESS_STATUS.PENDING);
-
-  useEffect(() => {
-    if (!isDisabled) {
-      estimateFee();
-    }
-  }, [address, rewards, blsSignature]);
 
   useEffect(() => {
     if (claimRewardsStatus === PROGRESS_STATUS.SUCCESS) {
@@ -186,35 +200,34 @@ function ClaimTokensDialog() {
         <>
           <div className="flex flex-col gap-4">
             <ActionModuleRow
-              label={dictionaryDialog('claimFee')}
-              tooltip={dictionaryDialog.rich('claimFeeTooltip', {
-                link: externalLink(URL.GAS_INFO),
-              })}
-            >
-              <span className="inline-flex flex-row items-center gap-1.5 align-middle">
-                {feeEstimate && !updateBalanceFee ? (
-                  <AlertTooltip
-                    tooltipContent={dictionaryDialog('alert.gasFetchFailedUpdateBalance')}
-                  />
-                ) : null}
-                {feeEstimate && !claimFee ? (
-                  <AlertTooltip
-                    tooltipContent={dictionaryDialog('alert.gasFetchFailedClaimRewards')}
-                  />
-                ) : null}
-                {feeEstimate ? (
-                  `${feeEstimate} ${TICKER.ETH}`
-                ) : (
-                  <LoadingText className="mr-8 scale-x-75 scale-y-50" />
-                )}
-              </span>
-            </ActionModuleRow>
-            <ActionModuleRow
               label={dictionaryDialog('amountClaimable')}
               tooltip={dictionaryDialog('amountClaimableTooltip')}
             >
               {formattedUnclaimedRewardsAmount}
             </ActionModuleRow>
+            <ActionModuleFeeAccordionRow
+              label={dictionaryFee('networkFee')}
+              tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+                link: externalLink(URL.GAS_INFO),
+                formula: () => feeFormula,
+              })}
+              fees={[
+                {
+                  label: dictionaryDialog('updateBalanceCost'),
+                  fee: feeEstimateUpdate,
+                  tooltip: feeFormulaUpdate,
+                },
+                {
+                  label: dictionaryDialog('claimRewardsCost'),
+                  fee: feeEstimateClaim,
+                  tooltip: feeFormulaClaim,
+                },
+              ]}
+              hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+              gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+              gasHighShowTooltip={gasHighShowTooltip}
+              totalFee={feeEstimate}
+            />
           </div>
           <AlertDialogFooter className="mt-4 flex flex-col gap-6 sm:flex-col">
             <Button
@@ -230,7 +243,7 @@ function ClaimTokensDialog() {
               disabled={isButtonDisabled}
               onClick={handleClick}
             >
-              {dictionaryDialog('buttons.submit', { tokenAmount: formattedUnclaimedRewardsAmount })}
+              {dictionaryDialog('buttons.submit')}
             </Button>
             {enabled ? (
               <Progress
