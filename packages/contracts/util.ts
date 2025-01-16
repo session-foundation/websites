@@ -32,10 +32,10 @@ export function getContractErrorName(
   let reason = error.name;
 
   // uncomment this to log the object, trust me it's useful
-  // console.log({
-  //   error,
-  //   errorKeys: Object.keys(error),
-  // });
+  console.log({
+    error,
+    errorKeys: Object.keys(error),
+  });
 
   if (error?.cause && typeof error.cause === 'object') {
     if (
@@ -46,7 +46,8 @@ export function getContractErrorName(
       error.cause.data.abiItem &&
       typeof error.cause.data.abiItem === 'object' &&
       'name' in error.cause.data.abiItem &&
-      typeof error.cause.data.abiItem.name === 'string'
+      typeof error.cause.data.abiItem.name === 'string' &&
+      error.cause.data.abiItem.name !== 'Error'
     ) {
       reason = error.cause.data.abiItem.name;
     } else if (
@@ -70,6 +71,8 @@ export function getContractErrorName(
           reason = 'UserRejectedRequest';
         } else if (reasonLower.includes('internal') && reasonLower.includes('rpc')) {
           reason = 'InternalRpc';
+        } else if (reasonLower.includes('amount exceeds balance')) {
+          reason = 'InsufficientBalance';
         }
       }
     }
