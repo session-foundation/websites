@@ -1,11 +1,12 @@
-import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
 import { BlockExplorerLink, BlockExplorerLinkText } from '@/components/BlockExplorerLink';
-import NodeStaking, { NodeStakingFormSkeleton } from './NodeStaking';
+import Staking, { NodeStakingFormSkeleton, StakingActionModuleTitle } from './Staking';
 import { Suspense, use } from 'react';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { stakingBackendPrefetchQuery } from '@/lib/staking-api-server';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
+import { LoadingText } from '@session/ui/components/loading-text';
 
 interface NodePageParams {
   params: Promise<{
@@ -16,14 +17,20 @@ interface NodePageParams {
 export default function NodePage(props: NodePageParams) {
   const params = use(props.params);
   const { address } = params;
-  const dictionary = useTranslations('actionModules.node');
 
   const { queryClient } = stakingBackendPrefetchQuery(getContributionContracts);
 
   return (
     <ActionModule
       background={3}
-      title={dictionary('title')}
+      title={
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <Suspense fallback={<LoadingText />}>
+            <StakingActionModuleTitle address={address} />
+          </Suspense>
+        </HydrationBoundary>
+      }
+      contentAlignment={MODULE_GRID_ALIGNMENT.TOP}
       headerAction={
         <HydrationBoundary state={dehydrate(queryClient)}>
           <Suspense fallback={<BlockExplorerLinkText />}>
@@ -35,7 +42,7 @@ export default function NodePage(props: NodePageParams) {
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<NodeStakingFormSkeleton />}>
-          <NodeStaking address={address} />
+          <Staking address={address} />
         </Suspense>
       </HydrationBoundary>
     </ActionModule>
