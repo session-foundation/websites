@@ -122,7 +122,7 @@ export enum CONTRIBUTION_CONTRACT_STATUS {
 }
 
 export type ContributorContractInfo = {
-  address: string;
+  address: `0x${string}`;
   contributors: Array<StakeContributor>;
   fee: number;
   node_add_timestamp: number | null;
@@ -186,6 +186,7 @@ export interface Registration {
 }
 
 export interface LoadRegistrationsResponse {
+  network: NetworkInfo;
   registrations: Registration[];
 }
 
