@@ -244,7 +244,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
                   // @ts-expect-error -- TODO: type this
                   field={field}
                   label={dictionary('rewardsAddress')}
-                  tooltip={dictionaryShared('rewardsAddressDescription')}
+                  tooltip={dictionary('rewardsAddressDescription')}
                   dataTestId={InputDataTestId.Stake_New_Stake_Rewards_Address}
                 />
               )}
