@@ -14,6 +14,7 @@ import {
 } from '../util';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import { useEstimateContractFee } from './useEstimateContractFee';
 
 export type ClaimRewardsQuery = ContractWriteQueryProps & {
   /** Claim rewards */
@@ -61,7 +62,7 @@ export function useUpdateRewardsBalanceQuery({
     functionName: 'updateRewardsBalance',
     // TODO: update the types to better reflect optional args as default
     // @ts-expect-error -- This is fine as the args change once the query is ready to execute.
-    defaultArgs,
+    args: defaultArgs,
   });
 
   return {
@@ -99,6 +100,41 @@ export type RegisterNodeContributor = {
   stakedAmount: bigint;
 };
 
+export type UseAddBlsPubKeyParams = {
+  blsPubKey: string;
+  blsSignature: string;
+  nodePubKey: string;
+  userSignature: string;
+  fee?: number;
+  contributors?: Array<RegisterNodeContributor>;
+};
+
+export function encodeAddBlsPubKeyArgs({
+  blsPubKey,
+  blsSignature,
+  nodePubKey,
+  userSignature,
+  fee,
+}: Omit<Required<UseAddBlsPubKeyParams>, 'contributors'>) {
+  const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
+  const encodedBlsSignature = encodeBlsSignature(blsSignature);
+  const { pubKey } = encodeED25519PubKey(nodePubKey);
+  const { sigs0, sigs1 } = encodeED25519Signature(userSignature);
+
+  const encodedNodeParams = {
+    serviceNodePubkey: pubKey,
+    serviceNodeSignature1: sigs0,
+    serviceNodeSignature2: sigs1,
+    fee,
+  };
+
+  return {
+    encodedBlsPubKey,
+    encodedBlsSignature,
+    encodedNodeParams,
+  };
+}
+
 export function useAddBLSPubKey({
   blsPubKey,
   blsSignature,
@@ -106,40 +142,52 @@ export function useAddBLSPubKey({
   userSignature,
   fee = 0,
   contributors = [],
-}: {
-  blsPubKey: string;
-  blsSignature: string;
-  nodePubKey: string;
-  userSignature: string;
-  fee?: number;
-  contributors?: Array<RegisterNodeContributor>;
-}): UseAddBLSPubKeyReturn {
-  const defaultArgs = useMemo(() => {
-    const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
-    const encodedBlsSignature = encodeBlsSignature(blsSignature);
-    const { pubKey } = encodeED25519PubKey(nodePubKey);
-    const { sigs0, sigs1 } = encodeED25519Signature(userSignature);
-
-    const encodedNodeParams = {
-      serviceNodePubkey: pubKey,
-      serviceNodeSignature1: sigs0,
-      serviceNodeSignature2: sigs1,
+}: UseAddBlsPubKeyParams): UseAddBLSPubKeyReturn {
+  const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
+    return encodeAddBlsPubKeyArgs({
+      blsPubKey,
+      blsSignature,
+      nodePubKey,
+      userSignature,
       fee,
-    };
-
-    return [encodedBlsPubKey, encodedBlsSignature, encodedNodeParams, contributors] as const;
-  }, [blsPubKey, blsSignature, nodePubKey, userSignature]);
+    });
+  }, [blsPubKey, blsSignature, nodePubKey, userSignature, fee]);
 
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'addBLSPublicKey',
-    defaultArgs,
+    args: [encodedBlsPubKey, encodedBlsSignature, encodedNodeParams, contributors],
   });
 
   return {
     addBLSPubKey: simulateAndWriteContract,
     ...rest,
   };
+}
+
+export function useAddBlsPubKeyFeeEstimate({
+  blsPubKey,
+  blsSignature,
+  nodePubKey,
+  userSignature,
+  fee = 0,
+  contributors = [],
+}: UseAddBlsPubKeyParams) {
+  const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
+    return encodeAddBlsPubKeyArgs({
+      blsPubKey,
+      blsSignature,
+      nodePubKey,
+      userSignature,
+      fee,
+    });
+  }, [blsPubKey, blsSignature, nodePubKey, userSignature, fee]);
+
+  return useEstimateContractFee({
+    contract: 'ServiceNodeRewards',
+    functionName: 'addBLSPublicKey',
+    args: [encodedBlsPubKey, encodedBlsSignature, encodedNodeParams, contributors],
+  });
 }
 
 export type UseInitiateRemoveBLSPublicKeyReturn = ContractWriteQueryProps & {
@@ -156,7 +204,7 @@ export function useInitiateRemoveBLSPublicKey({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'initiateExitBLSPublicKey',
-    defaultArgs,
+    args: defaultArgs,
   });
 
   return {
@@ -191,7 +239,7 @@ export function useRemoveBLSPublicKeyWithSignature({
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'exitBLSPublicKeyWithSignature',
-    defaultArgs,
+    args: defaultArgs,
   });
 
   return {

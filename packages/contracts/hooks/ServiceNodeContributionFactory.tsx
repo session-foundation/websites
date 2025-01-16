@@ -1,12 +1,8 @@
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useMemo } from 'react';
-import {
-  encodeBlsPubKey,
-  encodeBlsSignature,
-  encodeED25519PubKey,
-  encodeED25519Signature,
-} from '../util';
 import type { Address } from 'viem';
+import { encodeAddBlsPubKeyArgs } from './ServiceNodeRewards';
+import { useEstimateContractFee } from './useEstimateContractFee';
 
 export type UseCreateOpenNode = ContractWriteQueryProps & {
   createOpenNode: () => void;
@@ -34,38 +30,64 @@ export function useCreateOpenNode({
   reservedContributors,
   fee,
 }: UseCreateOpenNodeParams): UseCreateOpenNode {
-  const { pubKey } = encodeED25519PubKey(nodePubKey);
-
-  const defaultArgs = useMemo(() => {
-    const encodedBlsPubKey = encodeBlsPubKey(blsPubKey);
-    const encodedBlsSignature = encodeBlsSignature(blsSignature);
-    const { sigs0, sigs1 } = encodeED25519Signature(userSignature);
-
-    const encodedNodeParams = {
-      serviceNodePubkey: pubKey,
-      serviceNodeSignature1: sigs0,
-      serviceNodeSignature2: sigs1,
+  const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
+    return encodeAddBlsPubKeyArgs({
+      blsPubKey,
+      blsSignature,
+      nodePubKey,
+      userSignature,
       fee,
-    };
+    });
+  }, [blsPubKey, blsSignature, nodePubKey, userSignature, fee]);
 
-    return [
+  const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
+    contract: 'ServiceNodeContributionFactory',
+    functionName: 'deploy',
+    args: [
       encodedBlsPubKey,
       encodedBlsSignature,
       encodedNodeParams,
       reservedContributors,
       // The `autoStart` param is `manualFinalize` in the contract, so we invert it here
       !autoStart,
-    ] as const;
-  }, [blsPubKey, blsSignature, pubKey, userSignature, autoStart, fee]);
-
-  const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
-    contract: 'ServiceNodeContributionFactory',
-    functionName: 'deploy',
-    defaultArgs: defaultArgs,
+    ],
   });
 
   return {
     createOpenNode: simulateAndWriteContract,
     ...rest,
   };
+}
+
+export function useCreateOpenNodeFeeEstimate({
+  blsPubKey,
+  blsSignature,
+  nodePubKey,
+  userSignature,
+  fee,
+  autoStart,
+  reservedContributors,
+}: UseCreateOpenNodeParams) {
+  const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
+    return encodeAddBlsPubKeyArgs({
+      blsPubKey,
+      blsSignature,
+      nodePubKey,
+      userSignature,
+      fee,
+    });
+  }, [blsPubKey, blsSignature, nodePubKey, userSignature, fee]);
+
+  return useEstimateContractFee({
+    contract: 'ServiceNodeContributionFactory',
+    functionName: 'deploy',
+    args: [
+      encodedBlsPubKey,
+      encodedBlsSignature,
+      encodedNodeParams,
+      reservedContributors,
+      // The `autoStart` param is `manualFinalize` in the contract, so we invert it here
+      !autoStart,
+    ],
+  });
 }
