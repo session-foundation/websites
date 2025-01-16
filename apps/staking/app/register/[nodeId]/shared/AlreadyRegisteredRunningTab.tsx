@@ -4,15 +4,14 @@ import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizar
 import { useStakes } from '@/hooks/useStakes';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Loading } from '@session/ui/components/loading';
-import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
 import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 
-export function SuccessSoloTab() {
-  const dictionary = useTranslations('actionModules.registration.successSolo');
+export function AlreadyRegisteredRunningTab() {
+  const dictionary = useTranslations('actionModules.registration.alreadyRegisteredMulti');
   const dictionaryShared = useTranslations('actionModules.registration.shared');
   const { props } = useRegistrationWizard();
 
@@ -27,7 +26,6 @@ export function SuccessSoloTab() {
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
-      <PartyPopperIcon className="h-40 w-40" />
       <div className="flex flex-col items-center gap-2">
         <WizardSectionTitle title={dictionary('specialTitle')} />
         <WizardSectionDescription description={dictionary('specialDescription')} />

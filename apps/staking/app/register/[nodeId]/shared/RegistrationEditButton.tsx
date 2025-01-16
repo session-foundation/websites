@@ -6,7 +6,7 @@ import { forwardRef } from 'react';
 export const RegistrationEditButton = forwardRef<
   HTMLButtonElement,
   EditButtonProps & { tab: REG_TAB }
->(({ tab, ...props }, ref) => {
+>(({ tab, disabled, ...props }, ref) => {
   const { isSubmitting, isError, changeTab, setMode } = useRegistrationWizard();
 
   function handleClick() {
@@ -15,6 +15,11 @@ export const RegistrationEditButton = forwardRef<
   }
 
   return (
-    <EditButton ref={ref} {...props} disabled={isSubmitting || isError} onClick={handleClick} />
+    <EditButton
+      ref={ref}
+      {...props}
+      disabled={isSubmitting || isError || disabled}
+      onClick={handleClick}
+    />
   );
 });

@@ -4,7 +4,7 @@ import {
 } from '@/app/register/[nodeId]/Registration';
 import {
   type ErrorBoxProps,
-  ErrorTab,
+  ErrorTabRegistration,
   recoverableErrors,
 } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { RegistrationEditButton } from '@/app/register/[nodeId]/shared/RegistrationEditButton';
@@ -12,33 +12,133 @@ import { REG_TAB } from '@/app/register/[nodeId]/types';
 import { ActionModuleRow } from '@/components/ActionModule';
 import useRegisterNode, { type UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRelativeTime from '@/hooks/useRelativeTime';
-import { SESSION_NODE, SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
+import {
+  HANDRAIL_THRESHOLD_DYNAMIC,
+  SESSION_NODE,
+  SESSION_NODE_FULL_STAKE_AMOUNT,
+  SIGNIFICANT_FIGURES,
+  URL,
+} from '@/lib/constants';
 import { formatDate, formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { getContractErrorName } from '@session/contracts';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
-import type { RegisterNodeContributor } from '@session/contracts/hooks/ServiceNodeRewards';
+import { addresses, getContractErrorName, isValidChainId } from '@session/contracts';
+import {
+  formatSENTBigInt,
+  useAllowanceQuery,
+  useProxyApprovalFeeEstimate,
+} from '@session/contracts/hooks/Token';
+import {
+  type RegisterNodeContributor,
+  useAddBlsPubKeyFeeEstimate,
+} from '@session/contracts/hooks/ServiceNodeRewards';
 import { PubKey } from '@session/ui/components/PubKey';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
-import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
+import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
-import { Tooltip } from '@session/ui/ui/tooltip';
+import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { externalLink } from '@/lib/locale-defaults';
+import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 
 export function SubmitSoloTab() {
   const [params, setParams] = useState<UseRegisterNodeParams | null>(null);
 
   const { props, setIsSubmitting, formSolo, address } = useRegistrationWizard();
+  const { chainId } = useWallet();
+  const { balance, value: balanceValue } = useWalletTokenBalance();
 
   const dictionary = useTranslations('actionModules.registration.shared.submit');
+  const dictionarySubmit = useTranslations('actionModules.registration.submitSolo');
+  const dictionaryFee = useTranslations('fee');
   const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
   const dictShared = useTranslations('actionModules.shared');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
+
+  const contractAddress = useMemo(
+    () => (isValidChainId(chainId) ? addresses.ServiceNodeRewards[chainId] : null),
+    [chainId]
+  );
+  const { allowance } = useAllowanceQuery({
+    contractAddress,
+    gcTime: Number.POSITIVE_INFINITY,
+  });
+
+  const rewardsAddress = formSolo.watch('rewardsAddress');
+
+  const needsApproval = allowance === null || allowance < SESSION_NODE_FULL_STAKE_AMOUNT;
+
+  const {
+    fee: feeProxyApproval,
+    gasAmount: gasAmountProxyApproval,
+    gasPrice: gasPriceProxyApproval,
+    status: statusProxyApproval,
+  } = useProxyApprovalFeeEstimate({ contractAddress, amount: SESSION_NODE_FULL_STAKE_AMOUNT });
+
+  const addBlsFeeParams = useMemo(() => {
+    return {
+      contributors: [
+        {
+          staker: { addr: address, beneficiary: rewardsAddress },
+          stakedAmount: SESSION_NODE_FULL_STAKE_AMOUNT,
+        },
+      ],
+      blsPubKey: props.blsKey,
+      blsSignature: props.blsSignature,
+      nodePubKey: props.ed25519PubKey,
+      userSignature: props.ed25519Signature,
+    };
+  }, [props, rewardsAddress, address]);
+
+  const {
+    fee: feeAddBlsPubKey,
+    gasAmount: gasAmountAddBlsPubKey,
+    gasPrice: gasPriceAddBlsPubKey,
+    status: statusAddBlsPubKey,
+    error: errorAddBlsPubKey,
+  } = useAddBlsPubKeyFeeEstimate(addBlsFeeParams);
+
+  const { feeFormatted: feeFormattedProxyApproval, formula: formulaProxyApproval } =
+    useNetworkFeeFormula({
+      fee: feeProxyApproval,
+      gasAmount: gasAmountProxyApproval,
+      gasPrice: gasPriceProxyApproval,
+      maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
+    });
+
+  const { feeFormatted: feeFormattedAddBlsPubKey, formula: formulaAddBlsPubKey } =
+    useNetworkFeeFormula({
+      fee: feeAddBlsPubKey,
+      gasAmount: gasAmountAddBlsPubKey,
+      gasPrice: gasPriceAddBlsPubKey,
+      maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
+    });
+
+  const gasPrice = gasPriceAddBlsPubKey ?? gasPriceProxyApproval;
+
+  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+    fee:
+      feeProxyApproval || feeAddBlsPubKey
+        ? (feeProxyApproval ?? 0n) + (feeAddBlsPubKey ?? 0n)
+        : null,
+    gasAmount:
+      gasAmountProxyApproval || gasAmountAddBlsPubKey
+        ? (gasAmountProxyApproval ?? 0n) + (gasAmountAddBlsPubKey ?? 0n)
+        : null,
+    gasPrice,
+    maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
+  });
+
+  const gasHighShowTooltip = !!(
+    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
+  );
 
   const onSubmit = (data: SoloRegistrationFormSchema) => {
     try {
@@ -128,7 +228,7 @@ export function SubmitSoloTab() {
         tooltip={dictShared('rewardsAddressDescription')}
       >
         <PubKey
-          pubKey={formSolo.watch('rewardsAddress')}
+          pubKey={rewardsAddress}
           force="collapse"
           alwaysShowCopyButton
           leadingChars={8}
@@ -145,8 +245,47 @@ export function SubmitSoloTab() {
         label={dictShared('stakeAmount')}
         tooltip={dictShared('stakeAmountDescription')}
       >
-        <span className="font-semibold">{formatSENTBigInt(SESSION_NODE_FULL_STAKE_AMOUNT, 0)}</span>
+        <span className="inline-flex items-center gap-1.5">
+          {balanceValue !== undefined && balanceValue < SESSION_NODE_FULL_STAKE_AMOUNT ? (
+            <AlertTooltip
+              tooltipContent={dictShared('notEnoughTokensAlert', {
+                walletAmount: balance,
+                tokenAmount: formatSENTBigInt(SESSION_NODE_FULL_STAKE_AMOUNT, 0),
+              })}
+            />
+          ) : null}
+          <span className="font-semibold">
+            {formatSENTBigInt(SESSION_NODE_FULL_STAKE_AMOUNT, 0)}
+          </span>
+        </span>
       </ActionModuleRow>
+      <ActionModuleFeeAccordionRow
+        label={dictionaryFee('networkFee')}
+        tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+          link: externalLink(URL.GAS_INFO),
+          formula: () => (needsApproval ? feeFormula : formulaAddBlsPubKey),
+        })}
+        fees={[
+          {
+            label: dictShared('proxyApprovalCost'),
+            fee: feeFormattedProxyApproval,
+            tooltip: formulaProxyApproval,
+            noFee: !needsApproval,
+            noFeeReason: dictShared('proxyApprovalNotNeededTooltip', {
+              amount: formatSENTBigInt(allowance, 0),
+            }),
+          },
+          {
+            label: dictionarySubmit('addBlsPubKeyCost'),
+            fee: feeFormattedAddBlsPubKey,
+            tooltip: formulaAddBlsPubKey,
+          },
+        ]}
+        totalFee={needsApproval ? feeEstimate : feeFormattedAddBlsPubKey}
+        hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+        gasHighShowTooltip={gasHighShowTooltip}
+        gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+      />
       <Form {...formSolo}>
         <form onSubmit={formSolo.handleSubmit(onSubmit)} className={cn(params ? 'hidden' : '')}>
           <Button
@@ -169,6 +308,7 @@ export function SubmitSoloTab() {
 
 function SubmitSolo({ params }: { params: UseRegisterNodeParams }) {
   const dict = useTranslations('actionModules.registration.submitSolo');
+  const dictShared = useTranslations('actionModules.shared');
   const { setIsSubmitting, setIsSuccess, changeTab, setIsError } = useRegistrationWizard();
 
   const {
@@ -268,7 +408,7 @@ function SubmitSolo({ params }: { params: UseRegisterNodeParams }) {
   return (
     <div>
       <Typography variant="h3" className="text-start">
-        {dict('progress')}
+        {dictShared('progress')}
       </Typography>
       <Progress
         steps={[
@@ -318,7 +458,7 @@ function SubmitSolo({ params }: { params: UseRegisterNodeParams }) {
         onClick={handleRetry}
         data-testid={ButtonDataTestId.Register_Submit_Solo_Retry}
       >
-        {dict('retry')}
+        {dictShared('retry')}
       </Button>
     </div>
   );
@@ -360,5 +500,5 @@ function useConfirmationProgress() {
 
 function ErrorSolo({ error }: ErrorBoxProps) {
   const dict = useTranslations('actionModules.registration.errorSolo');
-  return <ErrorTab error={error} dict={dict} />;
+  return <ErrorTabRegistration error={error} dict={dict} />;
 }

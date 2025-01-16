@@ -29,7 +29,7 @@ export type ErrorTabProps = ErrorBoxProps & {
   dict: ReturnType<typeof useTranslations<'actionModules.registration.errorMulti'>>;
 };
 
-export function ErrorTab({ error, dict }: ErrorTabProps) {
+export function ErrorTabRegistration({ error, dict }: ErrorTabProps) {
   const { setIsError, setIsSubmitting, isSubmitting } = useRegistrationWizard();
 
   useEffect(() => {
@@ -37,8 +37,12 @@ export function ErrorTab({ error, dict }: ErrorTabProps) {
     if (isSubmitting) {
       setIsSubmitting(false);
     }
-  }, []);
+  }, [isSubmitting]);
 
+  return <ErrorTab error={error} dict={dict} />;
+}
+
+export function ErrorTab({ error, dict }: ErrorTabProps) {
   return (
     <div className="flex w-full flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-2">

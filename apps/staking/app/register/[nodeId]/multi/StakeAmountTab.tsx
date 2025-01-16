@@ -4,7 +4,10 @@ import {
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
 import StakeAmountField from '@/components/Form/StakeAmountField';
-import { SESSION_NODE_FULL_STAKE_AMOUNT, SESSION_NODE_MIN_STAKE_MULTI } from '@/lib/constants';
+import {
+  SESSION_NODE_FULL_STAKE_AMOUNT,
+  SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+} from '@/lib/constants';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
@@ -55,7 +58,7 @@ export function StakeAmountTab() {
             name={FIELD_NAME}
             render={({ field }) => (
               <StakeAmountField
-                minStake={SESSION_NODE_MIN_STAKE_MULTI}
+                minStake={SESSION_NODE_MIN_STAKE_MULTI_OPERATOR}
                 maxStake={SESSION_NODE_FULL_STAKE_AMOUNT}
                 watchedStakeAmount={stakeAmount}
                 field={field}
