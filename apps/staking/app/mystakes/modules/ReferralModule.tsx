@@ -35,7 +35,9 @@ export default function ReferralModule() {
     queryFn: async () => {
       try {
         const res = await getReferralCodeInfo({ code: hashId });
-        if (!res) throw new Error('No referral code found');
+        if (!res) {
+          toast.error('No referral code found');
+        }
         return res;
       } catch (error) {
         toast.error('Failed to get referral code info');
@@ -82,11 +84,17 @@ export default function ReferralModule() {
                 </div>
                 <div className="text-session-text-secondary mt-2 text-xs">
                   {status === 'success' ? (
-                    dictionary.rich('description4', {
-                      uses: data?.uses ?? 0,
-                      remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
-                      drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
-                    })
+                    data ? (
+                      dictionary.rich('description4', {
+                        uses: data?.uses ?? 0,
+                        remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
+                        drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
+                      })
+                    ) : (
+                      <span className="text-destructive text-base">
+                        This wallet is not eligible for a referral code
+                      </span>
+                    )
                   ) : (
                     <LoadingText />
                   )}

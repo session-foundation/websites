@@ -163,7 +163,7 @@
         "faucetOutOfTokens": "Faucet is out of {tokenSymbol}, Please <contact-support-link></contact-support-link> for assistance.",
         "faucetOutOfTokensTextOnly": "Faucet is out of {tokenSymbol}, Please contact support for assistance.",
         "invalidService": "The {service} account you connected was not part of the community snapshot on {snapshotDate} and is not eligible for testnet access.",
-        "invalidOxenAddress": "This wallet address was not registered for the {oxenProgram} on {oxenRegistrationDate} and is not eligible for testnet access. Try connecting with Discord or Telegram instead.",
+        "invalidOxenAddress": "This wallet address was not registered for the {oxenProgram} on {oxenRegistrationDate} and is not eligible for testnet access.",
         "alreadyUsedService": "The connected {service} account has already been used to claim testnet {tokenSymbol} for another wallet address.",
         "alreadyUsed": "The connected wallet address has already been used to claim testnet {tokenSymbol}.",
         "authFailed": "{service} authentication failed. Please refresh the page and try again.",

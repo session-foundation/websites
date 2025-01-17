@@ -359,7 +359,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
       {formState === FORM_STATE.LANDING ? (
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
-          <WalletButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
+          <WalletButtonWithLocales rounded="md" size="md" className="uppercase" hideBalance />
           {/*{!code ? (*/}
           {/*  <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">*/}
           {/*    {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}*/}
@@ -394,15 +394,15 @@ export const AuthModule = ({ code }: { code?: string }) => {
       ) : null}
 
       {faucetError === FAUCET_ERROR.FAUCET_OUT_OF_TOKENS ? (
-        <p className="text-destructive text-base">{dictionary('error.faucetOutOfTokens')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.faucetOutOfTokens')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INCORRECT_CHAIN ? (
-        <p className="text-destructive text-base">{dictionary('error.incorrectChain')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.incorrectChain')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INVALID_ADDRESS ? (
-        <p className="text-destructive text-base">{dictionary('error.invalidAddress')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.invalidAddress')}</p>
       ) : null}
 
       {/** NOTE: The eth requirement is removed for now, keep this here in case we need it again in the future */}

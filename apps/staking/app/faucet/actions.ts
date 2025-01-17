@@ -201,7 +201,16 @@ export async function transferTestTokens({
         );
       }
 
-      const { wallet, maxuses: maxUses, drip: codeDrip } = getReferralCodeDetails({ db, code });
+      const details = getReferralCodeDetails({ db, code });
+
+      if (!details) {
+        throw new FaucetError(
+          FAUCET_ERROR.INVALID_REFERRAL_CODE,
+          dictionary(FAUCET_ERROR.INVALID_REFERRAL_CODE)
+        );
+      }
+
+      const { wallet, maxuses: maxUses, drip: codeDrip } = details;
 
       if (wallet === targetAddress) {
         throw new FaucetError(
@@ -219,12 +228,12 @@ export async function transferTestTokens({
         );
       }
 
-      if (codeTransactionHistory.some((transaction) => transaction.target === targetAddress)) {
-        throw new FaucetError(
-          FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED,
-          dictionary(FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED)
-        );
-      }
+      // if (codeTransactionHistory.some((transaction) => transaction.target === targetAddress)) {
+      //   throw new FaucetError(
+      //     FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED,
+      //     dictionary(FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED)
+      //   );
+      // }
 
       if (codeDrip) {
         faucetTokenDrip = BigInt(codeDrip);
@@ -238,13 +247,13 @@ export async function transferTestTokens({
       const idIsOxenOperator = idIsInTable({
         db,
         source: TABLE.OPERATOR,
-        id: targetAddress,
+        id: targetAddress.toUpperCase(),
       });
 
       const idIsInWalletList = idIsInTable({
         db,
         source: TABLE.WALLET,
-        id: targetAddress,
+        id: targetAddress.toUpperCase(),
       });
 
       if (!idIsOxenOperator && !idIsInWalletList) {
@@ -468,7 +477,14 @@ export async function getReferralCodeInfo({ code }: { code: string }) {
   let db: BetterSql3.Database | undefined;
   try {
     const db = openDatabase();
-    const { maxuses: maxUses, drip } = getReferralCodeDetails({ db, code });
+    const details = getReferralCodeDetails({ db, code });
+
+    if (!details) {
+      return null;
+    }
+
+    const { maxuses: maxUses, drip } = details;
+
     const codeTransactionHistory = getCodeUseTransactionHistory({ db, code });
 
     const outOfUses = codeTransactionHistory.length >= (maxUses ?? 1);
