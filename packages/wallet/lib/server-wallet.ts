@@ -16,8 +16,9 @@ export function createServerWallet(privateKey: Address, chain: Chain) {
 }
 
 export function createPublicWalletClient(chain: Chain) {
+  const RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC_URL;
   return createPublicClient({
     chain,
-    transport: http(),
+    transport: http(RPC_URL),
   });
 }
