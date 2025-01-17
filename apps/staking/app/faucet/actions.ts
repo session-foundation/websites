@@ -228,12 +228,12 @@ export async function transferTestTokens({
         );
       }
 
-      // if (codeTransactionHistory.some((transaction) => transaction.target === targetAddress)) {
-      //   throw new FaucetError(
-      //     FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED,
-      //     dictionary(FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED)
-      //   );
-      // }
+      if (codeTransactionHistory.some((transaction) => transaction.target === targetAddress)) {
+        throw new FaucetError(
+          FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED,
+          dictionary(FAUCET_ERROR.REFERRAL_CODE_ALREADY_USED)
+        );
+      }
 
       if (codeDrip) {
         faucetTokenDrip = BigInt(codeDrip);
