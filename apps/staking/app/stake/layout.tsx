@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import OpenNodesModule from '@/app/stake/OpenNodesModule';
 import ScreenContainer from '@/components/ScreenContainer';
 import { ModuleGrid } from '@session/ui/components/ModuleGrid';
-import OpenNodesModule from '@/app/stake/OpenNodesModule';
+import type { ReactNode } from 'react';
 
 export default async function Layout({ children }: { children: ReactNode }) {
   return (

@@ -148,11 +148,12 @@ export function useStakes(overrideAddress?: Address) {
     const networkTime =
       net && 'block_timestamp' in net && net.block_timestamp ? data.network.block_timestamp : 0;
 
-    const addedBlsKeysSet = new Set(
-      stakesArr
-        .filter((stake) => parseStakeState(stake, blockHeight) !== STAKE_STATE.EXITED)
-        .map(({ pubkey_bls }) => pubkey_bls)
-    );
+    const blsKeysObject =
+      'added_bls_keys' in data && typeof data.added_bls_keys === 'object'
+        ? data.added_bls_keys
+        : {};
+
+    const addedBlsKeysSet = new Set(Object.keys(blsKeysObject));
 
     const limitAgeJoiningTimestamp = Date.now() - CONTRIBUTION_CONTRACT.MAX_AGE_JOINING_MS;
 
@@ -161,8 +162,18 @@ export function useStakes(overrideAddress?: Address) {
     const filteredContracts = contractsArr.filter(({ pubkey_bls, node_add_timestamp, status }) => {
       switch (status) {
         case CONTRIBUTION_CONTRACT_STATUS.Finalized:
-          // Should only include the finalised contracts that have no bls key added time or have an added time recently
-          return !node_add_timestamp || node_add_timestamp * 1000 > limitAgeJoiningTimestamp;
+          /**
+           * Should only include the finalised contracts with a recent `node_add_timestamp`.
+           * If a contract is finalised and has a non-null `node_add_timestamp` it is related
+           * to a node that is in the added list. Once that node exits the network, this value
+           * will be null again. So a finalised contract with a null `node_add_timestamp`
+           * relates to a node that once joined the network but has since exited.
+           */
+          return (
+            node_add_timestamp &&
+            node_add_timestamp * 1000 > limitAgeJoiningTimestamp &&
+            !addedBlsKeysSet.has(pubkey_bls.slice(2))
+          );
 
         case CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib:
           /**

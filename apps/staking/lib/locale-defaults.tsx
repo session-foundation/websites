@@ -1,22 +1,22 @@
-import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { SENT_DECIMALS, SENT_SYMBOL, TOKEN } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
-import { RichTranslationValues } from 'next-intl';
+import { formatBigIntTokenValue } from '@session/util-crypto/maths';
+import type { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
 import type { AriaRole, ReactNode } from 'react';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import {
   FAUCET,
   NETWORK,
   SESSION_NODE_FULL_STAKE_AMOUNT,
-  SESSION_NODE_MIN_STAKE_MULTI,
-  SESSION_NODE_MIN_STAKE_SOLO,
+  SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+  SESSION_NODE_MIN_STAKE_SOLO_OPERATOR,
   SESSION_NODE_TIME_STATIC,
   SOCIALS,
   TICKER,
   URL,
 } from './constants';
-import { arbitrum, arbitrumSepolia } from 'viem/chains';
-import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 
 export const internalLink = (href: string, prefetch?: boolean) => {
   return (children: ReactNode) => (
@@ -73,6 +73,7 @@ export const defaultTranslationElements = {
   'text-bold': text('font-bold'),
   'text-extrabold': text('font-extrabold'),
   'text-black': text('font-black'),
+  br: (children: ReactNode) => <br />,
   'discord-server-link': defaultExternalLink(
     SOCIALS[Social.Discord].link,
     "Session Token's Discord server"
@@ -80,6 +81,11 @@ export const defaultTranslationElements = {
   'contact-support-link': defaultExternalLink(
     SOCIALS[Social.Discord].link,
     'contact the Session team via Discord.'
+  ),
+  'please-contract-support-link': defaultExternalLink(
+    SOCIALS[Social.Discord].link,
+    'please contract support',
+    'text-session-green'
   ),
   'incentive-program-link': defaultExternalLink(
     URL.INCENTIVE_PROGRAM,
@@ -101,7 +107,7 @@ export const defaultTranslationElements = {
 } satisfies RichTranslationValues;
 
 export const defaultTranslationVariables = {
-  tokenSymbol: SENT_SYMBOL,
+  tokenSymbol: TOKEN.SYMBOL,
   gasTokenSymbol: TICKER.ETH,
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
@@ -114,6 +120,9 @@ export const defaultTranslationVariables = {
   notFoundContentType: 'page',
   smallContributorLeaveRequestDelay:
     SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS,
+  fullStateAmount: `${formatBigIntTokenValue(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeSolo: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_SOLO_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeMulti: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
 } satisfies RichTranslationValues;
 
 export const defaultTranslationValues: RichTranslationValues = {

@@ -3,7 +3,7 @@ import { type ContributorContractInfo } from '@session/staking-api-js/client';
 import { Address } from 'viem';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
 import {
   CollapsableContent,
   getTotalStakedAmountForAddress,
@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { Button } from '@session/ui/ui/button';
 import type { VariantProps } from 'class-variance-authority';
 import { statusVariants } from '@session/ui/components/StatusIndicator';
+import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
 
 function getContractStatusColor(
   state: STAKE_CONTRACT_STATE
@@ -59,14 +60,7 @@ const ContractSummary = ({ contract, state, isOperator }: ContractSummaryProps) 
           contributors={contract.contributors}
           data-testid={StakedNodeDataTestId.Contributor_List}
         />
-        {isOperator ? (
-          /**
-           * TODO: implement start button
-           */
-          <Button size="xs" data-testid={ButtonDataTestId.Staked_Node_Start} disabled>
-            Start
-          </Button>
-        ) : null}
+        {isOperator ? <ContractStartButton contractAddress={contract.address} /> : null}
       </>
     );
   }
@@ -140,7 +134,11 @@ const StakedContractCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
-            <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
+            <PubKey
+              pubKey={operatorAddress}
+              expandOnHoverDesktopOnly
+              force={hideButton ? 'collapse' : undefined}
+            />
           </CollapsableContent>
           {beneficiaryAddress ? (
             <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">

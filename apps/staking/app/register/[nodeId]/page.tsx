@@ -1,8 +1,8 @@
-import { useTranslations } from 'next-intl';
-import ActionModule from '@/components/ActionModule';
-import NodeRegistration from './NodeRegistration';
+import ActionModule, { ActionModuleRowSkeleton } from '@/components/ActionModule';
 import { Suspense, use } from 'react';
-import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationForm';
+import NodeRegistration from './NodeRegistration';
+import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
+import { ButtonSkeleton } from '@session/ui/ui/button';
 
 interface NodePageParams {
   params: Promise<{
@@ -10,16 +10,28 @@ interface NodePageParams {
   }>;
 }
 
+export function NodeRegistrationFormSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <ActionModuleRowSkeleton />
+      <ActionModuleRowSkeleton />
+      <ActionModuleRowSkeleton />
+      <ActionModuleRowSkeleton />
+      <ButtonSkeleton rounded="lg" size="lg" />
+    </div>
+  );
+}
+
 export default function NodePage(props: NodePageParams) {
   const params = use(props.params);
   const { nodeId } = params;
-  const dictionary = useTranslations('actionModules.register');
 
   return (
     <ActionModule
       background={2}
-      title={dictionary('title')}
       className="h-screen-without-header md:h-full"
+      noHeader
+      contentAlignment={MODULE_GRID_ALIGNMENT.TOP}
     >
       <Suspense fallback={<NodeRegistrationFormSkeleton />}>
         <NodeRegistration nodeId={nodeId} />

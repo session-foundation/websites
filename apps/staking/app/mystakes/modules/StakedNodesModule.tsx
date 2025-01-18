@@ -6,7 +6,6 @@ import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
-  ModuleGridContent,
   ModuleGridHeader,
   ModuleGridInfoContent,
   ModuleGridTitle,
@@ -22,10 +21,12 @@ import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { Address } from 'viem';
 import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { useNetworkStatus } from '@/components/StatusBar';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
 import { useStakes } from '@/hooks/useStakes';
+import { NodeListModuleContent } from '@/components/NodesListModule';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
+  const dictionary = useTranslations('modules.stakedNodes');
   const {
     stakes,
     contracts,
@@ -47,9 +48,14 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
   }, []);
 
   return (
-    <ModuleGridContent className="h-full md:overflow-y-auto">
+    <NodeListModuleContent>
       {isError ? (
-        <ErrorMessage refetch={refetch} />
+        <ErrorMessage
+          refetch={refetch}
+          message={dictionary.rich('error')}
+          buttonText={dictionary('errorButton')}
+          buttonDataTestId={ButtonDataTestId.Staked_Node_Error_Retry}
+        />
       ) : isLoading ? (
         <Loading />
       ) : (stakes?.length || contracts?.length) && blockHeight && networkTime ? (
@@ -80,7 +86,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
       ) : (
         <NoNodes />
       )}
-    </ModuleGridContent>
+    </NodeListModuleContent>
   );
 }
 
@@ -116,24 +122,6 @@ function NoWallet() {
       <p>{dictionary('noWalletP1')}</p>
       <p>{dictionary('noWalletP2')}</p>
       <WalletButtonWithLocales rounded="md" size="lg" />
-    </ModuleGridInfoContent>
-  );
-}
-
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('modules.stakedNodes');
-  return (
-    <ModuleGridInfoContent>
-      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.My_Stakes_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
     </ModuleGridInfoContent>
   );
 }

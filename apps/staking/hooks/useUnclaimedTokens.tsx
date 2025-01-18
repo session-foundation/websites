@@ -5,7 +5,7 @@ import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
 import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
 import { safeTrySync } from '@session/util-js/try';
 import { bigIntMax } from '@session/util-crypto/maths';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { DYNAMIC_MODULE, HANDRAIL_THRESHOLD } from '@/lib/constants';
 import { useMemo } from 'react';
 

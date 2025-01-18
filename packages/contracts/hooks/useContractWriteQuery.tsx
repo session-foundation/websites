@@ -3,7 +3,6 @@ import {
   type Address,
   type ContractFunctionArgs,
   type ContractFunctionName,
-  isAddress,
   type SimulateContractErrorType,
   type TransactionExecutionErrorType,
 } from 'viem';
@@ -31,8 +30,8 @@ export type ContractWriteQueryProps = {
   refetchContractWriteFeeEstimate: () => void;
   /** Reset the contract write query */
   resetContract: () => void;
-  /** Estimate gas the amount of gas to make the contract write */
-  gasAmountEstimate: bigint | null;
+  /** The amount of gas to make the contract write */
+  gasAmount: bigint | null;
   /** The current price of gas */
   gasPrice: bigint | null;
   /** The estimated fee to write to the contract */
@@ -73,20 +72,21 @@ export function useContractWriteQuery<
 >({
   contract,
   functionName,
-  defaultArgs,
+  args,
   addressOverride,
 }: {
   contract: T;
-  defaultArgs?: Args;
+  args?: Args;
   functionName: FName;
   addressOverride?: Address | null;
 }): UseContractWrite<Args> {
-  const { config, address: executorAddress, chainId } = useWallet();
-  const [estimateGasEnabled, setEstimateGasEnabled] = useState<boolean>(false);
+  const { config, chainId } = useWallet();
   const [simulateEnabled, setSimulateEnabled] = useState<boolean>(false);
-  const [contractArgs, setContractArgs] = useState<Args | undefined>(defaultArgs);
+  const [overrideContractArgs, setOverrideContractArgs] = useState<Args | undefined>();
   const [simulateStatusOverride, setSimulateStatusOverride] =
     useState<GenericContractStatus | null>(null);
+
+  const contractArgs = overrideContractArgs ?? args;
 
   const {
     data: hash,
@@ -105,46 +105,38 @@ export function useContractWriteQuery<
     hash,
   });
 
-  const contractDetails = useMemo(() => {
-    if (!isValidChainId(chainId)) return null;
-    const contractAddress = isValidChainId(chainId) ? addresses[contract][chainId] : undefined;
+  const abi = useMemo(() => Contracts[contract] as Abi, [contract]);
+  const contractAddress = useMemo(
+    () => (isValidChainId(chainId) ? addresses[contract][chainId] : undefined),
+    [contract, chainId]
+  );
 
-    if (!contractAddress || !isAddress(contractAddress)) return null;
-
-    const abi = Contracts[contract] as Abi;
-    if (!abi) return null;
-
-    return {
-      address: addressOverride ?? contractAddress,
-      abi,
-      functionName,
-      args: contractArgs as ContractFunctionArgs,
-      chainId,
-    };
-  }, [contract, chainId, functionName, contractArgs, addressOverride]);
-
-  const simulateContractDetails = useMemo(() => {
-    return {
-      ...contractDetails,
-      config,
-      query: {
-        enabled: simulateEnabled,
-        refetchOnWindowFocus: false,
-      },
-    };
-  }, [contractDetails, config, simulateEnabled]);
+  const address = addressOverride ?? contractAddress;
 
   const {
     data,
     status: simulateStatusRaw,
     error: simulateError,
     refetch: refetchRaw,
-  } = useSimulateContract(simulateContractDetails);
+  } = useSimulateContract({
+    address,
+    abi,
+    functionName,
+    args: contractArgs as ContractFunctionArgs,
+    chainId,
+    config,
+    query: {
+      enabled: simulateEnabled,
+      refetchOnWindowFocus: false,
+    },
+  });
 
   const refetchSimulate = async () => {
-    setSimulateStatusOverride('pending');
-    await refetchRaw();
-    setSimulateStatusOverride(null);
+    if (simulateEnabled) {
+      setSimulateStatusOverride('pending');
+      await refetchRaw();
+      setSimulateStatusOverride(null);
+    }
   };
 
   const simulateStatus = useMemo(
@@ -153,9 +145,8 @@ export function useContractWriteQuery<
   );
 
   const {
-    estimateGasAmount,
-    gasAmountEstimate,
-    getGasPrice,
+    getGasAmount,
+    gasAmount,
     gasPrice,
     fee,
     status: estimateFeeStatus,
@@ -163,18 +154,14 @@ export function useContractWriteQuery<
   } = useEstimateContractFee({
     contract,
     functionName,
-    executorAddress,
+    args: contractArgs,
   });
 
-  const estimateContractWriteFee = () => setEstimateGasEnabled(true);
+  const estimateContractWriteFee = getGasAmount;
+  const refetchContractWriteFeeEstimate = getGasAmount;
 
-  const refetchContractWriteFeeEstimate = () => {
-    void getGasPrice();
-    void estimateGasAmount(contractArgs);
-  };
-
-  const simulateAndWriteContract: WriteContractFunction<Args> = (args) => {
-    if (args) setContractArgs(args);
+  const simulateAndWriteContract: WriteContractFunction<Args> = (argsOverride) => {
+    if (argsOverride) setOverrideContractArgs(argsOverride);
 
     setSimulateEnabled(true);
 
@@ -182,11 +169,17 @@ export function useContractWriteQuery<
   };
 
   const writeContractWithoutSimulating: WriteContractFunction<Args> = (args) => {
-    if (args) setContractArgs(args);
+    if (args) setOverrideContractArgs(args);
 
-    if (!contractDetails) throw new Error('Contract details are not defined');
+    if (!address) throw new Error('Contract address is not defined');
 
-    writeContract(contractDetails);
+    writeContract({
+      address,
+      abi,
+      functionName,
+      args: contractArgs as ContractFunctionArgs,
+      chainId,
+    });
   };
 
   const resetContract = () => {
@@ -198,7 +191,8 @@ export function useContractWriteQuery<
     if (!simulateEnabled) return 'idle';
     if (simulateStatus === 'error' || writeStatus === 'error' || transactionStatus === 'error') {
       return 'error';
-    } else if (
+    }
+    if (
       simulateStatus === 'success' &&
       writeStatus === 'success' &&
       transactionStatus === 'success'
@@ -214,14 +208,6 @@ export function useContractWriteQuery<
     }
   }, [simulateStatus, data?.request]);
 
-  useEffect(() => {
-    if (estimateGasEnabled) {
-      void refetchContractWriteFeeEstimate();
-    }
-  }, [estimateGasEnabled]);
-
-  useEffect(() => setContractArgs(defaultArgs), [defaultArgs]);
-
   return {
     simulateAndWriteContract,
     writeContractWithoutSimulating,
@@ -230,7 +216,7 @@ export function useContractWriteQuery<
     resetContract,
     transactionData,
     fee,
-    gasAmountEstimate,
+    gasAmount,
     gasPrice,
     simulateStatus,
     writeStatus,

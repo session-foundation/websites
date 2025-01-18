@@ -1,10 +1,10 @@
 // #region - getBuildInfo
 
-import type { Contributor } from '@session/staking-api-js/client';
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
 import { getContributionRangeFromContributors } from '../lib/maths';
 import { createPublicClient, http } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
+import type { StakeContributor } from '@session/staking-api-js/client';
 
 const address = '0x63528ae9247165fd89f093a591238009720fb422';
 
@@ -12,10 +12,9 @@ function createContributor(amount: number) {
   return {
     address: '0x',
     beneficiary: '0x',
-    locked_contributions: [],
     reserved: 0,
     amount,
-  } as Contributor;
+  } as StakeContributor;
 }
 
 const operatorContributorAmounts = [
@@ -25,7 +24,7 @@ const operatorContributorAmounts = [
 
 const operators = operatorContributorAmounts.map((amount) => createContributor(amount));
 
-async function getMinContributionFromContract(contributors: Array<Contributor>) {
+async function getMinContributionFromContract(contributors: Array<StakeContributor>) {
   const client = createPublicClient({
     chain: arbitrumSepolia,
     transport: http('http://10.24.0.1/arb_sepolia'),
@@ -45,7 +44,7 @@ async function getMinContributionFromContract(contributors: Array<Contributor>) 
   });
 }
 
-async function contributionTest(contributors: Array<Contributor>) {
+async function contributionTest(contributors: Array<StakeContributor>) {
   const { minStake } = getContributionRangeFromContributors(contributors);
 
   const minFromContract = await getMinContributionFromContract(contributors);
@@ -77,6 +76,19 @@ describe('getContributionRangeFromContributors', () => {
       test.concurrent(`${operator.amount} contribution, and ${stake}`, async () =>
         contributionTest([operator, createContributor(Number(stake))])
       );
+    }
+  });
+  describe('All contributors contribute minStake', () => {
+    const contributors = [createContributor(5000_000000000)];
+    const { minStake: firstMinStake } = getContributionRangeFromContributors(contributors);
+    let lastMinStake = firstMinStake;
+    for (let i = 0; i < 8; i++) {
+      contributors.push(createContributor(Number(lastMinStake)));
+      test.concurrent(`All contributors contribute ${lastMinStake}`, async () =>
+        contributionTest(contributors)
+      );
+      const { minStake } = getContributionRangeFromContributors(contributors);
+      lastMinStake = minStake;
     }
   });
 });

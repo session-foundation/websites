@@ -7,7 +7,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { forwardRef, type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
 import { StakeContributor } from '@session/staking-api-js/client';
 import { ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';

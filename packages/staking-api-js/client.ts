@@ -35,6 +35,13 @@ export interface Contributor {
 export interface GetContributionContractsResponse {
   network: NetworkInfo;
   contracts: ContributorContractInfo[];
+  added_bls_keys: Record<number, string>;
+}
+
+/** GET /contract/contribution/<sn key> */
+export interface GetContributionContractForNodePubkeyResponse {
+  network: NetworkInfo;
+  contract: ContributorContractInfo;
 }
 
 /** GET /stakes/<32 byte address> */
@@ -115,7 +122,7 @@ export enum CONTRIBUTION_CONTRACT_STATUS {
 }
 
 export type ContributorContractInfo = {
-  address: string;
+  address: `0x${string}`;
   contributors: Array<StakeContributor>;
   fee: number;
   node_add_timestamp: number | null;
@@ -143,6 +150,7 @@ export interface GetStakesResponse {
   network: NetworkInfo;
   contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
+  added_bls_keys: Record<number, string>;
 }
 
 /** /store */
@@ -178,6 +186,7 @@ export interface Registration {
 }
 
 export interface LoadRegistrationsResponse {
+  network: NetworkInfo;
   registrations: Registration[];
 }
 
@@ -383,6 +392,18 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return this.request<GetContributionContractsResponse>(options);
+  }
+
+  public async getContributionContractForNodePubkey({
+    nodePubKey,
+  }: {
+    nodePubKey: string;
+  }): Promise<StakingBackendResponse<GetContributionContractForNodePubkeyResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/contract/contribution/${nodePubKey}`,
+      method: 'GET',
+    };
+    return this.request<GetContributionContractForNodePubkeyResponse>(options);
   }
 
   /**

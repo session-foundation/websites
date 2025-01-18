@@ -29,4 +29,9 @@ export function getEthereumWindowProvider(): EthereumWindowProvider | undefined 
   return window.ethereum;
 }
 
+export enum ETH {
+  DECIMALS = 18,
+  SYMBOL = 'ETH',
+}
+
 export const ETH_DECIMALS = 18;

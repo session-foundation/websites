@@ -10,7 +10,7 @@ import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 
 export default function DailyNodeReward() {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();

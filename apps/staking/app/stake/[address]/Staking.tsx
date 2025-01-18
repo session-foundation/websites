@@ -11,7 +11,7 @@ import {
   ActionModuleTooltip,
 } from '@/components/ActionModule';
 import { PubKey } from '@session/ui/components/PubKey';
-import { type DecimalDelimiter, formatPercentage, getDecimalDelimiter } from '@/lib/locale-client';
+import { type DecimalDelimiter, formatPercentage, useDecimalDelimiter } from '@/lib/locale-client';
 import { ButtonSkeleton } from '@session/ui/ui/button';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ import {
 } from '@session/ui/ui/accordion';
 import { type Address, isAddress } from 'viem';
 import { NodeContributorList } from '@/components/NodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { NodeStakingButton } from '@/app/stake/[address]/NodeStakingButton';
 import { Loading } from '@session/ui/components/loading';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
@@ -40,19 +40,73 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { getContributionRangeFromContributors } from '@/lib/maths';
+import { ManageStake } from '@/app/stake/[address]/ManageStake';
+import { NewStake } from '@/app/stake/[address]/NewStake';
 
-export default function NodeStaking({ address }: { address: string }) {
+export function getContractAndContributor({
+  data,
+  address,
+  connectedAddress,
+}: {
+  data: Awaited<ReturnType<typeof getContributionContracts>>['data'];
+  address: string;
+  connectedAddress?: string;
+}) {
+  const foundContract = data?.contracts?.find((contract) =>
+    areHexesEqual(contract.address, address)
+  );
+
+  if (!foundContract) {
+    return {
+      contract: null,
+      contributor: null,
+    };
+  }
+
+  const foundContributor =
+    foundContract.contributors.find((contributor) =>
+      areHexesEqual(contributor.address, connectedAddress)
+    ) ?? null;
+
+  return {
+    contract: foundContract,
+    contributor: foundContributor,
+  };
+}
+
+export function StakingActionModuleTitle({ address }: { address: string }) {
+  const dict = useTranslations('actionModules.staking');
+  const { data } = useStakingBackendSuspenseQuery(getContributionContracts);
+
+  const { address: connectedAddress } = useWallet();
+
+  const { contributor } = useMemo(
+    () => getContractAndContributor({ data, address, connectedAddress }),
+    [data, address, connectedAddress]
+  );
+
+  return dict(contributor ? 'titleManageStake' : 'titleNewStake');
+}
+
+export default function Staking({ address }: { address: string }) {
   const { data, isLoading } = useStakingBackendSuspenseQuery(getContributionContracts);
   const dictionary = useTranslations('general');
 
-  const node = useMemo(() => {
-    return data?.contracts?.find((contract) => areHexesEqual(contract.address, address));
-  }, [data, address]);
+  const { address: connectedAddress } = useWallet();
+
+  const { contract, contributor } = useMemo(
+    () => getContractAndContributor({ data, address, connectedAddress }),
+    [data, address, connectedAddress]
+  );
 
   return isLoading ? (
     <Loading />
-  ) : node ? (
-    <NodeStakingForm node={node} />
+  ) : contract ? (
+    contributor ? (
+      <ManageStake contract={contract} />
+    ) : (
+      <NewStake contract={contract} />
+    )
   ) : (
     <span>{dictionary('nodeNotFound')}</span>
   );
@@ -120,7 +174,7 @@ export function NodeStakingForm({
     return multiStatus === PROGRESS_STATUS.PENDING || multiStatus === PROGRESS_STATUS.SUCCESS;
   }, [multiStatus]);
 
-  const decimalDelimiter = getDecimalDelimiter();
+  const decimalDelimiter = useDecimalDelimiter();
   const { minStake, maxStake, totalStaked } = getContributionRangeFromContributors(
     node.contributors
   );

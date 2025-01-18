@@ -135,3 +135,17 @@
   @apply drop-shadow-lg filter;
   filter: drop-shadow(0 0 8px #ffea00);
 }
+
+.fade-to-transparent-b {
+  position: relative;
+}
+
+.fade-to-transparent-b::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  mask: linear-gradient(to top, transparent, var(--session-black) 7%);
+  backdrop-filter: blur(8px);
+}
