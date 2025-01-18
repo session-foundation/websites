@@ -466,7 +466,7 @@ function SubmitMulti({
      *
      *  After this first fetch the `refetchInterval` computes the next l2 update timestamp and
      *  schedules a refetch 5s after this timestamp.
-     *  (l2_height_timestamp + {@link BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS} + 5s)
+     *  (l2_height_timestamp + {@link BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS} )
      *
      *  This refetch interval computation continues after each fetch until the contract address is
      *  available in the query state. Then the interval is disabled and no more refetches are made.
@@ -494,8 +494,8 @@ function SubmitMulti({
 
           const msUntilNextL2Update = nextL2UpdateTimestampMs - Date.now();
 
-          // Update 5s after the next l2 update (no less than 1s from now)
-          return Math.max(msUntilNextL2Update + 5000, 1000);
+          // Update at the next l2 update (no less than 1s from now)
+          return Math.max(msUntilNextL2Update, 1000);
         }
       },
       gcTime: Number.POSITIVE_INFINITY,

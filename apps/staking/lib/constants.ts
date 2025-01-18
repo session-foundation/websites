@@ -258,8 +258,8 @@ export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
 } as const;
 
 export enum BACKEND {
-  /** 30 seconds */
-  L2_TARGET_UPDATE_INTERVAL_SECONDS = 30,
+  /** 10 seconds */
+  L2_TARGET_UPDATE_INTERVAL_SECONDS = 10,
   /** 2 minutes */
   NODE_TARGET_UPDATE_INTERVAL_SECONDS = 2 * 60,
 }
