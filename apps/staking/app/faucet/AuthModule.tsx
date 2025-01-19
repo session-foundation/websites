@@ -1,7 +1,6 @@
 'use client';
 
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
-import { useSession } from '@session/auth/client';
 import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
@@ -19,6 +18,7 @@ import {
   FormErrorMessage,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
   FormSubmitButton,
 } from '@session/ui/ui/form';
@@ -68,7 +68,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
   const [submitAttemptCounter, setSubmitAttemptCounter] = useState<number>(0);
   const [formState, setFormState] = useState<FORM_STATE>(FORM_STATE.LANDING);
   const [faucetError, setFaucetError] = useState<FAUCET_ERROR | null>(null);
-  const { data, status: authStatus } = useSession();
+  // const { data, status: authStatus } = useSession();
   const [transactionHash, setTransactionHash] = useState<Address | null>(null);
   const [transactionHistory, setTransactionHistory] = useState<TransactionHistory[]>([]);
   const { address, disconnect, isConnected: isConnectedWallet, chainId, switchChain } = useWallet();
@@ -76,11 +76,11 @@ export const AuthModule = ({ code }: { code?: string }) => {
 
   const FormSchema = getFaucetFormSchema();
 
-  const isConnected = authStatus === 'authenticated';
-  /** @ts-expect-error -- Workaround to get id */
-  const discordId = data?.user?.discordId;
-  /** @ts-expect-error -- Workaround to get id */
-  const telegramId = data?.user?.telegramId;
+  // const isConnected = authStatus === 'authenticated';
+  // /** @ts-expect-error -- Workaround to get id */
+  // const discordId = data?.user?.discordId;
+  // /** @ts-expect-error -- Workaround to get id */
+  // const telegramId = data?.user?.telegramId;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -231,7 +231,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
   }, [setIsBalanceVisible]);
 
   return (
-    <ActionModule contentClassName="gap-3" contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
+    <ActionModule contentClassName="gap-4" contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
       {formState !== FORM_STATE.LANDING && formState !== FORM_STATE.SUCCESS ? (
         <span
           className="text-session-text absolute left-6 top-4 inline-flex w-min gap-1 text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
@@ -243,17 +243,18 @@ export const AuthModule = ({ code }: { code?: string }) => {
       ) : null}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <ModuleGridHeader />
-
+          {formState !== FORM_STATE.LANDING ? <ModuleGridHeader /> : null}
+          {code ? <span>Referral code added</span> : null}
           <FormField
             control={form.control}
             name="walletAddress"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col gap-0.5">
+                <FormLabel className="text-session-text">Wallet address</FormLabel>
                 <FormControl>
                   <div className="flex w-full items-center gap-2">
                     <Input
-                      placeholder={address ?? dictionary('inputPlaceholder')}
+                      placeholder={address ?? '0x'}
                       disabled={!!address}
                       className="w-full"
                       {...field}
@@ -356,10 +357,15 @@ export const AuthModule = ({ code }: { code?: string }) => {
         </Button>
       ) : null}
 
-      {formState === FORM_STATE.LANDING ? (
+      {formState === FORM_STATE.LANDING && !isConnectedWallet ? (
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
-          <WalletButtonWithLocales rounded="md" size="md" className="uppercase" hideBalance />
+          <WalletButtonWithLocales
+            rounded="md"
+            size="md"
+            className="flex w-full items-center justify-center text-center uppercase"
+            hideBalance
+          />
           {/*{!code ? (*/}
           {/*  <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">*/}
           {/*    {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}*/}

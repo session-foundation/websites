@@ -34,11 +34,7 @@ export default function ReferralModule() {
     enabled: !hidden,
     queryFn: async () => {
       try {
-        const res = await getReferralCodeInfo({ code: hashId });
-        if (!res) {
-          toast.error('No referral code found');
-        }
-        return res;
+        return await getReferralCodeInfo({ code: hashId });
       } catch (error) {
         toast.error('Failed to get referral code info');
         return null;
@@ -65,23 +61,33 @@ export default function ReferralModule() {
           <div className="w-full">
             {!hidden && referralLink ? (
               <>
-                <div className="flex w-full flex-row items-center gap-2 align-middle">
-                  <Input
-                    readOnly
-                    ref={inputRef}
-                    value={referralLink}
-                    className="w-full select-all"
-                    onFocus={(e) => e.target.select()}
-                  />
-                  <CopyToClipboardButton
-                    textToCopy={referralLink}
-                    data-testid={ButtonDataTestId.Copy_Referral_Link}
-                    onCopyComplete={() => {
-                      inputRef.current?.select();
-                      toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
-                    }}
-                  />
-                </div>
+                {status === 'success' ? (
+                  data ? (
+                    <div className="flex w-full flex-row items-center gap-2 align-middle">
+                      <Input
+                        readOnly
+                        ref={inputRef}
+                        value={referralLink}
+                        className="w-full select-all"
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <CopyToClipboardButton
+                        textToCopy={referralLink}
+                        data-testid={ButtonDataTestId.Copy_Referral_Link}
+                        onCopyComplete={() => {
+                          inputRef.current?.select();
+                          toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-destructive text-base">
+                      This wallet is not eligible for a referral code
+                    </span>
+                  )
+                ) : (
+                  <LoadingText />
+                )}
                 <div className="text-session-text-secondary mt-2 text-xs">
                   {status === 'success' ? (
                     data ? (
@@ -90,11 +96,7 @@ export default function ReferralModule() {
                         remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
                         drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
                       })
-                    ) : (
-                      <span className="text-destructive text-base">
-                        This wallet is not eligible for a referral code
-                      </span>
-                    )
+                    ) : null
                   ) : (
                     <LoadingText />
                   )}
