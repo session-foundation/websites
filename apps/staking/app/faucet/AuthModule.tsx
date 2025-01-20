@@ -5,7 +5,7 @@ import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
 import { useTranslations } from 'next-intl';
-import ActionModule, { ActionModuleDivider } from '@/components/ActionModule';
+import ActionModule from '@/components/ActionModule';
 import { WalletAddTokenWithLocales } from '@/components/WalletAddTokenWithLocales';
 import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -73,7 +73,6 @@ export const AuthModule = ({ code }: { code?: string }) => {
   const [transactionHistory, setTransactionHistory] = useState<TransactionHistory[]>([]);
   const { address, disconnect, isConnected: isConnectedWallet, chainId, switchChain } = useWallet();
   const { setIsBalanceVisible } = useWalletButton();
-
   const FormSchema = getFaucetFormSchema();
 
   // const isConnected = authStatus === 'authenticated';
@@ -92,6 +91,8 @@ export const AuthModule = ({ code }: { code?: string }) => {
     },
     reValidateMode: 'onChange',
   });
+
+  const referralCode = form.watch('code');
 
   const successMessage = (hash: Address) => (
     <div className="flex flex-col text-sm font-normal">
@@ -216,7 +217,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
         switchChain({ chainId: arbitrumSepolia.id });
       }
     } else {
-      form.reset({ walletAddress: '' });
+      form.reset({ walletAddress: '', code: referralCode });
       form.clearErrors();
       setTransactionHash(null);
     }
@@ -244,7 +245,6 @@ export const AuthModule = ({ code }: { code?: string }) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {formState !== FORM_STATE.LANDING ? <ModuleGridHeader /> : null}
-          {code ? <span>Referral code added</span> : null}
           <FormField
             control={form.control}
             name="walletAddress"
@@ -278,7 +278,21 @@ export const AuthModule = ({ code }: { code?: string }) => {
               </FormItem>
             )}
           />
-
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-0.5">
+                <FormLabel className="text-session-text">Referral code (optional)</FormLabel>
+                <FormControl>
+                  <div className="flex w-full items-center gap-2">
+                    <Input className="w-full" {...field} />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {formState === FORM_STATE.CONFIRM ? (
             <div className="flex flex-col gap-2">
               <p className="text-center text-sm">
@@ -336,6 +350,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
           )}
         </form>
       </Form>
+
       {formState !== FORM_STATE.LANDING && transactionHash ? (
         <Button
           data-testid={ButtonDataTestId.Faucet_Submit}
@@ -378,8 +393,6 @@ export const AuthModule = ({ code }: { code?: string }) => {
       {transactionHistory.length ? (
         <FaucetTransactions transactionHistory={transactionHistory} />
       ) : null}
-
-      <ActionModuleDivider />
 
       {formState === FORM_STATE.LANDING ? (
         <Button
