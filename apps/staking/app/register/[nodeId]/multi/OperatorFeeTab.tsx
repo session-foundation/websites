@@ -1,5 +1,6 @@
 import {
   type MultiRegistrationFormSchema,
+  REGISTRATION_QUERY_PARAM,
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
@@ -12,10 +13,11 @@ import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef } from 'react';
 
 export function OperatorFeeTab() {
-  const dictionaryConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
-  const dictionaryContinue = useTranslations('actionModules.registration.shared.buttonContinue');
   const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
+
+  const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
+  const dictContinue = useTranslations('actionModules.registration.shared.buttonContinue');
 
   const initial = useRef<string>(formMulti.watch('operatorFee'));
 
@@ -26,7 +28,7 @@ export function OperatorFeeTab() {
   };
 
   const handleSubmit = (data: MultiRegistrationFormSchema) => {
-    pushQueryParam('operatorFee', data.operatorFee);
+    pushQueryParam(REGISTRATION_QUERY_PARAM.OPERATOR_FEE, data.operatorFee);
     changeTab(
       mode === REG_MODE.EDIT || mode === REG_MODE.EXPRESS
         ? REG_TAB.SUBMIT_MULTI
@@ -66,11 +68,11 @@ export function OperatorFeeTab() {
       </Form>
       <Button
         data-testid={ButtonDataTestId.Registration_Operator_Fee_Continue}
-        aria-label={(mode === REG_MODE.EDIT ? dictionaryConfirm : dictionaryContinue)('aria')}
+        aria-label={(mode === REG_MODE.EDIT ? dictConfirm : dictContinue)('aria')}
         disabled={fieldStatus.invalid || formMulti.watch('operatorFee') === ''}
         onClick={formMulti.handleSubmit(handleSubmit)}
       >
-        {(mode === REG_MODE.EDIT ? dictionaryConfirm : dictionaryContinue)('text')}
+        {(mode === REG_MODE.EDIT ? dictConfirm : dictContinue)('text')}
       </Button>
     </div>
   );

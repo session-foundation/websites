@@ -10,7 +10,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useStakes } from '@/hooks/useStakes';
 import { useMemo } from 'react';
 
-import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/page';
+import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   const { address } = useWallet();

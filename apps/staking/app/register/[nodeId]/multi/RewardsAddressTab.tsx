@@ -6,26 +6,26 @@ import { useTranslations } from 'next-intl';
 import React from 'react';
 
 export function RewardsAddressTab() {
-  const dictionary = useTranslations('actionModules.registration.rewardsAddress');
   const { changeTab } = useRegistrationWizard();
+  const dict = useTranslations('actionModules.registration.rewardsAddress');
 
   return (
     <div className="flex w-full flex-col gap-4">
       <Button
         data-testid={ButtonDataTestId.Registration_Rewards_Address_Same}
-        aria-label={dictionary('buttonSame.aria')}
+        aria-label={dict('buttonSame.aria')}
         onClick={() => changeTab(REG_TAB.AUTO_ACTIVATE)}
         // TODO: Implement reserve slots
         // onClick={() => changeTab(REG_TAB.RESERVE_SLOTS)}
       >
-        {dictionary('buttonSame.text')}
+        {dict('buttonSame.text')}
       </Button>
       <Button
         data-testid={ButtonDataTestId.Registration_Rewards_Address_Different}
-        aria-label={dictionary('buttonDifferent.aria')}
+        aria-label={dict('buttonDifferent.aria')}
         onClick={() => changeTab(REG_TAB.REWARDS_ADDRESS_INPUT_MULTI)}
       >
-        {dictionary('buttonDifferent.text')}
+        {dict('buttonDifferent.text')}
       </Button>
     </div>
   );

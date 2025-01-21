@@ -11,11 +11,13 @@ import Link from 'next/link';
 import React, { useEffect } from 'react';
 
 export function AlreadyRegisteredRunningTab() {
-  const dictionary = useTranslations('actionModules.registration.alreadyRegisteredMulti');
-  const dictionaryShared = useTranslations('actionModules.registration.shared');
   const { props } = useRegistrationWizard();
 
+  const dict = useTranslations('actionModules.registration.alreadyRegisteredMulti');
+  const dictShared = useTranslations('actionModules.registration.shared');
+
   const { stakes, blockHeight, networkTime, refetch } = useStakes();
+  
   const stake = stakes.find((stake) =>
     areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
   );
@@ -27,8 +29,8 @@ export function AlreadyRegisteredRunningTab() {
   return (
     <div className="flex w-full flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-2">
-        <WizardSectionTitle title={dictionary('specialTitle')} />
-        <WizardSectionDescription description={dictionary('specialDescription')} />
+        <WizardSectionTitle title={dict('specialTitle')} />
+        <WizardSectionDescription description={dict('specialDescription')} />
       </div>
       {stake ? (
         <StakedNodeCard
@@ -45,12 +47,12 @@ export function AlreadyRegisteredRunningTab() {
       )}
       <Link href="/mystakes" className="w-full">
         <Button
-          aria-label={dictionaryShared('buttonViewMyStakes.aria')}
+          aria-label={dictShared('buttonViewMyStakes.aria')}
           data-testid={ButtonDataTestId.Registration_Success_Solo_View_My_Stakes}
           rounded="md"
           className="w-full"
         >
-          {dictionaryShared('buttonViewMyStakes.text')}
+          {dictShared('buttonViewMyStakes.text')}
         </Button>
       </Link>
     </div>

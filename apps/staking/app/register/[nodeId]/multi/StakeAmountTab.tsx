@@ -17,10 +17,11 @@ import React, { useEffect, useRef } from 'react';
 const FIELD_NAME = 'stakeAmount';
 
 export function StakeAmountTab() {
-  const dictionaryConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
-  const dictionaryContinue = useTranslations('actionModules.registration.shared.buttonContinue');
   const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
+
+  const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
+  const dictContinue = useTranslations('actionModules.registration.shared.buttonContinue');
 
   const stakeAmount = formMulti.watch(FIELD_NAME);
   const initial = useRef<string>(stakeAmount);
@@ -81,11 +82,11 @@ export function StakeAmountTab() {
       </Form>
       <Button
         data-testid={ButtonDataTestId.Registration_Stake_Amount_Continue}
-        aria-label={(mode === REG_MODE.EDIT ? dictionaryConfirm : dictionaryContinue)('aria')}
+        aria-label={(mode === REG_MODE.EDIT ? dictConfirm : dictContinue)('aria')}
         disabled={formMulti.getFieldState(FIELD_NAME).invalid}
         onClick={handleSubmit}
       >
-        {(mode === REG_MODE.EDIT ? dictionaryConfirm : dictionaryContinue)('text')}
+        {(mode === REG_MODE.EDIT ? dictConfirm : dictContinue)('text')}
       </Button>
     </div>
   );

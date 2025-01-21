@@ -15,15 +15,17 @@ export const recoverableErrors = new Set([
   'SafeERC20FailedOperation',
   /** Max registrations exceeded, can try again after the next block */
   'MaxPubkeyAggregationsExceeded',
-]);
-
-export const unrecoverableErrors = new Set([
-  'BLSPubkeyAlreadyExists',
-  'MaxContributorsExceeded',
-  'ContributionTotalMismatch',
-  'InvalidBLSProofOfPossession',
+  /** The connected wallet failed */
   'InternalRpc',
 ]);
+
+// NOTE: this is here to keep track of known errors so we can move them to recoverable if needed
+// export const unrecoverableErrors = new Set([
+//   'BLSPubkeyAlreadyExists',
+//   'MaxContributorsExceeded',
+//   'ContributionTotalMismatch',
+//   'InvalidBLSProofOfPossession',
+// ]);
 
 export type ErrorTabProps = ErrorBoxProps & {
   dict: ReturnType<typeof useTranslations<'actionModules.registration.errorMulti'>>;

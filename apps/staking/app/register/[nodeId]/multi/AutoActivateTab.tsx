@@ -1,4 +1,7 @@
-import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
+import {
+  REGISTRATION_QUERY_PARAM,
+  useRegistrationWizard,
+} from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
@@ -6,9 +9,10 @@ import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef } from 'react';
 
 export function AutoActivateTab() {
-  const dictionary = useTranslations('actionModules.registration.autoActivate');
   const { mode, changeTab, formMulti, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
+
+  const dict = useTranslations('actionModules.registration.autoActivate');
 
   const initial = useRef<boolean>(formMulti.watch('autoActivate'));
 
@@ -20,7 +24,7 @@ export function AutoActivateTab() {
 
   const handleSubmit = (autoActivate: boolean) => {
     formMulti.setValue('autoActivate', autoActivate);
-    pushQueryParam('autoActivate', autoActivate ? 'true' : 'false');
+    pushQueryParam(REGISTRATION_QUERY_PARAM.AUTO_ACTIVATE, autoActivate ? 'true' : 'false');
     changeTab(REG_TAB.SUBMIT_MULTI);
   };
 
@@ -33,17 +37,17 @@ export function AutoActivateTab() {
     <div className="flex w-full flex-col gap-4">
       <Button
         data-testid={ButtonDataTestId.Registration_Auto_Activate_Automatic}
-        aria-label={dictionary('buttonAutomatic.aria')}
+        aria-label={dict('buttonAutomatic.aria')}
         onClick={() => handleSubmit(true)}
       >
-        {dictionary('buttonAutomatic.text')}
+        {dict('buttonAutomatic.text')}
       </Button>
       <Button
         data-testid={ButtonDataTestId.Registration_Auto_Activate_Manual}
-        aria-label={dictionary('buttonManual.aria')}
+        aria-label={dict('buttonManual.aria')}
         onClick={() => handleSubmit(false)}
       >
-        {dictionary('buttonManual.text')}
+        {dict('buttonManual.text')}
       </Button>
     </div>
   );

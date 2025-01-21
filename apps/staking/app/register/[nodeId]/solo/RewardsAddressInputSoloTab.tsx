@@ -8,9 +8,10 @@ import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef } from 'react';
 
 export function RewardsAddressInputSoloTab() {
-  const dictionary = useTranslations('actionModules.shared');
-  const dictionaryConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
   const { formSolo, changeTab, setBackButtonClickCallback } = useRegistrationWizard();
+
+  const dict = useTranslations('actionModules.shared');
+  const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
 
   const initialRewardsAddress = useRef<string>(formSolo.watch('rewardsAddress'));
 
@@ -34,8 +35,8 @@ export function RewardsAddressInputSoloTab() {
               <EthereumAddressField
                 // @ts-expect-error -- TODO: type this
                 field={field}
-                label={dictionary('rewardsAddress')}
-                tooltip={dictionary('rewardsAddressDescription')}
+                label={dict('rewardsAddress')}
+                tooltip={dict('rewardsAddressDescription')}
                 dataTestId={InputDataTestId.Registration_Rewards_Address_Solo}
               />
             )}
@@ -44,11 +45,11 @@ export function RewardsAddressInputSoloTab() {
       </Form>
       <Button
         data-testid={ButtonDataTestId.Registration_Rewards_Address_Input_Solo_Confirm}
-        aria-label={dictionaryConfirm('aria')}
+        aria-label={dictConfirm('aria')}
         disabled={!formSolo.formState.isValid}
         onClick={() => changeTab(REG_TAB.SUBMIT_SOLO)}
       >
-        {dictionaryConfirm('text')}
+        {dictConfirm('text')}
       </Button>
     </div>
   );

@@ -55,17 +55,18 @@ export function SubmitSoloTab() {
   const { chainId } = useWallet();
   const { balance, value: balanceValue } = useWalletTokenBalance();
 
-  const dictionary = useTranslations('actionModules.registration.shared.submit');
-  const dictionarySubmit = useTranslations('actionModules.registration.submitSolo');
-  const dictionaryFee = useTranslations('fee');
-  const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
+  const dict = useTranslations('actionModules.registration.shared.submit');
+  const dictSubmit = useTranslations('actionModules.registration.submitSolo');
+  const dictFee = useTranslations('fee');
+  const dictRegistrationShared = useTranslations('actionModules.registration.shared');
   const dictShared = useTranslations('actionModules.shared');
-  const sessionNodeDictionary = useTranslations('sessionNodes.general');
+  const dictSessionNode = useTranslations('sessionNodes.general');
 
   const contractAddress = useMemo(
     () => (isValidChainId(chainId) ? addresses.ServiceNodeRewards[chainId] : null),
     [chainId]
   );
+
   const { allowance } = useAllowanceQuery({
     contractAddress,
     gcTime: Number.POSITIVE_INFINITY,
@@ -79,7 +80,6 @@ export function SubmitSoloTab() {
     fee: feeProxyApproval,
     gasAmount: gasAmountProxyApproval,
     gasPrice: gasPriceProxyApproval,
-    status: statusProxyApproval,
   } = useProxyApprovalFeeEstimate({ contractAddress, amount: SESSION_NODE_FULL_STAKE_AMOUNT });
 
   const addBlsFeeParams = useMemo(() => {
@@ -101,8 +101,6 @@ export function SubmitSoloTab() {
     fee: feeAddBlsPubKey,
     gasAmount: gasAmountAddBlsPubKey,
     gasPrice: gasPriceAddBlsPubKey,
-    status: statusAddBlsPubKey,
-    error: errorAddBlsPubKey,
   } = useAddBlsPubKeyFeeEstimate(addBlsFeeParams);
 
   const { feeFormatted: feeFormattedProxyApproval, formula: formulaProxyApproval } =
@@ -185,8 +183,8 @@ export function SubmitSoloTab() {
   return (
     <div className="flex w-full flex-col gap-3.5">
       <ActionModuleRow
-        label={sessionNodeDictionary('publicKeyShort')}
-        tooltip={sessionNodeDictionary('publicKeyDescription')}
+        label={dictSessionNode('publicKeyShort')}
+        tooltip={dictSessionNode('publicKeyDescription')}
       >
         <PubKey
           pubKey={props.ed25519PubKey}
@@ -197,8 +195,8 @@ export function SubmitSoloTab() {
         />
       </ActionModuleRow>
       <ActionModuleRow
-        label={sessionNodeDictionary('blsKey')}
-        tooltip={sessionNodeDictionary('blsKeyDescription')}
+        label={dictSessionNode('blsKey')}
+        tooltip={dictSessionNode('blsKeyDescription')}
       >
         <PubKey
           pubKey={props.blsKey}
@@ -208,10 +206,7 @@ export function SubmitSoloTab() {
           trailingChars={4}
         />
       </ActionModuleRow>
-      <ActionModuleRow
-        label={dictionary('preparedAt')}
-        tooltip={dictionary('preparedAtDescription')}
-      >
+      <ActionModuleRow label={dict('preparedAt')} tooltip={dict('preparedAtDescription')}>
         <Tooltip
           tooltipContent={formatDate(props.preparedAt, {
             dateStyle: 'full',
@@ -236,7 +231,7 @@ export function SubmitSoloTab() {
           className="font-semibold"
         />
         <RegistrationEditButton
-          aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+          aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Solo_Edit_Rewards_Address}
           tab={REG_TAB.REWARDS_ADDRESS_INPUT_SOLO}
         />
@@ -260,8 +255,8 @@ export function SubmitSoloTab() {
         </span>
       </ActionModuleRow>
       <ActionModuleFeeAccordionRow
-        label={dictionaryFee('networkFee')}
-        tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+        label={dictFee('networkFee')}
+        tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
           link: externalLink(URL.GAS_INFO),
           formula: () => (needsApproval ? feeFormula : formulaAddBlsPubKey),
         })}
@@ -276,15 +271,15 @@ export function SubmitSoloTab() {
             }),
           },
           {
-            label: dictionarySubmit('addBlsPubKeyCost'),
+            label: dictSubmit('addBlsPubKeyCost'),
             fee: feeFormattedAddBlsPubKey,
             tooltip: formulaAddBlsPubKey,
           },
         ]}
         totalFee={needsApproval ? feeEstimate : feeFormattedAddBlsPubKey}
-        hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+        hasMissingEstimatesTooltipContent={dictFee('missingFees')}
         gasHighShowTooltip={gasHighShowTooltip}
-        gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+        gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
       />
       <Form {...formSolo}>
         <form onSubmit={formSolo.handleSubmit(onSubmit)} className={cn(params ? 'hidden' : '')}>
@@ -292,9 +287,9 @@ export function SubmitSoloTab() {
             type="submit"
             className="w-full"
             data-testid={ButtonDataTestId.Registration_Submit_Solo_Confirm}
-            aria-label={dictionaryRegistrationShared('buttonConfirmAndStake.aria')}
+            aria-label={dictRegistrationShared('buttonConfirmAndStake.aria')}
           >
-            {dictionaryRegistrationShared('buttonConfirmAndStake.text')}
+            {dictRegistrationShared('buttonConfirmAndStake.text')}
           </Button>
           <FormErrorMessage />
         </form>

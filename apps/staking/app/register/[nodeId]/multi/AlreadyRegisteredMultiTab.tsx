@@ -5,14 +5,14 @@ import { useTranslations } from 'next-intl';
 import { OpenNodeCard } from '@/components/OpenNodeCard';
 
 export function AlreadyRegisteredMultiTab() {
-  const dictionary = useTranslations('actionModules.registration.alreadyRegisteredMulti');
+  const dict = useTranslations('actionModules.registration.alreadyRegisteredMulti');
   const { contract } = useRegistrationWizard();
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-2">
-        <WizardSectionTitle title={dictionary('specialTitle')} />
-        <WizardSectionDescription description={dictionary('specialDescription')} />
+        <WizardSectionTitle title={dict('specialTitle')} />
+        <WizardSectionDescription description={dict('specialDescription')} />
       </div>
       {contract ? (
         <OpenNodeCard className="text-start" id={contract.address} contract={contract} forceSmall />

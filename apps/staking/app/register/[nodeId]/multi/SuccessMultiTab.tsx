@@ -19,9 +19,10 @@ import {
 import { TOKEN } from '@session/contracts';
 
 export function SuccessMultiTab() {
-  const dictionary = useTranslations('actionModules.registration.successMulti');
-  const dictionaryShared = useTranslations('actionModules.registration.shared');
   const { contract, props, formMulti, address } = useRegistrationWizard();
+
+  const dict = useTranslations('actionModules.registration.successMulti');
+  const dictShared = useTranslations('actionModules.registration.shared');
 
   const { data } = useStakingBackendQueryWithParams(
     getContributionContractBySnKey,
@@ -81,8 +82,8 @@ export function SuccessMultiTab() {
     <div className="flex w-full flex-col items-center gap-6">
       <PartyPopperIcon className="h-40 w-40" />
       <div className="flex flex-col items-center gap-2">
-        <WizardSectionTitle title={dictionary('specialTitle')} />
-        <WizardSectionDescription description={dictionary('specialDescription')} />
+        <WizardSectionTitle title={dict('specialTitle')} />
+        <WizardSectionDescription description={dict('specialDescription')} />
       </div>
       {deployedContract ? (
         <StakedContractCard
@@ -97,12 +98,12 @@ export function SuccessMultiTab() {
       )}
       <Link href="/mystakes" className="w-full">
         <Button
-          aria-label={dictionaryShared('buttonViewMyStakes.aria')}
+          aria-label={dictShared('buttonViewMyStakes.aria')}
           data-testid={ButtonDataTestId.Registration_Success_Multi_View_My_Stakes}
           rounded="md"
           className="w-full"
         >
-          {dictionaryShared('buttonViewMyStakes.text')}
+          {dictShared('buttonViewMyStakes.text')}
         </Button>
       </Link>
     </div>

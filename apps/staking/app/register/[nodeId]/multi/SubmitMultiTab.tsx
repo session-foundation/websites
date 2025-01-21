@@ -67,15 +67,14 @@ export function SubmitMultiTab() {
   const { chainId } = useWallet();
   const { balance, value: balanceValue } = useWalletTokenBalance();
 
-  const dictionary = useTranslations('actionModules.registration.shared.submit');
-  const dictionaryFee = useTranslations('fee');
-  const dictionarySubmit = useTranslations('actionModules.registration.submitMulti');
-  const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
+  const dict = useTranslations('actionModules.registration.shared.submit');
+  const dictFee = useTranslations('fee');
+  const dictSubmit = useTranslations('actionModules.registration.submitMulti');
+  const dictRegistrationShared = useTranslations('actionModules.registration.shared');
   const dictShared = useTranslations('actionModules.shared');
-  const sessionNodeDictionary = useTranslations('sessionNodes.general');
-
-  const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-  const dictionaryOperatorFee = useTranslations('actionModules.operatorFee.validation');
+  const dictSessionNode = useTranslations('sessionNodes.general');
+  const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
+  const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
 
   const reservedContributors = formMulti.watch('reservedContributors');
   const autoStart = formMulti.watch('autoActivate');
@@ -144,7 +143,7 @@ export function SubmitMultiTab() {
       if (err) {
         formMulti.setError('root', {
           type: 'manual',
-          message: dictionaryOperatorFee('incorrectFormat'),
+          message: dictOperatorFee('incorrectFormat'),
         });
         return;
       }
@@ -156,7 +155,7 @@ export function SubmitMultiTab() {
       if (errBigInt) {
         formMulti.setError('root', {
           type: 'manual',
-          message: dictionaryStakeAmount('incorrectFormat'),
+          message: dictStakeAmount('incorrectFormat'),
         });
         return;
       }
@@ -194,8 +193,8 @@ export function SubmitMultiTab() {
   return (
     <div className="flex w-full flex-col gap-3.5">
       <ActionModuleRow
-        label={sessionNodeDictionary('publicKeyShort')}
-        tooltip={sessionNodeDictionary('publicKeyDescription')}
+        label={dictSessionNode('publicKeyShort')}
+        tooltip={dictSessionNode('publicKeyDescription')}
       >
         <PubKey
           pubKey={props.ed25519PubKey}
@@ -206,8 +205,8 @@ export function SubmitMultiTab() {
         />
       </ActionModuleRow>
       <ActionModuleRow
-        label={sessionNodeDictionary('blsKey')}
-        tooltip={sessionNodeDictionary('blsKeyDescription')}
+        label={dictSessionNode('blsKey')}
+        tooltip={dictSessionNode('blsKeyDescription')}
       >
         <PubKey
           pubKey={props.blsKey}
@@ -217,10 +216,7 @@ export function SubmitMultiTab() {
           trailingChars={4}
         />
       </ActionModuleRow>
-      <ActionModuleRow
-        label={dictionary('preparedAt')}
-        tooltip={dictionary('preparedAtDescription')}
-      >
+      <ActionModuleRow label={dict('preparedAt')} tooltip={dict('preparedAtDescription')}>
         <Tooltip
           tooltipContent={formatDate(props.preparedAt, {
             dateStyle: 'full',
@@ -245,7 +241,7 @@ export function SubmitMultiTab() {
           className="font-semibold"
         />
         <RegistrationEditButton
-          aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+          aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Rewards_Address}
           tab={REG_TAB.REWARDS_ADDRESS_INPUT_MULTI}
         />
@@ -269,7 +265,7 @@ export function SubmitMultiTab() {
           </span>
         </span>
         <RegistrationEditButton
-          aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+          aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Stake_Amount}
           tab={REG_TAB.STAKE_AMOUNT}
         />
@@ -282,7 +278,7 @@ export function SubmitMultiTab() {
           {formMulti.watch('autoActivate') ? 'Enabled' : 'Disabled'}
         </span>
         <RegistrationEditButton
-          aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+          aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Auto_Activate}
           tab={REG_TAB.AUTO_ACTIVATE}
         />
@@ -295,7 +291,7 @@ export function SubmitMultiTab() {
           {formatPercentage(Number.parseFloat(formMulti.watch('operatorFee')) / 100)}
         </span>
         <RegistrationEditButton
-          aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+          aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Operator_Fee}
           tab={REG_TAB.OPERATOR_FEE}
         />
@@ -316,41 +312,41 @@ export function SubmitMultiTab() {
           <div>
             <EditButton
               disabled
-              aria-label={dictionaryRegistrationShared('buttonEditField.aria')}
+              aria-label={dictRegistrationShared('buttonEditField.aria')}
               data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
             />
           </div>
         </Tooltip>
       </ActionModuleRow>
       <ActionModuleFeeAccordionRow
-        label={dictionaryFee('networkFee')}
-        tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+        label={dictFee('networkFee')}
+        tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
           link: externalLink(URL.GAS_INFO),
           formula: () => formulaDeploy,
         })}
         fees={[
           {
-            label: dictionarySubmit('deployCost'),
+            label: dictSubmit('deployCost'),
             fee: feeFormattedDeploy,
             tooltip: formulaDeploy,
           },
           /** TODO: implement proxy approval fee estimate once available from backend */
           {
-            label: dictionarySubmit('proxyApprovalCost'),
+            label: dictSubmit('proxyApprovalCost'),
             fee: null,
             tooltip: 'Unable to estimate network fee.',
           },
           /** TODO: implement contribute funds fee estimate once available from backend */
           {
-            label: dictionarySubmit('contributeFundsCost'),
+            label: dictSubmit('contributeFundsCost'),
             fee: null,
             tooltip: 'Unable to estimate network fee.',
           },
         ]}
         totalFee={feeFormattedDeploy}
-        hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+        hasMissingEstimatesTooltipContent={dictFee('missingFees')}
         gasHighShowTooltip={gasHighShowTooltip}
-        gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+        gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
       />
       <Form {...formMulti}>
         <form
@@ -361,9 +357,9 @@ export function SubmitMultiTab() {
             type="submit"
             className="w-full"
             data-testid={ButtonDataTestId.Registration_Submit_Multi_Confirm}
-            aria-label={dictionaryRegistrationShared('buttonConfirmAndStake.aria')}
+            aria-label={dictRegistrationShared('buttonConfirmAndStake.aria')}
           >
-            {dictionaryRegistrationShared('buttonConfirmAndStake.text')}
+            {dictRegistrationShared('buttonConfirmAndStake.text')}
           </Button>
           <FormErrorMessage />
         </form>

@@ -1,5 +1,6 @@
 import {
   type MultiRegistrationFormSchema,
+  REGISTRATION_QUERY_PARAM,
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
@@ -11,10 +12,11 @@ import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef } from 'react';
 
 export function RewardsAddressInputMultiTab() {
-  const dictionary = useTranslations('actionModules.shared');
-  const dictionaryConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
   const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
+
+  const dict = useTranslations('actionModules.shared');
+  const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
 
   const initialRewardsAddress = useRef<string>(formMulti.watch('rewardsAddress'));
 
@@ -25,7 +27,7 @@ export function RewardsAddressInputMultiTab() {
   };
 
   const handleSubmit = (data: MultiRegistrationFormSchema) => {
-    pushQueryParam('rewardsAddress', data.rewardsAddress);
+    pushQueryParam(REGISTRATION_QUERY_PARAM.REWARDS_ADDRESS, data.rewardsAddress);
     // TODO: Implement the reserve slots
     // changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.RESERVE_SLOTS);
     changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.AUTO_ACTIVATE);
@@ -50,8 +52,8 @@ export function RewardsAddressInputMultiTab() {
               <EthereumAddressField
                 // @ts-expect-error -- TODO: type this
                 field={field}
-                label={dictionary('rewardsAddress')}
-                tooltip={dictionary('rewardsAddressDescription')}
+                label={dict('rewardsAddress')}
+                tooltip={dict('rewardsAddressDescription')}
                 dataTestId={InputDataTestId.Registration_Rewards_Address_Multi}
               />
             )}
@@ -60,11 +62,11 @@ export function RewardsAddressInputMultiTab() {
       </Form>
       <Button
         data-testid={ButtonDataTestId.Registration_Rewards_Address_Input_Multi_Confirm}
-        aria-label={dictionaryConfirm('aria')}
+        aria-label={dictConfirm('aria')}
         disabled={formMulti.getFieldState('rewardsAddress').invalid}
         onClick={formMulti.handleSubmit(handleSubmit)}
       >
-        {dictionaryConfirm('text')}
+        {dictConfirm('text')}
       </Button>
     </div>
   );
