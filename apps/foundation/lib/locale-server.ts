@@ -6,8 +6,8 @@ import { headers } from 'next/headers';
 import { getLangDir } from 'rtl-detect';
 import { DEFAULT_LOCALE, matchClosestLocale } from './locale-util';
 
-export const getServerSideLocale = () => {
-  const acceptLanguage = headers().get('accept-language');
+export const getServerSideLocale = async () => {
+  const acceptLanguage = (await headers()).get('accept-language');
   return matchClosestLocale(acceptLanguage);
 };
 

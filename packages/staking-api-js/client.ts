@@ -78,7 +78,7 @@ export type NodeInfo = {
   pubkey_bls: string;
   pubkey_ed25519: string;
   public_ip: string | null;
-  pulse_votes: any | null;
+  pulse_votes: unknown | null;
   quorumnet_port: number | null;
   registration_height: number;
   registration_hf_version: string;
@@ -137,7 +137,7 @@ export type ContributorContractInfo = {
 };
 
 export type ArbitrumEvent = {
-  args: any;
+  args: unknown;
   block: number;
   main_arg: string | null;
   name: string;
