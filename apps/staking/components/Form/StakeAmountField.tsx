@@ -77,7 +77,8 @@ export default function StakeAmountField({
   stickiness = 400,
   watchedStakeAmount,
 }: StakeAmountFieldProps) {
-  const dictionary = useTranslations('actionModules.register');
+  const dictionary = useTranslations('general');
+  const dictionaryStakeAmount = useTranslations('actionModules.registration.stakeAmount');
   const actionModuleSharedDictionary = useTranslations('actionModules.shared');
   const { isConnected } = useWallet();
 
@@ -140,7 +141,7 @@ export default function StakeAmountField({
               balanceValue !== undefined &&
               balanceValue < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (
                 <AlertTooltip
-                  tooltipContent={dictionary('notEnoughTokensAlert', {
+                  tooltipContent={dictionary('error.InsufficientBalance', {
                     walletAmount: balance,
                     tokenAmount: formatSENTBigInt(
                       stringToBigInt(watchedStakeAmount, SENT_DECIMALS)
@@ -164,7 +165,7 @@ export default function StakeAmountField({
                   )
                 }
               >
-                {dictionary.rich('minContribution', {
+                {dictionaryStakeAmount.rich('min', {
                   min: formatSENTBigIntNoRounding(minStake),
                 })}
               </Button>
@@ -183,7 +184,7 @@ export default function StakeAmountField({
                   )
                 }
               >
-                {dictionary.rich('maxContribution', {
+                {dictionaryStakeAmount.rich('max', {
                   max: formatSENTBigIntNoRounding(maxStake),
                 })}
               </Button>

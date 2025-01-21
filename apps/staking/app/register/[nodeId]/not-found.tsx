@@ -4,11 +4,7 @@ import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
 
 export default function NotFound() {
-  const dictRegister = useTranslations('actionModules.register');
+  const dict = useTranslations('general');
 
-  return (
-    <ActionModule background={1} title={dictRegister('title')}>
-      {dictRegister('notFound.description')}
-    </ActionModule>
-  );
+  return <ActionModule background={1}>{dict('notFound')}</ActionModule>;
 }

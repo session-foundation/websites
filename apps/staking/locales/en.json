@@ -22,6 +22,10 @@
       "InsufficientBalance": "insufficient {tokenSymbol} balance for transaction"
     }
   },
+  "maintenance": {
+    "title": "Maintenance Notice",
+    "description": "Sorry! The staking portal is under maintenance. Please check back later."
+  },
   "fee": {
     "networkFee": "Network Fee",
     "networkFeeTooltip": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link>",
@@ -197,6 +201,9 @@
     },
     "shared": {
       "error": "Error"
+    },
+    "nodes": {
+      "title": "Session Nodes"
     },
     "openNodes": {
       "title": "Open Session Nodes",
@@ -668,117 +675,6 @@
       "alreadyRegisteredRunning": {
         "specialTitle": "Already Registered!",
         "specialDescription": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network."
-      }
-    },
-    "register": {
-      "title": "Register a New Node",
-      "preparedAtTimestamp": "Registration Prepared",
-      "preparedAtTimestampDescription": "When the node was prepared for registration",
-      "minContribution": "Min: <text-bold>{min}</text-bold>",
-      "maxContribution": "Max: <text-bold>{max}</text-bold>",
-      "feeNA": "N/A",
-      "feeNADescription": "Single contributor nodes cannot have an operator fee, as the operator already receives all rewards.",
-      "disabled": "Registrations are disabled",
-      "advancedOptions": {
-        "title": "Advanced Options",
-        "autoRegister": "Auto-Register",
-        "autoRegisterDescription": "Automatically registers the node once the full stake is reached.",
-        "beneficiary": "Rewards Beneficiary Address",
-        "beneficiaryDescription": "Enter the beneficiary address where staking rewards should be sent. If left empty, rewards will be sent to your wallet address."
-      },
-      "button": {
-        "submitSolo": "Register Solo Node and Stake {amount}",
-        "submitMultiRegisterAndStake": "Create & Stake to Multi-Contributor Node",
-        "submitMultiRegisterOnly": "Create Multi-Contributor Node",
-        "submitMultiStake": "Stake {amount} to Multi-Contributor Node",
-        "addReserved": "Add Reserved Slots",
-        "addReservedDisabledDescription": "Reserved slots are currently disabled. Please try again later.",
-        "submitMultiRegisterDisabledDescription": "Multi-contributor registrations are currently disabled. Please try again later.",
-        "submitMultiRegisterDisabledIsSoloDescription": "You can't create a multi-contributor node if you are staking the full amount.",
-        "submitSoloDisabledNotSolo": "You must stake the full amount to register a solo node."
-      },
-      "description": "Please start the registration process from your client or select from the list of open Session Node.",
-      "notFound": {
-        "description": "The registration you are looking for could not be found.",
-        "foundOpenNode": "It looks like this node is already registered and open for staking:",
-        "foundRunningNode": "It looks like this node is already registered and running, go to <my-stakes-link>My Stakes</my-stakes-link> to see your stakes:",
-        "foundRunningNodeOtherOperator": "It looks like this node is already registered and running for another operator:"
-      },
-      "notEnoughTokensAlert": "It looks like you don't have enough {tokenSymbol} to stake to this node. It looks like your wallet has {walletAmount}, please make sure you have at least {tokenAmount} in your wallet before registering.",
-      "goToMyStakes": "The Session Node has been successfully registered and joined the network. It will appear on <link></link> soon",
-      "stageSolo": {
-        "validate": {
-          "idle": "Validating registration",
-          "pending": "Validating registration",
-          "success": "Registration validated",
-          "errorTemplate": "Failed to validate registration, {reason}",
-          "errors": {}
-        },
-        "approve": {
-          "idle": "Requesting permission to stake {tokenAmount}",
-          "pending": "Requesting permission to stake {tokenAmount} waiting for user approval",
-          "success": "Permission to stake {tokenSymbol} granted",
-          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
-          "errors": {}
-        },
-        "arbitrum": {
-          "idle": "Registering Session node on Arbitrum",
-          "pending": "Registering Session node on Arbitrum",
-          "success": "Registered Session node on Arbitrum",
-          "errorTemplate": "Arbitrum registration failed, {reason}",
-          "errors": {
-            "MaxContributorsExceeded": "max contributors exceeded",
-            "ContributionTotalMismatch": "stake does not match required amount",
-            "BLSPubkeyAlreadyExists": "node already registered with the same SN Key",
-            "MaxPubkeyAggregationsExceeded": "block registration limit exceeded, please try again later",
-            "SafeERC20FailedOperation": "failed to stake {tokenSymbol}, please try again later"
-          }
-        },
-        "network": {
-          "idle": "Adding Session node to the Session network",
-          "pending": "Adding Session node to the Session network waiting for confirmation",
-          "success": "Adding Session node to the Session network confirmed",
-          "errors": {
-            "template": "Session node failed to join the network, {reason}, please try again later"
-          }
-        }
-      },
-      "stageMulti": {
-        "create": {
-          "idle": "Creating Open Node contract",
-          "pending": "Creating Open Node contract",
-          "success": "Created Open Node contract",
-          "errorTemplate": "Failed to create Open Node contract, {reason}",
-          "errors": {}
-        },
-        "address": {
-          "idle": "Finalising Open Node contract address",
-          "pending": "Finalising Open Node contract address",
-          "success": " Finalised Node contract address. <link>View on Arbiscan</link>",
-          "errorTemplate": "Failed to finalise Open Node contract address, {reason}",
-          "errors": {}
-        },
-        "validate": {
-          "idle": "Validating registration",
-          "pending": "Validating registration",
-          "success": "Registration validated",
-          "errorTemplate": "Failed to validate registration, {reason}",
-          "errors": {}
-        },
-        "approve": {
-          "idle": "Requesting permission to stake {tokenAmount}",
-          "pending": "Requesting permission to stake {tokenAmount} waiting for user approval",
-          "success": "Permission to stake {tokenSymbol} granted",
-          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
-          "errors": {}
-        },
-        "contribute": {
-          "idle": "Contributing {tokenAmount} to Open Node contract",
-          "pending": "Contributing {tokenAmount} to Open Node contract",
-          "success": "Contributed {tokenAmount} to Open Node contract",
-          "errorTemplate": "Failed to contribute {tokenAmount} to Open Node contract, {reason}",
-          "errors": {}
-        }
       }
     },
     "node": {
