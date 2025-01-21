@@ -7,7 +7,7 @@ import { useStakingBackendQuery } from '@/lib/staking-api-client';
  * NOTE: This should only be used if the user has NOT connected their wallet.
  * @param enabled - Whether the query should be enabled.
  */
-export function useAddedBlsKeysPublic({ enabled }: { enabled?: boolean }) {
+export function useAddedBlsKeysPublic({ enabled }: { enabled: boolean }) {
   const { data, isLoading, isFetching } = useStakingBackendQuery(getNodesBlsKeys, { enabled });
 
   const addedBlsKeys = useMemo(() => {

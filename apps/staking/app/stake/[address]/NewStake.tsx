@@ -51,7 +51,6 @@ export type StakeFormSchema = z.infer<ReturnType<typeof getStakeFormSchema>>;
 
 export function NewStake({ contract }: { contract: ContributorContractInfo }) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
   const [stakingParams, setStakingParams] = useState<UseContributeStakeToOpenNodeParams | null>(
     null
   );
@@ -134,11 +133,19 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
       return;
     }
 
+    if (!address || !isAddress(address)) {
+      form.setError('root', {
+        type: 'manual',
+        message: 'Wallet Address is not a valid Ethereum Address',
+      });
+      return;
+    }
+
     setStakingParams({
       stakeAmount,
       userAddress: address,
       contractAddress: contract.address,
-      beneficiary: data.rewardsAddress,
+      beneficiary: isAddress(data.rewardsAddress) ? data.rewardsAddress : undefined,
     });
   };
 
@@ -263,11 +270,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
       </Form>
       <ErrorBoundary errorComponent={ErrorStake}>
         {stakingParams ? (
-          <SubmitContributeFunds
-            stakingParams={stakingParams}
-            setIsSubmitting={setIsSubmitting}
-            setIsError={setIsError}
-          />
+          <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
         ) : null}
       </ErrorBoundary>
     </StakeInfo>

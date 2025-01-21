@@ -11,6 +11,7 @@ import {
 } from '@session/contracts/hooks/Token';
 import { useContributeFundsFeeEstimate } from '@session/contracts/hooks/ServiceNodeContribution';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import type { Address } from 'viem';
 
 export function ContributeFundsFeeActionModuleRow({
   contract,
@@ -24,8 +25,8 @@ export function ContributeFundsFeeActionModuleRow({
   maxStake: bigint;
 }) {
   const { chainId, address } = useWallet();
-  const dictionaryFee = useTranslations('fee');
-  const dictionarySubmit = useTranslations('actionModules.registration.submitMulti');
+  const dictFee = useTranslations('fee');
+  const dictSubmit = useTranslations('actionModules.registration.submitMulti');
   const dictShared = useTranslations('actionModules.shared');
 
   const { allowance } = useAllowanceQuery({
@@ -39,7 +40,6 @@ export function ContributeFundsFeeActionModuleRow({
     fee: feeProxyApproval,
     gasAmount: gasAmountProxyApproval,
     gasPrice: gasPriceProxyApproval,
-    status: statusProxyApproval,
   } = useProxyApprovalFeeEstimate({
     contractAddress: contract.address,
     amount: maxStake,
@@ -51,7 +51,8 @@ export function ContributeFundsFeeActionModuleRow({
     gasAmount: gasAmountContributeFunds,
   } = useContributeFundsFeeEstimate({
     amount: minStake,
-    beneficiary: address,
+    // This is fine, its to get the fee estimate
+    beneficiary: address as Address,
   });
 
   const { feeFormatted: feeFormattedProxyApproval, formula: formulaProxyApproval } =
@@ -91,8 +92,8 @@ export function ContributeFundsFeeActionModuleRow({
 
   return (
     <ActionModuleFeeAccordionRow
-      label={dictionaryFee('networkFee')}
-      tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+      label={dictFee('networkFee')}
+      tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
         link: externalLink(URL.GAS_INFO),
         formula: () => (needsApproval ? feeFormula : formulaContributeFunds),
       })}
@@ -107,16 +108,16 @@ export function ContributeFundsFeeActionModuleRow({
           }),
         },
         {
-          label: dictionarySubmit('contributeFundsCost'),
+          label: dictSubmit('contributeFundsCost'),
           fee: feeFormattedContributeFunds,
           tooltip: formulaContributeFunds,
         },
       ]}
       showDivider
       totalFee={needsApproval ? feeEstimate : feeFormattedContributeFunds}
-      hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+      hasMissingEstimatesTooltipContent={dictFee('missingFees')}
       gasHighShowTooltip={gasHighShowTooltip}
-      gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+      gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
     />
   );
 }

@@ -123,8 +123,8 @@ function RegistrationProvider({
   const { getQueryParams, pushQueryParam } = useQueryParams();
   const preferredRegistrationMode = getItem<REG_MODE>(PREFERENCE.PREF_REGISTRATION_MODE);
   const dict = useTranslations('actionModules.registration');
-  const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-  const dictionaryOperatorFee = useTranslations('actionModules.operatorFee.validation');
+  const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
+  const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
   const decimalDelimiter = useDecimalDelimiter();
 
   const formMultiSchema = getRegistrationMultiFormSchema({
@@ -133,24 +133,24 @@ function RegistrationProvider({
       decimalDelimiter,
       minStake: SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
       maxStake: SESSION_NODE_FULL_STAKE_AMOUNT,
-      underMinMessage: dictionaryStakeAmount('underMin', {
+      underMinMessage: dictStakeAmount('underMin', {
         min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR),
       }),
-      underMinOperatorMessage: dictionaryStakeAmount('underMinOperator', {
+      underMinOperatorMessage: dictStakeAmount('underMinOperator', {
         min: formatSENTBigIntNoRounding(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR),
       }),
-      overMaxMessage: dictionaryStakeAmount('overMax', {
+      overMaxMessage: dictStakeAmount('overMax', {
         max: formatSENTBigIntNoRounding(SESSION_NODE_FULL_STAKE_AMOUNT),
       }),
     },
     operatorFee: {
       minOperatorFee: SESSION_NODE.MIN_OPERATOR_FEE,
       maxOperatorFee: SESSION_NODE.MAX_OPERATOR_FEE,
-      incorrectFormatMessage: dictionaryOperatorFee('incorrectFormat'),
-      underMinOperatorFeeMessage: dictionaryOperatorFee('underMin', {
+      incorrectFormatMessage: dictOperatorFee('incorrectFormat'),
+      underMinOperatorFeeMessage: dictOperatorFee('underMin', {
         min: SESSION_NODE.MIN_OPERATOR_FEE,
       }),
-      overMaxOperatorFeeMessage: dictionaryOperatorFee('overMax', {
+      overMaxOperatorFeeMessage: dictOperatorFee('overMax', {
         max: SESSION_NODE.MAX_OPERATOR_FEE,
       }),
     },
@@ -249,10 +249,10 @@ function RegistrationProvider({
       ? REG_TAB.ALREADY_REGISTERED_RUNNING
       : alreadyRegisteredMulti
         ? REG_TAB.ALREADY_REGISTERED_MULTI
-        : (queryParamStartTab ?? REG_TAB.START)
+        : queryParamStartTab ?? REG_TAB.START
   );
   const [nodeType, setNodeType] = useState<NODE_TYPE>(
-    alreadyRegisteredMulti ? NODE_TYPE.MULTI : (queryParamNodeType ?? NODE_TYPE.SOLO)
+    alreadyRegisteredMulti ? NODE_TYPE.MULTI : queryParamNodeType ?? NODE_TYPE.SOLO
   );
   const [mode, setMode] = useState<REG_MODE>(queryParamMode ?? userPrefMode);
 
@@ -469,7 +469,6 @@ export function Registration({
 export function RegistrationWizard() {
   const {
     handleTabBackButtonClick,
-    isError,
     isSubmitting,
     isSuccess,
     nodeType,

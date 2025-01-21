@@ -41,7 +41,7 @@ import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
-import { isAddress } from 'viem';
+import { type Address, isAddress } from 'viem';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
@@ -80,13 +80,17 @@ export function SubmitSoloTab() {
     fee: feeProxyApproval,
     gasAmount: gasAmountProxyApproval,
     gasPrice: gasPriceProxyApproval,
-  } = useProxyApprovalFeeEstimate({ contractAddress, amount: SESSION_NODE_FULL_STAKE_AMOUNT });
+  } = useProxyApprovalFeeEstimate({
+    contractAddress: contractAddress!,
+    amount: SESSION_NODE_FULL_STAKE_AMOUNT,
+  });
 
   const addBlsFeeParams = useMemo(() => {
     return {
       contributors: [
         {
-          staker: { addr: address, beneficiary: rewardsAddress },
+          // This is fine, its to get the fee estimate
+          staker: { addr: address, beneficiary: rewardsAddress as Address },
           stakedAmount: SESSION_NODE_FULL_STAKE_AMOUNT,
         },
       ],

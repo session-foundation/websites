@@ -56,7 +56,7 @@ export function useStakingBackendSuspenseQuery<Q extends StakingBackendQuery>(qu
 
 export function useStakingBackendQuery<Q extends StakingBackendQuery>(
   query: Q,
-  queryOptions?: Parameters<typeof useQuery<Awaited<ReturnType<Q>>['data']>>[0]
+  queryOptions?: QueryOptions<Q>
 ) {
   const stakingBackendClient = useStakingBackendBrowserClient();
   return useQuery<Awaited<ReturnType<Q>>['data']>({
@@ -82,7 +82,6 @@ export function useStakingBackendSuspenseQueryWithParams<Q extends StakingBacken
     },
   });
 }
-
 
 export function useStakingBackendQueryWithParams<Q extends StakingBackendQueryWithParams>(
   query: Q,

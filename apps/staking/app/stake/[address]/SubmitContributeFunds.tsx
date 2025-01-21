@@ -14,11 +14,9 @@ import { type Dispatch, type SetStateAction, useEffect } from 'react';
 export function SubmitContributeFunds({
   stakingParams,
   setIsSubmitting,
-  setIsError,
 }: {
   stakingParams: UseContributeStakeToOpenNodeParams;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
-  setIsError: Dispatch<SetStateAction<boolean>>;
 }) {
   const dict = useTranslations('actionModules.registration.submitMulti');
   const dictShared = useTranslations('actionModules.shared');
@@ -68,7 +66,6 @@ export function SubmitContributeFunds({
         return;
       }
 
-      setIsError(true);
       throw contractError;
     }
   };

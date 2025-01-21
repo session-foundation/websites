@@ -173,7 +173,6 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
     fee,
     gasAmount,
     gasPrice,
-    estimateContractWriteFee,
     simulateEnabled,
     resetContract,
     status,

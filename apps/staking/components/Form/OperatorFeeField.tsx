@@ -44,6 +44,7 @@ export type OperatorFeeFieldProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- This is fine for now TODO: resolve properly
   field: any;
   maxFee: number;
+  // TODO: investigate adding a min fee if needed
   minFee: number;
   placeholder: string;
 };
@@ -53,7 +54,6 @@ export default function OperatorFeeField({
   disabled,
   field,
   maxFee,
-  minFee,
   placeholder,
 }: OperatorFeeFieldProps) {
   const decimalDelimiter = useDecimalDelimiter();

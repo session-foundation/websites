@@ -15,7 +15,6 @@ export const useEstimateContractFee = <
   contract,
   args,
   functionName,
-  executorAddress,
 }: {
   contract: T;
   args?: Args;

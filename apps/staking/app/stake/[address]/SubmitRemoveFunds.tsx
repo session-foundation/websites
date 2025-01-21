@@ -16,11 +16,9 @@ import {
 
 export function SubmitRemoveFunds({
   setIsSubmitting,
-  setIsError,
   contractAddress,
 }: {
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
-  setIsError: Dispatch<SetStateAction<boolean>>;
   contractAddress: Address;
 }) {
   const dict = useTranslations('actionModules.staking.manage');
@@ -59,7 +57,6 @@ export function SubmitRemoveFunds({
         return;
       }
 
-      setIsError(true);
       throw contractError;
     }
   };

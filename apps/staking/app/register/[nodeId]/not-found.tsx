@@ -2,55 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
-import { NodeStakingForm } from '@/app/stake/[address]/Staking';
-import { usePathname } from 'next/navigation';
-import { StakedNodeCard } from '@/components/StakedNodeCard';
-import { useRegisteredNode } from '@/hooks/useRegisteredNode';
 
 export default function NotFound() {
-  const registerDictionary = useTranslations('actionModules.register');
-  const pathname = usePathname();
-  const { found, openNode, stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
-    pubKeyEd25519: pathname.split('/').at(-1),
-  });
+  const dictRegister = useTranslations('actionModules.register');
 
   return (
-    <ActionModule background={1} title={registerDictionary('title')}>
-      {!found ? (
-        registerDictionary('notFound.description')
-      ) : stakedNode ? (
-        <>
-          <span className="mb-4 text-lg font-medium">
-            {registerDictionary.rich('notFound.foundRunningNode')}
-          </span>
-          <StakedNodeCard
-            id={stakedNode.contract_id.toString()}
-            stake={stakedNode}
-            networkTime={networkTime}
-            blockHeight={blockHeight}
-          />
-        </>
-      ) : runningNode ? (
-        <>
-          <span className="mb-4 text-lg font-medium">
-            {registerDictionary('notFound.foundRunningNodeOtherOperator')}
-          </span>
-          <StakedNodeCard
-            id={runningNode.contract_id.toString()}
-            stake={runningNode}
-            networkTime={networkTime}
-            blockHeight={blockHeight}
-            hideButton
-          />
-        </>
-      ) : openNode ? (
-        <>
-          <span className="mb-4 text-lg font-medium">
-            {registerDictionary('notFound.foundOpenNode')}
-          </span>
-          <NodeStakingForm node={openNode} />
-        </>
-      ) : null}
+    <ActionModule background={1} title={dictRegister('title')}>
+      {dictRegister('notFound.description')}
     </ActionModule>
   );
 }

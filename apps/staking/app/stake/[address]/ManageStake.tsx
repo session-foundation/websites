@@ -21,7 +21,6 @@ enum EditableStakeGroup {
 export function ManageStake({ contract }: { contract: ContributorContractInfo }) {
   const [editableStakeGroup, setEditableStakeGroup] = useState<EditableStakeGroup | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
 
   const { address } = useWallet();
 
@@ -91,7 +90,6 @@ export function ManageStake({ contract }: { contract: ContributorContractInfo })
             contract={contract}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
-            setIsError={setIsError}
           />
         ) : null}
       </ErrorBoundary>

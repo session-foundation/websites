@@ -138,7 +138,6 @@ function NodeExitContractWriteDialog({
     fee,
     gasAmount,
     gasPrice,
-    estimateContractWriteFee,
     simulateEnabled,
     resetContract,
     status,

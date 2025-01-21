@@ -9,7 +9,6 @@ import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { safeTrySync } from '@session/util-js/try';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
-import { SESSION_NODE_TIME_STATIC } from '@/lib/constants';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { areHexesEqual } from '@session/util-crypto/string';
 import type { ContributorContractInfo } from '@session/staking-api-js/client';
@@ -30,12 +29,10 @@ export function ManageStakeContribution({
   contract,
   isSubmitting,
   setIsSubmitting,
-  setIsError,
 }: {
   contract: ContributorContractInfo;
   isSubmitting: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
-  setIsError: Dispatch<SetStateAction<boolean>>;
 }) {
   const [stakingParams, setStakingParams] = useState<UseContributeStakeToOpenNodeParams | null>(
     null
@@ -54,18 +51,18 @@ export function ManageStakeContribution({
 
   const isOperator = areHexesEqual(contract.operator_address, address);
 
-  // TODO: get real time, for now always disabled
-  const stakeAmountLastEdited = new Date('2025-06-06').getTime();
-
-  /** If the time since the last stake update is within the
-   *  last {@link SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS} ms, the
-   *  user can remove the stake amount */
-  const isStakeAmountRemovable = useMemo(
-    () =>
-      stakeAmountLastEdited + SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS <
-      Date.now(),
-    [stakeAmountLastEdited]
-  );
+  // TODO: implement the remove stake amount limit feature
+  // const stakeAmountLastEdited = new Date('2025-06-06').getTime();
+  //
+  // /** If the time since the last stake update is within the
+  //  *  last {@link SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS} ms, the
+  //  *  user can remove the stake amount */
+  // const isStakeAmountRemovable = useMemo(
+  //   () =>
+  //     stakeAmountLastEdited + SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS <
+  //     Date.now(),
+  //   [stakeAmountLastEdited]
+  // );
 
   const contributor = contract.contributors.find((contributor) =>
     areHexesEqual(contributor.address, address)
@@ -137,11 +134,19 @@ export function ManageStakeContribution({
       return;
     }
 
+    if (!address || !isAddress(address)) {
+      form.setError('root', {
+        type: 'manual',
+        message: 'Wallet Address is not a valid Ethereum Address',
+      });
+      return;
+    }
+
     setStakingParams({
       stakeAmount: additionalStakeAmount,
       userAddress: address,
       contractAddress: contract.address,
-      beneficiary: data.rewardsAddress,
+      beneficiary: isAddress(data.rewardsAddress) ? data.rewardsAddress : undefined,
     });
   };
 
@@ -240,18 +245,10 @@ export function ManageStakeContribution({
         </form>
       </Form>
       {stakingParams ? (
-        <SubmitContributeFunds
-          stakingParams={stakingParams}
-          setIsSubmitting={setIsSubmitting}
-          setIsError={setIsError}
-        />
+        <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
       ) : null}
       {isRemoveStake ? (
-        <SubmitRemoveFunds
-          setIsSubmitting={setIsSubmitting}
-          setIsError={setIsError}
-          contractAddress={contract.address}
-        />
+        <SubmitRemoveFunds setIsSubmitting={setIsSubmitting} contractAddress={contract.address} />
       ) : null}
     </>
   );
