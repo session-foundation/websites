@@ -182,8 +182,8 @@ export const SESSION_NODE_TIME = (chainId?: number) => {
 };
 
 export enum CONTRIBUTION_CONTRACT {
-  /** 30m -- the maximum age of a node that can be considered "joining" before its hidden, should be registered in ~20m */
-  MAX_AGE_JOINING_MS = 30 * 60 * 1000,
+  /** 25m -- the maximum age of a node that can be considered "joining" before its hidden, should be registered in ~20m */
+  MAX_AGE_JOINING_S = 25 * 60,
 }
 
 export enum TOAST {

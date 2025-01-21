@@ -10,7 +10,7 @@ import Link from 'next/link';
 import React, { useMemo } from 'react';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
-import { getNonFinalizedDeployedContributorContractAddress } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
+import { getNonFinalizedLatestDeployedContributorContract } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
@@ -30,7 +30,7 @@ export function SuccessMultiTab() {
     },
     {
       refetchInterval: (query) =>
-        getNonFinalizedDeployedContributorContractAddress(query.state.data) ? false : 5000,
+        getNonFinalizedLatestDeployedContributorContract(query.state.data) ? false : 5000,
       gcTime: Number.POSITIVE_INFINITY,
       staleTime: Number.POSITIVE_INFINITY,
       refetchIntervalInBackground: true,
@@ -46,8 +46,11 @@ export function SuccessMultiTab() {
     let contractDetails: ContributorContractInfo | null = null;
     if (contract) {
       contractDetails = { ...contract };
-    } else if (data && 'contract' in data && data.contract) {
-      contractDetails = { ...data.contract };
+    } else {
+      const fetchedContract = getNonFinalizedLatestDeployedContributorContract(data);
+      if (fetchedContract) {
+        contractDetails = { ...fetchedContract };
+      }
     }
 
     if (!contractDetails) return null;

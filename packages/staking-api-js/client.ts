@@ -34,14 +34,14 @@ export interface Contributor {
 
 export interface GetContributionContractsResponse {
   network: NetworkInfo;
-  contracts: ContributorContractInfo[];
+  contracts: Array<ContributorContractInfo>;
   added_bls_keys: Record<number, string>;
 }
 
 /** GET /contract/contribution/<sn key> */
 export interface GetContributionContractForNodePubkeyResponse {
   network: NetworkInfo;
-  contract: ContributorContractInfo;
+  contracts: Array<ContributorContractInfo>;
 }
 
 /** GET /stakes/<32 byte address> */
@@ -124,7 +124,10 @@ export enum CONTRIBUTION_CONTRACT_STATUS {
 export type ContributorContractInfo = {
   address: `0x${string}`;
   contributors: Array<StakeContributor>;
+  created_timestamp: number;
   fee: number;
+  last_added_timestamp: number | null;
+  manual_finalize: boolean;
   node_add_timestamp: number | null;
   operator_address: string;
   pubkey_bls: string;

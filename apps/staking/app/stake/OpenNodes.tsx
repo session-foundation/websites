@@ -6,11 +6,12 @@ import { externalLink } from '@/lib/locale-defaults';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useTranslations } from 'next-intl';
 import { NodesListSkeleton } from '@/components/NodesListModule';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useNetworkStatus } from '@/components/StatusBar';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
+import { useStakes } from '@/hooks/useStakes';
 
 export default function OpenNodes() {
   const dictionary = useTranslations('modules.openNodes');
@@ -18,7 +19,13 @@ export default function OpenNodes() {
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts();
 
+  const { hiddenContractsWithStakes } = useStakes();
+
   const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
+
+  const openContractBlsKeys = useMemo(() => {
+    return new Set(contracts.map(({ pubkey_bls }) => pubkey_bls));
+  }, [contracts]);
 
   useEffect(() => {
     setNetworkStatusVisible(true);
@@ -36,8 +43,17 @@ export default function OpenNodes() {
     />
   ) : isLoading ? (
     <NodesListSkeleton />
-  ) : contracts?.length ? (
-    contracts.map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)
+  ) : contracts?.length || hiddenContractsWithStakes?.length ? (
+    <>
+      {hiddenContractsWithStakes
+        .filter(({ pubkey_bls }) => !openContractBlsKeys.has(pubkey_bls))
+        .map((contract) => (
+          <OpenNodeCard key={contract.address} contract={contract} showAlreadyRunningWarning />
+        ))}
+      {contracts.map((contract) => (
+        <OpenNodeCard key={contract.address} contract={contract} />
+      ))}
+    </>
   ) : (
     <NoNodes />
   );

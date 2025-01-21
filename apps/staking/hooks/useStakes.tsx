@@ -1,5 +1,11 @@
 import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
-import { isStakeRequestingExit, parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
+import {
+  isStakeRequestingExit,
+  parseStakeEventState,
+  parseStakeState,
+  STAKE_EVENT_STATE,
+  STAKE_STATE,
+} from '@/components/StakedNode/state';
 import { CONTRIBUTION_CONTRACT } from '@/lib/constants';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
@@ -135,8 +141,17 @@ export function useStakes(overrideAddress?: Address) {
       { enabled }
     );
 
-  const [stakes, contracts, addedBlsKeys, blockHeight, networkTime, network] = useMemo(() => {
-    if (!address || !data) return [[], [], null, null, null];
+  const [
+    stakes,
+    contracts,
+    hiddenContractsWithStakes,
+    addedBlsKeys,
+    runningStakesBlsKeys,
+    blockHeight,
+    networkTime,
+    network,
+  ] = useMemo(() => {
+    if (!address || !data) return [[], [], [], null, null, null];
     const stakesArr = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];
     const contractsArr = 'contracts' in data && Array.isArray(data.contracts) ? data.contracts : [];
 
@@ -154,31 +169,37 @@ export function useStakes(overrideAddress?: Address) {
         : {};
 
     const addedBlsKeysSet = new Set(Object.keys(blsKeysObject));
+    const runningStakesBlsKeysSet = new Set(
+      stakesArr
+        .filter((stake) => parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE)
+        .map(({ pubkey_bls }) => pubkey_bls)
+    );
 
-    const limitAgeJoiningTimestamp = Date.now() - CONTRIBUTION_CONTRACT.MAX_AGE_JOINING_MS;
+    const limitAgeJoiningTimestamp = Date.now() / 1000 - CONTRIBUTION_CONTRACT.MAX_AGE_JOINING_S;
 
     const addedAwaitingOperatorContracts = new Set();
 
-    const filteredContracts = contractsArr.filter(({ pubkey_bls, node_add_timestamp, status }) => {
+    const hiddenContracts: Array<ContributorContractInfo> = [];
+
+    const filteredContracts = contractsArr.filter((contract) => {
+      const { pubkey_bls, last_added_timestamp, status } = contract;
       switch (status) {
         case CONTRIBUTION_CONTRACT_STATUS.Finalized:
           /**
-           * Should only include the finalised contracts with a recent `node_add_timestamp`.
-           * If a contract is finalised and has a non-null `node_add_timestamp` it is related
-           * to a node that is in the added list. Once that node exits the network, this value
-           * will be null again. So a finalised contract with a null `node_add_timestamp`
-           * relates to a node that once joined the network but has since exited.
+           * Should only include the finalised contracts with a recent `last_added_timestamp`.
+           * If a contract is finalised and has a non-null `last_added_timestamp` it is related
+           * to a node that is in the added list.
            */
           return (
-            node_add_timestamp &&
-            node_add_timestamp * 1000 > limitAgeJoiningTimestamp &&
-            !addedBlsKeysSet.has(pubkey_bls.slice(2))
+            !runningStakesBlsKeysSet.has(pubkey_bls.slice(2)) &&
+            (last_added_timestamp ? last_added_timestamp > limitAgeJoiningTimestamp : true)
           );
 
         case CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib:
           /**
            * Only include one awaiting operator contract per bls key. This will should probably be
-           * the latest created contract based on database insert order on the backend.
+           * the latest created contract based on database insert order on the backend. These
+           * only show up in the list if the user is the operator.
            */
           if (
             !addedBlsKeysSet.has(pubkey_bls.slice(2)) &&
@@ -190,20 +211,36 @@ export function useStakes(overrideAddress?: Address) {
           return false;
 
         default:
-          return !addedBlsKeysSet.has(pubkey_bls.slice(2));
+          if (addedBlsKeysSet.has(pubkey_bls.slice(2))) {
+            hiddenContracts.push(contract);
+            return false;
+          }
+          return true;
       }
     });
 
     stakesArr.sort((a, b) => sortStakes(a, b, address, blockHeight));
     filteredContracts.sort((a, b) => sortContracts(a, b, address));
+    hiddenContracts.sort((a, b) => sortContracts(a, b, address));
 
-    return [stakesArr, filteredContracts, addedBlsKeysSet, blockHeight, networkTime, net];
+    return [
+      stakesArr,
+      filteredContracts,
+      hiddenContracts,
+      addedBlsKeysSet,
+      runningStakesBlsKeysSet,
+      blockHeight,
+      networkTime,
+      net,
+    ];
   }, [data, address]);
 
   return {
     stakes,
     contracts,
+    hiddenContractsWithStakes,
     addedBlsKeys,
+    runningStakesBlsKeys,
     network,
     blockHeight,
     networkTime,

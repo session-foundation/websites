@@ -16,6 +16,7 @@ import { NodeContributorList } from '@/components/NodeCard';
 import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
 import type { ReactNode } from 'react';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import { isAddress } from 'viem';
 
 type EditableField = 'stakeAmount' | 'rewardsAddress' | 'operatorFee' | 'autoActivate';
 
@@ -46,6 +47,7 @@ export function StakeInfo({
   const dictShared = useTranslations('actionModules.shared');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
   const actionModuleDictionary = useTranslations('actionModules');
+  const dictGeneral = useTranslations('general');
 
   const isOperator = areHexesEqual(contract.operator_address, address);
   const contributor = contract.contributors.find((contributor) =>
@@ -117,7 +119,7 @@ export function StakeInfo({
         label={dictShared('autoActivate')}
         tooltip={dictShared('autoActivateDescription')}
       >
-        <span className="font-semibold">{contract.autoActivate ? 'Enabled' : 'Disabled'}</span>
+        <span className="font-semibold">{!contract.manual_finalize ? 'Enabled' : 'Disabled'}</span>
         {isOperator ? (
           <Tooltip tooltipContent="Editing this field is not yet supported">
             <EditButton
@@ -179,7 +181,11 @@ export function StakeInfo({
           tooltip={dictShared('rewardsAddressDescription')}
         >
           <PubKey
-            pubKey={contributor.beneficiary ?? address}
+            pubKey={
+              contributor.beneficiary && isAddress(contributor.beneficiary)
+                ? contributor.beneficiary
+                : address ?? dictGeneral('none')
+            }
             force="collapse"
             alwaysShowCopyButton
             leadingChars={8}

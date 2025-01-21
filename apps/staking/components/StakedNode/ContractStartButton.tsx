@@ -8,17 +8,14 @@ export function ContractStartButton({ contractAddress }: { contractAddress: Addr
   const dict = useTranslations('nodeCard.staked.finalize');
   const { finalizeContract, contractCallStatus } = useFinalizeContract({ contractAddress });
 
-  const isLoading = contractCallStatus !== 'pending';
-  const isDisabled = contractCallStatus !== 'idle';
-
   return (
     <Button
       size="xs"
-      disabled={isDisabled}
+      disabled={contractCallStatus === 'pending' || contractCallStatus === 'success'}
       onClick={() => finalizeContract()}
       data-testid={ButtonDataTestId.Staked_Node_Start}
     >
-      {isLoading ? '...' : dict('buttonText')}
+      {contractCallStatus === 'pending' ? '...' : dict('buttonText')}
     </Button>
   );
 }

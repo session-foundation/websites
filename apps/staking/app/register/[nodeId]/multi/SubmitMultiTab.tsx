@@ -377,17 +377,17 @@ export function SubmitMultiTab() {
   );
 }
 
-export function getNonFinalizedDeployedContributorContractAddress(
+export function getNonFinalizedLatestDeployedContributorContract(
   data?: Awaited<ReturnType<typeof getContributionContractBySnKey>>['data']
 ) {
-  if (data && 'contract' in data && data.contract && 'address' in data.contract) {
-    if (!isAddress(data.contract.address)) {
-      throw new Error(`Contract address is not valid ${data.contract.address}`);
+  if (data && 'contracts' in data && Array.isArray(data.contracts) && data.contracts.length) {
+    const contract = data.contracts
+      .filter((contract) => contract.status !== CONTRIBUTION_CONTRACT_STATUS.Finalized)
+      .sort((a, b) => b.created_timestamp - a.created_timestamp)[0];
+
+    if (contract && 'address' in contract && isAddress(contract.address)) {
+      return contract;
     }
-    if (data.contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized) {
-      return null;
-    }
-    return data.contract.address;
   }
   return null;
 }
@@ -445,8 +445,6 @@ function SubmitMulti({
 
   const isDeployed = createNodeContractStatus === PROGRESS_STATUS.SUCCESS;
 
-  const deployedTimestampMs = useMemo(() => (isDeployed ? Date.now() : null), [isDeployed]);
-
   const { setNetworkInfo } = useNetworkStatus();
 
   const {
@@ -474,7 +472,7 @@ function SubmitMulti({
     {
       enabled: isDeployed || !isCreateNodeEnabled,
       refetchInterval: (query) => {
-        if (getNonFinalizedDeployedContributorContractAddress(query.state.data)) return false;
+        if (getNonFinalizedLatestDeployedContributorContract(query.state.data)) return false;
 
         const l2HeightTimestamp =
           query.state.data &&
@@ -487,7 +485,7 @@ function SubmitMulti({
         // TODO: investigate using trysafe
         // const [_, l2HeightTimestamp] = safeTrySync(() => query.state.data?.network.l2_height_timestamp);
 
-        if (l2HeightTimestamp && deployedTimestampMs) {
+        if (l2HeightTimestamp) {
           /** {@link BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS} after the last l2 update */
           const nextL2UpdateTimestampMs =
             (l2HeightTimestamp + BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS) * 1000;
@@ -506,18 +504,7 @@ function SubmitMulti({
     }
   );
 
-  const contract = useMemo(() => {
-    if (data) {
-      if (
-        'contract' in data &&
-        data.contract &&
-        data.contract.status !== CONTRIBUTION_CONTRACT_STATUS.Finalized
-      ) {
-        return data.contract;
-      }
-      return null;
-    }
-  }, [data]);
+  const contract = useMemo(() => getNonFinalizedLatestDeployedContributorContract(data), [data]);
 
   useEffect(() => {
     if (contract) {

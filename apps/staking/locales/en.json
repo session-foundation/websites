@@ -106,7 +106,7 @@
     "information": {
       "title": "Getting test {tokenSymbol}",
       "referralTitle": "Referrals",
-      "referralDescription": "If you received a valid referral link from a Session Token community member, you are eligible to receive test {tokenSymbol}.",
+      "referralDescription": "If you received a valid referral code from a Session Token community member, you are eligible to receive test {tokenSymbol}.",
       "communityTitle": "Session Token Community Members",
       "communityDescription": "If you were part of the Token Community <session-token-community-snapshot-link></session-token-community-snapshot-link>  taken on {snapshotDate}, you are eligible to receive test {tokenSymbol}. Connect to {connectionOptions}, and then connect your wallet or enter your wallet address manually. If your eligibility is confirmed, test {tokenSymbol} will be sent to this address.",
       "oxenTitle": "Oxen Service Nodes",
@@ -807,7 +807,8 @@
       },
       "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
       "stakedTo": "Staked",
-      "stakedToTooltip": "You have staked {tokenAmount}"
+      "stakedToTooltip": "You have staked {tokenAmount}",
+      "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
     },
     "pending": {
       "type": "Type",
