@@ -4,6 +4,7 @@ import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
 import { LocaleKey } from './locale-util';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
+import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -116,7 +117,9 @@ export enum QUERY {
 }
 
 /** 20,000 SENT  */
-export const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+export const SESSION_NODE_MIN_STAKE_MULTI = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO = SESSION_NODE_FULL_STAKE_AMOUNT;
 
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
@@ -161,6 +164,11 @@ export const SESSION_NODE_TIME = (chainId?: number) => {
   }
 };
 
+export enum CONTRIBUTION_CONTRACT {
+  /** 30m -- the maximum age of a node that can be considered "joining" before its hidden, should be registered in ~20m */
+  MAX_AGE_JOINING_MS = 30 * 60 * 1000,
+}
+
 export enum TOAST {
   ERROR_COLLAPSE_LENGTH = 128,
 }
@@ -170,7 +178,43 @@ export enum DYNAMIC_MODULE {
   SENT_ROUNDED_DECIMALS = 2,
 }
 
-export enum HANDRAIL_THRESHOLD {
+export const HANDRAIL_THRESHOLD = {
   /** 0.005 SENT */
-  CLAIM_REWARDS_AMOUNT = '5000000',
+  CLAIM_REWARDS_AMOUNT: 5000000n,
+};
+
+export const preferenceStorageKey = 'stake';
+
+export enum PREFERENCE {
+  BACKEND_URL = 'backendUrl',
+  PREF_REGISTRATION_MODE = 'prefRegistrationMode',
+  SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
+}
+
+export const preferenceStorageDefaultItems = {
+  [PREFERENCE.BACKEND_URL]: '/api/ssb',
+  [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: false,
+} as const;
+
+export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
+  [REG_TAB.START]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.STAKE_AMOUNT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.OPERATOR_FEE]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS_INPUT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.AUTO_ACTIVATE]: 'https://docs.getsession.org/TBD',
+} as const;
+
+export enum LAST_UPDATED_BEHIND_TRIGGER {
+  /** 2.5 minutes */
+  BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
+  /** 4 minutes */
+  BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
+  /** 2.5 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
 }

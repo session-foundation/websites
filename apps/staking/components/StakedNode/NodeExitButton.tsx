@@ -1,9 +1,9 @@
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
 import { Button } from '@session/ui/ui/button';
-import { CollapsableContent } from '@/components/StakedNodeCard';
 import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '@session/ui/lib/utils';
+import { CollapsableContent } from '@/components/NodeCard';
 
 export const NodeExitButton = forwardRef<
   HTMLSpanElement,
@@ -14,7 +14,7 @@ export const NodeExitButton = forwardRef<
   const dictionary = useTranslations('nodeCard.staked.exit');
   return (
     <CollapsableContent
-      className={cn('bottom-4 right-6 flex items-end min-[500px]:absolute', className)}
+      className={cn('bottom-4 end-6 flex items-end min-[500px]:absolute', className)}
       size="buttonSm"
       width="w-max"
       {...props}

@@ -1,8 +1,8 @@
 import {
   useStakingBackendQueryWithParams,
   useStakingBackendSuspenseQuery,
-} from '@/lib/sent-staking-backend-client';
-import { getOpenNodes } from '@/lib/queries/getOpenNodes';
+} from '@/lib/staking-api-client';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { getNodes } from '@/lib/queries/getNodes';
 import { useMemo } from 'react';
@@ -12,7 +12,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export const useRegisteredNode = ({ pubKeyEd25519 }: { pubKeyEd25519?: string }) => {
   const { address } = useWallet();
-  const { data: openData } = useStakingBackendSuspenseQuery(getOpenNodes);
+  const { data: openData } = useStakingBackendSuspenseQuery(getContributionContracts);
   const { data: runningData } = useStakingBackendSuspenseQuery(getNodes);
   const { data: stakedData } = useStakingBackendQueryWithParams(
     getStakedNodes,

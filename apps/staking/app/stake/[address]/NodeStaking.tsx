@@ -1,6 +1,6 @@
 'use client';
 
-import type { GetOpenNodesResponse } from '@session/sent-staking-js/client';
+import type { GetContributionContractsResponse } from '@session/staking-api-js/client';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
@@ -15,10 +15,9 @@ import { type DecimalDelimiter, formatPercentage, getDecimalDelimiter } from '@/
 import { ButtonSkeleton } from '@session/ui/ui/button';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { Form, FormField, FormItem, FormMessage } from '@session/ui/ui/form';
+import { Form, FormField, FormItem, FormMessage, useForm } from '@session/ui/ui/form';
 import { SENT_DECIMALS } from '@session/contracts';
 import StakeAmountField, {
   getStakeAmountFormFieldSchema,
@@ -33,24 +32,22 @@ import {
 import { type Address, isAddress } from 'viem';
 import { NodeContributorList } from '@/components/NodeCard';
 import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
-import { NodeStakingButton } from '@/app/stake/[contract]/NodeStakingButton';
+import { NodeStakingButton } from '@/app/stake/[address]/NodeStakingButton';
 import { Loading } from '@session/ui/components/loading';
-import { useStakingBackendSuspenseQuery } from '@/lib/sent-staking-backend-client';
-import { getOpenNodes } from '@/lib/queries/getOpenNodes';
+import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { getContributionRangeFromContributors } from '@/lib/maths';
-import { useRegisteredNode } from '@/hooks/useRegisteredNode';
-import { StakedNodeCard } from '@/components/StakedNodeCard';
 
-export default function NodeStaking({ contract }: { contract: string }) {
-  const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
+export default function NodeStaking({ address }: { address: string }) {
+  const { data, isLoading } = useStakingBackendSuspenseQuery(getContributionContracts);
   const dictionary = useTranslations('general');
 
   const node = useMemo(() => {
-    return data?.nodes?.find((node) => areHexesEqual(node.contract, contract));
-  }, [data, contract]);
+    return data?.contracts?.find((contract) => areHexesEqual(contract.address, address));
+  }, [data, address]);
 
   return isLoading ? (
     <Loading />
@@ -98,7 +95,11 @@ export type ParsedStakeData = {
   beneficiaryAddress?: Address;
 };
 
-export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][number] }) {
+export function NodeStakingForm({
+  node,
+}: {
+  node: GetContributionContractsResponse['contracts'][number];
+}) {
   const dictionary = useTranslations('actionModules.register');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
   const sessionNodeStakingDictionary = useTranslations('sessionNodes.staking');
@@ -110,7 +111,7 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
     REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI
   );
 
-  const contractAddress = node.contract.startsWith('0x') ? node.contract : `0x${node.contract}`;
+  const contractAddress = node.address;
 
   const [finalisedFormData, setFinalisedFormData] = useState<ParsedStakeData | null>(null);
   const [multiStatus, setMultiStatus] = useState<PROGRESS_STATUS>(PROGRESS_STATUS.IDLE);
@@ -123,10 +124,6 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
   const { minStake, maxStake, totalStaked } = getContributionRangeFromContributors(
     node.contributors
   );
-
-  const { stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
-    pubKeyEd25519: node.service_node_pubkey,
-  });
 
   const FormSchema = getStakeFormSchema({
     minStake,
@@ -153,7 +150,7 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
     if (beneficiaryAddress && !isAddress(beneficiaryAddress)) {
       form.setError('beneficiaryAddress', {
         type: 'manual',
-        message: actionModuleDictionary('beneficiaryAddress.validation.invalidAddress'),
+        message: 'Invalid address',
       });
       return;
     }
@@ -175,26 +172,6 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        {stakedNode ? (
-          <>
-            <span className="mb-4 text-lg font-medium">
-              {dictionary.rich('notFound.foundRunningNode')}
-            </span>
-            <StakedNodeCard node={stakedNode} networkTime={networkTime} blockHeight={blockHeight} />
-          </>
-        ) : runningNode ? (
-          <>
-            <span className="mb-4 text-lg font-medium">
-              {dictionary('notFound.foundRunningNodeOtherOperator')}
-            </span>
-            <StakedNodeCard
-              node={runningNode}
-              networkTime={networkTime}
-              blockHeight={blockHeight}
-              hideButton
-            />
-          </>
-        ) : null}
         <ActionModuleRow
           label={actionModuleDictionary('node.contributors')}
           tooltip={actionModuleDictionary('node.contributorsTooltip')}
@@ -219,8 +196,8 @@ export function NodeStakingForm({ node }: { node: GetOpenNodesResponse['nodes'][
           label={sessionNodeDictionary('operatorAddress')}
           tooltip={sessionNodeDictionary('operatorAddressTooltip')}
         >
-          {node.operator ? (
-            <PubKey pubKey={node.operator} force="collapse" alwaysShowCopyButton />
+          {node.operator_address ? (
+            <PubKey pubKey={node.operator_address} force="collapse" alwaysShowCopyButton />
           ) : null}
         </ActionModuleRow>
         <ActionModuleRow

@@ -180,6 +180,9 @@
     "title": {
       "format": "{title}:"
     },
+    "shared": {
+      "error": "Error"
+    },
     "openNodes": {
       "title": "Open Session Nodes",
       "description": "Nodes that are open for staking. <link>Learn more</link>",
@@ -191,7 +194,9 @@
       "landingP2Mainnet": "Want to run your own Session Node?",
       "learnMoreButtonText": "Learn More",
       "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
-      "showHiddenPendingNodesText": "Show Pending Nodes"
+      "showHiddenPendingNodesText": "Show Pending Nodes",
+      "error": "An error occurred while fetching open nodes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "errorButton": "Retry"
     },
     "nodeRegistrations": {
       "title": "Your Prepared Registrations",
@@ -201,7 +206,9 @@
       "noNodesP1": "You have not prepared registrations for any Session Nodes.",
       "noNodesP2": "Learn how to prepare registration for your Session Node <link>here</link>.",
       "learnMoreButtonText": "Learn More",
-      "learnMoreButtonAria": "Navigate to the Session Node documentation page."
+      "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
+      "error": "An error occurred while fetching your prepared registrations. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "errorButton": "Retry"
     },
     "stakedNodes": {
       "title": "My Stakes",
@@ -211,7 +218,9 @@
       "noNodesP1": "You have no staked Session Nodes.",
       "noNodesP2": "Click the <link>Stake Now</link> button to stake to an open node or register a new Session node.",
       "stakeNowButtonText": "Stake Now",
-      "stakeNowButtonAria": "Navigate to the staking page to stake to an open node."
+      "stakeNowButtonAria": "Navigate to the staking page to stake to an open node.",
+      "error": "An error occurred while fetching your stakes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "errorButton": "Retry"
     },
     "toast": {
       "error": "Failed to fetch {module}.",
@@ -254,6 +263,8 @@
         },
         "successToast": "Claimed {tokenAmount} on Arbitrum"
       },
+      "error": "An error occurred while fetching the signature for your unclaimed rewards. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "errorButton": "Retry",
       "stage": {
         "balance": {
           "idle": "Updating rewards amount on Arbitrum",
@@ -526,6 +537,7 @@
       "lastUptimeDescription": "The last time the node provided a proof of availability. Block {blockNumber} ({date})",
       "lastReward": "Last Reward: {relativeTime}",
       "lastRewardDescription": "The last time the node received rewards. Block {blockNumber} ({date})",
+      "exitUnlockTimerProcessing": "Exit request is being processed",
       "exitUnlockTimerNotification": "Exit available {relativeTime}",
       "exitUnlockTimerDescription": "Time left until the node is available for exit. Return {relativeTime} ({date}) to exit the node.",
       "exitTimerNotification": "Exit available. Exit {relativeTime} to avoid penalty.",
@@ -561,6 +573,8 @@
             "highGas": "The price of Gas is higher than usual."
           }
         },
+        "error": "An error occurred while fetching the signature to exit the node. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+        "errorButton": "Retry",
         "stage": {
           "arbitrum": {
             "idle": "Session node exit on Arbitrum submitting",
@@ -641,6 +655,23 @@
           }
         }
       }
+    }
+  },
+  "statusBar": {
+    "network": {
+      "loading": "Block loading...",
+      "unreachable": "Unreachable",
+      "infoTooltip": "Block {blockNumber} was {blockRelativeTime}",
+      "warningTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "unreachableTooltip": "Unable to reach the network. <clickable-text>Click to refresh</clickable-text>"
+    },
+    "l2": {
+      "loading": "L2 Height loading...",
+      "infoTooltip": "L2 Height {height} was {heightRelativeTime}",
+      "warningTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "unreachableTooltip": "Unable to reach Arbitrum. <clickable-text>Click to refresh</clickable-text>"
     }
   }
 }

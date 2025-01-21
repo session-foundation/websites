@@ -1,53 +1,70 @@
 'use client';
 
-import { isOpenNodeContributor, isOpenNodeOperator, OpenNodeCard } from '@/components/OpenNodeCard';
+import { OpenNodeCard } from '@/components/OpenNodeCard';
 import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useTranslations } from 'next-intl';
-import { useStakingBackendSuspenseQuery } from '@/lib/sent-staking-backend-client';
-import { getOpenNodes } from '@/lib/queries/getOpenNodes';
+import { useStakingBackendQuery, useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useMemo } from 'react';
-import type { OpenNode } from '@session/sent-staking-js/client';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import type { Address } from 'viem';
-
-export const sortAndGroupOpenNodes = (nodes: Array<OpenNode>, address?: Address) => {
-  nodes.sort((a, b) => {
-    if (a.fee === b.fee) return b.total_contributions - a.total_contributions;
-    return a.fee - b.fee;
-  });
-  const operatorNotStaked = [];
-  const operator = [];
-  const staked = [];
-  const other = [];
-
-  for (const node of nodes) {
-    const isOperator = isOpenNodeOperator(node, address);
-    if (node.total_contributions === 0) {
-      if (isOperator) operatorNotStaked.push(node);
-    } else if (isOperator) operator.push(node);
-    else if (isOpenNodeContributor(node, address)) staked.push(node);
-    else other.push(node);
-  }
-
-  return [operatorNotStaked, operator, staked, other].flat(1);
-};
+import { getNodesBlsKeys } from '@/lib/queries/getNodesBlsKeys';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { Button } from '@session/ui/ui/button';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { sortContracts } from '@/hooks/useStakes';
 
 export default function OpenNodes() {
-  const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
+  const {
+    data: contractsData,
+    isLoading: isLoadingContracts,
+    refetch,
+    isError,
+  } = useStakingBackendSuspenseQuery(getContributionContracts);
+  const { data: blsKeysData, isLoading: isLoadingBlsKeys } =
+    useStakingBackendQuery(getNodesBlsKeys);
   const { address } = useWallet();
 
-  const nodes = useMemo(
-    () => (data?.nodes?.length ? sortAndGroupOpenNodes(data.nodes, address) : []),
-    [data, address]
-  );
+  const contracts = useMemo(() => {
+    if (!contractsData) return null;
+    const contractsArray =
+      'contracts' in contractsData && Array.isArray(contractsData.contracts)
+        ? contractsData.contracts
+        : [];
 
-  return isLoading ? (
+    if (address) {
+      contractsArray.sort((a, b) => sortContracts(a, b, address));
+    }
+
+    return contractsArray;
+  }, [contractsData, address]);
+
+  const blsKeys = useMemo(() => {
+    if (!blsKeysData) return new Set<string>();
+    const blsKeysObject =
+      'bls_keys' in blsKeysData && typeof blsKeysData.bls_keys === 'object'
+        ? blsKeysData.bls_keys
+        : {};
+
+    return new Set(Object.keys(blsKeysObject));
+  }, [blsKeysData]);
+
+  const filteredContracts = useMemo(() => {
+    if (!contracts) return [];
+    return contracts
+      .filter(({ status }) => status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib)
+      .filter(({ pubkey_bls }) => !blsKeys.has(pubkey_bls.slice(2)));
+  }, [contracts, blsKeys]);
+
+  return isError ? (
+    <ErrorMessage refetch={refetch} />
+  ) : isLoadingContracts || isLoadingBlsKeys ? (
     <NodesListSkeleton />
-  ) : nodes.length ? (
-    nodes.map((node) => <OpenNodeCard key={node.contract} node={node} />)
+  ) : filteredContracts?.length ? (
+    filteredContracts.map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)
   ) : (
     <NoNodes />
   );
@@ -59,6 +76,24 @@ function NoNodes() {
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
       <p>{dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_DOCS) })}</p>
+    </ModuleGridInfoContent>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.openNodes');
+  return (
+    <ModuleGridInfoContent>
+      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
     </ModuleGridInfoContent>
   );
 }

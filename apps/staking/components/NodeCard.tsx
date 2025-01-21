@@ -4,17 +4,19 @@ import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import { bigIntToNumber } from '@session/util-crypto/maths';
-import { SENT_DECIMALS } from '@session/contracts';
+import { forwardRef, type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/SENT';
-import { StakeContributor } from '@session/sent-staking-js/client';
+import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { StakeContributor } from '@session/staking-api-js/client';
+import { ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
+import { Button } from '@session/ui/ui/button';
+import { SENT_DECIMALS } from '@session/contracts';
 
 export interface Contributor {
   address: string;
-  amount: bigint;
+  amount: number;
 }
 
 export const outerNodeCardVariants = cva(
@@ -144,48 +146,27 @@ const ContributorIcon = ({
 };
 
 /**
- * @deprecated Use {@link getTotalStakedAmountForAddress} instead.
  * Returns the total staked amount for a given address.
  * @param contributors - The list of contributors.
  * @param address - The address to check.
  * @returns The total staked amount for the given address.
  */
-export const getTotalStakedAmountForAddressNumber = (
+export const getTotalStakedAmountForAddress = (
   contributors: Contributor[],
   address: string
 ): number => {
   return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address)
-      ? acc + bigIntToNumber(amount, SENT_DECIMALS)
-      : acc;
+    return areHexesEqual(contributorAddress, address) ? acc + amount : acc;
   }, 0);
 };
 
-export const getTotalStakedAmountForAddressBigInt = (
-  contributors: Contributor[],
-  address: string
-): bigint => {
-  contributors = contributors.map(({ amount, address: contributorAddress }) => {
-    return {
-      amount: typeof amount === 'bigint' ? amount : BigInt(`${amount}`),
-      address: contributorAddress,
-    };
-  });
-  return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address) ? acc + amount : acc;
-  }, BigInt(0));
-};
-
-export const getTotalStakedAmountForAddress = (
-  contributors: Contributor[],
-  address: string,
-  decimals?: number,
-  hideSymbol?: boolean
+export const getTotalStakedAmountForAddressFormatted = (
+  contributors: StakeContributor[],
+  address?: string
 ): string => {
-  return formatSENTBigInt(
-    getTotalStakedAmountForAddressBigInt(contributors, address),
-    decimals,
-    hideSymbol
+  return formatSENTNumber(
+    address ? getTotalStakedAmountForAddress(contributors, address) : 0,
+    SENT_DECIMALS
   );
 };
 
@@ -271,6 +252,111 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
     );
   }
 );
+
+type ToggleCardExpansionButtonProps = HTMLAttributes<HTMLLabelElement> & {
+  htmlFor: string;
+};
+
+export const ToggleCardExpansionButton = forwardRef<
+  HTMLLabelElement,
+  ToggleCardExpansionButtonProps
+>(({ className, ...props }, ref) => {
+  const [expanded, setExpanded] = useState(false);
+  const dictionary = useTranslations('nodeCard.staked');
+  return (
+    <label
+      ref={ref}
+      role="button"
+      onClick={() => setExpanded((prev) => !prev)}
+      aria-label={expanded ? dictionary(`ariaCollapse`) : dictionary(`ariaExpand`)}
+      data-testid={
+        expanded ? StakedNodeDataTestId.Collapse_Button : StakedNodeDataTestId.Expand_Button
+      }
+      className={cn(
+        'ms-auto flex w-max cursor-pointer select-none items-center align-middle peer-checked:[&>svg]:rotate-180',
+        className
+      )}
+      {...props}
+    >
+      <span className="text-gradient-white hidden font-medium lg:inline-block">
+        {expanded ? dictionary('labelCollapse') : dictionary('labelExpand')}
+      </span>
+      <ArrowDownIcon
+        className={cn(
+          'fill-session-text stroke-session-text ms-1 h-4 w-4 transform transition-all duration-300 ease-in-out motion-reduce:transition-none'
+        )}
+      />
+    </label>
+  );
+});
+
+export const RowLabel = ({ children }: { children: ReactNode }) => (
+  <span className="font-semibold">{children} </span>
+);
+
+const collapsableContentVariants = cva(
+  'inline-flex flex-wrap h-full max-h-0 select-none gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
+  {
+    variants: {
+      size: {
+        xs: 'text-xs md:text-xs peer-checked:max-h-4',
+        base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
+        buttonMd: cn('peer-checked:max-h-11'),
+        buttonSm: cn('peer-checked:max-h-9'),
+      },
+      width: {
+        'w-full': 'w-full',
+        'w-max': 'w-max',
+      },
+    },
+    defaultVariants: {
+      size: 'base',
+      width: 'w-full',
+    },
+  }
+);
+
+type CollapsableContentProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof collapsableContentVariants>;
+
+export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContentProps>(
+  ({ className, size, width, ...props }, ref) => (
+    <NodeCardText
+      ref={ref}
+      className={cn(collapsableContentVariants({ size, width, className }))}
+      {...props}
+    />
+  )
+);
+
+export const CollapsableButton = forwardRef<
+  HTMLButtonElement,
+  HTMLAttributes<HTMLButtonElement> & {
+    ariaLabel: string;
+    dataTestId: ButtonDataTestId;
+    disabled?: boolean;
+    mobileChildren?: ReactNode;
+  }
+>(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
+  <CollapsableContent
+    className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
+    size="buttonSm"
+  >
+    <Button
+      data-testid={dataTestId}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      rounded="md"
+      size="sm"
+      variant="destructive-outline"
+      className="uppercase"
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </Button>
+  </CollapsableContent>
+));
 
 export {
   ContributorIcon,

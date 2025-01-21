@@ -3,8 +3,18 @@
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner, type ToastT, useSonner } from 'sonner';
 import { cn } from '../../lib/utils';
-import { type ComponentProps, Fragment, useEffect, useState } from 'react';
-import { ListChecks, ListX, XCircleIcon } from 'lucide-react';
+import {
+  type ComponentProps,
+  createContext,
+  type Dispatch,
+  Fragment,
+  type ReactNode,
+  type SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { XCircleIcon } from 'lucide-react';
 import { Button } from './button';
 import { ButtonDataTestId } from '../../data-test-ids';
 
@@ -14,12 +24,10 @@ function renderToastNode(node: ToastT['description']) {
 
 type ToasterProps = ComponentProps<typeof Sonner>;
 
-const Toaster = ({ ...props }: ToasterProps) => {
+export const Toaster = ({ ...props }: ToasterProps) => {
+  const { showHistory, setShowHistory, toastHistory, setToastHistory } = useToasterHistory();
   const { theme = 'system' } = useTheme();
   const { toasts } = useSonner();
-
-  const [showHistory, setShowHistory] = useState(false);
-  const [toastHistory, setToastHistory] = useState<Array<ToastT>>([]);
   const [toastIds] = useState<Set<string | number>>(new Set());
 
   // The toast array from useSonner only contains the active toasts, which are removed when a user
@@ -78,7 +86,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         {...props}
       />
       {/* Note: Has to be z-index higher than Sonner, the sonner is 999999999 */}
-      <div className="absolute bottom-2 z-[9999999999] mx-6 flex w-[90vw] flex-col items-end gap-2 md:right-14 md:w-auto">
+      <div className="absolute bottom-10 z-[9999999999] mx-6 flex w-[90vw] flex-col items-end gap-2 md:right-14 md:w-auto">
         {showHistory && toastHistory.length ? (
           <div className="bg-session-black border-session-white max-h-96 overflow-y-auto rounded-md border md:w-[40vh]">
             {toastHistory.map((toast, index) => (
@@ -119,21 +127,37 @@ const Toaster = ({ ...props }: ToasterProps) => {
             ))}
           </div>
         ) : null}
-        {toastHistory.length ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            rounded="full"
-            className="self-end"
-            onClick={() => setShowHistory(!showHistory)}
-            data-testid={ButtonDataTestId.Toggle_Show_Toaster_History}
-          >
-            {showHistory ? <ListX className="h-5 w-5" /> : <ListChecks className="h-5 w-5" />}
-          </Button>
-        ) : null}
       </div>
     </>
   );
 };
 
-export { Toaster };
+type ToasterContext = {
+  toastHistory: Array<ToastT>;
+  setToastHistory: Dispatch<SetStateAction<Array<ToastT>>>;
+  showHistory: boolean;
+  setShowHistory: Dispatch<SetStateAction<boolean>>;
+};
+
+const ToasterContext = createContext<ToasterContext | undefined>(undefined);
+
+export default function ToasterProvider({ children }: { children?: ReactNode }) {
+  const [toastHistory, setToastHistory] = useState<Array<ToastT>>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  return (
+    <ToasterContext.Provider value={{ toastHistory, setToastHistory, showHistory, setShowHistory }}>
+      {children}
+    </ToasterContext.Provider>
+  );
+}
+
+export function useToasterHistory() {
+  const context = useContext(ToasterContext);
+
+  if (context === undefined) {
+    throw new Error('useToasterHistory must be used inside ToasterProvider');
+  }
+
+  return context;
+}

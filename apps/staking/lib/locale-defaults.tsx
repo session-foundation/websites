@@ -1,11 +1,22 @@
-import { SENT_SYMBOL } from '@session/contracts';
+import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
 import { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { FAUCET, NETWORK, SESSION_NODE_TIME_STATIC, SOCIALS, TICKER, URL } from './constants';
+import type { AriaRole, ReactNode } from 'react';
+import {
+  FAUCET,
+  NETWORK,
+  SESSION_NODE_FULL_STAKE_AMOUNT,
+  SESSION_NODE_MIN_STAKE_MULTI,
+  SESSION_NODE_MIN_STAKE_SOLO,
+  SESSION_NODE_TIME_STATIC,
+  SOCIALS,
+  TICKER,
+  URL,
+} from './constants';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 
 export const internalLink = (href: string, prefetch?: boolean) => {
   return (children: ReactNode) => (
@@ -25,6 +36,14 @@ export const externalLink = (href: string, className?: string) => {
     >
       {children}
     </a>
+  );
+};
+
+export const clickableText = (onClick: () => void, role: AriaRole = 'button') => {
+  return (children: ReactNode) => (
+    <span className="text-session-green cursor-pointer underline" onClick={onClick} role={role}>
+      {children}
+    </span>
   );
 };
 

@@ -35,13 +35,21 @@ import { Input } from '@session/ui/ui/input';
 import { nonceManager, privateKeyToAccount } from 'viem/accounts';
 import { Address, createWalletClient, http } from 'viem';
 import { TestnetServiceNodeRewardsAbi } from '@session/contracts/abis';
-import { useStakingBackendSuspenseQuery } from '@/lib/sent-staking-backend-client';
-import { SessionStakingClient } from '@session/sent-staking-js/client';
+import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { SessionStakingClient } from '@session/staking-api-js/client';
 import { Loading } from '@session/ui/components/loading';
 import { Checkbox } from '@session/ui/ui/checkbox';
 import { PubKey } from '@session/ui/components/PubKey';
 import { toast } from '@session/ui/lib/toast';
 import { arbitrumSepolia } from 'viem/chains';
+import { addresses, SENT_DECIMALS } from '@session/contracts';
+import {
+  formatSENTBigInt,
+  useAllowanceQuery,
+  useProxyApproval,
+} from '@session/contracts/hooks/SENT';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { useContractReadQuery } from '@session/contracts/hooks/useContractReadQuery';
 
 export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -89,7 +97,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
 
   return (
     <Sheet open={isOpen}>
-      <SheetContent closeSheet={() => setIsOpen(false)}>
+      <SheetContent closeSheet={() => setIsOpen(false)} className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Welcome to the danger zone</SheetTitle>
           <SheetDescription>
@@ -143,7 +151,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
             ))}
           </SheetDescription>
           <PageSpecificFeatureFlags />
-          {/*<ContractActions />*/}
+          <ContractActions />
           <ToastWorkshop />
         </SheetHeader>
       </SheetContent>
@@ -202,68 +210,67 @@ function FeatureFlagToggle({
   );
 }
 
-//
-// function ContractActions() {
-//   const [value, setValue] = useState<string>('0');
-//   const serviceNodeRewardsAddress = addresses.ServiceNodeRewards[arbitrumSepolia.id];
-//
-//   const tokenAmount = useMemo(() => BigInt(value) * BigInt(10 ** SENT_DECIMALS), [value]);
-//
-//   const {
-//     allowance,
-//     refetch,
-//     status: allowanceStatus,
-//   } = useAllowanceQuery({
-//     contractAddress: serviceNodeRewardsAddress,
-//   });
-//
-//   const { approveWrite, resetApprove, status } = useProxyApproval({
-//     contractAddress: serviceNodeRewardsAddress,
-//     tokenAmount,
-//   });
-//
-//   const handleClick = () => {
-//     if (status !== 'idle') {
-//       resetApprove();
-//     }
-//     approveWrite();
-//   };
-//
-//   useEffect(() => {
-//     if (status === 'success') refetch();
-//   }, [status]);
-//
-//   return (
-//     <>
-//       <SheetTitle>Contract Actions 🚀</SheetTitle>
-//       <span className="inline-flex justify-start gap-1 align-middle">
-//         <span className="inline-flex justify-start gap-1 align-middle">
-//           {'Allowance:'}
-//           <span className="text-session-green">
-//             {allowanceStatus === 'success' ? formatSENTBigInt(allowance) : <LoadingText />}
-//           </span>
-//         </span>
-//       </span>
-//       <Input type="number" value={value} onChange={(e) => setValue(e.target.value)} />
-//       <Button
-//         data-testid="button:reset-allowance"
-//         onClick={handleClick}
-//         size="sm"
-//         rounded="md"
-//         disabled={status === 'pending' || tokenAmount === allowance}
-//       >
-//         {status === 'pending' ? (
-//           <LoadingText />
-//         ) : tokenAmount > BigInt(0) ? (
-//           'Set Allowance'
-//         ) : (
-//           'Reset Allowance'
-//         )}
-//       </Button>
-//       <ExitNodes />
-//     </>
-//   );
-// }
+function ContractActions() {
+  const [value, setValue] = useState<string>('0');
+  const serviceNodeRewardsAddress = addresses.ServiceNodeRewards[arbitrumSepolia.id];
+
+  const tokenAmount = useMemo(() => BigInt(value) * BigInt(10 ** SENT_DECIMALS), [value]);
+
+  const {
+    allowance,
+    refetch,
+    status: allowanceStatus,
+  } = useAllowanceQuery({
+    contractAddress: serviceNodeRewardsAddress,
+  });
+
+  const { approveWrite, resetApprove, status } = useProxyApproval({
+    contractAddress: serviceNodeRewardsAddress,
+    tokenAmount,
+  });
+
+  const handleClick = () => {
+    if (status !== 'idle') {
+      resetApprove();
+    }
+    approveWrite();
+  };
+
+  useEffect(() => {
+    if (status === 'success') refetch();
+  }, [status]);
+
+  return (
+    <>
+      <SheetTitle>Contract Actions 🚀</SheetTitle>
+      <span className="inline-flex justify-start gap-1 align-middle">
+        <span className="inline-flex justify-start gap-1 align-middle">
+          {'Allowance:'}
+          <span className="text-session-green">
+            {allowanceStatus === 'success' ? formatSENTBigInt(allowance) : <LoadingText />}
+          </span>
+        </span>
+      </span>
+      <Input type="number" value={value} onChange={(e) => setValue(e.target.value)} />
+      <Button
+        data-testid="button:reset-allowance"
+        onClick={handleClick}
+        size="sm"
+        rounded="md"
+        disabled={status === 'pending' || tokenAmount === allowance}
+      >
+        {status === 'pending' ? (
+          <LoadingText />
+        ) : tokenAmount > BigInt(0) ? (
+          'Set Allowance'
+        ) : (
+          'Reset Allowance'
+        )}
+      </Button>
+      <ExitNodes />
+    </>
+  );
+}
 
 export function getExitLiquidationList(client: SessionStakingClient) {
   return client.exitLiquidationList();
@@ -274,18 +281,59 @@ function ExitNodes() {
   const [selectedContractIds, setSelectedContractIds] = useState<Array<number>>([]);
   const { data, status } = useStakingBackendSuspenseQuery(getExitLiquidationList);
 
+  const { data: blsKeyContractIdMapData, status: blsKeyContractIdMapStatus } = useContractReadQuery(
+    {
+      contract: 'ServiceNodeRewards',
+      functionName: 'allServiceNodeIDs',
+      enabled: status === 'success',
+    }
+  );
+
   const nodes = useMemo(() => {
-    if (status === 'success' && data) {
-      return data.result
-        .map((node) => ({ contractId: node.contract_id, pubKey: node.service_node_pubkey }))
-        .filter(({ contractId }) => contractId)
-        .sort((a, b) => a.contractId! - b.contractId!) as Array<{
-        contractId: number;
-        pubKey: string;
-      }>;
+    if (
+      status === 'success' &&
+      data &&
+      blsKeyContractIdMapStatus === 'success' &&
+      blsKeyContractIdMapData
+    ) {
+      const [ids, blsKeys] = blsKeyContractIdMapData;
+
+      // Create an object that maps "<x:064x><y:064x>" to the contractId
+      const result: Record<string, number> = {};
+
+      for (let i = 0; i < ids.length; i++) {
+        const contractId = ids[i];
+        if (!contractId) {
+          console.warn('Unexpected null contractId');
+          continue;
+        }
+        const blsKeyPair = blsKeys[i];
+        if (!blsKeyPair) {
+          console.warn('Unexpected null blsKeyPair');
+          continue;
+        }
+        const { X, Y } = blsKeyPair;
+
+        // Convert x and y to 64-char hex strings and concatenate
+        const key = `${X.toString(16).padStart(64, '0')}${Y.toString(16).padStart(64, '0')}`;
+        result[key] = parseInt(contractId.toString());
+      }
+
+      const nodeList = [];
+
+      for (const node of data.result) {
+        const contractId = result[node.info.bls_public_key];
+        if (!contractId) {
+          console.warn('No contractId found for blsKey', node.info.bls_public_key);
+          continue;
+        }
+        nodeList.push({ contractId, pubKey: node.service_node_pubkey });
+      }
+
+      return nodeList.sort((a, b) => a.contractId - b.contractId);
     }
     return [];
-  }, [data?.result, status]);
+  }, [data, status, blsKeyContractIdMapStatus, blsKeyContractIdMapData]);
 
   const handleEjectNodes = async () => {
     if (selectedContractIds.length === 0) return;
@@ -394,9 +442,9 @@ async function ejectNodes({
     const arrBigInted = array.map(BigInt);
 
     const hash = await wallet.writeContract({
-      address: '0xb691e7C159369475D0a3d4694639ae0144c7bAB2',
+      address: addresses.ServiceNodeRewards[arbitrumSepolia.id],
       abi: TestnetServiceNodeRewardsAbi,
-      functionName: 'requestRemoveNodeBySNID',
+      functionName: 'exitNodeBySNID',
       args: [arrBigInted],
     });
     console.log(`Hash: ${hash}`);

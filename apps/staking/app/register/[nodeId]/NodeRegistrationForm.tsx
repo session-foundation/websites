@@ -1,6 +1,6 @@
 'use client';
 
-import { type LoadRegistrationsResponse, NODE_STATE } from '@session/sent-staking-js/client';
+import { type LoadRegistrationsResponse } from '@session/staking-api-js/client';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
@@ -28,10 +28,9 @@ import { Button, ButtonSkeleton } from '@session/ui/ui/button';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@session/ui/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage, useForm } from '@session/ui/ui/form';
 import { SENT_DECIMALS } from '@session/contracts';
 import StakeAmountField, {
   getStakeAmountFormFieldSchema,
@@ -51,6 +50,7 @@ import { safeTrySync } from '@session/util-js/try';
 import { RegisterMultiNodeButton } from '@/app/register/[nodeId]/RegisterMultiNodeButton';
 import { RegisterSoloNodeButton } from '@/app/register/[nodeId]/RegisterSoloNodeButton';
 import { OpenNodeCard } from '@/components/OpenNodeCard';
+import { parseStakeState, STAKE_STATE } from '@/components/StakedNode/state';
 
 type GetRegistrationFormSchemaArgs = {
   minStake: bigint;
@@ -200,7 +200,7 @@ export function NodeRegistrationForm({
     if (beneficiaryAddress && !isAddress(beneficiaryAddress)) {
       form.setError('beneficiaryAddress', {
         type: 'manual',
-        message: actionModuleDictionary('beneficiaryAddress.validation.invalidAddress'),
+        message: 'Invalid Ethereum Address',
       });
       return;
     }
@@ -228,20 +228,26 @@ export function NodeRegistrationForm({
         {!isRemoteFlagLoading && isRegistrationPausedFlagEnabled ? (
           <span>{dictionary('disabled')}</span>
         ) : null}
-        {stakedNode && stakedNode.state === NODE_STATE.RUNNING ? (
+        {stakedNode && parseStakeState(stakedNode, blockHeight) === STAKE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary.rich('notFound.foundRunningNode')}
             </span>
-            <StakedNodeCard node={stakedNode} networkTime={networkTime} blockHeight={blockHeight} />
+            <StakedNodeCard
+              id={stakedNode.contract_id.toString()}
+              stake={stakedNode}
+              networkTime={networkTime}
+              blockHeight={blockHeight}
+            />
           </>
-        ) : runningNode && runningNode.state === NODE_STATE.RUNNING ? (
+        ) : runningNode && parseStakeState(runningNode, blockHeight) === STAKE_STATE.RUNNING ? (
           <>
             <span className="mb-4 text-lg font-medium">
               {dictionary('notFound.foundRunningNodeOtherOperator')}
             </span>
             <StakedNodeCard
-              node={runningNode}
+              id={runningNode.contract_id.toString()}
+              stake={runningNode}
               networkTime={networkTime}
               blockHeight={blockHeight}
               hideButton
@@ -250,7 +256,7 @@ export function NodeRegistrationForm({
         ) : openNode ? (
           <>
             <span className="mb-4 text-lg font-medium">{dictionary('notFound.foundOpenNode')}</span>
-            <OpenNodeCard node={openNode} forceSmall />
+            <OpenNodeCard id={openNode.address} contract={openNode} forceSmall />
           </>
         ) : null}
         <ActionModuleRow

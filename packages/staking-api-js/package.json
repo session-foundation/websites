@@ -1,5 +1,5 @@
 {
-  "name": "@session/sent-staking-js",
+  "name": "@session/staking-api-js",
   "version": "0.0.0",
   "private": true,
   "exports": {

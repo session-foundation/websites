@@ -192,3 +192,23 @@ export function useRemoveBLSPublicKeyWithSignature({
     ...rest,
   };
 }
+
+export function useGetRecipients({ address }: { address: Address }) {
+  const { data: recipients, ...rest } = useContractReadQuery({
+    contract: 'ServiceNodeRewards',
+    functionName: 'recipients',
+    args: [address],
+    enabled: !!address,
+  });
+
+  const [rewards, claimed] = useMemo(() => {
+    if (!recipients || recipients.length !== 2) return [undefined, undefined];
+    return recipients;
+  }, [recipients]);
+
+  return {
+    rewards,
+    claimed,
+    ...rest,
+  };
+}
