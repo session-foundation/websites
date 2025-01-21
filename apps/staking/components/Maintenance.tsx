@@ -1,4 +1,3 @@
-import { siteMetadata } from '@/lib/metadata';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import Link from 'next/link';
@@ -8,15 +7,7 @@ import { cn } from '@session/ui/lib/utils';
 import { SOCIALS } from '@/lib/constants';
 import { Social } from '@session/ui/components/SocialLinkList';
 
-export async function generateMetadata() {
-  const dict = await getTranslations('maintenance');
-  return siteMetadata({
-    title: dict('title'),
-    description: dict('description'),
-  });
-}
-
-export default async function Page() {
+export default async function Maintenance() {
   const dict = await getTranslations('maintenance');
   return (
     <div className="-mt-header-displacement flex h-screen w-full items-center justify-center p-32 align-middle">
