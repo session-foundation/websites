@@ -11,7 +11,7 @@ export default async function Maintenance() {
   const dict = await getTranslations('maintenance');
   return (
     <div className="-mt-header-displacement flex h-screen w-full items-center justify-center p-32 align-middle">
-      <div className="mt-10 flex flex-col items-center justify-center text-center align-middle md:flex-row md:gap-10 md:text-start">
+      <div className="mt-10 flex flex-col items-center justify-center text-center align-middle md:mt-0 md:flex-row md:gap-10 md:text-start">
         <TriangleAlertIcon className={cn('stroke-warning h-60 w-60 stroke-2')} />
         <div className="flex h-full flex-col justify-between gap-3 md:gap-4">
           <p className="text-md text-warning max-w-sm text-2xl">{dict('title')}</p>
