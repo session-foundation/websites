@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   /**
    *  We don't need to handle any errors from the remote flag functions as any errors are handled
-   *  in the function call and call happens on the same thread as this is server-side rendered.
+   *  in the function call, and that call happens on the same thread, as this is server-side rendered.
    */
   const enabledFlags = new Set((await getRemoteFeatureFlags()).flags);
 
