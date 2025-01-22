@@ -166,7 +166,7 @@ function PageSpecificFeatureFlags() {
   const pageFlags = pathname
     .split('/')
     .flatMap((slug) => pageFeatureFlags[slug])
-    .filter((flag) => flag !== undefined) as Array<FEATURE_FLAG>;
+    .filter((flag) => flag !== undefined);
 
   if (!pageFlags || pageFlags.length === 0) return null;
 

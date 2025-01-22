@@ -1,7 +1,19 @@
-import { Address, type Chain, createPublicClient, createWalletClient, http } from 'viem';
+import {
+  Address,
+  type Chain,
+  createPublicClient,
+  createWalletClient,
+  http,
+  type HttpTransport,
+  type PrivateKeyAccount,
+  type WalletClient,
+} from 'viem';
 import { nonceManager, privateKeyToAccount } from 'viem/accounts';
 
-export function createServerWallet(privateKey: Address, chain: Chain) {
+export function createServerWallet(
+  privateKey: Address,
+  chain: Chain
+): WalletClient<HttpTransport, Chain, PrivateKeyAccount> {
   if (!privateKey) {
     throw new Error('Private key is required to create a server wallet');
   }
