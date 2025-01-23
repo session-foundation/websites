@@ -16,7 +16,7 @@ import { TestnetServiceNodeRewardsAbi } from './TestnetServiceNodeRewards';
 
 export const Contracts = {
   RewardRatePool: RewardRatePoolAbi,
-  SENT: SENTAbi,
+  Token: SENTAbi,
   ServiceNodeContribution: ServiceNodeContributionAbi,
   ServiceNodeContributionFactory: ServiceNodeContributionFactoryAbi,
   ServiceNodeRewards: ServiceNodeRewardsAbi,

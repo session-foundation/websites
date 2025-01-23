@@ -26,6 +26,7 @@ export type InfoNodeCardProps = HTMLAttributes<HTMLDivElement> & {
     dataTestId: ButtonDataTestId;
     ariaLabel: string;
   };
+  warnings?: ReactNode;
   statusIndicatorColour?: StatusIndicatorVariants['status'];
 };
 
@@ -39,6 +40,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
       forceSmall,
       pubKey,
       button,
+      warnings,
       children,
       ...props
     },
@@ -57,23 +59,38 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
           className
         )}
       >
-        <div className={cn('text-center sm:text-start', className)}>
-          <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
-            {statusIndicatorColour ? (
-              <div className="-mr-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
-                <StatusIndicator status={statusIndicatorColour} />
-              </div>
-            ) : null}
-            <NodeCardTitle className="inline-flex flex-wrap gap-2 text-sm md:text-lg">
-              <span className="text-nowrap font-normal">
-                {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
-              </span>
-              <PubKey pubKey={pubKey} force="collapse" leadingChars={8} trailingChars={4} />
-            </NodeCardTitle>
+        <div className="flex flex-row gap-6">
+          {warnings ? (
+            <div className="flex w-max flex-row items-center gap-2 align-middle">{warnings}</div>
+          ) : null}
+          <div className={cn('text-center sm:text-start', className)}>
+            <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
+              {statusIndicatorColour ? (
+                <div className="-mr-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
+                  <StatusIndicator status={statusIndicatorColour} />
+                </div>
+              ) : null}
+              <NodeCardTitle
+                className={cn(
+                  'inline-flex flex-wrap gap-2',
+                  forceSmall ? 'text-xs md:text-base' : 'text-sm md:text-lg'
+                )}
+              >
+                <span className="text-nowrap font-normal">
+                  {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
+                </span>
+                <PubKey pubKey={pubKey} force="collapse" leadingChars={8} trailingChars={4} />
+              </NodeCardTitle>
+            </div>
+            <NodeCardText
+              className={cn(
+                'col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row',
+                forceSmall ? 'text-xs md:text-xs' : 'text-xs md:text-base'
+              )}
+            >
+              {children}
+            </NodeCardText>
           </div>
-          <NodeCardText className="col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle text-xs font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row md:text-base">
-            {children}
-          </NodeCardText>
         </div>
         <div className="flex flex-row items-center gap-2 align-middle">
           {buttonSiblings}
@@ -81,7 +98,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
             <Link href={button.link} className="w-full sm:w-auto" prefetch>
               <Button
                 variant={isActive ? 'default' : 'outline'}
-                size="md"
+                size={forceSmall ? 'sm' : 'md'}
                 rounded="md"
                 aria-label={button.ariaLabel}
                 data-testid={button.dataTestId}

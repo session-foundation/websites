@@ -10,7 +10,7 @@ export default async function SanityLayout({
   children: ReactNode;
   disableDraftModePath: string;
 }) {
-  const isDraftMode = isDraftModeEnabled();
+  const isDraftMode = await isDraftModeEnabled();
   return (
     <>
       {isDraftMode ? (

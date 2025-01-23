@@ -15,6 +15,7 @@ import {
   type WriteContractStatus,
 } from './useContractWriteQuery';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useEstimateContractFee } from './useEstimateContractFee';
 
 export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
   formatSENTBigInt(value, SENT_DECIMALS, hideSymbol);
@@ -34,7 +35,7 @@ export type SENTBalanceQuery = ContractReadQueryProps & {
 
 export function useSENTBalanceQuery({ address }: { address?: Address }): SENTBalanceQuery {
   const { data: balance, ...rest } = useContractReadQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'balanceOf',
     args: [address!],
     enabled: !!address,
@@ -55,15 +56,24 @@ export type SENTAllowanceQuery = ContractReadQueryProps & {
 
 export function useAllowanceQuery({
   contractAddress,
+  gcTime,
 }: {
   contractAddress?: Address | null;
+  gcTime?: number;
 }): SENTAllowanceQuery {
   const { address } = useWallet();
+
+  const args = useMemo(
+    () => (address && contractAddress ? ([address, contractAddress] as const) : undefined),
+    [address, contractAddress]
+  );
+
   const { data: allowance, ...rest } = useContractReadQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'allowance',
-    args: [address!, contractAddress!],
-    enabled: !!address && !!contractAddress,
+    args,
+    enabled: !!args,
+    gcTime,
   });
 
   return {
@@ -81,14 +91,19 @@ export type UseProxyApprovalReturn = {
   simulateError: SimulateContractErrorType | Error | null;
   writeError: WriteContractErrorType | Error | null;
   transactionError: TransactionExecutionErrorType | Error | null;
+  fee: bigint | null;
+  gasAmount: bigint | null;
+  gasPrice: bigint | null;
 };
 
 export function useProxyApproval({
   contractAddress,
   tokenAmount,
+  gcTime,
 }: {
   contractAddress?: Address | null;
   tokenAmount: bigint;
+  gcTime?: number;
 }): UseProxyApprovalReturn {
   const [hasEnoughAllowance, setHasEnoughAllowance] = useState<boolean>(false);
   const [allowanceReadStatusOverride, setAllowanceReadStatusOverride] =
@@ -101,12 +116,15 @@ export function useProxyApproval({
     refetch: refetchRaw,
   } = useAllowanceQuery({
     contractAddress,
+    gcTime,
   });
 
   const refetchAllowance = async () => {
-    setAllowanceReadStatusOverride('pending');
-    await refetchRaw();
-    setAllowanceReadStatusOverride(null);
+    if (contractAddress) {
+      setAllowanceReadStatusOverride('pending');
+      await refetchRaw();
+      setAllowanceReadStatusOverride(null);
+    }
   };
 
   const readStatus = useMemo(
@@ -121,8 +139,11 @@ export function useProxyApproval({
     simulateError,
     writeError,
     transactionError,
+    fee,
+    gasAmount,
+    gasPrice,
   } = useContractWriteQuery({
-    contract: 'SENT',
+    contract: 'Token',
     functionName: 'approve',
   });
 
@@ -133,7 +154,9 @@ export function useProxyApproval({
   };
 
   const resetApprove = () => {
-    resetContract();
+    if (contractAddress) {
+      resetContract();
+    }
   };
 
   const approveWrite = () => {
@@ -174,10 +197,12 @@ export function useProxyApproval({
     if (readStatus === 'success' && tokenAmount > BigInt(0) && contractAddress) {
       approveWrite();
     }
-  }, [readStatus, contractAddress]);
+  }, [readStatus, contractAddress, tokenAmount]);
 
   useEffect(() => {
-    void refetchAllowance();
+    if (contractAddress && (readStatusRaw === 'success' || readStatusRaw === 'error')) {
+      void refetchAllowance();
+    }
   }, [contractAddress]);
 
   return {
@@ -189,5 +214,19 @@ export function useProxyApproval({
     simulateError,
     writeError,
     transactionError,
+    fee,
+    gasAmount,
+    gasPrice,
   };
+}
+
+export function useProxyApprovalFeeEstimate({
+  contractAddress,
+  amount,
+}: { contractAddress: Address; amount: bigint }) {
+  return useEstimateContractFee({
+    contract: 'Token',
+    functionName: 'approve',
+    args: [contractAddress, amount],
+  });
 }

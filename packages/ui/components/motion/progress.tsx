@@ -4,10 +4,10 @@ import { Circle } from './shapes/circle';
 import { cn } from '../../lib/utils';
 
 export enum PROGRESS_STATUS {
+  ERROR,
   IDLE,
   PENDING,
   SUCCESS,
-  ERROR,
 }
 
 type Step = {

@@ -96,10 +96,10 @@ const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipP
 
 const AlertTooltip = forwardRef<
   ElementRef<typeof PopoverPrimitive.Content>,
-  Omit<TooltipProps, 'children'>
->((props, ref) => (
+  Omit<TooltipProps, 'children'> & { iconClassName?: string }
+>(({ iconClassName, ...props }, ref) => (
   <Tooltip {...props} ref={ref}>
-    <TriangleAlertIcon className="stroke-warning h-4 w-4" />
+    <TriangleAlertIcon className={cn('stroke-warning h-4 w-4', iconClassName)} />
   </Tooltip>
 ));
 

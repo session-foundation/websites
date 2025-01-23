@@ -19,13 +19,14 @@ export default function useExitNode({
   blsSignature,
   excludedSigners,
 }: UseExitNodeParams) {
-  const stageDictKey = 'nodeCard.staked.requestExit.dialog.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('nodeCard.staked.requestExit.dialog.stage');
+  const dictGeneral = useTranslations('general');
 
   const {
     removeBLSPublicKeyWithSignature,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     contractCallStatus,
     simulateError,
@@ -43,10 +44,9 @@ export default function useExitNode({
   const errorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'arbitrum',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError,
         writeError,
         transactionError,
@@ -62,6 +62,8 @@ export default function useExitNode({
   return {
     removeBLSPublicKeyWithSignature,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     simulateEnabled,
     resetContract,

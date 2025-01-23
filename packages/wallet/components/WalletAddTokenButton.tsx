@@ -17,6 +17,7 @@ export type WalletAddTokenButtonProps = ButtonVariantProps & {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO: reimplement this component
 export default function WalletAddTokenButton(props: WalletAddTokenButtonProps) {
   return null;
   //   const { addToken, error, isPending } = useAddSessionTokenToWallet(props.tokenIcon);

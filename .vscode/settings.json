@@ -1,6 +1,6 @@
 {
   // The settings.json file contains a subset of the settings as the .websites-monorepo.workspace file to ensure important settings are applied to all workspaces.
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "./node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
   },

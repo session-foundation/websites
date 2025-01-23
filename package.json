@@ -4,6 +4,7 @@
   "scripts": {
     "turbo": "DO_NOT_TRACK=1 NEXT_TELEMETRY_DISABLED=1 turbo",
     "build": "pnpm turbo build",
+    "build:ci": "pnpm turbo build:ci",
     "start": "pnpm turbo start",
     "dev": "pnpm turbo dev",
     "check-types": "pnpm turbo check-types",

@@ -29,7 +29,7 @@ export const createEnableDraftHandler = ({
       return new NextResponse('Invalid secret', { status: 401 });
     }
 
-    draftMode().enable();
+    (await draftMode()).enable();
     logger.info(`Enabled draft mode for ${req.url}`);
     return NextResponse.redirect(new URL(redirectTo, req.url));
   };

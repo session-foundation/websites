@@ -6,7 +6,7 @@ import { isDraftModeEnabled } from '@session/sanity-cms/lib/util';
 
 export default async function DevSheetServerSide() {
   const pages = await getPagesInfo({ client });
-  const isDraftMode = isDraftModeEnabled();
+  const isDraftMode = await isDraftModeEnabled();
   const buildInfo = getBuildInfo();
 
   return <DevSheet buildInfo={buildInfo} pages={pages} isDraftMode={isDraftMode} />;

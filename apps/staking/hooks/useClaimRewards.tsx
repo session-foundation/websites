@@ -26,14 +26,14 @@ export default function useClaimRewards({
   const [skipUpdateBalance, setSkipUpdateBalance] = useState<boolean>(false);
 
   const stageDictKey = 'modules.claim.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations(stageDictKey);
+  const dictGeneral = useTranslations('general');
 
   const {
     updateRewardsBalance,
     fee: updateBalanceFee,
-    estimateContractWriteFee: updateBalanceEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: updateBalanceRefetchContractWriteFeeEstimate,
+    gasPrice: updateBalanceGasPrice,
+    gasAmount: updateBalanceGasAmountEstimate,
     contractCallStatus: updateBalanceContractCallStatus,
     transactionStatus: updateBalanceTransactionStatus,
     estimateFeeError: updateBalanceEstimateFeeError,
@@ -45,8 +45,8 @@ export default function useClaimRewards({
   const {
     claimRewards,
     fee: claimFee,
-    estimateContractWriteFee: claimEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: claimRefetchContractWriteFeeEstimate,
+    gasPrice: claimGasPrice,
+    gasAmount: claimGasAmountEstimate,
     contractCallStatus: claimContractCallStatus,
     simulateError: claimSimulateError,
     writeError: claimWriteError,
@@ -63,16 +63,6 @@ export default function useClaimRewards({
     [claimContractCallStatus]
   );
 
-  const estimateFee = () => {
-    updateBalanceEstimateContractWriteFee();
-    claimEstimateContractWriteFee();
-  };
-
-  const refetchFeeEstimate = () => {
-    claimRefetchContractWriteFeeEstimate();
-    updateBalanceRefetchContractWriteFeeEstimate();
-  };
-
   const updateBalanceAndClaimRewards = () => {
     setEnabled(true);
     if (!skipUpdateBalance) {
@@ -83,10 +73,9 @@ export default function useClaimRewards({
   const updateRewardsBalanceErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'balance',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: updateBalanceSimulateError,
         writeError: updateBalanceWriteError,
         transactionError: updateBalanceTransactionError,
@@ -97,10 +86,9 @@ export default function useClaimRewards({
   const claimRewardsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'claim',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: claimSimulateError,
         writeError: claimWriteError,
         transactionError: claimTransactionError,
@@ -126,10 +114,12 @@ export default function useClaimRewards({
 
   return {
     updateBalanceAndClaimRewards,
-    refetchFeeEstimate,
     claimFee,
+    claimGasPrice,
+    claimGasAmountEstimate,
     updateBalanceFee,
-    estimateFee,
+    updateBalanceGasPrice,
+    updateBalanceGasAmountEstimate,
     updateRewardsBalanceStatus,
     claimRewardsStatus,
     enabled,

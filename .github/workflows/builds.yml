@@ -50,7 +50,7 @@ jobs:
           echo "NEXT_PUBLIC_SANITY_API_VERSION=${{ secrets.NEXT_PUBLIC_SANITY_API_VERSION }}" >> $GITHUB_ENV
 
       - name: Run builds
-        run: pnpm build
+        run: pnpm build:ci
         env:
           NEXT_PUBLIC_SANITY_API_VERSION: ${{ secrets.NEXT_PUBLIC_SANITY_API_VERSION }}
           NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}

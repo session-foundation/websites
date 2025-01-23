@@ -21,7 +21,8 @@ export enum STAKE_EVENT_STATE {
 }
 
 export function parseStakeEventState(stake: Stake) {
-  const latestEvent = stake.events[0];
+  const latestEvent =
+    stake && 'events' in stake && Array.isArray(stake.events) ? stake?.events[0] : undefined;
 
   if (!latestEvent) return STAKE_EVENT_STATE.UNKNOWN;
 
@@ -79,7 +80,9 @@ export function isStakeRequestingExit(stake: Stake) {
 export function isStakeReadyToExit(stake: Stake, blockHeight: number) {
   const eventState = parseStakeEventState(stake);
   return (
-    eventState === STAKE_EVENT_STATE.EXIT_REQUESTED && stake.requested_unlock_height < blockHeight
+    eventState === STAKE_EVENT_STATE.EXIT_REQUESTED &&
+    stake.requested_unlock_height &&
+    stake.requested_unlock_height < blockHeight
   );
 }
 

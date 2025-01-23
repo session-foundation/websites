@@ -5,14 +5,14 @@ const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
 export const getContributionRangeFromContributors = (
   contributors: Array<StakeContributor> = []
 ) => {
-  let remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT;
   let totalStaked = 0n;
 
   for (const contributor of contributors) {
     const amount = BigInt(contributor.amount);
-    remainingStake -= amount;
     totalStaked += amount;
   }
+
+  const remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT - totalStaked;
 
   const min = calcMinimumContribution(
     remainingStake,

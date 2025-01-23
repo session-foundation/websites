@@ -12,7 +12,7 @@ import {
   NodeItemSeparator,
   NodeItemValue,
 } from '@/components/InfoNodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { areHexesEqual } from '@session/util-crypto/string';
@@ -62,8 +62,12 @@ export const StakedToIndicator = forwardRef<
 
 const OpenNodeCard = forwardRef<
   HTMLDivElement,
-  HTMLAttributes<HTMLDivElement> & { contract: ContributorContractInfo; forceSmall?: boolean }
->(({ className, forceSmall, contract, ...props }, ref) => {
+  HTMLAttributes<HTMLDivElement> & {
+    contract: ContributorContractInfo;
+    forceSmall?: boolean;
+    showAlreadyRunningWarning?: boolean;
+  }
+>(({ className, forceSmall, showAlreadyRunningWarning, contract, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.open');
   const generalNodeDictionary = useTranslations('sessionNodes.general');
   const titleFormat = useTranslations('modules.title');
@@ -95,18 +99,27 @@ const OpenNodeCard = forwardRef<
         dataTestId: ButtonDataTestId.Node_Card_View,
         link: `/stake/${contract.address}`,
       }}
+      warnings={
+        <>
+          {showAlreadyRunningWarning ? (
+            <AlertTooltip
+              iconClassName="h-10 w-10"
+              tooltipContent={dictionary('errorStakedButAlreadyRunning')}
+            />
+          ) : null}
+          {state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION ? (
+            <AlertTooltip
+              iconClassName="h-10 w-10"
+              tooltipContent={dictionary('youOperatorNotStaked')}
+            />
+          ) : null}
+        </>
+      }
       {...props}
     >
       {isOperator ? (
-        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
-          {state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION ? (
-            <AlertTooltip tooltipContent={dictionary('youOperatorNotStaked')} />
-          ) : (
-            <>
-              <NodeOperatorIndicator />
-              <NodeItemSeparator className="ms-2 hidden md:block" />
-            </>
-          )}
+        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center gap-1.5 align-middle">
+          <NodeOperatorIndicator />
         </NodeItem>
       ) : isContributor ? (
         <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
