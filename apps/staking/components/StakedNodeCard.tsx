@@ -178,13 +178,13 @@ const isDateSoonOrPast = (date: Date | null): boolean =>
 const ReadyForExitNotification = ({
   date,
   timeString,
-  className,
   isDeregistered,
+  className,
 }: {
   date: Date | null;
   timeString: string | null;
-  className?: string;
   isDeregistered?: boolean;
+  className?: string;
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
