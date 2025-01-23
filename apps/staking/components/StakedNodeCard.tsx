@@ -136,11 +136,21 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
   )
 );
 
-export const NodeOperatorIndicator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
+type NodeOperatorIndicatorProps = HTMLAttributes<HTMLDivElement> & {
+  isOperatorConnectedWallet?: boolean;
+};
+
+export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeOperatorIndicatorProps>(
+  ({ className, isOperatorConnectedWallet, ...props }, ref) => {
     const dictionary = useTranslations('nodeCard.staked');
     return (
-      <Tooltip tooltipContent={dictionary('operatorTooltip')}>
+      <Tooltip
+        tooltipContent={
+          isOperatorConnectedWallet
+            ? dictionary('operatorTooltip')
+            : dictionary('operatorTooltipOther')
+        }
+      >
         <div
           ref={ref}
           className={cn(
@@ -169,10 +179,12 @@ const ReadyForExitNotification = ({
   date,
   timeString,
   className,
+  isDeregistered,
 }: {
   date: Date | null;
   timeString: string | null;
   className?: string;
+  isDeregistered?: boolean;
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
@@ -187,7 +199,11 @@ const ReadyForExitNotification = ({
   return (
     <Tooltip
       tooltipContent={dictionary.rich(
-        isLiquidationSoon ? 'exitTimerDescriptionNow' : 'exitTimerDescription',
+        isDeregistered
+          ? 'liquidationDescription'
+          : isLiquidationSoon
+            ? 'exitTimerDescriptionNow'
+            : 'exitTimerDescription',
         {
           relativeTime,
           link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
@@ -196,8 +212,11 @@ const ReadyForExitNotification = ({
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
-          ? dictionary('exitTimerNotificationNow')
-          : dictionary('exitTimerNotification', { relativeTime })}
+          ? dictionary(isDeregistered ? 'liquidationNotification' : 'exitTimerNotificationNow')
+          : dictionary(
+              isDeregistered ? 'deregistrationTimerDescription' : 'exitTimerNotification',
+              { relativeTime }
+            )}
       </NodeNotification>
     </Tooltip>
   );
@@ -207,9 +226,11 @@ const ExitUnlockTimerNotification = ({
   date,
   timeString,
   className,
+  isDeregistered,
 }: {
   date: Date | null;
   timeString: string | null;
+  isDeregistered?: boolean;
   className?: string;
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
@@ -225,15 +246,23 @@ const ExitUnlockTimerNotification = ({
 
   return (
     <Tooltip
-      tooltipContent={dictionary('exitUnlockTimerDescription', {
-        relativeTime,
-        date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
-      })}
+      tooltipContent={dictionary(
+        isDeregistered ? 'deregisteredTimerDescription' : 'exitUnlockTimerDescription',
+        {
+          relativeTime,
+          date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
+        }
+      )}
     >
       <NodeNotification level="warning" className={className}>
         {relativeTime
-          ? dictionary('exitUnlockTimerNotification', { relativeTime })
-          : dictionary('exitUnlockTimerProcessing')}
+          ? dictionary(
+              isDeregistered ? 'deregisteredTimerNotification' : 'exitUnlockTimerNotification',
+              {
+                relativeTime,
+              }
+            )
+          : dictionary(isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing')}
       </NodeNotification>
     </Tooltip>
   );
@@ -329,11 +358,16 @@ const NodeSummary = ({
         {contributors}
         {!isExited ? (
           isReadyToUnlockByDeregistration ? (
-            <ReadyForExitNotification date={liquidationDate} timeString={liquidationTime} />
+            <ReadyForExitNotification
+              timeString={liquidationTime}
+              date={liquidationDate}
+              isDeregistered
+            />
           ) : (
             <ExitUnlockTimerNotification
-              date={deregistrationUnlockDate}
               timeString={deregistrationUnlockTime}
+              date={deregistrationUnlockDate}
+              isDeregistered
             />
           )
         ) : null}
@@ -636,8 +670,6 @@ const StakedNodeCard = forwardRef<
               stake={stake}
               state={state}
               blockHeight={blockHeight}
-              deregistrationUnlockDate={deregistrationUnlockDate}
-              deregistrationUnlockTime={deregistrationUnlockTime}
               requestedUnlockDate={requestedUnlockDate}
               requestedUnlockTime={requestedUnlockTime}
               notFoundString={notFoundString}
@@ -656,15 +688,11 @@ function StakeNodeCardButton({
   blockHeight,
   notFoundString,
   requestedUnlockDate,
-  deregistrationUnlockDate,
   requestedUnlockTime,
-  deregistrationUnlockTime,
 }: {
   stake: Stake;
   state: STAKE_STATE;
   blockHeight: number;
-  deregistrationUnlockTime?: string | null;
-  deregistrationUnlockDate?: Date | null;
   requestedUnlockDate?: Date | null;
   requestedUnlockTime?: string | null;
   notFoundString?: string;
@@ -672,38 +700,14 @@ function StakeNodeCardButton({
   const dictionary = useTranslations('nodeCard.staked');
 
   const eventState = parseStakeEventState(stake);
-  const isReadyToExitByDeregistrationUnlock = useIsReadyToExitByDeregistrationUnlock(
-    state,
-    eventState,
-    stake.deregistration_height,
-    blockHeight
-  );
 
   if (
     state === STAKE_STATE.EXITED ||
     eventState === STAKE_EVENT_STATE.EXITED ||
-    eventState === STAKE_EVENT_STATE.LIQUIDATED
+    eventState === STAKE_EVENT_STATE.LIQUIDATED ||
+    state === STAKE_STATE.DEREGISTERED
   ) {
     return null;
-  }
-
-  if (state === STAKE_STATE.DEREGISTERED) {
-    if (isReadyToExitByDeregistrationUnlock) {
-      return <NodeExitButtonDialog node={stake} />;
-    }
-
-    return (
-      <Tooltip
-        tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
-          relativeTime: deregistrationUnlockTime ?? notFoundString,
-          date: deregistrationUnlockDate
-            ? formatDate(deregistrationUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-            : notFoundString,
-        })}
-      >
-        <NodeExitButton disabled />
-      </Tooltip>
-    );
   }
 
   if (isReadyToExitByUnlock(state, eventState, stake.requested_unlock_height, blockHeight)) {
