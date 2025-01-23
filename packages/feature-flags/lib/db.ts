@@ -30,7 +30,7 @@ export type CountType<F extends string> = Record<`count(${F})`, number>;
  *
  * @returns A boolean indicating whether the count value exists and is greater than zero.
  */
-export const hasCount = <F extends string>(row: CountType<F>, countField: F) => {
+export const hasCount = <F extends FLAGS_TABLE>(row: CountType<F>, countField: F) => {
   const count = row[`count(${countField})`];
   return count && count > 0;
 };
