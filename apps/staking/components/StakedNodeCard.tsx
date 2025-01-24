@@ -39,6 +39,7 @@ import {
 } from '@/components/StakedNode/state';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
+import { useStakes } from '@/hooks/useStakes';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -68,16 +69,13 @@ export const useIsReadyToExitByDeregistrationUnlock = (
   deregistrationHeight?: number | null,
   blockHeight?: number
 ) => {
-  const { chainId } = useWallet();
   return !!(
     state === STAKE_STATE.DEREGISTERED &&
     eventState !== STAKE_EVENT_STATE.EXITED &&
     eventState !== STAKE_EVENT_STATE.LIQUIDATED &&
     deregistrationHeight &&
     blockHeight &&
-    deregistrationHeight +
-      msInBlocks(SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS * 1000) <=
-      blockHeight
+    deregistrationHeight <= blockHeight
   );
 };
 
@@ -319,6 +317,7 @@ type NodeSummaryProps = {
   liquidationTime: string | null;
   showAllTimers?: boolean;
   isOperator?: boolean;
+  isInContractIdList?: boolean;
 };
 
 const NodeSummary = ({
@@ -333,6 +332,7 @@ const NodeSummary = ({
   deregistrationUnlockTime,
   liquidationDate,
   liquidationTime,
+  isInContractIdList,
 }: NodeSummaryProps) => {
   const eventState = parseStakeEventState(node);
   const isExited =
@@ -356,7 +356,7 @@ const NodeSummary = ({
     return (
       <>
         {contributors}
-        {!isExited ? (
+        {!isExited && isInContractIdList ? (
           isReadyToUnlockByDeregistration ? (
             <ReadyForExitNotification
               timeString={liquidationTime}
@@ -379,7 +379,7 @@ const NodeSummary = ({
     return (
       <>
         {contributors}
-        {isExited ? null : isReadyToExitByUnlock(
+        {isExited || !isInContractIdList ? null : isReadyToExitByUnlock(
             state,
             eventState,
             node.requested_unlock_height,
@@ -484,6 +484,9 @@ const StakedNodeCard = forwardRef<
 
   const address = targetWalletAddress ?? connectedAddress;
 
+  const { currentContractIds } = useStakes(address);
+  const isInContractIdList = currentContractIds?.has(stake.contract_id);
+
   const {
     operator_fee: fee,
     operator_address: operatorAddress,
@@ -542,6 +545,7 @@ const StakedNodeCard = forwardRef<
           node={stake}
           state={state}
           blockHeight={blockHeight}
+          isInContractIdList={isInContractIdList}
           deregistrationDate={deregistrationDate}
           deregistrationTime={deregistrationTime}
           deregistrationUnlockDate={deregistrationUnlockDate}
