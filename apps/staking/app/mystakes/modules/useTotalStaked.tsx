@@ -10,15 +10,17 @@ export function useTotalStaked(addressOverride?: Address) {
   const { address: connectedAddress } = useWallet();
   const address = addressOverride ?? connectedAddress;
 
-  const { stakes, contracts, refetch, status, enabled } = useStakes(addressOverride);
+  const { stakes, contracts, refetch, status, enabled, currentContractIds } =
+    useStakes(addressOverride);
 
   const totalStakedAmount = useMemo(() => {
     if (!address) return formatSENTBigInt(0n);
 
     const stakedStakes = stakes.filter((stake) => {
       const eventState = parseStakeEventState(stake);
-      return !(
-        eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED
+      return (
+        !(eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED) &&
+        currentContractIds?.has(stake.contract_id)
       );
     });
 

@@ -153,7 +153,7 @@ export interface GetStakesResponse {
   network: NetworkInfo;
   contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
-  added_bls_keys: Record<number, string>;
+  added_bls_keys: Record<string, number>;
 }
 
 /** /store */
