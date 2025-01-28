@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
-import { NodeStakingForm } from '@/app/stake/[nodeId]/NodeStaking';
+import { NodeStakingForm } from '@/app/stake/[address]/NodeStaking';
 import { usePathname } from 'next/navigation';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useRegisteredNode } from '@/hooks/useRegisteredNode';
@@ -11,7 +11,7 @@ export default function NotFound() {
   const registerDictionary = useTranslations('actionModules.register');
   const pathname = usePathname();
   const { found, openNode, stakedNode, runningNode, networkTime, blockHeight } = useRegisteredNode({
-    nodeId: pathname.split('/').at(-1),
+    pubKeyEd25519: pathname.split('/').at(-1),
   });
 
   return (
@@ -23,7 +23,12 @@ export default function NotFound() {
           <span className="mb-4 text-lg font-medium">
             {registerDictionary.rich('notFound.foundRunningNode')}
           </span>
-          <StakedNodeCard node={stakedNode} networkTime={networkTime} blockHeight={blockHeight} />
+          <StakedNodeCard
+            id={stakedNode.contract_id.toString()}
+            stake={stakedNode}
+            networkTime={networkTime}
+            blockHeight={blockHeight}
+          />
         </>
       ) : runningNode ? (
         <>
@@ -31,7 +36,8 @@ export default function NotFound() {
             {registerDictionary('notFound.foundRunningNodeOtherOperator')}
           </span>
           <StakedNodeCard
-            node={runningNode}
+            id={runningNode.contract_id.toString()}
+            stake={runningNode}
             networkTime={networkTime}
             blockHeight={blockHeight}
             hideButton

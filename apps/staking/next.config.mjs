@@ -44,10 +44,14 @@ const nextConfig = {
     '@session/feature-flags',
     'better-sqlite3-multiple-ciphers',
   ],
-  experimental: {
-    serverComponentsExternalPackages: ['pino', 'pino-pretty'],
-  },
-  webpack: (config) => {
+  serverExternalPackages: ['pino', 'pino-pretty'],
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        bufferutil: false,
+        'utf-8-validate': false,
+      };
+    }
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     if (process.env.NO_MINIFY?.toLowerCase() === 'true') {
       config.optimization = {

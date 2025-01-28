@@ -10,11 +10,12 @@ import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 
-const circleVariants = cva('', {
+export const circleVariants = cva('', {
   variants: {
     variant: {
       black: 'fill-indicator-black',
       grey: 'fill-indicator-grey',
+      'grey-lighter': 'fill-indicator-grey-lighter',
       green: 'fill-indicator-green',
       blue: 'fill-indicator-blue',
       yellow: 'fill-indicator-yellow',
@@ -23,6 +24,7 @@ const circleVariants = cva('', {
     strokeVariant: {
       black: 'stroke-indicator-black',
       grey: 'stroke-indicator-grey',
+      'grey-lighter': 'stroke-indicator-grey-lighter',
       green: 'stroke-indicator-green',
       blue: 'stroke-indicator-blue',
       yellow: 'stroke-indicator-yellow',
@@ -31,6 +33,7 @@ const circleVariants = cva('', {
     glow: {
       black: '',
       grey: 'drop-shadow-[0_0_8px_var(--indicator-grey)] glow-grey',
+      'grey-lighter': 'drop-shadow-[0_0_8px_var(--indicator-grey-lighter)] glow-grey-lighter',
       green: 'drop-shadow-[0_0_8px_var(--indicator-green)] glow',
       blue: 'drop-shadow-[0_0_8px_var(--indicator-blue)] glow-blue',
       yellow: 'drop-shadow-[0_0_8px_var(--indicator-yellow)] glow-yellow',
@@ -49,7 +52,7 @@ const circleVariants = cva('', {
   },
 });
 
-type CircleVariantProps = VariantProps<typeof circleVariants>;
+export type CircleVariantProps = VariantProps<typeof circleVariants>;
 
 type CircleProps = CircleVariantProps & {
   cx: number | string;

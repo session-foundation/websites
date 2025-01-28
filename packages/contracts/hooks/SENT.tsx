@@ -1,7 +1,6 @@
 'use client';
 
 import { Address, SimulateContractErrorType, TransactionExecutionErrorType } from 'viem';
-import { useAccount } from 'wagmi';
 import { ReadContractData } from 'wagmi/query';
 import { SENTAbi } from '../abis';
 import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
@@ -15,8 +14,10 @@ import {
   useContractWriteQuery,
   type WriteContractStatus,
 } from './useContractWriteQuery';
-import { useChain } from './useChain';
-import type { CHAIN } from '../chains';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+
+export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
+  formatSENTBigInt(value, SENT_DECIMALS, hideSymbol);
 
 export const formatSENTBigInt = (value?: bigint | null, decimals?: number, hideSymbol?: boolean) =>
   `${value ? formatBigIntTokenValue(value, SENT_DECIMALS, decimals) : 0}${hideSymbol ? '' : ` ${SENT_SYMBOL}`}`;
@@ -31,21 +32,12 @@ export type SENTBalanceQuery = ContractReadQueryProps & {
   balance: SENTBalance;
 };
 
-export function useSENTBalanceQuery({
-  address,
-  overrideChain,
-}: {
-  address?: Address;
-  overrideChain?: CHAIN;
-}): SENTBalanceQuery {
-  const chain = useChain();
-
+export function useSENTBalanceQuery({ address }: { address?: Address }): SENTBalanceQuery {
   const { data: balance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'balanceOf',
     args: [address!],
     enabled: !!address,
-    chain: overrideChain ?? chain,
   });
 
   return {
@@ -64,16 +56,14 @@ export type SENTAllowanceQuery = ContractReadQueryProps & {
 export function useAllowanceQuery({
   contractAddress,
 }: {
-  contractAddress: Address;
+  contractAddress?: Address | null;
 }): SENTAllowanceQuery {
-  const { address } = useAccount();
-  const chain = useChain();
+  const { address } = useWallet();
   const { data: allowance, ...rest } = useContractReadQuery({
     contract: 'SENT',
     functionName: 'allowance',
-    args: [address!, contractAddress],
-    enabled: !!address,
-    chain,
+    args: [address!, contractAddress!],
+    enabled: !!address && !!contractAddress,
   });
 
   return {
@@ -97,15 +87,14 @@ export function useProxyApproval({
   contractAddress,
   tokenAmount,
 }: {
-  contractAddress: Address;
+  contractAddress?: Address | null;
   tokenAmount: bigint;
 }): UseProxyApprovalReturn {
   const [hasEnoughAllowance, setHasEnoughAllowance] = useState<boolean>(false);
   const [allowanceReadStatusOverride, setAllowanceReadStatusOverride] =
     useState<GenericContractStatus | null>(null);
 
-  const chain = useChain();
-  const { address } = useAccount();
+  const { address } = useWallet();
   const {
     allowance,
     status: readStatusRaw,
@@ -135,7 +124,6 @@ export function useProxyApproval({
   } = useContractWriteQuery({
     contract: 'SENT',
     functionName: 'approve',
-    chain,
   });
 
   const approve = () => {
@@ -149,8 +137,8 @@ export function useProxyApproval({
   };
 
   const approveWrite = () => {
-    if (readStatus !== 'success') {
-      throw new Error('Checking if current allowance is sufficient');
+    if (!contractAddress) {
+      throw new Error('No contract address for approveWrite');
     }
 
     if (tokenAmount > BigInt(0) && allowance >= tokenAmount) {
@@ -183,10 +171,14 @@ export function useProxyApproval({
   }, [readStatus, contractCallStatus, hasEnoughAllowance]);
 
   useEffect(() => {
-    if (readStatus === 'success' && tokenAmount > BigInt(0)) {
+    if (readStatus === 'success' && tokenAmount > BigInt(0) && contractAddress) {
       approveWrite();
     }
-  }, [readStatus]);
+  }, [readStatus, contractAddress]);
+
+  useEffect(() => {
+    void refetchAllowance();
+  }, [contractAddress]);
 
   return {
     approve,

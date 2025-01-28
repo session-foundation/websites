@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
-import { CHAIN } from '@session/contracts/chains';
 import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
 import { LocaleKey } from './locale-util';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
-
-/** TODO - Change this to MAINNET when we launch mainnet */
-export const preferredChain = CHAIN.TESTNET as const;
+import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
+import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -22,6 +20,8 @@ export enum URL {
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = 'https://token.getsession.org/testnet-incentive-program',
   INCENTIVE_PROGRAM_TOS = 'https://token.getsession.org/incentive-program-terms',
   BUG_BOUNTY_PROGRAM = 'https://token.getsession.org/bug-bounty-program',
+  TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
+  TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
   BUG_BOUNTY_TOS = 'https://token.getsession.org/bug-bounty-terms',
   SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
@@ -45,7 +45,7 @@ export const SOCIALS = {
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
-  [Social.Github]: { name: Social.Github, link: 'https://github.com/oxen-io/websites' },
+  [Social.Github]: { name: Social.Github, link: 'https://github.com/session-foundation/websites' },
   [Social.RSS]: { name: Social.RSS, link: 'https://token.getsession.org/blog/feed' },
 } satisfies Partial<Record<Social, SocialLink>>;
 
@@ -63,6 +63,10 @@ export enum FAUCET_ERROR {
   INVALID_OXEN_ADDRESS = 'invalidOxenAddress',
   ALREADY_USED = 'alreadyUsed',
   ALREADY_USED_SERVICE = 'alreadyUsedService',
+  INVALID_REFERRAL_CODE = 'invalidReferralCode',
+  REFERRAL_CODE_CANT_BE_USED_BY_CREATOR = 'referralCodeCantBeUsedByCreator',
+  REFERRAL_CODE_OUT_OF_USES = 'referralCodeOutOfUses',
+  REFERRAL_CODE_ALREADY_USED = 'referralCodeAlreadyUsed',
 }
 
 export enum TICKER {
@@ -92,6 +96,7 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'support', href: '/support', linkType: 'external' },
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
   { dictionaryKey: 'explorer', href: 'https://stagenet.oxen.observer', linkType: 'external' },
+  { dictionaryKey: 'leaderboard', href: '/leaderboard', linkType: 'internal' },
 ] as const;
 
 export enum QUERY {
@@ -111,9 +116,12 @@ export enum QUERY {
   STALE_TIME_REMOTE_FEATURE_FLAGS = 60 * 1000,
 }
 
+/** 20,000 SENT  */
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+export const SESSION_NODE_MIN_STAKE_MULTI = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO = SESSION_NODE_FULL_STAKE_AMOUNT;
+
 export enum SESSION_NODE {
-  /** 20,000 SENT  */
-  FULL_STAKE_AMOUNT = '20000000000000',
   /** Average millisecond per block (~2 minutes per block) */
   MS_PER_BLOCK = 2 * 60 * 1000,
 }
@@ -143,16 +151,23 @@ enum SESSION_NODE_TIME_MAINNET {
   DEREGISTRATION_LOCKED_STAKE_SECONDS = 30 * 24 * 60 * 60,
 }
 
-export const SESSION_NODE_TIME = (chain: CHAIN) => {
-  switch (chain) {
-    case CHAIN.TESTNET:
+export const SESSION_NODE_TIME = (chainId?: number) => {
+  switch (chainId) {
+    case arbitrumSepolia.id:
+    case sepolia.id:
       return SESSION_NODE_TIME_TESTNET;
 
     default:
-    case CHAIN.MAINNET:
+    case arbitrum.id:
+    case mainnet.id:
       return SESSION_NODE_TIME_MAINNET;
   }
 };
+
+export enum CONTRIBUTION_CONTRACT {
+  /** 30m -- the maximum age of a node that can be considered "joining" before its hidden, should be registered in ~20m */
+  MAX_AGE_JOINING_MS = 30 * 60 * 1000,
+}
 
 export enum TOAST {
   ERROR_COLLAPSE_LENGTH = 128,
@@ -163,7 +178,43 @@ export enum DYNAMIC_MODULE {
   SENT_ROUNDED_DECIMALS = 2,
 }
 
-export enum HANDRAIL_THRESHOLD {
+export const HANDRAIL_THRESHOLD = {
   /** 0.005 SENT */
-  CLAIM_REWARDS_AMOUNT = '5000000',
+  CLAIM_REWARDS_AMOUNT: 5000000n,
+};
+
+export const preferenceStorageKey = 'stake';
+
+export enum PREFERENCE {
+  BACKEND_URL = 'backendUrl',
+  PREF_REGISTRATION_MODE = 'prefRegistrationMode',
+  SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
+}
+
+export const preferenceStorageDefaultItems = {
+  [PREFERENCE.BACKEND_URL]: '/api/ssb',
+  [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: false,
+} as const;
+
+export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
+  [REG_TAB.START]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.STAKE_AMOUNT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.OPERATOR_FEE]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.RESERVE_SLOTS_INPUT]: 'https://docs.getsession.org/TBD',
+  [REG_TAB.AUTO_ACTIVATE]: 'https://docs.getsession.org/TBD',
+} as const;
+
+export enum LAST_UPDATED_BEHIND_TRIGGER {
+  /** 2.5 minutes */
+  BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
+  /** 4 minutes */
+  BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
+  /** 2.5 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
 }

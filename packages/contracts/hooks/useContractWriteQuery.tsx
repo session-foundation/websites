@@ -1,22 +1,19 @@
-import type {
-  Abi,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  SimulateContractErrorType,
-  TransactionExecutionErrorType,
+import {
+  type Abi,
+  type Address,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+  isAddress,
+  type SimulateContractErrorType,
+  type TransactionExecutionErrorType,
 } from 'viem';
 import type { WriteContractErrorType } from 'wagmi/actions';
-import { CHAIN, chains } from '../chains';
-import { addresses, type ContractName } from '../constants';
+import { addresses, type ContractName, isValidChainId } from '../constants';
 import { ContractAbis, Contracts } from '../abis';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  useAccount,
-  useSimulateContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from 'wagmi';
+import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { useEstimateContractFee } from './useEstimateContractFee';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export type GenericContractStatus = 'error' | 'pending' | 'success';
 
@@ -27,6 +24,7 @@ export type WriteContractStatus = GenericContractStatus | 'idle';
 export type WriteContractFunction<Args> = (args?: Args) => void;
 
 export type ContractWriteQueryProps = {
+  transactionData: unknown;
   /** Execute getting the fee estimation for the contract write */
   estimateContractWriteFee: () => void;
   /** Re-fetch the gas price and units of gas needed to write the contract */
@@ -64,11 +62,7 @@ export type ContractWriteQueryProps = {
 export type UseContractWrite<Args> = ContractWriteQueryProps & {
   /** Simulate the contract write then write to the contract if the simulation is successful */
   simulateAndWriteContract: WriteContractFunction<Args>;
-};
-
-export type ContractWriteQueryFetchOptions = {
-  /** Chain the contract is on */
-  chain: CHAIN;
+  writeContractWithoutSimulating: WriteContractFunction<Args>;
 };
 
 export function useContractWriteQuery<
@@ -80,13 +74,14 @@ export function useContractWriteQuery<
   contract,
   functionName,
   defaultArgs,
-  chain,
+  addressOverride,
 }: {
   contract: T;
   defaultArgs?: Args;
   functionName: FName;
-} & ContractWriteQueryFetchOptions): UseContractWrite<Args> {
-  const { address: executorAddress } = useAccount();
+  addressOverride?: Address | null;
+}): UseContractWrite<Args> {
+  const { config, address: executorAddress, chainId } = useWallet();
   const [estimateGasEnabled, setEstimateGasEnabled] = useState<boolean>(false);
   const [simulateEnabled, setSimulateEnabled] = useState<boolean>(false);
   const [contractArgs, setContractArgs] = useState<Args | undefined>(defaultArgs);
@@ -99,33 +94,52 @@ export function useContractWriteQuery<
     status: writeStatus,
     writeContract,
     reset,
-  } = useWriteContract();
-  const { error: transactionError, status: transactionStatus } = useWaitForTransactionReceipt({
+  } = useWriteContract({ config });
+
+  const {
+    error: transactionError,
+    status: transactionStatus,
+    data: transactionData,
+  } = useWaitForTransactionReceipt({
+    config,
     hash,
   });
 
   const contractDetails = useMemo(() => {
+    if (!isValidChainId(chainId)) return null;
+    const contractAddress = isValidChainId(chainId) ? addresses[contract][chainId] : undefined;
+
+    if (!contractAddress || !isAddress(contractAddress)) return null;
+
+    const abi = Contracts[contract] as Abi;
+    if (!abi) return null;
+
     return {
-      address: addresses[contract][chain],
-      abi: Contracts[contract] as Abi,
+      address: addressOverride ?? contractAddress,
+      abi,
       functionName,
       args: contractArgs as ContractFunctionArgs,
+      chainId,
     };
-  }, [contract, chain, functionName, contractArgs]);
+  }, [contract, chainId, functionName, contractArgs, addressOverride]);
+
+  const simulateContractDetails = useMemo(() => {
+    return {
+      ...contractDetails,
+      config,
+      query: {
+        enabled: simulateEnabled,
+        refetchOnWindowFocus: false,
+      },
+    };
+  }, [contractDetails, config, simulateEnabled]);
 
   const {
     data,
     status: simulateStatusRaw,
     error: simulateError,
     refetch: refetchRaw,
-  } = useSimulateContract({
-    ...contractDetails,
-    query: {
-      enabled: simulateEnabled,
-      refetchOnWindowFocus: false,
-    },
-    chainId: chains[chain].id,
-  });
+  } = useSimulateContract(simulateContractDetails);
 
   const refetchSimulate = async () => {
     setSimulateStatusOverride('pending');
@@ -149,7 +163,6 @@ export function useContractWriteQuery<
   } = useEstimateContractFee({
     contract,
     functionName,
-    chain,
     executorAddress,
   });
 
@@ -166,6 +179,14 @@ export function useContractWriteQuery<
     setSimulateEnabled(true);
 
     void refetchSimulate();
+  };
+
+  const writeContractWithoutSimulating: WriteContractFunction<Args> = (args) => {
+    if (args) setContractArgs(args);
+
+    if (!contractDetails) throw new Error('Contract details are not defined');
+
+    writeContract(contractDetails);
   };
 
   const resetContract = () => {
@@ -203,9 +224,11 @@ export function useContractWriteQuery<
 
   return {
     simulateAndWriteContract,
+    writeContractWithoutSimulating,
     estimateContractWriteFee,
     refetchContractWriteFeeEstimate,
     resetContract,
+    transactionData,
     fee,
     gasAmountEstimate,
     gasPrice,

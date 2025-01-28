@@ -2,12 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@session/ui/ui/avatar';
 import { Button } from '@session/ui/ui/button';
-import { forwardRef } from 'react';
+import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { DiscordIcon } from '../icons/DiscordIcon';
 import { signIn, signOut, useSession } from '../lib/client';
 import { ButtonDataTestId } from '../testing/data-test-ids';
 
-type DiscordAuthButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type DiscordAuthButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   showAvatar?: boolean;
 };
 

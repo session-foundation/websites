@@ -1,0 +1,29 @@
+import 'server-only';
+
+import { createSessionStakingClient } from '@session/staking-api-js/client';
+import { isProduction, NEXT_PUBLIC_SENT_STAKING_API_URL } from '@/lib/env';
+import { getStakingBackendQueryArgs, StakingBackendQuery } from '@/lib/staking-api';
+import { createQueryClient } from '@/lib/query';
+
+export const createSessionStakingServerClient = () =>
+  createSessionStakingClient({
+    baseUrl: NEXT_PUBLIC_SENT_STAKING_API_URL,
+    debug: !isProduction,
+    errorOn404: !isProduction,
+  });
+
+export function stakingBackendPrefetchQuery<Q extends StakingBackendQuery>(query: Q) {
+  const stakingBackendClient = createSessionStakingServerClient();
+
+  const queryClient = createQueryClient();
+
+  queryClient.prefetchQuery<Awaited<ReturnType<Q>>['data']>({
+    ...getStakingBackendQueryArgs(query),
+    queryFn: async () => {
+      const res = await query(stakingBackendClient);
+      return res.data;
+    },
+  });
+
+  return { queryClient };
+}

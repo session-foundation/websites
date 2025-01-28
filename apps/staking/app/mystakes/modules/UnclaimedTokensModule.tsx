@@ -1,64 +1,25 @@
 'use client';
 
-import { DYNAMIC_MODULE, HANDRAIL_THRESHOLD, URL } from '@/lib/constants';
+import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { useMemo } from 'react';
-import type { QUERY_STATUS } from '@/lib/query';
 import {
   getVariableFontSizeForSmallModule,
   ModuleDynamicQueryText,
 } from '@/components/ModuleDynamic';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 import { Address } from 'viem';
-
-export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
-  const { address: connectedAddress } = useWallet();
-  const address = useMemo(
-    () => params?.addressOverride ?? connectedAddress,
-    [params?.addressOverride, connectedAddress]
-  );
-
-  const { data, status, refetch } = useStakingBackendQueryWithParams(
-    getStakedNodes,
-    {
-      address: address!,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-
-  const unclaimedRewards = useMemo(
-    () => (data?.wallet ? data.wallet.rewards - data.wallet.contract_claimed : undefined),
-    [data?.wallet?.rewards, data?.wallet?.contract_claimed]
-  );
-
-  const formattedUnclaimedRewardsAmount = useMemo(
-    () => formatSENTBigInt(unclaimedRewards, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS),
-    [unclaimedRewards]
-  );
-
-  const canClaim = Boolean(
-    status === 'success' &&
-      unclaimedRewards &&
-      unclaimedRewards >= BigInt(HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT)
-  );
-
-  return { status, refetch, unclaimedRewards, formattedUnclaimedRewardsAmount, canClaim };
-};
+import type { QUERY_STATUS } from '@/lib/query';
+import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
 
 export default function UnclaimedTokensModule({ addressOverride }: { addressOverride?: Address }) {
   const dictionary = useTranslations('modules.unclaimedTokens');
+  const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
 
-  const { formattedUnclaimedRewardsAmount, status, refetch } = useUnclaimedTokens({
+  const { formattedUnclaimedRewardsAmount, status, refetch, enabled } = useUnclaimedTokens({
     addressOverride,
   });
 
@@ -71,6 +32,8 @@ export default function UnclaimedTokensModule({ addressOverride }: { addressOver
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled={enabled}
+        errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),

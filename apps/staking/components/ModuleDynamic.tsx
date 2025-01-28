@@ -6,14 +6,17 @@ import { forwardRef, type HTMLAttributes, type ReactNode, useId } from 'react';
 import { toastErrorRefetch, type ToastErrorRefetchProps } from './Toast';
 import { QUERY_STATUS } from '@/lib/query';
 import type { GenericContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
+import { RetryIcon } from '@session/ui/icons/RetryIcon';
 
 type GenericQueryProps = {
   fallback: ReactNode;
+  errorFallback: ReactNode;
   errorToast: ToastErrorRefetchProps;
 };
 
 type ModuleContractReadTextProps = HTMLAttributes<HTMLSpanElement> & {
   status: GenericContractStatus;
+  enabled?: boolean;
 } & GenericQueryProps;
 
 export const getVariableFontSizeForLargeModule = (
@@ -39,7 +42,10 @@ export const getVariableFontSize = (
   `clamp(${minTextSize}px, min(${maxTextSize + 2 - stringLength}px, ${moduleViewportWidth}vw), ${maxTextSize}px)`;
 
 const ModuleDynamicContractReadText = forwardRef<HTMLSpanElement, ModuleContractReadTextProps>(
-  ({ className, children, status, fallback, errorToast, ...props }, ref) => {
+  (
+    { className, children, status, fallback, errorFallback, errorToast, enabled, ...props },
+    ref
+  ) => {
     const toastId = useId();
 
     if (status === 'error') {
@@ -53,6 +59,14 @@ const ModuleDynamicContractReadText = forwardRef<HTMLSpanElement, ModuleContract
         {status === 'success' ? (
           children ?? fallback
         ) : status === 'error' ? (
+          <div
+            className="hover:text-session-green group flex cursor-pointer items-center gap-1"
+            onClick={errorToast.refetch}
+          >
+            <RetryIcon className="stroke-session-text group-hover:stroke-session-green h-8 w-8" />
+            {errorFallback ?? fallback}
+          </div>
+        ) : !enabled ? (
           fallback
         ) : (
           <LoadingText />
@@ -65,10 +79,14 @@ ModuleDynamicContractReadText.displayName = 'ModuleDynamicContractReadText';
 
 type ModuleQueryTextProps = HTMLAttributes<HTMLSpanElement> & {
   status: QUERY_STATUS;
+  enabled?: boolean;
 } & GenericQueryProps;
 
 const ModuleDynamicQueryText = forwardRef<HTMLSpanElement, ModuleQueryTextProps>(
-  ({ className, children, status, fallback, errorToast, ...props }, ref) => {
+  (
+    { className, children, status, fallback, errorFallback, errorToast, enabled, ...props },
+    ref
+  ) => {
     const toastId = useId();
     if (status === QUERY_STATUS.ERROR) {
       toastErrorRefetch({
@@ -81,6 +99,14 @@ const ModuleDynamicQueryText = forwardRef<HTMLSpanElement, ModuleQueryTextProps>
         {status === QUERY_STATUS.SUCCESS ? (
           children ?? fallback
         ) : status === QUERY_STATUS.ERROR ? (
+          <div
+            className="hover:text-session-green group flex cursor-pointer items-center gap-1"
+            onClick={errorToast.refetch}
+          >
+            <RetryIcon className="stroke-session-text group-hover:stroke-session-green h-8 w-8" />
+            {errorFallback ?? fallback}
+          </div>
+        ) : !enabled ? (
           fallback
         ) : (
           <LoadingText />

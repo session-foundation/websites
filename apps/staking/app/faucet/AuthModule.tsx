@@ -1,6 +1,6 @@
 'use client';
 
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { useSession } from '@session/auth/client';
 import { DiscordAuthButton } from '@session/auth/components/DiscordAuthButton';
 import { TelegramAuthButton } from '@session/auth/components/TelegramAuthButton';
@@ -13,7 +13,6 @@ import { WalletAddTokenWithLocales } from '@/components/WalletAddTokenWithLocale
 import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CHAIN } from '@session/contracts';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { toast } from '@session/ui/lib/toast';
 import {
@@ -27,14 +26,16 @@ import {
 } from '@session/ui/ui/form';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { collapseString } from '@session/util-crypto/string';
-import { useWallet, useWalletChain, WALLET_STATUS } from '@session/wallet/hooks/wallet-hooks';
-import { ReactNode, useEffect, useState } from 'react';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Address, isAddress } from 'viem';
 import { z } from 'zod';
 import { FaucetTransactions } from './FaucetTransactions';
 import { transferTestTokens } from './actions';
 import { TransactionHistory } from './utils';
+import { arbitrumSepolia } from 'viem/chains';
+import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
 
 enum FORM_STATE {
   LANDING,
@@ -57,12 +58,13 @@ export const getFaucetFormSchema = () => {
     }),
     discordId: z.string().optional(),
     telegramId: z.string().optional(),
+    code: z.string().optional(),
   });
 };
 
 export type FaucetFormSchema = z.infer<ReturnType<typeof getFaucetFormSchema>>;
 
-export const AuthModule = () => {
+export const AuthModule = ({ code }: { code?: string }) => {
   const dictionary = useTranslations('faucet.form');
   const generalDictionary = useTranslations('general');
   const [submitAttemptCounter, setSubmitAttemptCounter] = useState<number>(0);
@@ -71,8 +73,8 @@ export const AuthModule = () => {
   const { data, status: authStatus } = useSession();
   const [transactionHash, setTransactionHash] = useState<Address | null>(null);
   const [transactionHistory, setTransactionHistory] = useState<TransactionHistory[]>([]);
-  const { address, disconnect, status: walletStatus } = useWallet();
-  const { chain, switchChain } = useWalletChain();
+  const { address, disconnect, isConnected: isConnectedWallet, chainId, switchChain } = useWallet();
+  const { setIsBalanceVisible } = useWalletButton();
 
   const FormSchema = getFaucetFormSchema();
 
@@ -88,6 +90,7 @@ export const AuthModule = () => {
       walletAddress: '',
       discordId: '',
       telegramId: '',
+      code: code ?? '',
     },
     reValidateMode: 'onChange',
   });
@@ -197,7 +200,13 @@ export const AuthModule = () => {
   }, [address, ethAmount, form]); */
 
   useEffect(() => {
-    if (walletStatus === WALLET_STATUS.CONNECTED && address) {
+    if (code) {
+      toast.info(dictionary('referralCodeAdded'));
+    }
+  }, [code]);
+
+  useEffect(() => {
+    if (isConnectedWallet && address) {
       form.clearErrors();
       form.setValue('walletAddress', address, {
         shouldValidate: true,
@@ -205,18 +214,26 @@ export const AuthModule = () => {
         shouldDirty: true,
       });
       setTransactionHash(null);
-      if (chain !== CHAIN.TESTNET) {
-        switchChain(CHAIN.TESTNET);
+      if (chainId !== arbitrumSepolia.id) {
+        switchChain({ chainId: arbitrumSepolia.id });
       }
-    } else if (walletStatus === WALLET_STATUS.DISCONNECTED) {
+    } else {
       form.reset({ walletAddress: '' });
       form.clearErrors();
       setTransactionHash(null);
     }
-  }, [walletStatus, chain, address, form]);
+  }, [isConnectedWallet, chainId, address, form]);
+
+  /** While the component is mounted, show the balance */
+  useEffect(() => {
+    setIsBalanceVisible(true);
+    return () => {
+      setIsBalanceVisible(false);
+    };
+  }, [setIsBalanceVisible]);
 
   return (
-    <ActionModule className="p-2 lg:p-10" contentClassName="gap-3">
+    <ActionModule contentClassName="gap-3">
       {formState !== FORM_STATE.LANDING && formState !== FORM_STATE.SUCCESS ? (
         <span
           className="text-session-text absolute left-6 top-4 inline-flex w-min gap-1 text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
@@ -344,11 +361,13 @@ export const AuthModule = () => {
       {formState === FORM_STATE.LANDING ? (
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
-          <WalletModalButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
-          <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
-            {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
-            {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
-          </span>
+          <WalletButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
+          {!code ? (
+            <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
+              {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
+              {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
+            </span>
+          ) : null}
         </>
       ) : null}
 

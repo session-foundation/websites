@@ -19,6 +19,7 @@ export type InfoNodeCardProps = HTMLAttributes<HTMLDivElement> & {
   pubKey: string;
   buttonSiblings?: ReactNode;
   isActive?: boolean;
+  forceSmall?: boolean;
   button?: {
     text: string;
     link: string;
@@ -35,6 +36,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
       buttonSiblings,
       isActive,
       className,
+      forceSmall,
       pubKey,
       button,
       children,
@@ -49,7 +51,8 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         ref={ref}
         {...props}
         className={cn(
-          'reduced-motion:transition-none flex flex-col items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out sm:flex-row md:gap-10',
+          'reduced-motion:transition-none flex flex-col items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out',
+          forceSmall ? '' : 'sm:flex-row md:gap-10',
           isActive && 'border-session-green',
           className
         )}
@@ -57,7 +60,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         <div className={cn('text-center sm:text-start', className)}>
           <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
             {statusIndicatorColour ? (
-              <div className="-mr-2 scale-75 p-0 sm:mr-0 md:scale-100 md:p-0.5">
+              <div className="-mr-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
                 <StatusIndicator status={statusIndicatorColour} />
               </div>
             ) : null}
@@ -65,7 +68,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
               <span className="text-nowrap font-normal">
                 {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
               </span>
-              <PubKey pubKey={pubKey} force="collapse" />
+              <PubKey pubKey={pubKey} force="collapse" leadingChars={8} trailingChars={4} />
             </NodeCardTitle>
           </div>
           <NodeCardText className="col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle text-xs font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row md:text-base">

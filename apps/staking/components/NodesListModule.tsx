@@ -4,7 +4,7 @@ import {
   ModuleGridHeader,
   ModuleGridTitle,
 } from '@session/ui/components/ModuleGrid';
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { InfoNodeCardSkeleton } from '@/components/InfoNodeCard';
 
 export default function NodesListModule({

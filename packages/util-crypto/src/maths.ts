@@ -39,20 +39,7 @@ export const formatNumber = (value: number, decimals = 4): string => {
 export const bigIntToNumber = (value: bigint, decimals: number): number => {
   if (decimals === 0) return Number(value);
 
-  let str = value.toString();
-
-  const isNegative = str.startsWith('-');
-  if (isNegative) {
-    str = str.slice(1);
-  }
-
-  if (str.length <= decimals) {
-    str = ['0', str.padStart(decimals, '0')].join('.');
-  } else {
-    str = [str.slice(0, -decimals), str.slice(-decimals)].join('.');
-  }
-
-  const floatValueWithDecimals = parseFloat(`${isNegative ? '-' : ''}${str}`);
+  const floatValueWithDecimals = parseFloat(bigIntToString(value, decimals));
 
   if (
     floatValueWithDecimals > Number.MAX_SAFE_INTEGER ||
@@ -80,4 +67,95 @@ export const formatBigIntTokenValue = (
 ): string => {
   const number = bigIntToNumber(value, decimalValue);
   return formatNumber(number, decimals);
+};
+
+export const stringToBigInt = (value: string, decimals: number, decimalDelimiter = '.'): bigint => {
+  if (!value.includes(decimalDelimiter)) {
+    return BigInt(value) * BigInt(10) ** BigInt(decimals);
+  }
+
+  const [integer, fraction] = value.split(decimalDelimiter);
+
+  if (integer === undefined || fraction === undefined) {
+    throw new Error('Invalid string format');
+  }
+
+  return BigInt(integer) * BigInt(10) ** BigInt(decimals) + BigInt(fraction.padEnd(decimals, '0'));
+};
+
+export const numberToBigInt = (value: number): bigint => {
+  return BigInt(value.toString().replaceAll(',', '').replaceAll('.', ''));
+};
+
+export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter = '.'): string => {
+  let str = value.toString();
+  if (decimals === 0) return str;
+
+  const isNegative = str.startsWith('-');
+  if (isNegative) str = str.slice(1);
+
+  if (str.length <= decimals) {
+    // Turn the int into a decimal string by padding with zeros until the decimal size, the remove the trailing zeros
+    const dec = str.padStart(decimals, '0').replace(/0+$/, '');
+    str = ['0', dec].join(decimalDelimiter);
+  } else {
+    const int = str.slice(0, -decimals);
+    // Get the decimal part of the string and remove the trailing zeros
+    const dec = str.slice(-decimals).replace(/0+$/, '');
+    str = dec ? [int, dec].join(decimalDelimiter) : int;
+  }
+
+  return `${isNegative ? '-' : ''}${str}`;
+};
+
+/**
+ * Get the smaller bigint value between two values.
+ * @param v1 first bigint value
+ * @param v2 second bigint value
+ */
+export const bigIntMin = (
+  v1?: bigint | null | undefined,
+  v2?: bigint | null | undefined
+): bigint => {
+  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
+    throw new Error('Both values are undefined or null');
+  }
+
+  // Simulate v1 being Infinity if it is undefined or null
+  if (v1 === undefined || v1 === null) {
+    return v2!;
+  }
+
+  // Simulate v2 being Infinity if it is undefined or null
+  if (v2 === undefined || v2 === null) {
+    return v1!;
+  }
+
+  return v1 < v2 ? v1 : v2;
+};
+
+/**
+ * Get the larger bigint value between two values.
+ * @param v1 first bigint value
+ * @param v2 second bigint value
+ */
+export const bigIntMax = (
+  v1?: bigint | null | undefined,
+  v2?: bigint | null | undefined
+): bigint => {
+  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
+    throw new Error('Both values are undefined or null');
+  }
+
+  // Simulate v1 being -Infinity if it is undefined or null
+  if (v1 === undefined || v1 === null) {
+    return v2!;
+  }
+
+  // Simulate v2 being -Infinity if it is undefined or null
+  if (v2 === undefined || v2 === null) {
+    return v1!;
+  }
+
+  return v1 > v2 ? v1 : v2;
 };

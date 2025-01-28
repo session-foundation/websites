@@ -1,15 +1,17 @@
 import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
-import NodeRegistration, { NodeRegistrationFormSkeleton } from './NodeRegistration';
-import { Suspense } from 'react';
+import NodeRegistration from './NodeRegistration';
+import { Suspense, use } from 'react';
+import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationForm';
 
 interface NodePageParams {
-  params: {
+  params: Promise<{
     nodeId: string;
-  };
+  }>;
 }
 
-export default function NodePage({ params }: NodePageParams) {
+export default function NodePage(props: NodePageParams) {
+  const params = use(props.params);
   const { nodeId } = params;
   const dictionary = useTranslations('actionModules.register');
 

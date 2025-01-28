@@ -1,8 +1,8 @@
 'use client';
 
 import Loading from '@/app/loading';
-import { generateStakeId, StakedNodeCard } from '@/components/StakedNodeCard';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { StakedNodeCard } from '@/components/StakedNodeCard';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
@@ -13,66 +13,70 @@ import {
 } from '@session/ui/components/ModuleGrid';
 import { Button } from '@session/ui/ui/button';
 import { Switch } from '@session/ui/ui/switch';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { EXPERIMENTAL_FEATURE_FLAG, FEATURE_FLAG } from '@/lib/feature-flags';
-import { useExperimentalFeatureFlag, useFeatureFlag } from '@/lib/feature-flags-client';
+import { useEffect } from 'react';
+import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { Address } from 'viem';
-import { generateMockNodeData } from '@session/sent-staking-js/test';
+import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
+import { useNetworkStatus } from '@/components/StatusBar';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { useStakes } from '@/hooks/useStakes';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
-  const showMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_STAKED_NODES);
-  const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_STAKED_NODES);
+  const {
+    stakes,
+    contracts,
+    network,
+    blockHeight,
+    networkTime,
+    isLoading,
+    isFetching,
+    refetch,
+    isError,
+  } = useStakes(address);
+  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
 
-  if (showMockNodes && showNoNodes) {
-    console.error('Cannot show mock nodes and no nodes at the same time');
-  }
-
-  const { data, isLoading } = useStakingBackendQueryWithParams(getStakedNodes, {
-    address,
-  });
-
-  const [stakes, blockHeight, networkTime] = useMemo(() => {
-    if (showMockNodes) {
-      const mockResponse = generateMockNodeData({ userAddress: address });
-      return [
-        mockResponse.stakes,
-        mockResponse.network.block_height,
-        mockResponse.network.block_timestamp,
-      ];
-    } else if (!data || showNoNodes) {
-      return [[], null, null];
-    }
-    
-    return [
-      [...data.stakes, ...data.historical_stakes],
-      data.network.block_height,
-      data.network.block_timestamp,
-    ];
-  }, [data, showMockNodes, showNoNodes]);
+  useEffect(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, []);
 
   return (
     <ModuleGridContent className="h-full md:overflow-y-auto">
-      {isLoading ? (
+      {isError ? (
+        <ErrorMessage refetch={refetch} />
+      ) : isLoading ? (
         <Loading />
-      ) : stakes?.length && blockHeight && networkTime ? (
-        stakes.map((node) => {
-          const key = generateStakeId(node);
-          return (
-            <StakedNodeCard
-              key={key}
-              uniqueId={key}
-              node={node}
-              blockHeight={blockHeight}
-              networkTime={networkTime}
-              targetWalletAddress={address}
-            />
-          );
-        })
+      ) : (stakes?.length || contracts?.length) && blockHeight && networkTime ? (
+        <>
+          {contracts.map((contract) => {
+            return (
+              <StakedContractCard
+                key={contract.address}
+                id={contract.address}
+                contract={contract}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+          {stakes.map((stake) => {
+            return (
+              <StakedNodeCard
+                key={stake.contract_id}
+                id={stake.contract_id.toString()}
+                stake={stake}
+                blockHeight={blockHeight}
+                networkTime={networkTime}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+        </>
       ) : (
         <NoNodes />
       )}
@@ -111,7 +115,25 @@ function NoWallet() {
     <ModuleGridInfoContent>
       <p>{dictionary('noWalletP1')}</p>
       <p>{dictionary('noWalletP2')}</p>
-      <WalletModalButtonWithLocales rounded="md" size="lg" />
+      <WalletButtonWithLocales rounded="md" size="lg" />
+    </ModuleGridInfoContent>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.stakedNodes');
+  return (
+    <ModuleGridInfoContent>
+      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.My_Stakes_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
     </ModuleGridInfoContent>
   );
 }

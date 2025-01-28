@@ -3,19 +3,23 @@
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
 import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import type { Registration } from '@session/sent-staking-js/client';
+import type { Registration } from '@session/staking-api-js/client';
 import { InfoNodeCard, NodeItem, NodeItemLabel, NodeItemValue } from '@/components/InfoNodeCard';
 import { usePathname } from 'next/navigation';
+import useRelativeTime from '@/hooks/useRelativeTime';
 
 const NodeRegistrationCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & { node: Registration }
 >(({ className, node, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.pending');
+  const actionModulesRegisterDictionary = useTranslations('actionModules.register');
   const titleFormat = useTranslations('modules.title');
   const pathname = usePathname();
 
-  const { pubkey_ed25519: pubKey, type: nodeType } = node;
+  const { pubkey_ed25519: pubKey, timestamp } = node;
+
+  const preparedTimer = useRelativeTime(new Date(timestamp * 1000), { addSuffix: true });
 
   const isRegistrationFormOpen = useMemo(
     () => pathname === `/register/${pubKey}`,
@@ -90,8 +94,10 @@ const NodeRegistrationCard = forwardRef<
       {...props}
     >
       <NodeItem>
-        <NodeItemLabel>{titleFormat('format', { title: dictionary('type') })}</NodeItemLabel>
-        <NodeItemValue>{dictionary(nodeType === 'solo' ? 'solo' : 'multi')}</NodeItemValue>
+        <NodeItemLabel>
+          {titleFormat('format', { title: actionModulesRegisterDictionary('preparedAtTimestamp') })}
+        </NodeItemLabel>
+        <NodeItemValue>{preparedTimer}</NodeItemValue>
       </NodeItem>
     </InfoNodeCard>
   );

@@ -42,8 +42,7 @@ export const formatLocalizedTimeFromSeconds = (
   formatLocalizedRelativeTimeClient(getDateFromUnixTimestampSeconds(seconds), new Date(0), options);
 
 export const formatNumber = (num: number, options?: Intl.NumberFormatOptions) => {
-  const locale = useLocale();
-  return new Intl.NumberFormat(locale, options).format(num);
+  return new Intl.NumberFormat(undefined, options).format(num);
 };
 
 export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions) => {
@@ -63,4 +62,15 @@ export const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions) => 
 export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions) => {
   const locale = useLocale();
   return new Intl.ListFormat(locale, options).format(list);
+};
+
+export type DecimalDelimiter = '.' | ',';
+
+export const getDecimalDelimiter = (): DecimalDelimiter => {
+  const locale = useLocale();
+  const decimal = Intl.NumberFormat(locale)
+    .formatToParts(1.1)
+    ?.find((part) => part.type === 'decimal')?.value;
+  if (decimal) return decimal as DecimalDelimiter;
+  return (1.1).toLocaleString().substring(1, 2) as DecimalDelimiter;
 };

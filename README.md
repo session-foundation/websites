@@ -32,8 +32,8 @@ This repository contains the following apps and packages:
 - `@session/logger`: An opinionated logging wrapper. [Read more](packages/logger/README.md).
 - `@session/sanity-cms`: A [Sanity](https://sanity.io/) CMS integration
   library. [Read more](packages/sanity-cms/README.md).
-- `@session/sent-staking-js`: Session Token Staking js library for interacting with the Session Token staking
-  backend. [Read more](packages/sent-staking-js/README.md).
+- `@session/staking-api-js`: Session Token Staking js library for interacting with the Session Token staking
+  backend. [Read more](packages/staking-api-js/README.md).
 - `@session/testing`: A testing utility library. [Read more](packages/testing/README.md).
 - `@session/typescript-config`: `tsconfig.json` configurations. [Read more](packages/typescript-config/README.md).
 - `@session/ui`: Session UI component library is a collection of UI components for [Next.js](https://nextjs.org/) apps

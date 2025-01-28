@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@session/ui/ui/dialog';
-import * as React from 'react';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { TOS_LOCKED_PATHS, URL } from '@/lib/constants';

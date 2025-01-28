@@ -15,15 +15,15 @@
     "@session/eslint-config": "workspace:*",
     "@session/typescript-config": "workspace:*",
     "@session/logger": "workspace:*",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.0",
-    "react": "18.3.1"
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "react": "19.0.0-rc-66855b96-20241106"
   },
   "dependencies": {
     "@session/testing": "workspace:*",
     "@session/util-js": "workspace:*",
     "better-sqlite3-multiple-ciphers": "11.1.2",
-    "next": "14.2.12"
+    "next": "15.0.4"
   },
   "engines": {
     "node": ">=22",

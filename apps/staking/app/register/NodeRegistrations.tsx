@@ -1,27 +1,25 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
-import { useTranslations } from 'next-intl';
-import { generateMockRegistrations } from '@session/sent-staking-js/test';
+import { NodesListSkeleton } from '@/components/NodesListModule';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { QUERY, URL } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
-import { NodesListSkeleton } from '@/components/NodesListModule';
-import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
-import { externalLink } from '@/lib/locale-defaults';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { externalLink } from '@/lib/locale-defaults';
+import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
+import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
+import { Button } from '@session/ui/ui/button';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
+import { useStakes } from '@/hooks/useStakes';
 
 export default function NodeRegistrations() {
-  const showOneMockNode = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_ONE);
-  const showTwoMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_TWO);
-  const showThreeMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_THREE);
-  const showManyMockNodes = useFeatureFlag(FEATURE_FLAG.MOCK_PENDING_NODES_MANY);
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
 
   // TODO: use once we have user preferences
@@ -33,38 +31,10 @@ export default function NodeRegistrations() {
 
    const [showHidden, setShowHidden] = useState<boolean>(false); */
 
-  if (
-    (showOneMockNode || showTwoMockNodes || showThreeMockNodes || showManyMockNodes) &&
-    showNoNodes
-  ) {
-    console.error('Cannot show mock nodes and no nodes at the same time');
-  }
-
-  if (
-    [showOneMockNode, showTwoMockNodes, showThreeMockNodes, showManyMockNodes].filter(Boolean)
-      .length > 1
-  ) {
-    console.error(
-      'You cant have multiple showMockNode flags enabled at once, ignoring all by the largest number'
-    );
-  }
-
   const { address, isConnected } = useWallet();
 
-  const { data: registrationsData, isLoading: isLoadingRegistrations } =
-    useStakingBackendQueryWithParams(
-      getNodeRegistrations,
-      { address: address! },
-      {
-        enabled: isConnected,
-        staleTime: isProduction
-          ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-          : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-      }
-    );
-
-  const { data: stakesData, isLoading: isLoadingStakes } = useStakingBackendQueryWithParams(
-    getStakedNodes,
+  const { data, isLoading, isError, refetch } = useStakingBackendQueryWithParams(
+    getNodeRegistrations,
     { address: address! },
     {
       enabled: isConnected,
@@ -74,52 +44,27 @@ export default function NodeRegistrations() {
     }
   );
 
+  const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
+
   const nodes = useMemo(() => {
-    if (showNoNodes) {
-      return [];
-    }
-    if (address) {
-      if (showManyMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 12 });
-      } else if (showThreeMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 3 });
-      } else if (showTwoMockNodes) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 2 });
-      } else if (showOneMockNode) {
-        return generateMockRegistrations({ userAddress: address, numberOfNodes: 1 });
-      }
-    }
-
-    if (isLoadingRegistrations || isLoadingStakes) {
+    if (
+      showNoNodes ||
+      !data ||
+      !('registrations' in data) ||
+      !Array.isArray(data.registrations) ||
+      isLoadingStakes ||
+      !addedBlsKeys
+    ) {
       return [];
     }
 
-    if (!stakesData || !stakesData?.stakes?.length) {
-      return registrationsData?.registrations ?? [];
-    }
+    return data.registrations.filter(({ pubkey_bls }) => !addedBlsKeys.has(pubkey_bls));
+  }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
-    const stakedNodeEd25519Pubkeys = stakesData?.stakes?.map(
-      ({ service_node_pubkey }) => service_node_pubkey
-    );
-
-    return registrationsData?.registrations.filter(
-      ({ pubkey_ed25519 }) => !stakedNodeEd25519Pubkeys.includes(pubkey_ed25519)
-    );
-  }, [
-    isLoadingRegistrations,
-    isLoadingStakes,
-    registrationsData?.registrations,
-    stakesData?.stakes,
-    address,
-    showNoNodes,
-    showOneMockNode,
-    showTwoMockNodes,
-    showThreeMockNodes,
-    showManyMockNodes,
-  ]);
-
-  return address ? (
-    isLoadingStakes || isLoadingRegistrations ? (
+  return isError ? (
+    <ErrorMessage refetch={refetch} />
+  ) : address ? (
+    isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
     ) : nodes?.length ? (
       nodes.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
@@ -139,7 +84,7 @@ function NoWallet() {
       <p>
         {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
       </p>
-      <WalletModalButtonWithLocales rounded="md" size="lg" />
+      <WalletButtonWithLocales rounded="md" size="lg" />
     </ModuleGridInfoContent>
   );
 }
@@ -152,6 +97,24 @@ function NoNodes() {
       <p>
         {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
       </p>
+    </ModuleGridInfoContent>
+  );
+}
+
+function ErrorMessage({ refetch }: { refetch: () => void }) {
+  const dictionary = useTranslations('modules.nodeRegistrations');
+  return (
+    <ModuleGridInfoContent>
+      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
+      <p>{dictionary.rich('error')}</p>
+      <Button
+        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
+        rounded="md"
+        size="lg"
+        onClick={refetch}
+      >
+        {dictionary('errorButton')}
+      </Button>
     </ModuleGridInfoContent>
   );
 }

@@ -8,9 +8,13 @@ export enum REMOTE_FEATURE_FLAG {
   CUSTOM_BANNER = 'remote_customBanner',
   NEW_TOKEN_CONTRACT = 'remote_newTokenContract',
   DISABLE_NODE_REGISTRATION = 'remote_disableNodeRegistration',
+  DISABLE_NODE_REGISTRATION_SOLO = 'remote_disableNodeRegistrationSolo',
+  DISABLE_NODE_REGISTRATION_MULTI = 'remote_disableNodeRegistrationMulti',
+  DISABLE_NODE_REGISTRATION_RESERVED = 'remote_disableNodeRegistrationReserved',
   DISABLE_CLAIM_REWARDS = 'remote_disableClaimRewards',
   DISABLE_REQUEST_NODE_EXIT = 'remote_disableRequestNodeExit',
   DISABLE_NODE_EXIT = 'remote_disableNodeExit',
+  DISABLE_NODE_STAKING_MULTI = 'remote_disableNodeStakingMulti',
 }
 
 export const remoteFeatureFlagsInfo: Record<
@@ -40,6 +44,22 @@ export const remoteFeatureFlagsInfo: Record<
   [REMOTE_FEATURE_FLAG.NEW_TOKEN_CONTRACT]: {
     name: 'New Token Contract',
     description: 'The token contract address been updated.',
+  },
+  [REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_MULTI]: {
+    name: 'Disable Node Registration Multi',
+    description: 'Disable the ability to register a node.',
+  },
+  [REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_RESERVED]: {
+    name: 'Disable Node Registration Reserved',
+    description: 'Disable reserve slots on open nodes.',
+  },
+  [REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_SOLO]: {
+    name: 'Disable Node Registration Solo',
+    description: 'Disable the ability to register a node. (Solo)',
+  },
+  [REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI]: {
+    name: 'Disable Node Staking Multi',
+    description: 'Disable the ability to stake to an open node.',
   },
 };
 

@@ -30,24 +30,26 @@ import {
   useSetFeatureFlag,
 } from '@/lib/feature-flags-client';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import {
-  formatSENTBigInt,
-  useAllowanceQuery,
-  useProxyApproval,
-} from '@session/contracts/hooks/SENT';
-import { addresses, CHAIN, chains, SENT_DECIMALS } from '@session/contracts';
-import { LoadingText } from '@session/ui/components/loading-text';
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
 import { nonceManager, privateKeyToAccount } from 'viem/accounts';
 import { Address, createWalletClient, http } from 'viem';
 import { TestnetServiceNodeRewardsAbi } from '@session/contracts/abis';
-import { useStakingBackendSuspenseQuery } from '@/lib/sent-staking-backend-client';
-import { SessionStakingClient } from '@session/sent-staking-js/client';
+import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { SessionStakingClient } from '@session/staking-api-js/client';
 import { Loading } from '@session/ui/components/loading';
 import { Checkbox } from '@session/ui/ui/checkbox';
 import { PubKey } from '@session/ui/components/PubKey';
 import { toast } from '@session/ui/lib/toast';
+import { arbitrumSepolia } from 'viem/chains';
+import { addresses, SENT_DECIMALS } from '@session/contracts';
+import {
+  formatSENTBigInt,
+  useAllowanceQuery,
+  useProxyApproval,
+} from '@session/contracts/hooks/SENT';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { useContractReadQuery } from '@session/contracts/hooks/useContractReadQuery';
 
 export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,7 +97,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
 
   return (
     <Sheet open={isOpen}>
-      <SheetContent closeSheet={() => setIsOpen(false)}>
+      <SheetContent closeSheet={() => setIsOpen(false)} className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Welcome to the danger zone</SheetTitle>
           <SheetDescription>
@@ -150,6 +152,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
           </SheetDescription>
           <PageSpecificFeatureFlags />
           <ContractActions />
+          <ToastWorkshop />
         </SheetHeader>
       </SheetContent>
     </Sheet>
@@ -209,7 +212,7 @@ function FeatureFlagToggle({
 
 function ContractActions() {
   const [value, setValue] = useState<string>('0');
-  const serviceNodeRewardsAddress = addresses.ServiceNodeRewards.testnet;
+  const serviceNodeRewardsAddress = addresses.ServiceNodeRewards[arbitrumSepolia.id];
 
   const tokenAmount = useMemo(() => BigInt(value) * BigInt(10 ** SENT_DECIMALS), [value]);
 
@@ -278,18 +281,59 @@ function ExitNodes() {
   const [selectedContractIds, setSelectedContractIds] = useState<Array<number>>([]);
   const { data, status } = useStakingBackendSuspenseQuery(getExitLiquidationList);
 
+  const { data: blsKeyContractIdMapData, status: blsKeyContractIdMapStatus } = useContractReadQuery(
+    {
+      contract: 'ServiceNodeRewards',
+      functionName: 'allServiceNodeIDs',
+      enabled: status === 'success',
+    }
+  );
+
   const nodes = useMemo(() => {
-    if (status === 'success' && data) {
-      return data.result
-        .map((node) => ({ contractId: node.contract_id, pubKey: node.service_node_pubkey }))
-        .filter(({ contractId }) => contractId)
-        .sort((a, b) => a.contractId! - b.contractId!) as Array<{
-        contractId: number;
-        pubKey: string;
-      }>;
+    if (
+      status === 'success' &&
+      data &&
+      blsKeyContractIdMapStatus === 'success' &&
+      blsKeyContractIdMapData
+    ) {
+      const [ids, blsKeys] = blsKeyContractIdMapData;
+
+      // Create an object that maps "<x:064x><y:064x>" to the contractId
+      const result: Record<string, number> = {};
+
+      for (let i = 0; i < ids.length; i++) {
+        const contractId = ids[i];
+        if (!contractId) {
+          console.warn('Unexpected null contractId');
+          continue;
+        }
+        const blsKeyPair = blsKeys[i];
+        if (!blsKeyPair) {
+          console.warn('Unexpected null blsKeyPair');
+          continue;
+        }
+        const { X, Y } = blsKeyPair;
+
+        // Convert x and y to 64-char hex strings and concatenate
+        const key = `${X.toString(16).padStart(64, '0')}${Y.toString(16).padStart(64, '0')}`;
+        result[key] = parseInt(contractId.toString());
+      }
+
+      const nodeList = [];
+
+      for (const node of data.result) {
+        const contractId = result[node.info.bls_public_key];
+        if (!contractId) {
+          console.warn('No contractId found for blsKey', node.info.bls_public_key);
+          continue;
+        }
+        nodeList.push({ contractId, pubKey: node.service_node_pubkey });
+      }
+
+      return nodeList.sort((a, b) => a.contractId - b.contractId);
     }
     return [];
-  }, [data?.result, status]);
+  }, [data, status, blsKeyContractIdMapStatus, blsKeyContractIdMapData]);
 
   const handleEjectNodes = async () => {
     if (selectedContractIds.length === 0) return;
@@ -365,7 +409,7 @@ function createWallet({ privateKey }: { privateKey: Address }) {
   const account = privateKeyToAccount(privateKey, { nonceManager });
   return createWalletClient({
     account,
-    chain: chains[CHAIN.TESTNET],
+    chain: arbitrumSepolia,
     transport: http(),
   });
 }
@@ -398,9 +442,9 @@ async function ejectNodes({
     const arrBigInted = array.map(BigInt);
 
     const hash = await wallet.writeContract({
-      address: '0xb691e7C159369475D0a3d4694639ae0144c7bAB2',
+      address: addresses.ServiceNodeRewards[arbitrumSepolia.id],
       abi: TestnetServiceNodeRewardsAbi,
-      functionName: 'requestRemoveNodeBySNID',
+      functionName: 'exitNodeBySNID',
       args: [arrBigInted],
     });
     console.log(`Hash: ${hash}`);
@@ -411,4 +455,92 @@ async function ejectNodes({
 
   console.log(`Total: ${total}`);
   console.log(`Actual: ${idsToBoot.length}`);
+}
+
+const toastWorkshopFallbackText = 'Toast Workshop 🍞';
+const toastWorkshopBigText = toastWorkshopFallbackText.repeat(20);
+
+function ToastWorkshop() {
+  const [customText, setCustomText] = useState<string>('');
+  const [useBigText, setUseBigText] = useState(false);
+
+  const text = useBigText ? toastWorkshopBigText : customText || toastWorkshopFallbackText;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SheetTitle>{toastWorkshopFallbackText}</SheetTitle>
+      <Input
+        placeholder="Custom Text"
+        value={customText}
+        onChange={(e) => setCustomText(e.target.value)}
+      />
+      <span className="flex flex-row items-center gap-2">
+        <Switch checked={useBigText} onCheckedChange={(checked) => setUseBigText(checked)} />
+        Use Big Text
+      </span>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.success(text);
+        }}
+      >
+        Success
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.error(text);
+        }}
+      >
+        Error
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.info(text);
+        }}
+      >
+        Info
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.warning(text);
+        }}
+      >
+        Warning
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.promise(new Promise((resolve) => setTimeout(resolve, 5000)), {
+            loading: 'Loading...',
+            success: text,
+          });
+        }}
+      >
+        Success 5s
+      </Button>
+      <Button
+        data-testid="button:toast-workshop"
+        size="xs"
+        variant="secondary"
+        onClick={() => {
+          toast.handleError(new Error(text));
+        }}
+      >
+        Error
+      </Button>
+    </div>
+  );
 }
