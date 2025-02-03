@@ -4,6 +4,7 @@ import { FuelIcon } from '@session/ui/icons/FuelIcon';
 import { LoadingText } from '@session/ui/components/loading-text';
 import type { ReactNode } from 'react';
 import { TICKER } from '@/lib/constants';
+import { cn } from '@session/ui/lib/utils';
 
 export function ActionModuleFeeAccordionRow({
   label,
@@ -21,8 +22,8 @@ export function ActionModuleFeeAccordionRow({
     label: string;
     fee: ReactNode | null;
     tooltip: ReactNode | null;
-    noFee?: boolean;
-    noFeeReason?: string;
+    hasExemption?: boolean;
+    exemptionReason?: string;
   }>;
   hasMissingEstimatesTooltipContent: ReactNode;
   gasHighShowTooltip?: boolean;
@@ -31,6 +32,8 @@ export function ActionModuleFeeAccordionRow({
   showDivider?: boolean;
 }) {
   const hasMissingEstimates = fees.some(({ fee }) => fee === null);
+  const exemptFromAllFees = fees.every(({ hasExemption }) => hasExemption);
+
   return (
     <ActionModuleAccordionRow
       label={label}
@@ -38,22 +41,20 @@ export function ActionModuleFeeAccordionRow({
       last={!showDivider}
       accordionContent={
         <div className="flex flex-col gap-1">
-          {fees.map(({ label, fee, tooltip, noFee, noFeeReason }) => (
+          {fees.map(({ label, fee, tooltip, hasExemption, exemptionReason }) => (
             <span className="flex justify-between" key={label}>
               <span className="inline-flex items-center gap-2 text-nowrap align-middle">
                 {label}
                 <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
               </span>
               <span className="inline-flex items-center gap-2 text-nowrap align-middle">
-                {!noFee ? (
-                  fee ?? '?'
-                ) : (
+                <span className={cn(hasExemption && 'line-through')}>{fee ?? '?'}</span>
+                {hasExemption ? (
                   <>
-                    <span className="line-through">{fee ?? '?'}</span>
                     <span>{`0 ${TICKER.ETH}`}</span>
-                    <ActionModuleTooltip>{noFeeReason}</ActionModuleTooltip>
+                    <ActionModuleTooltip>{exemptionReason}</ActionModuleTooltip>
                   </>
-                )}
+                ) : null}
               </span>
             </span>
           ))}
@@ -66,7 +67,20 @@ export function ActionModuleFeeAccordionRow({
         ) : null}
         {gasHighShowTooltip ? <AlertTooltip tooltipContent={gasHighTooltip} /> : null}
         <FuelIcon className="h-3.5 w-3.5" />
-        {totalFee ? totalFee : <LoadingText className="mr-8 scale-x-75 scale-y-50" />}
+        {totalFee ? (
+          <span className="inline-flex items-center gap-2 text-nowrap align-middle">
+            <span className={cn(exemptFromAllFees && 'line-through')}>{totalFee}</span>
+            {exemptFromAllFees ? (
+              <>
+                <span>{`0 ${TICKER.ETH}`}</span>
+                {/* NOTE: This is fine, len > 0 for exemptFromAllFees to be true */}
+                <ActionModuleTooltip>{fees[0]?.exemptionReason}</ActionModuleTooltip>
+              </>
+            ) : null}
+          </span>
+        ) : (
+          <LoadingText className="mr-8 scale-x-75 scale-y-50" />
+        )}
       </span>
     </ActionModuleAccordionRow>
   );
