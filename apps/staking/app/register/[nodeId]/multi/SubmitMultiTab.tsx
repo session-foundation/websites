@@ -275,7 +275,7 @@ export function SubmitMultiTab() {
         tooltip={dictShared('autoActivateDescription')}
       >
         <span className="font-semibold">
-          {formMulti.watch('autoActivate') ? 'Enabled' : 'Disabled'}
+          {dictShared(formMulti.watch('autoActivate') ? 'enabled' : 'disabled')}
         </span>
         <RegistrationEditButton
           aria-label={dictRegistrationShared('buttonEditField.aria')}
@@ -621,7 +621,7 @@ function SubmitMulti({
 
   useEffect(() => {
     /**
-     * Don't do anything until the initial contract details is fetched (to see if one exists already)
+     * Don't do anything until the initial contract details are fetched (to see if one exists already)
      */
     if (!isSuccessFetchContractDetails) {
       return;

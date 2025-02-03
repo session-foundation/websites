@@ -382,6 +382,8 @@
       "buttonEditField": {
         "aria": "Edit {field}"
       },
+      "enabled": "Enabled",
+      "disabled": "Disabled",
       "progress": "Progress",
       "retry": "Retry",
       "proxyApprovalCost": "Proxy Approval Cost:",

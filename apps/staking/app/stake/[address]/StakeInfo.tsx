@@ -119,7 +119,9 @@ export function StakeInfo({
         label={dictShared('autoActivate')}
         tooltip={dictShared('autoActivateDescription')}
       >
-        <span className="font-semibold">{!contract.manual_finalize ? 'Enabled' : 'Disabled'}</span>
+        <span className="font-semibold">
+          {dictShared(!contract.manual_finalize ? 'enabled' : 'disabled')}
+        </span>
         {isOperator ? (
           <Tooltip tooltipContent="Editing this field is not yet supported">
             <EditButton
