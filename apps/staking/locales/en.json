@@ -518,8 +518,8 @@
       "stakeAmount": {
         "title": "How much do you want to stake?",
         "description": "As the node operator, you must stake at least {minStakeMulti}.",
-        "min": "Min: {minStakeMulti}",
-        "max": "Max: {maxStakeMulti}",
+        "min": "Min: {min}",
+        "max": "Max: {max}",
         "errorUnderMin": "You cannot stake under the minimum of {min}"
       },
       "operatorFee": {
