@@ -109,6 +109,8 @@ export const defaultTranslationElements = {
 
 export const defaultTranslationVariables = {
   tokenSymbol: TOKEN.SYMBOL,
+  gas: 'Gas',
+  gasPrice: 'Gas Price',
   gasTokenSymbol: TICKER.ETH,
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
