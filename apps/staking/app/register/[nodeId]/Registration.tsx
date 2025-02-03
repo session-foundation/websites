@@ -370,14 +370,20 @@ function getTab(tab: REG_TAB) {
   switch (tab) {
     case REG_TAB.START:
       return <StartTab />;
-    // SOLO
+
+    /**
+     * Solo Registration tabs
+     */
     case REG_TAB.REWARDS_ADDRESS_INPUT_SOLO:
       return <RewardsAddressInputSoloTab />;
     case REG_TAB.SUBMIT_SOLO:
       return <SubmitSoloTab />;
     case REG_TAB.SUCCESS_SOLO:
       return <SuccessSoloTab />;
-    // MULTI
+
+    /**
+     * Multi Registration tabs
+     */
     case REG_TAB.STAKE_AMOUNT:
       return <StakeAmountTab />;
     case REG_TAB.OPERATOR_FEE:
@@ -398,7 +404,9 @@ function getTab(tab: REG_TAB) {
     case REG_TAB.SUCCESS_MULTI:
       return <SuccessMultiTab />;
 
-    // Already Registered
+    /**
+     * Already Registered tabs
+     */
     case REG_TAB.ALREADY_REGISTERED_RUNNING:
       return <AlreadyRegisteredRunningTab />;
     case REG_TAB.ALREADY_REGISTERED_MULTI:
