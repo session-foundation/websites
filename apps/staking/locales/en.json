@@ -323,7 +323,7 @@
     },
     "referral": {
       "title": "Referral Program",
-      "description1": "Grow the Session Network by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
+      "description1": "Grow the {sessionNetwork} by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
       "description2": "Learn more <link>here</link>.",
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
       "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",
@@ -334,7 +334,7 @@
     "general": {
       "publicKeyShort": "SN Key",
       "publicKeyLong": "Session Node Public Key",
-      "publicKeyDescription": "This node's unique public identifier on the Session Network",
+      "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}",
       "blsKey": "BLS Key",
       "blsKeyDescription": "This node's public cryptographic key for interacting Session smart contracts",
       "operatorAddress": "Operator Address",
@@ -611,11 +611,11 @@
           }
         },
         "network": {
-          "idle": "Registering node on Session network",
-          "pending": "Registering node on Session network ({progress} confirmations) estimated time remaining: {remainingTime}",
-          "success": "Registering node on Session network confirmed",
+          "idle": "Registering node on {sessionNetwork}",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations) estimated time remaining: {remainingTime}",
+          "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Registering node on Session network failed, {reason}, please try again later"
+            "template": "Registering node on {sessionNetwork} failed, {reason}, please try again later"
           }
         }
       },
@@ -625,7 +625,7 @@
       },
       "successSolo": {
         "specialTitle": "Single Contributor Node Created!",
-        "specialDescription": "Your node is staked and running on the Session Network."
+        "specialDescription": "Your node is staked and running on the {sessionNetwork}."
       },
       "submitMulti": {
         "deployCost": "Deploy Cost:",
@@ -781,9 +781,9 @@
             "idle": "Session node network exit confirming",
             "pending": "Session node network exit confirming",
             "success": "Session node network exit confirmed",
-            "errorTemplate": "Failed to confirm the node exit with the Session network, {reason}",
+            "errorTemplate": "Failed to confirm the node exit with the {sessionNetwork}, {reason}",
             "errors": {
-              "UnableToReachNetwork": "unable to reach the Session network"
+              "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
             }
           }
         }
@@ -835,9 +835,9 @@
               "idle": "Session node exit request confirming",
               "pending": "Session node exit request confirming",
               "success": "Session node exit request confirmed",
-              "errorTemplate": "Failed to confirm the submission of the node exit request to the Session network, {reason}",
+              "errorTemplate": "Failed to confirm the submission of the node exit request to the {sessionNetwork}, {reason}",
               "errors": {
-                "UnableToReachNetwork": "unable to reach the Session network"
+                "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
               }
             }
           }

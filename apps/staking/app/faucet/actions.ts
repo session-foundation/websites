@@ -122,6 +122,10 @@ export async function getSessionTokenBalance({
 
 setupDatababse();
 
+/**
+ * NOTE: discord and telegram functionality is disabled, the code will stay here and be set
+ *   to null in case it's needed in the future
+ */
 export async function transferTestTokens({
   walletAddress: targetAddress,
   // discordId,

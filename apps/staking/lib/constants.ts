@@ -78,6 +78,8 @@ export enum NETWORK {
   TESTNET = 'Testnet',
 }
 
+export const SESSION_NETWORK = 'Session Network' as const;
+
 type LinkItem = {
   href: string;
   dictionaryKey: keyof Omit<LocaleKey['navigation'], 'hamburgerDropdown'>;
