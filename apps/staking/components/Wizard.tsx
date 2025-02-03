@@ -69,7 +69,7 @@ export function WizardSectionDescription({
   const children = useMemo(() => {
     if (!href) return description;
 
-    let descriptionChild: ReactNode | string = description;
+    let descriptionChild: ReactNode = description;
     let hrefLinkedWord: null | string = null;
     if (typeof description === 'string') {
       const wordsArray = description.trim().split(' ');
