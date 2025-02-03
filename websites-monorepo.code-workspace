@@ -50,9 +50,6 @@
   },
   "settings": {
     "typescript.tsdk": "./node_modules/typescript/lib",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "always",
-    },
     "editor.formatOnSave": true,
     "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "typescript.enablePromptUseWorkspaceTsdk": true,
