@@ -32,10 +32,10 @@ export function getContractErrorName(
   let reason = error.name;
 
   // uncomment this to log the object, trust me it's useful
-  console.log({
-    error,
-    errorKeys: Object.keys(error),
-  });
+  // console.log({
+  //   error,
+  //   errorKeys: Object.keys(error),
+  // });
 
   if (error?.cause && typeof error.cause === 'object') {
     if (
