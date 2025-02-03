@@ -62,6 +62,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
   const dictionaryShared = useTranslations('actionModules.shared');
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
+  const dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
 
   const decimalDelimiter = useDecimalDelimiter();
 
@@ -116,7 +117,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
     if (data.rewardsAddress && !isAddress(data.rewardsAddress)) {
       form.setError('root', {
         type: 'manual',
-        message: 'Rewards Address is not a valid Ethereum Address',
+        message: dictionaryEthAddress('invalidAddress'),
       });
       return;
     }
@@ -136,7 +137,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
     if (!address || !isAddress(address)) {
       form.setError('root', {
         type: 'manual',
-        message: 'Wallet Address is not a valid Ethereum Address',
+        message: dictionaryEthAddress('invalidAddress'),
       });
       return;
     }
@@ -166,12 +167,14 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
 
   return (
     <StakeInfo contract={contract} totalStaked={totalStaked} isSubmitting={isSubmitting}>
-      <ContributeFundsFeeActionModuleRow
-        contract={contract}
-        stakeAmount={watchedStakeAmountBigInt}
-        minStake={minStake}
-        maxStake={maxStake}
-      />
+      {address ? (
+        <ContributeFundsFeeActionModuleRow
+          contract={contract}
+          stakeAmount={watchedStakeAmountBigInt}
+          minStake={minStake}
+          maxStake={maxStake}
+        />
+      ) : null}
       {stakingParams ? (
         <>
           <ActionModuleRow
