@@ -15,6 +15,8 @@ export enum REMOTE_FEATURE_FLAG {
   DISABLE_REQUEST_NODE_EXIT = 'remote_disableRequestNodeExit',
   DISABLE_NODE_EXIT = 'remote_disableNodeExit',
   DISABLE_NODE_STAKING_MULTI = 'remote_disableNodeStakingMulti',
+  ENABLE_MAINTENANCE_MODE = 'remote_enableMaintenanceMode',
+  ENABLE_APP_MAINTENANCE_MODE = 'remote_enableAppMaintenanceMode',
 }
 
 export const remoteFeatureFlagsInfo: Record<
@@ -60,6 +62,14 @@ export const remoteFeatureFlagsInfo: Record<
   [REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI]: {
     name: 'Disable Node Staking Multi',
     description: 'Disable the ability to stake to an open node.',
+  },
+  [REMOTE_FEATURE_FLAG.ENABLE_MAINTENANCE_MODE]: {
+    name: 'Enable Maintenance Mode',
+    description: 'Enable the maintenance mode.',
+  },
+  [REMOTE_FEATURE_FLAG.ENABLE_APP_MAINTENANCE_MODE]: {
+    name: 'Enable App Maintenance Mode',
+    description: 'Enable the app maintenance mode.',
   },
 };
 

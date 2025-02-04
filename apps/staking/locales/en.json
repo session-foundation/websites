@@ -723,6 +723,7 @@
     "staked": {
       "operator": "Operator",
       "operatorTooltip": "You are the operator of this node",
+      "operatorTooltipOther": "This is the operator of this node",
       "labelExpand": "Expand",
       "ariaExpand": "Expand node details",
       "labelCollapse": "Collapse",
@@ -740,6 +741,9 @@
       "exitTimerDescriptionNow": "Node is ready for exit. If you don't exit now, you may be subject to a small penalty. <link>Learn more</link>",
       "deregistrationTimerNotification": "Deregistration {relativeTime}",
       "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered {relativeTime} ({date})",
+      "deregisteredProcessing": "Deregistration is being processed",
+      "deregisteredTimerNotification": "Stake will unlock {relativeTime}",
+      "deregisteredTimerDescription": "Time left until the stake is unlocked and the node is available for liquidation. ({date})",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
       "finalize": {

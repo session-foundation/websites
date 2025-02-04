@@ -1,7 +1,7 @@
 'use server';
 
 import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
-import { hasCount, openDatabase, setupDatabase } from './db';
+import { FLAGS_TABLE, hasCount, openDatabase, setupDatabase } from './db';
 import { getEnabledFeatureFlags } from './queries/getEnabledFeatureFlags';
 import { getEnabledFeatureFlag } from './queries/getEnabledFeatureFlag';
 import type { GenericRemoteFeatureFlag } from './utils';
@@ -29,7 +29,7 @@ export async function getRemoteFeatureFlagGeneric<Flag extends GenericRemoteFeat
   try {
     db = openDatabase();
     const enabledFlagRow = getEnabledFeatureFlag<Flag>({ db, flag });
-    const enabled = hasCount<Flag>(enabledFlagRow, flag);
+    const enabled = hasCount(enabledFlagRow, FLAGS_TABLE.FLAG);
     return {
       enabled,
     };
