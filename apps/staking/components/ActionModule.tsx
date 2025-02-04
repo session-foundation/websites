@@ -109,6 +109,7 @@ type ActionModuleRowContentProps = {
   tooltip: ReactNode;
   children: ReactNode;
   containerClassName?: string;
+  parentClassName?: string;
 };
 
 const ActionModuleRowContent = ({
@@ -116,8 +117,11 @@ const ActionModuleRowContent = ({
   tooltip,
   children,
   containerClassName,
+  parentClassName,
 }: ActionModuleRowContentProps) => (
-  <div className="flex flex-row flex-wrap items-center justify-between w-full">
+  <div
+    className={cn('flex w-full flex-row flex-wrap items-center justify-between', parentClassName)}
+  >
     <span className="inline-flex items-center gap-2 text-nowrap align-middle">
       {label}
       <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
@@ -135,10 +139,16 @@ export const ActionModuleRow = ({
   tooltip,
   children,
   containerClassName,
+  parentClassName,
   last,
 }: ActionModuleRowProps) => (
   <>
-    <ActionModuleRowContent label={label} tooltip={tooltip} containerClassName={containerClassName}>
+    <ActionModuleRowContent
+      label={label}
+      tooltip={tooltip}
+      containerClassName={containerClassName}
+      parentClassName={parentClassName}
+    >
       {children}
     </ActionModuleRowContent>
     {!last ? <ActionModuleDivider /> : null}
@@ -150,6 +160,7 @@ export const ActionModuleAccordionRow = ({
   tooltip,
   children,
   containerClassName,
+  parentClassName,
   accordionContent,
   last,
 }: ActionModuleRowProps & {
@@ -163,6 +174,7 @@ export const ActionModuleAccordionRow = ({
             label={label}
             tooltip={tooltip}
             containerClassName={containerClassName}
+            parentClassName={parentClassName}
           >
             {children}
           </ActionModuleRowContent>

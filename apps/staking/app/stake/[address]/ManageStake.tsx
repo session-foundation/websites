@@ -8,7 +8,7 @@ import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
 } from '@session/staking-api-js/client';
-import { getContributionRangeFromContributors } from '@/lib/maths';
+import { getTotalStaked } from '@/lib/maths';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
 
@@ -29,7 +29,7 @@ export function ManageStake({ contract }: { contract: ContributorContractInfo })
   const isOperator = areHexesEqual(contract.operator_address, address);
   const isFinalized = contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized;
 
-  const { totalStaked } = getContributionRangeFromContributors(contract.contributors);
+  const totalStaked = getTotalStaked(contract.contributors);
 
   const haveOtherContributorsContributed = contract.contributors.length > 1;
 
@@ -78,12 +78,7 @@ export function ManageStake({ contract }: { contract: ContributorContractInfo })
   }, [isFinalized, haveOtherContributorsContributed, isOperator]);
 
   return (
-    <StakeInfo
-      contract={contract}
-      totalStaked={totalStaked}
-      isSubmitting={isSubmitting}
-      editableFields={editableFields}
-    >
+    <StakeInfo contract={contract} isSubmitting={isSubmitting} editableFields={editableFields}>
       <ErrorBoundary errorComponent={ErrorStake}>
         {editableStakeGroup === EditableStakeGroup.Contribution ? (
           <ManageStakeContribution
