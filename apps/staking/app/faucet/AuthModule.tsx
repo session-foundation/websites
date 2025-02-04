@@ -84,7 +84,8 @@ export const AuthModule = ({ code }: { code?: string }) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      walletAddress: '',
+      // This is fine
+      walletAddress: '' as Address,
       // discordId: '',
       // telegramId: '',
       code: code ?? '',
@@ -217,7 +218,8 @@ export const AuthModule = ({ code }: { code?: string }) => {
         switchChain({ chainId: arbitrumSepolia.id });
       }
     } else {
-      form.reset({ walletAddress: '', code: referralCode });
+      // This is fine, we're resetting the form
+      form.reset({ walletAddress: '' as Address, code: referralCode });
       form.clearErrors();
       setTransactionHash(null);
     }
