@@ -1,17 +1,27 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
-import { useTranslations } from 'next-intl';
-import type { Address } from 'viem';
 import { useCreateOpenNode } from '@session/contracts/hooks/ServiceNodeContributionFactory';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import type { Address } from 'viem';
 
 export type ReservedContributorStruct = {
   addr: Address;
   amount: bigint;
+};
+
+export type UseCreateOpenNodeContractParams = {
+  blsPubKey: string;
+  blsSignature: string;
+  nodePubKey: string;
+  userSignature: string;
+  reservedContributors: Array<ReservedContributorStruct>;
+  fee: number;
+  autoStart: boolean;
 };
 
 export default function useCreateOpenNodeRegistration({
@@ -22,28 +32,19 @@ export default function useCreateOpenNodeRegistration({
   userSignature,
   fee,
   autoStart,
-}: {
-  blsPubKey: string;
-  blsSignature: string;
-  nodePubKey: string;
-  userSignature: string;
-  reservedContributors: Array<ReservedContributorStruct>;
-  fee: number;
-  autoStart: boolean;
-}) {
+}: UseCreateOpenNodeContractParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const stageDictKey = 'actionModules.register.stageMulti' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('actionModules.registration.submitMulti');
+  const dictGeneral = useTranslations('general');
 
   const {
     createOpenNode,
-    openNodeContractAddress,
     contractCallStatus,
     simulateError,
     writeError,
     transactionError,
+    resetContract,
   } = useCreateOpenNode({
     blsPubKey,
     blsSignature,
@@ -59,18 +60,17 @@ export default function useCreateOpenNodeRegistration({
   };
 
   const resetCreateOpenNodeContract = () => {
-    if (contractCallStatus !== 'idle') return;
-    setEnabled(false);
+    resetContract();
+    createOpenNode();
   };
 
   const createNodeContractErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'create',
-        dictionary,
-        dictionaryGeneral,
-        simulateError: simulateError,
+        dict,
+        dictGeneral,
+        simulateError,
         writeError: writeError,
         transactionError: transactionError,
       }),
@@ -90,11 +90,13 @@ export default function useCreateOpenNodeRegistration({
   }, [enabled]);
 
   return {
-    openNodeContractAddress,
     createOpenNodeContract,
     resetCreateOpenNodeContract,
     createNodeContractErrorMessage,
     createNodeContractStatus,
     enabled,
+    simulateError,
+    writeError,
+    transactionError,
   };
 }

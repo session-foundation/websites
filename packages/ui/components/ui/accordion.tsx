@@ -9,9 +9,13 @@ const Accordion = AccordionPrimitive.Root;
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
->(({ className, ...props }, ref) => (
-  <AccordionPrimitive.Item ref={ref} className={cn('border-b', className)} {...props} />
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> & { hideDivider?: boolean }
+>(({ className, hideDivider, ...props }, ref) => (
+  <AccordionPrimitive.Item
+    ref={ref}
+    className={cn(!hideDivider ? 'border-b' : '', className)}
+    {...props}
+  />
 ));
 AccordionItem.displayName = 'AccordionItem';
 
@@ -29,7 +33,7 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      <ChevronDown className=" ms-1 h-4 w-4 -me-1 shrink-0 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

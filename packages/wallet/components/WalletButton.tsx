@@ -16,18 +16,8 @@ export type WalletButtonProps = Omit<ButtonProps, 'data-testid'> & {
   hideBalance?: boolean;
 };
 
-export function WalletButton({
-  disconnectedLabel,
-  disconnectedAriaLabel,
-  connectedAriaLabel,
-  hideBalance,
-  className,
-  ...props
-}: WalletButtonProps) {
-  const { chainId, tokens, isConnected, userSheetOpen, setUserSheetOpen, resolvedIdentifierShort } =
-    useWallet();
-
-  const { isBalanceVisible } = useWalletButton();
+export function useWalletTokenBalance() {
+  const { chainId, tokens } = useWallet();
 
   const token = useMemo(
     () => tokens?.find((token) => token.network.id === chainId),
@@ -46,6 +36,27 @@ export function WalletButton({
         : '0',
     [tokenData]
   );
+  return {
+    value: tokenData?.value,
+    decimals: tokenData?.decimals,
+    symbol: tokenData?.symbol,
+    balance: tokenBalance,
+  };
+}
+
+export function WalletButton({
+  disconnectedLabel,
+  disconnectedAriaLabel,
+  connectedAriaLabel,
+  hideBalance,
+  className,
+  ...props
+}: WalletButtonProps) {
+  const { isConnected, userSheetOpen, setUserSheetOpen, resolvedIdentifierShort } = useWallet();
+
+  const { isBalanceVisible } = useWalletButton();
+
+  const { balance: tokenBalance } = useWalletTokenBalance();
 
   const handleClick = () => {
     if (userSheetOpen) return;

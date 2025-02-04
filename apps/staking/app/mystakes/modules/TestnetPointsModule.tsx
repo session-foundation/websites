@@ -66,9 +66,10 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
           link: externalLink(URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT),
         })}
       </ModuleTooltip>
-      <ModuleTitle>
+      {/* We don't care that it hydrates differently based on client locale. */}
+      <ModuleTitle suppressHydrationWarning>
         {titleFormat('format', { title })}
-        {` (${formatPercentage((data?.percent ?? 0) / 100)})`}
+        {` (${formatPercentage((data?.percent ?? 0) / 100, { maximumSignificantDigits: 2 })})`}
       </ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { NextAuthProvider } from '@session/auth/client';
-import { formatDate, formatList } from '@/lib/locale-client';
+import { formatDate } from '@/lib/locale-client';
 import { COMMUNITY_DATE } from '@/lib/constants';
 import { AuthModule } from '@/app/faucet/AuthModule';
 
@@ -13,15 +13,15 @@ export function Faucet({ code }: { code?: string }) {
           <h1 className="text-5xl font-semibold">{dictionary('title')}</h1>
           <h2 className="text-lg font-semibold">{dictionary('referralTitle')}</h2>
           <p>{dictionary('referralDescription')}</p>
-          <h2 className="text-lg font-semibold">{dictionary('communityTitle')}</h2>
-          <p>
-            {dictionary.rich('communityDescription', {
-              connectionOptions: formatList(['Discord', 'Telegram']),
-              snapshotDate: formatDate(new Date(COMMUNITY_DATE.SESSION_TOKEN_COMMUNITY_SNAPSHOT), {
-                dateStyle: 'long',
-              }),
-            })}
-          </p>
+          {/*<h2 className="text-lg font-semibold">{dictionary('communityTitle')}</h2>*/}
+          {/*<p>*/}
+          {/*  {dictionary.rich('communityDescription', {*/}
+          {/*    connectionOptions: formatList(['Discord', 'Telegram']),*/}
+          {/*    snapshotDate: formatDate(new Date(COMMUNITY_DATE.SESSION_TOKEN_COMMUNITY_SNAPSHOT), {*/}
+          {/*      dateStyle: 'long',*/}
+          {/*    }),*/}
+          {/*  })}*/}
+          {/*</p>*/}
           <h2 className="text-lg font-semibold">{dictionary('oxenTitle')}</h2>
           <p>
             {dictionary.rich('oxenDescription', {
@@ -37,7 +37,7 @@ export function Faucet({ code }: { code?: string }) {
           <h2 className="text-lg font-semibold">{dictionary('walletRequirementTitle')}</h2>
           <p>{dictionary.rich('walletRequirementDescription')}</p>
         </div>
-        <div className="mt-6 h-max min-h-[400px] w-full max-w-3xl">
+        <div className="mt-6 flex h-max min-h-[400px] w-full max-w-xl flex-col items-center justify-center">
           <AuthModule code={code} />
         </div>
       </div>

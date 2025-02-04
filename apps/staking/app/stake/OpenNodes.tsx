@@ -5,66 +5,55 @@ import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useTranslations } from 'next-intl';
-import { useStakingBackendQuery, useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { NodesListSkeleton } from '@/components/NodesListModule';
-import { useMemo } from 'react';
-import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { getNodesBlsKeys } from '@/lib/queries/getNodesBlsKeys';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
-import { Button } from '@session/ui/ui/button';
+import { useEffect, useMemo } from 'react';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { sortContracts } from '@/hooks/useStakes';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { useNetworkStatus } from '@/components/StatusBar';
+import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
+import { useStakes } from '@/hooks/useStakes';
 
 export default function OpenNodes() {
-  const {
-    data: contractsData,
-    isLoading: isLoadingContracts,
-    refetch,
-    isError,
-  } = useStakingBackendSuspenseQuery(getContributionContracts);
-  const { data: blsKeysData, isLoading: isLoadingBlsKeys } =
-    useStakingBackendQuery(getNodesBlsKeys);
-  const { address } = useWallet();
+  const dictionary = useTranslations('modules.openNodes');
 
-  const contracts = useMemo(() => {
-    if (!contractsData) return null;
-    const contractsArray =
-      'contracts' in contractsData && Array.isArray(contractsData.contracts)
-        ? contractsData.contracts
-        : [];
+  const { contracts, network, isFetching, refetch, isError, isLoading } =
+    useOpenContributorContracts();
 
-    if (address) {
-      contractsArray.sort((a, b) => sortContracts(a, b, address));
-    }
+  const { hiddenContractsWithStakes } = useStakes();
 
-    return contractsArray;
-  }, [contractsData, address]);
+  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
 
-  const blsKeys = useMemo(() => {
-    if (!blsKeysData) return new Set<string>();
-    const blsKeysObject =
-      'bls_keys' in blsKeysData && typeof blsKeysData.bls_keys === 'object'
-        ? blsKeysData.bls_keys
-        : {};
+  const openContractBlsKeys = useMemo(() => {
+    return new Set(contracts.map(({ pubkey_bls }) => pubkey_bls));
+  }, [contracts]);
 
-    return new Set(Object.keys(blsKeysObject));
-  }, [blsKeysData]);
-
-  const filteredContracts = useMemo(() => {
-    if (!contracts) return [];
-    return contracts
-      .filter(({ status }) => status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib)
-      .filter(({ pubkey_bls }) => !blsKeys.has(pubkey_bls.slice(2)));
-  }, [contracts, blsKeys]);
+  useEffect(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, []);
 
   return isError ? (
-    <ErrorMessage refetch={refetch} />
-  ) : isLoadingContracts || isLoadingBlsKeys ? (
+    <ErrorMessage
+      refetch={refetch}
+      message={dictionary.rich('error')}
+      buttonText={dictionary('errorButton')}
+      buttonDataTestId={ButtonDataTestId.Open_Nodes_Error_Retry}
+    />
+  ) : isLoading ? (
     <NodesListSkeleton />
-  ) : filteredContracts?.length ? (
-    filteredContracts.map((contract) => <OpenNodeCard key={contract.address} contract={contract} />)
+  ) : contracts?.length || hiddenContractsWithStakes?.length ? (
+    <>
+      {hiddenContractsWithStakes
+        .filter(({ pubkey_bls }) => !openContractBlsKeys.has(pubkey_bls))
+        .map((contract) => (
+          <OpenNodeCard key={contract.address} contract={contract} showAlreadyRunningWarning />
+        ))}
+      {contracts.map((contract) => (
+        <OpenNodeCard key={contract.address} contract={contract} />
+      ))}
+    </>
   ) : (
     <NoNodes />
   );
@@ -76,24 +65,6 @@ function NoNodes() {
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>
       <p>{dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_DOCS) })}</p>
-    </ModuleGridInfoContent>
-  );
-}
-
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('modules.openNodes');
-  return (
-    <ModuleGridInfoContent>
-      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
     </ModuleGridInfoContent>
   );
 }

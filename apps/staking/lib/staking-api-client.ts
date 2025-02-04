@@ -4,7 +4,6 @@ import { createSessionStakingClient, SessionStakingClient } from '@session/staki
 import {
   getStakingBackendQueryArgs,
   getStakingBackendQueryWithParamsArgs,
-  type QueryOptions,
   StakingBackendQuery,
   StakingBackendQueryWithParams,
 } from '@/lib/staking-api';
@@ -13,6 +12,11 @@ import { useMemo } from 'react';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { usePreferences } from 'usepref';
 import { PREFERENCE, preferenceStorageDefaultItems } from '@/lib/constants';
+
+export type QueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
+  Parameters<typeof useQuery<Awaited<ReturnType<Q>>['data']>>[0],
+  'queryFn' | 'queryKey'
+>;
 
 let client: SessionStakingClient | undefined;
 
@@ -52,7 +56,7 @@ export function useStakingBackendSuspenseQuery<Q extends StakingBackendQuery>(qu
 
 export function useStakingBackendQuery<Q extends StakingBackendQuery>(
   query: Q,
-  queryOptions?: QueryOptions
+  queryOptions?: QueryOptions<Q>
 ) {
   const stakingBackendClient = useStakingBackendBrowserClient();
   return useQuery<Awaited<ReturnType<Q>>['data']>({
@@ -82,7 +86,7 @@ export function useStakingBackendSuspenseQueryWithParams<Q extends StakingBacken
 export function useStakingBackendQueryWithParams<Q extends StakingBackendQueryWithParams>(
   query: Q,
   params: Parameters<Q>[1],
-  queryOptions?: QueryOptions
+  queryOptions?: QueryOptions<Q>
 ) {
   const stakingBackendClient = useStakingBackendBrowserClient();
   return useQuery<Awaited<ReturnType<Q>>['data']>({

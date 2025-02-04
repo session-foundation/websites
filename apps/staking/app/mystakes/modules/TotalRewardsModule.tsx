@@ -10,7 +10,7 @@ import {
   ModuleDynamicContractReadText,
 } from '@/components/ModuleDynamic';
 import { useMemo } from 'react';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Address } from 'viem';
 import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
 

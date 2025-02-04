@@ -10,6 +10,7 @@ import {
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '../../lib/utils';
 import { Circle, type CircleVariantProps } from '../motion/shapes/circle';
+import type { DataTestId } from '../../data-test-ids';
 
 const circleRadius = 6;
 const extraRad = 1.875;
@@ -33,8 +34,16 @@ export const SliderLineCircle = forwardRef<
 
 const Slider = forwardRef<
   ElementRef<typeof SliderPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ value, max, className, children, ...props }, ref) => {
+  ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
+    dataTestIds?: {
+      slider0?: DataTestId;
+      slider25?: DataTestId;
+      slider50?: DataTestId;
+      slider75?: DataTestId;
+      slider100?: DataTestId;
+    };
+  }
+>(({ value, max, className, children, dataTestIds, ...props }, ref) => {
   const [showPercent, setShowPercent] = useState<boolean>(false);
   const decimalPercent =
     value?.[0] !== undefined && max !== undefined && max !== 0 ? value[0] / max : 0;
@@ -49,31 +58,35 @@ const Slider = forwardRef<
       <SliderPrimitive.Track className="bg-gray-lighter relative mx-1 h-0.5 w-full grow rounded-full">
         <SliderPrimitive.Range className="bg-session-green absolute h-full" />
         <div className="absolute left-0 right-0 flex h-full items-center justify-center">
-          <SliderLineCircle className="-left-0.5" variant="green" strokeVariant="green" />
           <SliderLineCircle
-            className="-right-0.5"
-            variant="grey-lighter"
-            strokeVariant="grey-lighter"
+            className="-left-0.5"
+            variant="green"
+            strokeVariant="green"
+            data-testid={dataTestIds?.slider0}
           />
           <SliderLineCircle
             className="-right-0.5"
             variant="grey-lighter"
             strokeVariant="grey-lighter"
+            data-testid={dataTestIds?.slider100}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.25 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.25 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${25}%)` }}
+            data-testid={dataTestIds?.slider25}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.5 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.5 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${50}% - 8px)` }}
+            data-testid={dataTestIds?.slider50}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.75 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.75 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${75}% - 8px)` }}
+            data-testid={dataTestIds?.slider75}
           />
           {children}
         </div>

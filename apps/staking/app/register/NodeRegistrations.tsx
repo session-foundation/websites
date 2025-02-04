@@ -12,14 +12,16 @@ import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
-import { TriangleAlertIcon } from '@session/ui/icons/TriangleAlertIcon';
-import { Button } from '@session/ui/ui/button';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useStakes } from '@/hooks/useStakes';
+import type { Registration } from '@session/staking-api-js/client';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { useNetworkStatus } from '@/components/StatusBar';
 
 export default function NodeRegistrations() {
+  const dictionary = useTranslations('modules.nodeRegistrations');
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
 
   // TODO: use once we have user preferences
@@ -33,7 +35,7 @@ export default function NodeRegistrations() {
 
   const { address, isConnected } = useWallet();
 
-  const { data, isLoading, isError, refetch } = useStakingBackendQueryWithParams(
+  const { data, isLoading, isError, refetch, isFetching } = useStakingBackendQueryWithParams(
     getNodeRegistrations,
     { address: address! },
     {
@@ -44,9 +46,21 @@ export default function NodeRegistrations() {
     }
   );
 
+  const network = useMemo(
+    () => (data && 'network' in data && data.network ? data.network : null),
+    [data]
+  );
+
+  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
+
   const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
-  const nodes = useMemo(() => {
+  /**
+   * - Sorted in descending order by the `timestamp` of the registration.
+   * - Remove registrations that have bls keys already in the smart contract.
+   * - Remove duplicate registrations, keeping only the most recent.
+   */
+  const registrations = useMemo(() => {
     if (
       showNoNodes ||
       !data ||
@@ -58,16 +72,38 @@ export default function NodeRegistrations() {
       return [];
     }
 
-    return data.registrations.filter(({ pubkey_bls }) => !addedBlsKeys.has(pubkey_bls));
+    const addedRegistrationBlsKeys = new Set();
+
+    return (data.registrations as Array<Registration>)
+      .sort(({ timestamp: tA }, { timestamp: tB }) => tB - tA)
+      .filter(({ pubkey_bls }) => {
+        if (!addedBlsKeys.has(pubkey_bls) && !addedRegistrationBlsKeys.has(pubkey_bls)) {
+          addedRegistrationBlsKeys.add(pubkey_bls);
+          return true;
+        }
+        return false;
+      });
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
+  useEffect(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, []);
+
   return isError ? (
-    <ErrorMessage refetch={refetch} />
+    <ErrorMessage
+      refetch={refetch}
+      message={dictionary.rich('error')}
+      buttonText={dictionary('errorButton')}
+      buttonDataTestId={ButtonDataTestId.Open_Nodes_Error_Retry}
+    />
   ) : address ? (
     isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
-    ) : nodes?.length ? (
-      nodes.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
+    ) : registrations?.length ? (
+      registrations.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
     ) : (
       <NoNodes />
     )
@@ -97,24 +133,6 @@ function NoNodes() {
       <p>
         {dictionary.rich('noNodesP2', { link: externalLink(URL.SESSION_NODE_SOLO_SETUP_DOCS) })}
       </p>
-    </ModuleGridInfoContent>
-  );
-}
-
-function ErrorMessage({ refetch }: { refetch: () => void }) {
-  const dictionary = useTranslations('modules.nodeRegistrations');
-  return (
-    <ModuleGridInfoContent>
-      <TriangleAlertIcon className="stroke-warning h-20 w-20" />
-      <p>{dictionary.rich('error')}</p>
-      <Button
-        data-testid={ButtonDataTestId.Open_Nodes_Error_Retry}
-        rounded="md"
-        size="lg"
-        onClick={refetch}
-      >
-        {dictionary('errorButton')}
-      </Button>
     </ModuleGridInfoContent>
   );
 }

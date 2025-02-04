@@ -34,7 +34,14 @@ export interface Contributor {
 
 export interface GetContributionContractsResponse {
   network: NetworkInfo;
-  contracts: ContributorContractInfo[];
+  contracts: Array<ContributorContractInfo>;
+  added_bls_keys: Record<number, string>;
+}
+
+/** GET /contract/contribution/<sn key> */
+export interface GetContributionContractForNodePubkeyResponse {
+  network: NetworkInfo;
+  contracts: Array<ContributorContractInfo>;
 }
 
 /** GET /stakes/<32 byte address> */
@@ -71,7 +78,7 @@ export type NodeInfo = {
   pubkey_bls: string;
   pubkey_ed25519: string;
   public_ip: string | null;
-  pulse_votes: any | null;
+  pulse_votes: unknown | null;
   quorumnet_port: number | null;
   registration_height: number;
   registration_hf_version: string;
@@ -115,9 +122,12 @@ export enum CONTRIBUTION_CONTRACT_STATUS {
 }
 
 export type ContributorContractInfo = {
-  address: string;
+  address: `0x${string}`;
   contributors: Array<StakeContributor>;
+  created_timestamp: number;
   fee: number;
+  last_added_timestamp: number | null;
+  manual_finalize: boolean;
   node_add_timestamp: number | null;
   operator_address: string;
   pubkey_bls: string;
@@ -127,7 +137,7 @@ export type ContributorContractInfo = {
 };
 
 export type ArbitrumEvent = {
-  args: any;
+  args: unknown;
   block: number;
   main_arg: string | null;
   name: string;
@@ -143,6 +153,7 @@ export interface GetStakesResponse {
   network: NetworkInfo;
   contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
+  added_bls_keys: Record<number, string>;
 }
 
 /** /store */
@@ -178,6 +189,7 @@ export interface Registration {
 }
 
 export interface LoadRegistrationsResponse {
+  network: NetworkInfo;
   registrations: Registration[];
 }
 
@@ -383,6 +395,18 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return this.request<GetContributionContractsResponse>(options);
+  }
+
+  public async getContributionContractForNodePubkey({
+    nodePubKey,
+  }: {
+    nodePubKey: string;
+  }): Promise<StakingBackendResponse<GetContributionContractForNodePubkeyResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/contract/contribution/${nodePubKey}`,
+      method: 'GET',
+    };
+    return this.request<GetContributionContractForNodePubkeyResponse>(options);
   }
 
   /**

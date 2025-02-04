@@ -1,7 +1,7 @@
 import type { Address } from 'viem';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { useMemo } from 'react';
 import { useStakes } from '@/hooks/useStakes';
 import { parseStakeEventState, STAKE_EVENT_STATE } from '@/components/StakedNode/state';

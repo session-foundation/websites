@@ -13,7 +13,7 @@ const NodeRegistrationCard = forwardRef<
   HTMLAttributes<HTMLDivElement> & { node: Registration }
 >(({ className, node, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.pending');
-  const actionModulesRegisterDictionary = useTranslations('actionModules.register');
+  const dictRegistration = useTranslations('actionModules.registration.shared');
   const titleFormat = useTranslations('modules.title');
   const pathname = usePathname();
 
@@ -95,7 +95,7 @@ const NodeRegistrationCard = forwardRef<
     >
       <NodeItem>
         <NodeItemLabel>
-          {titleFormat('format', { title: actionModulesRegisterDictionary('preparedAtTimestamp') })}
+          {titleFormat('format', { title: dictRegistration('submit.preparedAt') })}
         </NodeItemLabel>
         <NodeItemValue>{preparedTimer}</NodeItemValue>
       </NodeItem>

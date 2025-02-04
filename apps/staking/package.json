@@ -6,8 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "build:large": "NO_MINIFY=true next build",
+    "build:ci": "next build",
     "start": "next start",
-    "test": "jest",
+    "test:local": "jest",
     "check-types": "tsc --noEmit",
     "check-telemetry": "next telemetry",
     "lint": "eslint ."

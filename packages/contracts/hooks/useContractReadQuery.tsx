@@ -27,6 +27,7 @@ export type UseContractRead<Data> = ContractReadQueryProps & {
 export type ContractReadQueryFetchOptions = {
   /** Set enabled to true to enable automatic fetching when the query mounts or changes query keys. To manually fetch the query, use the readContract method returned from the useContractReadQuery instance. Defaults to false. */
   enabled?: boolean;
+  gcTime?: number;
 };
 
 export function useContractReadQuery<
@@ -41,6 +42,7 @@ export function useContractReadQuery<
   enabled,
   chainIdOverride,
   args,
+  gcTime,
 }: {
   contract: T;
   args?: Args;
@@ -67,6 +69,7 @@ export function useContractReadQuery<
     query: {
       enabled,
       refetchOnWindowFocus: false,
+      gcTime,
     },
   });
 

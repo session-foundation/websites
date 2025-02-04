@@ -1,14 +1,11 @@
 'use client';
 
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
-import { useSession } from '@session/auth/client';
-import { DiscordAuthButton } from '@session/auth/components/DiscordAuthButton';
-import { TelegramAuthButton } from '@session/auth/components/TelegramAuthButton';
-import { ModuleGridHeader } from '@session/ui/components/ModuleGrid';
+import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
 import { Button } from '@session/ui/ui/button';
 import { Input } from '@session/ui/ui/input';
 import { useTranslations } from 'next-intl';
-import ActionModule, { ActionModuleDivider } from '@/components/ActionModule';
+import ActionModule from '@/components/ActionModule';
 import { WalletAddTokenWithLocales } from '@/components/WalletAddTokenWithLocales';
 import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -21,6 +18,7 @@ import {
   FormErrorMessage,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
   FormSubmitButton,
 } from '@session/ui/ui/form';
@@ -56,8 +54,8 @@ export const getFaucetFormSchema = () => {
     walletAddress: z.string().refine((value) => isAddress(value), {
       message: dictionary('error.invalidAddress', { example: '0x...' }),
     }),
-    discordId: z.string().optional(),
-    telegramId: z.string().optional(),
+    // discordId: z.string().optional(),
+    // telegramId: z.string().optional(),
     code: z.string().optional(),
   });
 };
@@ -70,30 +68,31 @@ export const AuthModule = ({ code }: { code?: string }) => {
   const [submitAttemptCounter, setSubmitAttemptCounter] = useState<number>(0);
   const [formState, setFormState] = useState<FORM_STATE>(FORM_STATE.LANDING);
   const [faucetError, setFaucetError] = useState<FAUCET_ERROR | null>(null);
-  const { data, status: authStatus } = useSession();
+  // const { data, status: authStatus } = useSession();
   const [transactionHash, setTransactionHash] = useState<Address | null>(null);
   const [transactionHistory, setTransactionHistory] = useState<TransactionHistory[]>([]);
   const { address, disconnect, isConnected: isConnectedWallet, chainId, switchChain } = useWallet();
   const { setIsBalanceVisible } = useWalletButton();
-
   const FormSchema = getFaucetFormSchema();
 
-  const isConnected = authStatus === 'authenticated';
-  /** @ts-expect-error -- Workaround to get id */
-  const discordId = data?.user?.discordId;
-  /** @ts-expect-error -- Workaround to get id */
-  const telegramId = data?.user?.telegramId;
+  // const isConnected = authStatus === 'authenticated';
+  // /** @ts-expect-error -- Workaround to get id */
+  // const discordId = data?.user?.discordId;
+  // /** @ts-expect-error -- Workaround to get id */
+  // const telegramId = data?.user?.telegramId;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       walletAddress: '',
-      discordId: '',
-      telegramId: '',
+      // discordId: '',
+      // telegramId: '',
       code: code ?? '',
     },
     reValidateMode: 'onChange',
   });
+
+  const referralCode = form.watch('code');
 
   const successMessage = (hash: Address) => (
     <div className="flex flex-col text-sm font-normal">
@@ -111,13 +110,13 @@ export const AuthModule = ({ code }: { code?: string }) => {
       });
     }
 
-    if (discordId) {
-      data.discordId = discordId;
-    }
-
-    if (telegramId) {
-      data.telegramId = telegramId;
-    }
+    // if (discordId) {
+    //   data.discordId = discordId;
+    // }
+    //
+    // if (telegramId) {
+    //   data.telegramId = telegramId;
+    // }
 
     const promise: Promise<Address> = new Promise((resolve, reject) =>
       transferTestTokens(data).then((res) => {
@@ -127,7 +126,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
 
         const { hash, error, faucetError, history } = res;
 
-        if (history && history.length) {
+        if (history?.length) {
           setTransactionHistory(history);
         }
 
@@ -218,7 +217,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
         switchChain({ chainId: arbitrumSepolia.id });
       }
     } else {
-      form.reset({ walletAddress: '' });
+      form.reset({ walletAddress: '', code: referralCode });
       form.clearErrors();
       setTransactionHash(null);
     }
@@ -233,7 +232,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
   }, [setIsBalanceVisible]);
 
   return (
-    <ActionModule contentClassName="gap-3">
+    <ActionModule contentClassName="gap-4" contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
       {formState !== FORM_STATE.LANDING && formState !== FORM_STATE.SUCCESS ? (
         <span
           className="text-session-text absolute left-6 top-4 inline-flex w-min gap-1 text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
@@ -245,17 +244,17 @@ export const AuthModule = ({ code }: { code?: string }) => {
       ) : null}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <ModuleGridHeader />
-
+          {formState !== FORM_STATE.LANDING ? <ModuleGridHeader /> : null}
           <FormField
             control={form.control}
             name="walletAddress"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col gap-0.5">
+                <FormLabel className="text-session-text">Wallet address</FormLabel>
                 <FormControl>
                   <div className="flex w-full items-center gap-2">
                     <Input
-                      placeholder={address ?? dictionary('inputPlaceholder')}
+                      placeholder={address ?? '0x'}
                       disabled={!!address}
                       className="w-full"
                       {...field}
@@ -279,7 +278,21 @@ export const AuthModule = ({ code }: { code?: string }) => {
               </FormItem>
             )}
           />
-
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-0.5">
+                <FormLabel className="text-session-text">Referral code (optional)</FormLabel>
+                <FormControl>
+                  <div className="flex w-full items-center gap-2">
+                    <Input className="w-full" {...field} />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {formState === FORM_STATE.CONFIRM ? (
             <div className="flex flex-col gap-2">
               <p className="text-center text-sm">
@@ -292,33 +305,33 @@ export const AuthModule = ({ code }: { code?: string }) => {
                 })}
               </p>
 
-              {discordId ? (
-                <p className="text-center text-sm">
-                  {dictionary.rich('confirm.discordDisclaimer', {
-                    tooltip: (children) => (
-                      <FaucetTextTooltip
-                        tooltip={dictionary('confirm.discordDisclaimerUserIdTooltip')}
-                      >
-                        {children}
-                      </FaucetTextTooltip>
-                    ),
-                  })}
-                </p>
-              ) : null}
+              {/*{discordId ? (*/}
+              {/*  <p className="text-center text-sm">*/}
+              {/*    {dictionary.rich('confirm.discordDisclaimer', {*/}
+              {/*      tooltip: (children) => (*/}
+              {/*        <FaucetTextTooltip*/}
+              {/*          tooltip={dictionary('confirm.discordDisclaimerUserIdTooltip')}*/}
+              {/*        >*/}
+              {/*          {children}*/}
+              {/*        </FaucetTextTooltip>*/}
+              {/*      ),*/}
+              {/*    })}*/}
+              {/*  </p>*/}
+              {/*) : null}*/}
 
-              {telegramId ? (
-                <p className="text-center text-sm">
-                  {dictionary.rich('confirm.telegramDisclaimer', {
-                    tooltip: (children) => (
-                      <FaucetTextTooltip
-                        tooltip={dictionary('confirm.telegramDisclaimerUserIdTooltip')}
-                      >
-                        {children}
-                      </FaucetTextTooltip>
-                    ),
-                  })}
-                </p>
-              ) : null}
+              {/*{telegramId ? (*/}
+              {/*  <p className="text-center text-sm">*/}
+              {/*    {dictionary.rich('confirm.telegramDisclaimer', {*/}
+              {/*      tooltip: (children) => (*/}
+              {/*        <FaucetTextTooltip*/}
+              {/*          tooltip={dictionary('confirm.telegramDisclaimerUserIdTooltip')}*/}
+              {/*        >*/}
+              {/*          {children}*/}
+              {/*        </FaucetTextTooltip>*/}
+              {/*      ),*/}
+              {/*    })}*/}
+              {/*  </p>*/}
+              {/*) : null}*/}
             </div>
           ) : null}
 
@@ -337,6 +350,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
           )}
         </form>
       </Form>
+
       {formState !== FORM_STATE.LANDING && transactionHash ? (
         <Button
           data-testid={ButtonDataTestId.Faucet_Submit}
@@ -358,24 +372,27 @@ export const AuthModule = ({ code }: { code?: string }) => {
         </Button>
       ) : null}
 
-      {formState === FORM_STATE.LANDING ? (
+      {formState === FORM_STATE.LANDING && !isConnectedWallet ? (
         <>
           <span className="text-center">- {generalDictionary('or')} -</span>
-          <WalletButtonWithLocales rounded="md" size="lg" className="uppercase" hideBalance />
-          {!code ? (
-            <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">
-              {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}
-              {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}
-            </span>
-          ) : null}
+          <WalletButtonWithLocales
+            rounded="md"
+            size="md"
+            className="flex w-full items-center justify-center text-center uppercase"
+            hideBalance
+          />
+          {/*{!code ? (*/}
+          {/*  <span className="inline-flex w-full flex-col gap-2 uppercase xl:flex-row [&>*]:flex-grow">*/}
+          {/*    {!isConnected || (isConnected && discordId) ? <DiscordAuthButton /> : null}*/}
+          {/*    {!isConnected || (isConnected && telegramId) ? <TelegramAuthButton /> : null}*/}
+          {/*  </span>*/}
+          {/*) : null}*/}
         </>
       ) : null}
 
       {transactionHistory.length ? (
         <FaucetTransactions transactionHistory={transactionHistory} />
       ) : null}
-
-      <ActionModuleDivider />
 
       {formState === FORM_STATE.LANDING ? (
         <Button
@@ -396,15 +413,15 @@ export const AuthModule = ({ code }: { code?: string }) => {
       ) : null}
 
       {faucetError === FAUCET_ERROR.FAUCET_OUT_OF_TOKENS ? (
-        <p className="text-destructive text-base">{dictionary('error.faucetOutOfTokens')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.faucetOutOfTokens')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INCORRECT_CHAIN ? (
-        <p className="text-destructive text-base">{dictionary('error.incorrectChain')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.incorrectChain')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INVALID_ADDRESS ? (
-        <p className="text-destructive text-base">{dictionary('error.invalidAddress')}</p>
+        <p className="text-destructive text-base">{dictionary.rich('error.invalidAddress')}</p>
       ) : null}
 
       {/** NOTE: The eth requirement is removed for now, keep this here in case we need it again in the future */}

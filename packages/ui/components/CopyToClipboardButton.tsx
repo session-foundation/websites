@@ -57,6 +57,7 @@ const CopyToClipboardButton = forwardRef<HTMLButtonElement, CopyToClipboardButto
         variant="ghost"
         rounded="md"
         size="collapse"
+        type="button"
         className={cn('select-all p-0', className)}
         ref={ref}
         {...props}

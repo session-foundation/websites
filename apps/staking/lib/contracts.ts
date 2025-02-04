@@ -1,60 +1,70 @@
+import { getContractErrorName } from '@session/contracts';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import type { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
+import type { StakeContributor } from '@session/staking-api-js/client';
+import { toast } from '@session/ui/lib/toast';
+import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import type { useTranslations } from 'next-intl';
 import type { SimulateContractErrorType, TransactionExecutionErrorType, WriteContractErrorType } from 'viem';
-import { getContractErrorName } from '@session/contracts';
-import { toast } from '@session/ui/lib/toast';
-import { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
-import { PROGRESS_STATUS } from '@session/ui/motion/progress';
-import type { StakeContributor } from '@session/staking-api-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
 
 /**
  * Formats a localized contract error message based on the error type and the dictionary.
  * @param dictionary - The dictionary to use for localization.
- * @param parentDictKey - The parent dictionary key to use for localization. The key used in `useTranslations`
+ * @param dictGeneral - The general dictionary to use for localization.
  * @param errorGroupDictKey - The error group dictionary key to use for localization.
  * @param error - The error to format.
  * @returns The formatted error message.
  */
 export const formatLocalizedContractErrorMessage = ({
-  dictionary,
-  parentDictKey,
+  dict,
+  dictGeneral,
   errorGroupDictKey,
   error,
 }: {
-  dictionary: ReturnType<typeof useTranslations>;
-  parentDictKey: string;
+  dict: ReturnType<typeof useTranslations>;
+  dictGeneral: ReturnType<typeof useTranslations<'general'>>;
   errorGroupDictKey: string;
   error: Error | SimulateContractErrorType | WriteContractErrorType | TransactionExecutionErrorType;
 }) => {
   const parsedName = getContractErrorName(error);
   const dictKey = `${errorGroupDictKey}.errors.${parsedName}`;
-  /** @ts-expect-error -- We handle the invalid key case in the if statement below */
-  let reason = dictionary(dictKey);
-  if (reason === `${parentDictKey}.${dictKey}`) reason = parsedName;
+
+  /** @ts-expect-error -- the `.has` check makes this fine */
+  let reason = dict.has(dictKey) ? dict(dictKey) : null;
+
+  if (!reason) {
+    /** @ts-expect-error -- the `.has` check makes this fine */
+    reason = dictGeneral.has(`error.${parsedName}`) ? dictGeneral(`error.${parsedName}`) : null;
+  }
+
+  if (!reason) {
+    reason = parsedName;
+  }
+
   /** @ts-expect-error -- This key should exist, but this logs an error and returns the key if it doesn't */
-  return dictionary(`${errorGroupDictKey}.errorTemplate`, { reason });
+  return dict(`${errorGroupDictKey}.errorTemplate`, { reason });
 };
 
 /**
  * Formats a localized contract error messages based on the error types and the dictionary. This issued for all contract errors from a single contract lifecycle.
- * @param dictionary - The dictionary to use for localization.
- * @param parentDictKey - The parent dictionary key to use for localization. The key used in `useTranslations`
+ * @param dict - The dictionary to use for localization.
+ * @param dictGeneral - The general dictionary to use for localization.
  * @param errorGroupDictKey - The error group dictionary key to use for localization.
- * @param error - The error to format.
+ * @param simulateError - The simulate error to format.
+ * @param writeError - The write error to format.
+ * @param transactionError - The transaction error to format.
  * @returns The formatted error message.
  */
 export const formatAndHandleLocalizedContractErrorMessages = ({
-  dictionary,
-  dictionaryGeneral,
-  parentDictKey,
+  dict,
+  dictGeneral,
   errorGroupDictKey,
   simulateError,
   writeError,
   transactionError,
 }: {
-  dictionary: ReturnType<typeof useTranslations>;
-  dictionaryGeneral: ReturnType<typeof useTranslations>;
-  parentDictKey: string;
+  dict: ReturnType<typeof useTranslations>;
+  dictGeneral: ReturnType<typeof useTranslations<'general'>>;
   errorGroupDictKey: string;
   simulateError?: SimulateContractErrorType | Error | null;
   writeError?: WriteContractErrorType | Error | null;
@@ -63,29 +73,33 @@ export const formatAndHandleLocalizedContractErrorMessages = ({
   if (simulateError) {
     toast.handleError(simulateError);
     return formatLocalizedContractErrorMessage({
-      dictionary,
-      parentDictKey,
+      dict,
+      dictGeneral,
       errorGroupDictKey,
       error: simulateError,
     });
-  } else if (writeError) {
+  }
+
+  if (writeError) {
     toast.handleError(writeError);
     return formatLocalizedContractErrorMessage({
-      dictionary,
-      parentDictKey,
+      dict,
+      dictGeneral,
       errorGroupDictKey,
       error: writeError,
     });
-  } else if (transactionError) {
+  }
+
+  if (transactionError) {
     toast.handleError(transactionError);
     return formatLocalizedContractErrorMessage({
-      dictionary,
-      parentDictKey,
+      dict,
+      dictGeneral,
       errorGroupDictKey,
       error: transactionError,
     });
   }
-  return dictionaryGeneral('unknownError');
+  return dictGeneral('unknownError');
 };
 
 /**

@@ -12,7 +12,26 @@
     "notFound": "Not Found",
     "nodeNotFound": "Node Not Found",
     "soon": "Soon",
-    "now": "now"
+    "now": "now",
+    "none": "None",
+    "error": {
+      "UserRejectedRequest": "user rejected the request",
+      "InvalidBLSSignature": "invalid BLS signature, try again later",
+      "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
+      "SignatureExpired": "signature expired, try again later",
+      "InsufficientBalance": "insufficient {tokenSymbol} balance for transaction"
+    }
+  },
+  "maintenance": {
+    "title": "Maintenance Notice",
+    "description": "Sorry! The staking portal is under maintenance. Please check back later."
+  },
+  "fee": {
+    "networkFee": "Network Fee",
+    "networkFeeTooltip": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link>",
+    "networkFeeTooltipWithFormula": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link> <br></br> <formula></formula>",
+    "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate will be inaccurate.",
+    "gasHigh": "The network fee is higher than usual, the price of Gas is higher than normal on {mainNetworkChain} due to high demand. <link>Learn more</link>"
   },
   "maths": {
     "outOf": "{count}/{max}"
@@ -91,7 +110,7 @@
     "information": {
       "title": "Getting test {tokenSymbol}",
       "referralTitle": "Referrals",
-      "referralDescription": "If you received a valid referral link from a Session Token community member, you are eligible to receive test {tokenSymbol}.",
+      "referralDescription": "If you received a valid referral code from a Session Token community member, you are eligible to receive test {tokenSymbol}.",
       "communityTitle": "Session Token Community Members",
       "communityDescription": "If you were part of the Token Community <session-token-community-snapshot-link></session-token-community-snapshot-link>  taken on {snapshotDate}, you are eligible to receive test {tokenSymbol}. Connect to {connectionOptions}, and then connect your wallet or enter your wallet address manually. If your eligibility is confirmed, test {tokenSymbol} will be sent to this address.",
       "oxenTitle": "Oxen Service Nodes",
@@ -148,7 +167,7 @@
         "faucetOutOfTokens": "Faucet is out of {tokenSymbol}, Please <contact-support-link></contact-support-link> for assistance.",
         "faucetOutOfTokensTextOnly": "Faucet is out of {tokenSymbol}, Please contact support for assistance.",
         "invalidService": "The {service} account you connected was not part of the community snapshot on {snapshotDate} and is not eligible for testnet access.",
-        "invalidOxenAddress": "This wallet address was not registered for the {oxenProgram} on {oxenRegistrationDate} and is not eligible for testnet access. Try connecting with Discord or Telegram instead.",
+        "invalidOxenAddress": "This wallet address was not registered for the {oxenProgram} on {oxenRegistrationDate} and is not eligible for testnet access.",
         "alreadyUsedService": "The connected {service} account has already been used to claim testnet {tokenSymbol} for another wallet address.",
         "alreadyUsed": "The connected wallet address has already been used to claim testnet {tokenSymbol}.",
         "authFailed": "{service} authentication failed. Please refresh the page and try again.",
@@ -182,6 +201,9 @@
     },
     "shared": {
       "error": "Error"
+    },
+    "nodes": {
+      "title": "Session Nodes"
     },
     "openNodes": {
       "title": "Open Session Nodes",
@@ -248,13 +270,13 @@
       "title": "Claim",
       "dialog": {
         "title": "Claim Rewards",
-        "claimFee": "Claim Fee",
-        "claimFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link>",
+        "updateBalanceCost": "Update Balance Cost:",
+        "claimRewardsCost": "Claim Rewards Cost:",
         "amountClaimable": "Amount Claimable",
         "amountClaimableTooltip": "Amount of {tokenSymbol} rewards able to be claimed.",
         "buttons": {
-          "submit": "Claim {tokenAmount}",
-          "submitAria": "Claim {tokenAmount} with a claim gas fee of {gasAmount} {gasTokenSymbol}"
+          "submit": "Claim {tokenSymbol}",
+          "submitAria": "Claim {tokenSymbol} with a claim gas fee of {gasAmount} {gasTokenSymbol}"
         },
         "alert": {
           "gasFetchFailedUpdateBalance": "Failed to fetch fee estimate for updating rewards balance. Fee estimate may be inaccurate.",
@@ -272,7 +294,6 @@
           "success": "Updated rewards amount on Arbitrum",
           "errorTemplate": "Failed to update rewards amount on Arbitrum, {reason}",
           "errors": {
-            "UserRejectedRequest": "user rejected the request",
             "NullAddress": "recipient address is invalid",
             "RecipientRewardsTooLow": "rewards balance already updated",
             "InvalidBLSSignature": "invalid BLS signature, try again later",
@@ -284,9 +305,7 @@
           "pending": "Claiming {tokenAmount} on Arbitrum",
           "success": "Claimed {tokenAmount} on Arbitrum",
           "errorTemplate": "Failed to claim rewards on Arbitrum, {reason}",
-          "errors": {
-            "UserRejectedRequest": "user rejected the request"
-          }
+          "errors": {}
         }
       }
     },
@@ -304,7 +323,7 @@
     },
     "referral": {
       "title": "Referral Program",
-      "description1": "Grow the Session Network by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
+      "description1": "Grow the {sessionNetwork} by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
       "description2": "Learn more <link>here</link>.",
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
       "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",
@@ -315,7 +334,9 @@
     "general": {
       "publicKeyShort": "SN Key",
       "publicKeyLong": "Session Node Public Key",
-      "publicKeyDescription": "The identifier for the Session Node.",
+      "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}",
+      "blsKey": "BLS Key",
+      "blsKeyDescription": "This node's public cryptographic key for interacting Session smart contracts",
       "operatorAddress": "Operator Address",
       "operatorAddressTooltip": "The wallet address of the node operator.",
       "beneficiaryAddress": "Beneficiary Address",
@@ -340,87 +361,247 @@
   },
   "actionModules": {
     "shared": {
+      "notEnoughTokensAlert": "It looks like you don't have enough {tokenSymbol} to stake to this node. It looks like your wallet has {walletAmount}, please make sure you have at least {tokenAmount} in your wallet before staking.",
       "stakeAmount": "Stake Amount",
-      "stakeAmountDescription": "Amount of {tokenSymbol} to stake to the Session node."
+      "stakeAmountDescription": "Amount of {tokenSymbol} you are staking to this node",
+      "totalStaked": "Total Staked",
+      "totalStakedDescription": "The amount of {tokenSymbol} staked to this node, including your stake",
+      "yourStake": "Your Stake",
+      "yourStakeDescription": "The amount of {tokenSymbol} you have staked to this node",
+      "operatorAddress": "Operator Address",
+      "operatorAddressTooltip": "The address of the node operator.",
+      "operatorAddressDescription": "The wallet address of the node operator",
+      "autoActivate": "Automatic Activation",
+      "autoActivateDescription": "If enabled, this node will automatically join the network once fully staked",
+      "rewardsAddress": "Rewards Address",
+      "rewardsAddressDescription": "The wallet address that you will claim rewards to",
+      "operatorFee": "Operator Fee",
+      "operatorFeeDescription": "Percentage of node rewards taken as a fee by the operator, with remaining rewards distributed to contributors, proportional to stake amount",
+      "reserveSlots": "Reserve Slots",
+      "reserveSlotsDescription": "You can reserve up stakes for specific contributors to your node.",
+      "buttonEditField": {
+        "aria": "Edit {field}"
+      },
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "progress": "Progress",
+      "retry": "Retry",
+      "proxyApprovalCost": "Proxy Approval Cost:",
+      "proxyApprovalNotNeededTooltip": "Already approved for {amount}, proxy approval not needed for stake amount."
     },
     "stakeAmount": {
       "validation": {
         "underMinOperator": "Node operators must stake at least {min} (25%)",
         "underMin": "You must stake at least {min}",
-        "overMax": "You cannot stake more than {max}"
+        "overMax": "You cannot stake more than {max}",
+        "incorrectFormat": "Unable to parse stake amount, please re-enter the value",
+        "reduceForbidden": "You cannot reduce your stake amount, you can only increase it or remove all of it."
       }
     },
     "operatorFee": {
       "validation": {
         "underMin": "Operator fee must be at least {min}",
         "overMax": "Operator fee cannot be more than {max}",
-        "unableToParse": "Unable to parse operator fee, please re-enter the value"
+        "incorrectFormat": "Unable to parse operator fee, please re-enter the value"
       }
     },
-    "beneficiaryAddress": {
+    "ethAddress": {
       "validation": {
-        "invalidAddress": "Invalid beneficiary address, please re-enter the value"
+        "invalidAddress": "Invalid Ethereum Address"
       }
     },
-    "register": {
-      "title": "Register a New Node",
-      "preparedAtTimestamp": "Registration Prepared",
-      "preparedAtTimestampDescription": "When the node was prepared for registration",
-      "minContribution": "Min: <text-bold>{min}</text-bold>",
-      "maxContribution": "Max: <text-bold>{max}</text-bold>",
-      "feeNA": "N/A",
-      "feeNADescription": "Single contributor nodes cannot have an operator fee, as the operator already receives all rewards.",
-      "disabled": "Registrations are disabled",
-      "advancedOptions": {
-        "title": "Advanced Options",
-        "autoRegister": "Auto-Register",
-        "autoRegisterDescription": "Automatically registers the node once the full stake is reached.",
-        "beneficiary": "Rewards Beneficiary Address",
-        "beneficiaryDescription": "Enter the beneficiary address where staking rewards should be sent. If left empty, rewards will be sent to your wallet address."
-      },
-      "button": {
-        "submitSolo": "Register Solo Node and Stake {amount}",
-        "submitMultiRegisterAndStake": "Create & Stake to Multi-Contributor Node",
-        "submitMultiRegisterOnly": "Create Multi-Contributor Node",
-        "submitMultiStake": "Stake {amount} to Multi-Contributor Node",
-        "addReserved": "Add Reserved Slots",
-        "addReservedDisabledDescription": "Reserved slots are currently disabled. Please try again later.",
-        "submitMultiRegisterDisabledDescription": "Multi-contributor registrations are currently disabled. Please try again later.",
-        "submitMultiRegisterDisabledIsSoloDescription": "You can't create a multi-contributor node if you are staking the full amount.",
-        "submitSoloDisabledNotSolo": "You must stake the full amount to register a solo node."
-      },
-      "description": "Please start the registration process from your client or select from the list of open Session Node.",
-      "notFound": {
-        "description": "The registration you are looking for could not be found.",
-        "foundOpenNode": "It looks like this node is already registered and open for staking:",
-        "foundRunningNode": "It looks like this node is already registered and running, go to <my-stakes-link>My Stakes</my-stakes-link> to see your stakes:",
-        "foundRunningNodeOtherOperator": "It looks like this node is already registered and running for another operator:"
-      },
-      "notEnoughTokensAlert": "It looks like you don't have enough {tokenSymbol} to stake to this node. It looks like your wallet has {walletAmount}, please make sure you have at least {tokenAmount} in your wallet before registering.",
-      "goToMyStakes": "The Session Node has been successfully registered and joined the network. It will appear on <link></link> soon",
-      "stageSolo": {
-        "validate": {
-          "idle": "Validating registration",
-          "pending": "Validating registration",
-          "success": "Registration validated",
-          "errorTemplate": "Failed to validate registration, {reason}",
-          "errors": {
-            "InvalidBLSSignature": "invalid BLS signature, try again later"
-          }
+    "rewardsAddress": {
+      "validation": {
+        "invalidAddress": "Invalid rewards address, please re-enter the value"
+      }
+    },
+    "staking": {
+      "titleNewStake": "Stake to a Node",
+      "titleManageStake": "Manage Stake",
+      "rewardsAddress": "Add Separate Rewards Address (Optional)",
+      "rewardsAddressDescription": "Rewards will be claimable to the wallet you are registering with, or you can specify a different wallet address",
+      "manage": {
+        "stakeAmountAdditional": "Additional Stake Amount",
+        "stakeAmountAdditionalDescription": "Additional stake amount to add to the existing stake.",
+        "buttonRemoveStake": {
+          "text": "Remove Stake",
+          "aria": "Remove stake from the node"
         },
+        "withdrawContribution": {
+          "idle": "Withdrawing {tokenSymbol} from Open Node",
+          "pending": "Withdrawing {tokenSymbol} from Open Node",
+          "success": "Withdrawing {tokenSymbol} from Open Node",
+          "errorTemplate": "Failed to withdraw {tokenSymbol} from Open Node, {reason}",
+          "errors": {}
+        }
+      },
+      "buttonStake": {
+        "text": "Stake",
+        "aria": "Stake to the node"
+      },
+      "error": {
+        "specialTitle": "Something went wrong",
+        "specialDescription": "Something went wrong when trying to stake to the node, <please-contract-support-link></please-contract-support-link>"
+      },
+      "disabledReason": {
+        "alreadyFinalized": "The node details are already finalized and can't be edited.",
+        "alreadyContributedOperatorFee": "The operator fee can't be edited once another address has contributed to the node.",
+        "alreadyContributedReservedSlots": "The reserved slots can't be edited once another address has contributed to the node.",
+        "pastTimeLimitStakeAmountRemove": "You can't remove your stake from a node after {timeLimitAmount} from your previous stake to that node."
+      }
+    },
+    "registration": {
+      "shared": {
+        "buttonContinue": {
+          "text": "Continue",
+          "aria": "Continue to the next stage of the registration process"
+        },
+        "buttonConfirm": {
+          "text": "Confirm",
+          "aria": "Confirm the input and continue to the next stage of the registration process"
+        },
+        "buttonBack": {
+          "text": "Back",
+          "aria": "Go back to the previous stage of the registration process"
+        },
+        "buttonConfirmAndStake": {
+          "text": "Confirm and Stake",
+          "aria": "Confirm the registration data and stake to the node"
+        },
+        "buttonEditField": {
+          "aria": "Click to edit the field"
+        },
+        "buttonViewMyStakes": {
+          "text": "View My Stakes",
+          "aria": "View your stakes"
+        },
+        "registerANewNode": "Register a New Node",
+        "singleContributorNode": "Single Contributor Node",
+        "multiContributorNode": "Multi Contributor Node",
+        "submit": {
+          "preparedAt": "Registration Prepared",
+          "preparedAtDescription": "Time since this node's registration was prepared"
+        },
+        "error": {
+          "errorMessage": "Error Message",
+          "copyToClipboardButtonAria": "Copy error message to clipboard"
+        }
+      },
+      "loading": {
+        "title": "Checking for existing registrations",
+        "error": "Something went wrong",
+        "foundRunning": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network.",
+        "foundOpen": "An open node was found with the same key, you need to delete the node before creating a new one."
+      },
+      "start": {
+        "title": "Do you want to stake by yourself or with others?",
+        "description": "To stake by yourself, you need to stake <text-bold>{minStakeSolo}</text-bold>.",
+        "description2": "To operate a node and stake with others, you need to stake at least <text-bold>{minStakeMulti}</text-bold>.",
+        "buttonSolo": {
+          "text": "Stake by myself",
+          "aria": "Continue the registration process by staking the full {minStakeSolo} yourself."
+        },
+        "buttonMulti": {
+          "text": "Stake with others",
+          "aria": "Continue the registration process by staking at least {minStakeMulti} yourself."
+        },
+        "chooseMode": {
+          "title": "Choose your setup mode:",
+          "express": {
+            "text": "Express",
+            "tooltip": "Skip detailed setup and use default settings (you can edit specific settings later)"
+          },
+          "guided": {
+            "text": "Guided (recommended for new users)",
+            "tooltip": "Configure your node settings step-by-step"
+          }
+        }
+      },
+      "stakeAmount": {
+        "title": "How much do you want to stake?",
+        "description": "As the node operator, you must stake at least {minStakeMulti}.",
+        "min": "Min: {min}",
+        "max": "Max: {max}",
+        "errorUnderMin": "You cannot stake under the minimum of {min}"
+      },
+      "operatorFee": {
+        "title": "Set your operator fee",
+        "description": "After this fee is deducted, remaining rewards are distributed to you and your contributors, proportional to stake amount."
+      },
+      "rewardsAddress": {
+        "title": "Where do you want your rewards to go?",
+        "description": "Your rewards address can be the wallet you are registering with, or a different address",
+        "buttonSame": {
+          "text": "Same as the wallet",
+          "aria": "Use the same wallet address as the one you are registering with"
+        },
+        "buttonDifferent": {
+          "text": "Different address",
+          "aria": "Use a different wallet address"
+        }
+      },
+      "rewardsAddressInputSolo": {
+        "title": "Which address do you want your rewards to go to?",
+        "description": "Claimed rewards will be sent to this address.",
+        "errorInvalidAddress": "Invalid Ethereum Address"
+      },
+      "rewardsAddressInputMulti": {
+        "title": "Which address do you want your rewards to go to?",
+        "description": "Claimed rewards will be sent to this address, as well as {tokenSymbol} earned from your operator fee",
+        "errorInvalidAddress": "Invalid Ethereum Address"
+      },
+      "reserveSlots": {
+        "title": "Do you want to reserve stakes for specific contributors?",
+        "description": "You can reserve up to {remainingStake} for specific contributors to your node.",
+        "buttonSkip": {
+          "text": "Skip",
+          "aria": "Skip reserving stakes for specific contributors"
+        },
+        "buttonReserve": {
+          "text": "Reserve",
+          "aria": "Reserve stakes for specific contributors"
+        }
+      },
+      "reserveSlotsInput": {
+        "title": "Which addresses do you want to reserve stakes for?",
+        "description": "Reserve stakes for 1-9 other contributors.",
+        "address": "Address",
+        "stakeAmount": "Stake Amount",
+        "percentage": "Percentage",
+        "buttonAdd": {
+          "text": "Add",
+          "aria": "Add a new address to reserve stakes for"
+        },
+        "buttonRemove": {
+          "text": "Remove",
+          "aria": "Remove an address from reserving stakes for"
+        }
+      },
+      "autoActivate": {
+        "title": "Do you want your node to activate automatically?",
+        "description": "Automatically activate your node once fully staked, or manually activate when you are ready.",
+        "buttonAutomatic": {
+          "text": "Automatic",
+          "aria": "Automatically activate your node once fully staked"
+        },
+        "buttonManual": {
+          "text": "Manual",
+          "aria": "Manually activate your node when you are ready"
+        }
+      },
+      "submitSolo": {
+        "addBlsPubKeyCost": "Add BLS Public Key Cost:",
         "approve": {
-          "idle": "Requesting permission to stake {tokenAmount}",
-          "pending": "Requesting permission to stake {tokenAmount} waiting for user approval",
+          "idle": "Requesting permission to stake {tokenSymbol}",
+          "pending": "Requesting permission to stake {fullStateAmount} waiting for user approval",
           "success": "Permission to stake {tokenSymbol} granted",
           "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
-          "errors": {
-            "UserRejectedRequest": "user rejected the request"
-          }
+          "errors": {}
         },
         "arbitrum": {
-          "idle": "Registering Session node on Arbitrum",
-          "pending": "Registering Session node on Arbitrum",
-          "success": "Registered Session node on Arbitrum",
+          "idle": "Registering node on Arbitrum & Staking {tokenSymbol}",
+          "pending": "Registering node on Arbitrum & Staking {tokenSymbol}",
+          "success": "Registered node on Arbitrum & Staked {tokenSymbol}",
           "errorTemplate": "Arbitrum registration failed, {reason}",
           "errors": {
             "MaxContributorsExceeded": "max contributors exceeded",
@@ -432,66 +613,78 @@
           }
         },
         "network": {
-          "idle": "Adding Session node to the Session network",
-          "pending": "Adding Session node to the Session network waiting for confirmation",
-          "success": "Adding Session node to the Session network confirmed",
+          "idle": "Registering node on {sessionNetwork}",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations) estimated time remaining: {remainingTime}",
+          "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Session node failed to join the network, {reason}, please try again later"
+            "template": "Registering node on {sessionNetwork} failed, {reason}, please try again later"
           }
         }
       },
-      "stageMulti": {
+      "errorSolo": {
+        "specialTitle": "Something went wrong",
+        "specialDescription": "Something went wrong when trying to register the solo node, <please-contract-support-link></please-contract-support-link>"
+      },
+      "successSolo": {
+        "specialTitle": "Single Contributor Node Created!",
+        "specialDescription": "Your node is staked and running on the {sessionNetwork}."
+      },
+      "submitMulti": {
+        "deployCost": "Deploy Cost:",
+        "proxyApprovalCost": "Proxy Approval Cost:",
+        "contributeFundsCost": "Contribute Funds Cost:",
         "create": {
           "idle": "Creating Open Node contract",
           "pending": "Creating Open Node contract",
           "success": "Created Open Node contract",
           "errorTemplate": "Failed to create Open Node contract, {reason}",
-          "errors": {
-          }
+          "errors": {}
         },
         "address": {
           "idle": "Finalising Open Node contract address",
           "pending": "Finalising Open Node contract address",
           "success": " Finalised Node contract address. <link>View on Arbiscan</link>",
           "errorTemplate": "Failed to finalise Open Node contract address, {reason}",
-          "errors": {
-          }
-        },
-        "validate": {
-          "idle": "Validating registration",
-          "pending": "Validating registration",
-          "success": "Registration validated",
-          "errorTemplate": "Failed to validate registration, {reason}",
-          "errors": {
-            "InvalidBLSSignature": "invalid BLS signature, try again later"
-          }
+          "errors": {}
         },
         "approve": {
-          "idle": "Requesting permission to stake {tokenAmount}",
-          "pending": "Requesting permission to stake {tokenAmount} waiting for user approval",
+          "idle": "Requesting permission to stake {tokenSymbol}",
+          "pending": "Requesting permission to stake {tokenSymbol} waiting for user approval",
           "success": "Permission to stake {tokenSymbol} granted",
           "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
-          "errors": {
-            "UserRejectedRequest": "user rejected the request"
-          }
+          "errors": {}
         },
         "contribute": {
-          "idle": "Contributing {tokenAmount} to Open Node contract",
-          "pending": "Contributing {tokenAmount} to Open Node contract",
-          "success": "Contributed {tokenAmount} to Open Node contract",
-          "errorTemplate": "Failed to contribute {tokenAmount} to Open Node contract, {reason}",
-          "errors": {
-            "UserRejectedRequest": "user rejected the request"
-          }
+          "idle": "Contributing {tokenSymbol} to Open Node contract",
+          "pending": "Contributing {tokenSymbol} to Open Node contract",
+          "success": "Contributed {tokenSymbol} to Open Node contract",
+          "errorTemplate": "Failed to contribute {tokenSymbol} to Open Node contract, {reason}",
+          "errors": {}
         }
+      },
+      "errorMulti": {
+        "specialTitle": "Something went wrong",
+        "specialDescription": "Something went wrong when trying to create the multicontributor node, <please-contract-support-link></please-contract-support-link>"
+      },
+      "successMulti": {
+        "specialTitle": "Multicontributor node created!",
+        "specialDescription": "Your multicontributor node is ready for others to stake to."
+      },
+      "alreadyRegisteredMulti": {
+        "specialTitle": "Already Registered!",
+        "specialDescription": "An open node was found with the same key, you can continue using this registration or if you want to create a new registration you will need to reset your node's keys."
+      },
+      "alreadyRegisteredRunning": {
+        "specialTitle": "Already Registered!",
+        "specialDescription": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network."
       }
     },
     "node": {
       "title": "Stake to a Node",
       "contributors": "Shared Contributors",
-      "contributorsTooltip": "The contributors currently staking to this node.",
+      "contributorsTooltip": "The number of stakers on this node",
       "feeEstimate": "Fee Estimate",
-      "feeEstimateTooltip": "The amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link>",
+      "feeEstimateTooltip": "An estimate of the amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link> <br></br> {formula}",
       "button": {
         "submit": "Stake {amount}",
         "submitting": "Staking {amount}...",
@@ -512,7 +705,8 @@
       },
       "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
       "stakedTo": "Staked",
-      "stakedToTooltip": "You have staked {tokenAmount}"
+      "stakedToTooltip": "You have staked {tokenAmount}",
+      "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
     },
     "pending": {
       "type": "Type",
@@ -566,7 +760,7 @@
           "amountStakedTooltip": "Amount of {tokenSymbol} staked by you in this node.",
           "buttons": {
             "submit": "Exit Node",
-            "submitAria": "Exit the node from the network with a gas fee of {gasAmount} {gasTokenSymbol}"
+            "submitAria": "Exit the node from the network"
           },
           "alert": {
             "gasFetchFailed": "Failed to fetch fee estimate exiting the node. Fee estimate may be inaccurate.",
@@ -582,19 +776,16 @@
             "success": "Session node exit on Arbitrum submitted",
             "errorTemplate": "Failed to submit node exit on Arbitrum, {reason}",
             "errors": {
-              "UserRejectedRequest": "user rejected the request",
-              "SignatureExpired": "signature expired, try again later",
-              "BLSPubkeyDoesNotMatch": "BLS public key does not match",
-              "InvalidBLSSignature": "invalid BLS signature"
+              "BLSPubkeyDoesNotMatch": "BLS public key does not match"
             }
           },
           "network": {
             "idle": "Session node network exit confirming",
             "pending": "Session node network exit confirming",
             "success": "Session node network exit confirmed",
-            "errorTemplate": "Failed to confirm the node exit with the Session network, {reason}",
+            "errorTemplate": "Failed to confirm the node exit with the {sessionNetwork}, {reason}",
             "errors": {
-              "UnableToReachNetwork": "unable to reach the Session network"
+              "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
             }
           }
         }
@@ -623,7 +814,7 @@
             "amountStakedTooltip": "Amount of {tokenSymbol} staked by you in this node.",
             "buttons": {
               "submit": "Request Exit",
-              "submitAria": "Request node exit with a gas fee of {gasAmount} {gasTokenSymbol}"
+              "submitAria": "Request node exit"
             },
             "alert": {
               "gasFetchFailed": "Failed to fetch fee estimate for requesting node exit. Fee estimate may be inaccurate.",
@@ -637,7 +828,6 @@
               "success": "Session node exit request on Arbitrum submitted",
               "errorTemplate": "Failed to submit node exit request on Arbitrum, {reason}",
               "errors": {
-                "UserRejectedRequest": "user rejected the request",
                 "CallerNotContributor": "caller not a node contributor",
                 "EarlierLeaveRequestMade": "leave request already made for this node",
                 "SmallContributorLeaveTooEarly": "small contributors can only initiate exit requests after the node has been running for {smallContributorLeaveRequestDelay} days"
@@ -647,9 +837,9 @@
               "idle": "Session node exit request confirming",
               "pending": "Session node exit request confirming",
               "success": "Session node exit request confirmed",
-              "errorTemplate": "Failed to confirm the submission of the node exit request to the Session network, {reason}",
+              "errorTemplate": "Failed to confirm the submission of the node exit request to the {sessionNetwork}, {reason}",
               "errors": {
-                "UnableToReachNetwork": "unable to reach the Session network"
+                "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
               }
             }
           }
