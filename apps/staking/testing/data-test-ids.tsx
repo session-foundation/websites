@@ -38,6 +38,8 @@ export enum ButtonDataTestId {
   Network_Fee_Copy_Formula = 'button:network-fee-copy-formula',
   Exit_Node_Error_Retry = 'button:exit-node-error-retry',
   Staked_Node_Start = 'button:staked-node-start',
+  Maintenance_Discord = 'button:maintenance-discord',
+  Maintenance_X = 'button:maintenance-x',
   Stake_Amount_Min = 'button:stake-amount-min',
   Stake_Amount_Max = 'button:stake-amount-max',
   Show_Referral_Link = 'button:show-referral-link',

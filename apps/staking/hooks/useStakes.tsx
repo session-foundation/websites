@@ -171,12 +171,13 @@ export function useStakes(overrideAddress?: Address) {
     contracts,
     hiddenContractsWithStakes,
     addedBlsKeys,
+    currentContractIds,
     runningStakesBlsKeys,
     blockHeight,
     networkTime,
     network,
   ] = useMemo(() => {
-    if (!address || !data) return [[], [], [], null, null, null];
+    if (!address || !data) return [[], [], [], null, null, null, null];
     const stakesArr = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];
     const contractsArr = 'contracts' in data && Array.isArray(data.contracts) ? data.contracts : [];
 
@@ -194,6 +195,7 @@ export function useStakes(overrideAddress?: Address) {
         : {};
 
     const addedBlsKeysSet = new Set(Object.keys(blsKeysObject));
+    const currentContractIdsSet = new Set(Object.values(blsKeysObject));
     const runningStakesBlsKeysSet = new Set(
       stakesArr
         .filter((stake) => parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE)
@@ -253,6 +255,7 @@ export function useStakes(overrideAddress?: Address) {
       filteredContracts,
       hiddenContracts,
       addedBlsKeysSet,
+      currentContractIdsSet,
       runningStakesBlsKeysSet,
       blockHeight,
       networkTime,
@@ -265,6 +268,7 @@ export function useStakes(overrideAddress?: Address) {
     contracts,
     hiddenContractsWithStakes,
     addedBlsKeys,
+    currentContractIds,
     runningStakesBlsKeys,
     network,
     blockHeight,
