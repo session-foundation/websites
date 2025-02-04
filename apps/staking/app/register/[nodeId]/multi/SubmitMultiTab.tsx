@@ -22,6 +22,7 @@ import {
   formatDate,
   formatLocalizedRelativeTimeToNowClient,
   formatPercentage,
+  useDecimalDelimiter,
 } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
@@ -47,11 +48,11 @@ import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@
 import { useCreateOpenNodeFeeEstimate } from '@session/contracts/hooks/ServiceNodeContributionFactory';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { EditButton } from '@session/ui/components/EditButton';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
+import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 
 export function SubmitMultiTab() {
   const [creationParams, setCreationParams] = useState<UseCreateOpenNodeContractParams | null>(
@@ -67,6 +68,8 @@ export function SubmitMultiTab() {
   const { chainId } = useWallet();
   const { balance, value: balanceValue } = useWalletTokenBalance();
 
+  const decimalDelimiter = useDecimalDelimiter();
+
   const dict = useTranslations('actionModules.registration.shared.submit');
   const dictFee = useTranslations('fee');
   const dictSubmit = useTranslations('actionModules.registration.submitMulti');
@@ -74,6 +77,7 @@ export function SubmitMultiTab() {
   const dictShared = useTranslations('actionModules.shared');
   const dictSessionNode = useTranslations('sessionNodes.general');
   const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
+  const dictReservedSlots = useTranslations('actionModules.registration.reserveSlotsInput');
   const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
 
   const reservedContributors = formMulti.watch('reservedContributors');
@@ -163,7 +167,7 @@ export function SubmitMultiTab() {
       if (!isValidReservedSlots(data.reservedContributors)) {
         formMulti.setError('root', {
           type: 'manual',
-          message: 'Invalid reserved slots',
+          message: dictReservedSlots('validation.invalidReservedSlots'),
         });
         return;
       }
@@ -189,6 +193,8 @@ export function SubmitMultiTab() {
   };
 
   const watchedStakeAmount = formMulti.watch('stakeAmount');
+
+  const hasReservedSlots = formMulti.watch('reservedContributors').length > 1;
 
   return (
     <div className="flex w-full flex-col gap-3.5">
@@ -299,24 +305,49 @@ export function SubmitMultiTab() {
       <ActionModuleRow
         label={dictShared('reserveSlots')}
         tooltip={dictShared('reserveSlotsDescription')}
+        parentClassName={
+          hasReservedSlots ? 'flex flex-col gap-2 justify-start items-start w-full' : ''
+        }
+        containerClassName={hasReservedSlots ? 'w-full' : ''}
       >
-        <span className="font-semibold">None</span>
-        {/*TODO: Implement reserve slots*/}
-        {/*<RegistrationEditButton*/}
-        {/*  disabled={true}*/}
-        {/*  aria-label={dictionaryRegistrationShared('buttonEditField.aria')}*/}
-        {/*  data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}*/}
-        {/*  tab={REG_TAB.RESERVE_SLOTS_INPUT}*/}
-        {/*/>*/}
-        <Tooltip tooltipContent="Reserve slots are not available yet">
-          <div>
-            <EditButton
-              disabled
-              aria-label={dictRegistrationShared('buttonEditField.aria')}
-              data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
+        {/* reservedContributors length 1 means only the operator, so we treat it as no reserved slots*/}
+        {hasReservedSlots ? (
+          <div className="flex w-full flex-col gap-2">
+            <ReservedStakesTable
+              reservedStakes={formMulti.watch('reservedContributors')}
+              className="my-2 w-full"
+              actionButton={
+                <RegistrationEditButton
+                  variant="default"
+                  rounded="full"
+                  size="icon"
+                  className="group"
+                  iconClassName="stroke-session-black group-hover:stroke-session-green"
+                  aria-label={dictRegistrationShared('buttonEditField.aria')}
+                  data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
+                  tab={REG_TAB.RESERVE_SLOTS_INPUT}
+                />
+              }
             />
           </div>
-        </Tooltip>
+        ) : (
+          <>
+            <span className="font-semibold">None</span>
+            <RegistrationEditButton
+              aria-label={dictRegistrationShared('buttonEditField.aria')}
+              data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
+              tab={REG_TAB.RESERVE_SLOTS_INPUT}
+              onClick={() => {
+                formMulti.setValue('reservedContributors', [
+                  {
+                    addr: address,
+                    amount: stringToBigInt(watchedStakeAmount, SENT_DECIMALS, decimalDelimiter),
+                  },
+                ]);
+              }}
+            />
+          </>
+        )}
       </ActionModuleRow>
       <ActionModuleFeeAccordionRow
         label={dictFee('networkFee')}
