@@ -130,11 +130,19 @@ const ContributorIcon = ({
   return (
     <Tooltip
       tooltipContent={
-        <p>
-          {contributor
-            ? `${isUser ? dictionary('you') : contributor.address} | ${formatSENTNumber(contributor.amount)}`
-            : dictionary('emptySlot')}
-        </p>
+        contributor ? (
+          <div className="flex flex-col gap-1">
+            <span>{isUser ? dictionary('you') : contributor.address}</span>
+            <span>
+              {`${formatSENTNumber(contributor.amount)} ${dictionary('staked')}`}
+              {contributor.reserved
+                ? ` (${formatSENTNumber(contributor.reserved)} ${dictionary('reserved')})`
+                : ''}
+            </span>
+          </div>
+        ) : (
+          dictionary('emptySlot')
+        )
       }
     >
       <HumanIcon
@@ -186,11 +194,9 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
       const userContributor = contributors.find(({ address }) =>
         areHexesEqual(address, userAddress)
       );
-      const otherContributors = contributors.filter(
-        ({ address }) => !areHexesEqual(address, userAddress)
-      );
-      // TODO - add contributor list sorting
-      //.sort((a, b) => b.amount - a.amount);
+      const otherContributors = contributors
+        .filter(({ address }) => !areHexesEqual(address, userAddress))
+        .sort((a, b) => (b.amount || b.reserved) - (a.amount || a.reserved));
 
       return userContributor ? [userContributor, ...otherContributors] : otherContributors;
     }, [contributors]);
@@ -230,7 +236,14 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
             <ContributorIcon
               key={contributor.address}
               contributor={contributor}
-              className={cn('fill-text-primary h-4')}
+              className={cn(
+                'h-4',
+                contributor.amount
+                  ? 'fill-text-primary'
+                  : contributor.reserved
+                    ? 'fill-warning'
+                    : ''
+              )}
             />
           ))}
           {showEmptySlots
