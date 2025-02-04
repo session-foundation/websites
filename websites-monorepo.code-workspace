@@ -51,7 +51,6 @@
   "settings": {
     "typescript.tsdk": "./node_modules/typescript/lib",
     "editor.formatOnSave": true,
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.associations": {
@@ -62,26 +61,14 @@
       "node_modules": true,
     },
     "tailwindCSS.experimental.classRegex": [
-      [
-        "cva\\(([^)]*)\\)",
-        "[\"'`]([^\"'`]*).*?[\"'`]"
-      ],
-      [
-        "cx\\(([^)]*)\\)",
-        "(?:'|\"|`)([^']*)(?:'|\"|`)"
-      ],
-      [
-        "clsx\\(([^)]*)\\)",
-        "(?:'|\"|`)([^']*)(?:'|\"|`)"
-      ],
+      ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+      ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+      ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ],
     "eslint.alwaysShowStatus": true,
     "eslint.run": "onSave",
     // https://github.com/Microsoft/vscode-eslint#mono-repository-setup
-    "eslint.workingDirectories": [
-      "./apps",
-      "./packages"
-    ],
+    "eslint.workingDirectories": ["./apps", "./packages"],
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
