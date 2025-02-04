@@ -53,7 +53,6 @@ export function StartTab() {
             data-testid={ButtonDataTestId.Registration_Start_Button_Solo}
             aria-label={dict('start.buttonSolo.aria')}
             onClick={() => {
-              console.log('onClick');
               form.setValue('nodeType', NODE_TYPE.SOLO);
             }}
             type="submit"
@@ -65,7 +64,6 @@ export function StartTab() {
             data-testid={ButtonDataTestId.Registration_Start_Button_Multi}
             aria-label={dict('start.buttonMulti.aria')}
             onClick={() => {
-              console.log('onClick');
               form.setValue('nodeType', NODE_TYPE.MULTI);
             }}
             type="submit"

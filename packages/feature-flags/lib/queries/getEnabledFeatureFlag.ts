@@ -11,7 +11,7 @@ export function getEnabledFeatureFlag<Flag extends GenericRemoteFeatureFlag>({
 }) {
   return db
     .prepare(
-      `SELECT count(${flag}) FROM ${TABLE.FLAGS} WHERE ${FLAGS_TABLE.FLAG} = ? AND ${FLAGS_TABLE.ENABLED} = 1`
+      `SELECT count(${FLAGS_TABLE.FLAG}) FROM ${TABLE.FLAGS} WHERE ${FLAGS_TABLE.FLAG} = ? AND ${FLAGS_TABLE.ENABLED} = 1`
     )
-    .get(flag) as CountType<Flag>;
+    .get(flag) as CountType<FLAGS_TABLE.FLAG>;
 }
