@@ -44,6 +44,7 @@
     --session-gray-light: #55595c;
     --session-gray-DEFAULT: #3a3a3a;
     --session-gray-dark: #333132;
+    --session-gray-darker: #2e2e2e;
 
     --text-static: #dbdbdb;
     --text-gradient: linear-gradient(135deg, #ffffff -38.86%, #97a99e 133.98%);
