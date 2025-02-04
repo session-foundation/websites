@@ -260,7 +260,7 @@ export function StakeInfo({
         {hasReservedContributors ? (
           <ReservedStakesTable reservedStakes={reservedContributors} className="my-2 w-full" />
         ) : (
-          <span className="font-semibold">None</span>
+          <span className="font-semibold">{dictGeneral('none')}</span>
         )}
       </ActionModuleRow>
       {children}

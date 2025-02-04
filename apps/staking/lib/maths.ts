@@ -2,7 +2,7 @@ import type { StakeContributor } from '@session/staking-api-js/client';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import type { Address } from 'viem';
 
-const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
 
 export const parseContributorDetails = (contributors: Array<ReservedContributorStruct> = []) => {
   let totalStaked = 0n;

@@ -81,11 +81,11 @@ export function ReservedStakesTable({
         <Table size="compact">
           <TableHeader>
             <TableRow className="border-b-transparent bg-transparent hover:bg-transparent">
-              <TableHead></TableHead>
+              <TableHead />
               <TableHead className="ps-0">{dict('address')}</TableHead>
               <TableHead>{dict('stakeAmount')}</TableHead>
               <TableHead>{dict('percentage')}</TableHead>
-              {isEditable ? <TableHead></TableHead> : null}
+              {isEditable ? <TableHead /> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -140,7 +140,7 @@ export function ReservedStakesTable({
           </TableBody>
           <TableFooter>
             <TableRow className="[&>td]:py-3">
-              <TableCell colSpan={1} className="px-2.5"></TableCell>
+              <TableCell colSpan={1} className="px-2.5" />
               <TableCell colSpan={1} className="px-2.5">
                 <div className="flex flex-row items-center gap-2">
                   {dict('remainingStake')}

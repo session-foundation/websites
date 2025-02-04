@@ -8,7 +8,6 @@ import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
 } from '@session/staking-api-js/client';
-import { getTotalStaked } from '@/lib/maths';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
 
@@ -28,8 +27,6 @@ export function ManageStake({ contract }: { contract: ContributorContractInfo })
 
   const isOperator = areHexesEqual(contract.operator_address, address);
   const isFinalized = contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized;
-
-  const totalStaked = getTotalStaked(contract.contributors);
 
   const haveOtherContributorsContributed = contract.contributors.length > 1;
 

@@ -20,6 +20,6 @@ const RemoveButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName
     );
   }
 );
-RemoveButton.displayName = 'EditButton';
+RemoveButton.displayName = 'RemoveButton';
 
 export { RemoveButton };

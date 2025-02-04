@@ -602,8 +602,6 @@ function parseRegistrationQueryParams(
     }
   }
 
-  console.log(reservedContributors);
-
   const data = {
     autoActivate,
     operatorFee: params.get(REGISTRATION_QUERY_PARAM.OPERATOR_FEE) ?? undefined,

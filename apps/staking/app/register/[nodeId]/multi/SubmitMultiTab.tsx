@@ -73,6 +73,7 @@ export function SubmitMultiTab() {
   const dict = useTranslations('actionModules.registration.shared.submit');
   const dictFee = useTranslations('fee');
   const dictSubmit = useTranslations('actionModules.registration.submitMulti');
+  const dictGeneral = useTranslations('general');
   const dictRegistrationShared = useTranslations('actionModules.registration.shared');
   const dictShared = useTranslations('actionModules.shared');
   const dictSessionNode = useTranslations('sessionNodes.general');
@@ -332,7 +333,7 @@ export function SubmitMultiTab() {
           </div>
         ) : (
           <>
-            <span className="font-semibold">None</span>
+            <span className="font-semibold">{dictGeneral('none')}</span>
             <RegistrationEditButton
               aria-label={dictRegistrationShared('buttonEditField.aria')}
               data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
