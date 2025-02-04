@@ -20,7 +20,9 @@
       "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
       "SignatureExpired": "signature expired, try again later",
       "InsufficientBalance": "insufficient {tokenSymbol} balance for transaction"
-    }
+    },
+    "reserved": "Reserved",
+    "staked": "Staked"
   },
   "maintenance": {
     "title": "Maintenance Notice",
@@ -377,8 +379,8 @@
       "rewardsAddressDescription": "The wallet address that you will claim rewards to",
       "operatorFee": "Operator Fee",
       "operatorFeeDescription": "Percentage of node rewards taken as a fee by the operator, with remaining rewards distributed to contributors, proportional to stake amount",
-      "reserveSlots": "Reserve Slots",
-      "reserveSlotsDescription": "You can reserve up stakes for specific contributors to your node.",
+      "reserveSlots": "Reserved Stakes",
+      "reserveSlotsDescription": "You can reserve stakes for specific contributors to your node.",
       "buttonEditField": {
         "aria": "Edit {field}"
       },
@@ -446,7 +448,7 @@
       "disabledReason": {
         "alreadyFinalized": "The node details are already finalized and can't be edited.",
         "alreadyContributedOperatorFee": "The operator fee can't be edited once another address has contributed to the node.",
-        "alreadyContributedReservedSlots": "The reserved slots can't be edited once another address has contributed to the node.",
+        "alreadyContributedReservedSlots": "The reserved stakes can't be edited once another address has contributed to the node.",
         "pastTimeLimitStakeAmountRemove": "You can't remove your stake from a node after {timeLimitAmount} from your previous stake to that node."
       }
     },
@@ -566,8 +568,21 @@
         "title": "Which addresses do you want to reserve stakes for?",
         "description": "Reserve stakes for 1-9 other contributors.",
         "address": "Address",
+        "addressDescription": "The wallet address of the contributor you want to reserve a stake for",
         "stakeAmount": "Stake Amount",
+        "stakeAmountDescription": "The amount of stake you want to reserve for this contributor",
         "percentage": "Percentage",
+        "remainingStake": "Remaining Unreserved Stake",
+        "remainingStakeCreationDescription": "{amount} will be available for anyone to stake. Contributors with reserved stakes will also be able to exceed their reserved stake amount.",
+        "remainingStakeViewDescription": "{amount} is available for anyone to stake. Contributors with reserved stakes are also able to exceed their reserved stake amount.",
+        "validation": {
+          "slotInvalid": "Invalid reserved stake, please try again",
+          "addressAlreadyUsed": "This address is already reserved",
+          "invalidReservedSlots": "Invalid reserved stakes",
+          "errorUnderMin": "This slot can't have less than {min} reserved",
+          "underMin": "This slot can't have less than {min} reserved",
+          "overMax": "This slot can't have more than {max} reserved"
+        },
         "buttonAdd": {
           "text": "Add",
           "aria": "Add a new address to reserve stakes for"
@@ -575,6 +590,14 @@
         "buttonRemove": {
           "text": "Remove",
           "aria": "Remove an address from reserving stakes for"
+        },
+        "buttonCancel": {
+          "text": "Cancel",
+          "aria": "Cancel adding a new address to reserve stakes for"
+        },
+        "buttonConfirm": {
+          "text": "Confirm Slot {number}",
+          "aria": "Confirm adding a new address to reserve stakes for"
         }
       },
       "autoActivate": {
@@ -704,6 +727,7 @@
         "ariaLabel": "View the node details in the side panel"
       },
       "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
+      "youReservedNotContributed": "You have a reserved amount of {tokenAmount} that has not been contributed to this node. You can contribute to this node by staking {tokenAmount} to this node.",
       "stakedTo": "Staked",
       "stakedToTooltip": "You have staked {tokenAmount}",
       "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
