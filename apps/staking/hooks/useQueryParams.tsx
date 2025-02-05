@@ -16,7 +16,7 @@ export default function useQueryParams<K = string>(): UseQueryParamsReturn<K> {
   const searchParams = useSearchParams();
 
   const getQueryParams = useCallback(() => {
-    return new URLSearchParams(searchParams.toString());
+    return new URLSearchParams(decodeURI(searchParams.toString()));
   }, [searchParams]);
 
   const createQueryString = useCallback(
@@ -31,7 +31,7 @@ export default function useQueryParams<K = string>(): UseQueryParamsReturn<K> {
 
   const pushQueryParam = useCallback(
     (name: K, value: QueryParamValue) => {
-      const str = `${pathname}?${createQueryString(name, value)}`;
+      const str = `${pathname}?${encodeURI(createQueryString(name, value))}`;
       router.push(str);
     },
     [pathname, createQueryString]

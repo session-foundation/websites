@@ -73,6 +73,7 @@ export default {
           light: 'var(--session-gray-light)',
           DEFAULT: 'var(--session-gray-DEFAULT)',
           dark: 'var(--session-gray-dark)',
+          darker: 'var(--session-gray-darker)',
         },
         green: {
           DEFAULT: '#31F196',

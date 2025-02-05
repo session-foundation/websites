@@ -95,7 +95,7 @@ export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter
   if (isNegative) str = str.slice(1);
 
   if (str.length <= decimals) {
-    // Turn the int into a decimal string by padding with zeros until the decimal size, the remove the trailing zeros
+    // Turn the int into a decimal string by padding with zeros until the decimal size, then remove the trailing zeros
     const dec = str.padStart(decimals, '0').replace(/0+$/, '');
     str = ['0', dec].join(decimalDelimiter);
   } else {
@@ -103,6 +103,10 @@ export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter
     // Get the decimal part of the string and remove the trailing zeros
     const dec = str.slice(-decimals).replace(/0+$/, '');
     str = dec ? [int, dec].join(decimalDelimiter) : int;
+  }
+
+  if (str.charAt(str.length - 1) === '.') {
+    str = str.slice(0, -1);
   }
 
   return `${isNegative ? '-' : ''}${str}`;

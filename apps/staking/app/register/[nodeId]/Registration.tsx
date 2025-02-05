@@ -70,6 +70,13 @@ import { useStakes } from '@/hooks/useStakes';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { AlreadyRegisteredMultiTab } from '@/app/register/[nodeId]/multi/AlreadyRegisteredMultiTab';
 import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
+import { safeTrySync } from '@session/util-js/try';
+import {
+  isValidReservedSlots,
+  ReserveSlotsInputTab,
+} from '@/app/register/[nodeId]/multi/ReserveSlotsInputTab';
+import { ReserveSlotsTab } from '@/app/register/[nodeId]/multi/ReserveSlotsTab';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 
 type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   address: Address;
@@ -219,9 +226,8 @@ function RegistrationProvider({
           queryParamStartTab = REG_TAB.REWARDS_ADDRESS;
         } else if (data?.autoActivate === undefined) {
           queryParamStartTab = REG_TAB.AUTO_ACTIVATE;
-          // TODO: implement the reserve slots tab
-          // } else if (data?.reservedContributors === undefined) {
-          //   queryParamStartTab = REG_TAB.RESERVE_SLOTS;
+        } else if (data?.reservedContributors === undefined) {
+          queryParamStartTab = REG_TAB.RESERVE_SLOTS;
         } else {
           queryParamStartTab = REG_TAB.SUBMIT_MULTI;
         }
@@ -299,7 +305,9 @@ function RegistrationProvider({
       stakeAmount:
         queryParamFields?.stakeAmount ??
         bigIntToString(
-          bigIntMin(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, balanceValue ?? 0n),
+          balanceValue
+            ? bigIntMin(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, balanceValue)
+            : SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
           SENT_DECIMALS,
           decimalDelimiter
         ),
@@ -392,11 +400,10 @@ function getTab(tab: REG_TAB) {
       return <RewardsAddressTab />;
     case REG_TAB.REWARDS_ADDRESS_INPUT_MULTI:
       return <RewardsAddressInputMultiTab />;
-    // TODO: Implement the reserve slots
-    // case REG_TAB.RESERVE_SLOTS:
-    //   return <ReserveSlotsTab />;
-    // case REG_TAB.RESERVE_SLOTS_INPUT:
-    //   return <ReserveSlotsInputTab />;
+    case REG_TAB.RESERVE_SLOTS:
+      return <ReserveSlotsTab />;
+    case REG_TAB.RESERVE_SLOTS_INPUT:
+      return <ReserveSlotsInputTab />;
     case REG_TAB.AUTO_ACTIVATE:
       return <AutoActivateTab />;
     case REG_TAB.SUBMIT_MULTI:
@@ -445,7 +452,7 @@ export const getRegistrationMultiFormSchema = ({
     stakeAmount: getStakeAmountFormFieldSchema(stakeAmount),
     operatorFee: getOperatorFeeFormFieldSchema(operatorFee),
     reservedContributors: z.array(
-      z.object({ addr: z.string().refine((value) => isAddress(value)), amount: z.bigint() })
+      z.object({ addr: z.custom<Address>((value) => isAddress(value)), amount: z.bigint() })
     ),
   });
 
@@ -565,12 +572,40 @@ function parseRegistrationQueryParams(
   const autoActivateRaw = params.get(REGISTRATION_QUERY_PARAM.AUTO_ACTIVATE);
   const autoActivate = autoActivateRaw ? autoActivateRaw === 'false' : undefined;
 
+  const reservedContributorsRaw = params.get(REGISTRATION_QUERY_PARAM.RESERVED_CONTRIBUTORS);
+  const [parseErr, reservedContributorsParsed] = reservedContributorsRaw
+    ? safeTrySync(() => JSON.parse(reservedContributorsRaw))
+    : [null, null];
+
+  if (parseErr) {
+    console.error(parseErr);
+  }
+
+  let reservedContributors: Array<ReservedContributorStruct> | undefined = undefined;
+
+  if (Array.isArray(reservedContributorsParsed)) {
+    const res = reservedContributorsParsed
+      .map((slot) => {
+        const [err, amount] = safeTrySync(() => BigInt(slot.amount));
+
+        if (err) {
+          console.error(err);
+          return null;
+        }
+
+        return { addr: slot.addr, amount };
+      })
+      .filter((v) => v !== null);
+
+    if (isValidReservedSlots(res)) {
+      reservedContributors = res;
+    }
+  }
+
   const data = {
     autoActivate,
     operatorFee: params.get(REGISTRATION_QUERY_PARAM.OPERATOR_FEE) ?? undefined,
-    // TODO: Implement the reserve slots
-    // reservedContributors: params.get(REGISTRATION_QUERY_PARAM.RESERVED_CONTRIBUTORS) ?? undefined,
-    reservedContributors: undefined,
+    reservedContributors,
     rewardsAddress: params.get(REGISTRATION_QUERY_PARAM.REWARDS_ADDRESS) ?? undefined,
     stakeAmount: params.get(REGISTRATION_QUERY_PARAM.STAKE_AMOUNT) ?? undefined,
   };

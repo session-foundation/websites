@@ -287,6 +287,14 @@ describe('stringToBigInt', () => {
 });
 
 describe('bigIntToString', () => {
+  test('should convert a positive BigInt value to a string with decimals when the value is 0', () => {
+    expect(bigIntToString(0n, 0)).toBe('0');
+    expect(bigIntToString(0n, 1)).toBe('0');
+    expect(bigIntToString(0n, 2)).toBe('0');
+    expect(bigIntToString(0n, 3)).toBe('0');
+    expect(bigIntToString(0n, 4)).toBe('0');
+  });
+
   test('should convert a positive BigInt value to a string with decimals', () => {
     expect(bigIntToString(BigInt(1), 4)).toBe('0.0001');
     expect(bigIntToString(BigInt(10), 4)).toBe('0.001');

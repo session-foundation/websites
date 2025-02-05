@@ -1,9 +1,9 @@
 import { forwardRef } from 'react';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './ui/button';
-import { PencilIcon } from 'lucide-react';
+import { XIcon } from '../icons/XIcon';
 
-const EditButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?: string }>(
+const RemoveButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?: string }>(
   ({ className, iconClassName, ...props }, ref) => {
     return (
       <Button
@@ -15,11 +15,11 @@ const EditButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?:
         {...props}
         data-testid={props['data-testid']}
       >
-        <PencilIcon className={cn('stroke-session-white h-5 w-5', iconClassName)} />
+        <XIcon className={cn('stroke-destructive h-5 w-5', iconClassName)} />
       </Button>
     );
   }
 );
-EditButton.displayName = 'EditButton';
+RemoveButton.displayName = 'RemoveButton';
 
-export { EditButton };
+export { RemoveButton };

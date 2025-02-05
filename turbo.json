@@ -43,7 +43,8 @@
         "NEXT_PUBLIC_SANITY_API_VERSION",
         "SANITY_REVALIDATE_SECRET",
         "NEXT_PUBLIC_POINTS_PROGRAM_API",
-        "ARBITRUM_SEPOLIA_RPC_URL"
+        "ARBITRUM_SEPOLIA_RPC_URL",
+        "CI"
       ]
     },
     "dev": {
@@ -67,7 +68,11 @@
     "check-telemetry": {
       "cache": false
     },
-    "test": {},
+    "test": {
+      "inputs": [
+        "**/*.spec.ts"
+      ]
+    },
     "gh": {
       "dependsOn": [
         "^check-types",

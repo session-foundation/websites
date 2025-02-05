@@ -6,7 +6,13 @@ import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
-import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import {
+  bigIntMax,
+  bigIntMin,
+  bigIntToString,
+  numberToBigInt,
+  stringToBigInt,
+} from '@session/util-crypto/maths';
 import { safeTrySync } from '@session/util-js/try';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
@@ -18,7 +24,10 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import type { ContributorContractInfo } from '@session/staking-api-js/client';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getContributionRangeFromContributors } from '@/lib/maths';
+import {
+  getContributionRangeFromContributors,
+  getContributionRangeFromContributorsIgnoreReserved,
+} from '@/lib/maths';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { z } from 'zod';
 import EthereumAddressField, {
@@ -29,7 +38,7 @@ import StakeAmountField, {
   getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
 } from '@/components/Form/StakeAmountField';
-import { StakeInfo } from '@/app/stake/[address]/StakeInfo';
+import { getReservedContributorNonContributed, StakeInfo } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { PubKey } from '@session/ui/components/PubKey';
 import { EditButton } from '@session/ui/components/EditButton';
@@ -67,12 +76,27 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
   const decimalDelimiter = useDecimalDelimiter();
 
   const isOperator = areHexesEqual(contract.operator_address, address);
+  const reservedContributor = getReservedContributorNonContributed(contract, address);
 
   const { value: balanceValue } = useWalletTokenBalance();
 
-  const { minStake, maxStake, totalStaked } = getContributionRangeFromContributors(
+  const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
+    getContributionRangeFromContributors(contract.contributors);
+
+  const { maxStake: maxStakeReserved } = getContributionRangeFromContributorsIgnoreReserved(
     contract.contributors
   );
+
+  const minStake = reservedContributor?.reserved
+    ? numberToBigInt(reservedContributor?.reserved)
+    : minStakeCalculated;
+
+  const maxStake = bigIntMax(
+    bigIntMax(maxStakeCalculated, minStake),
+    reservedContributor ? maxStakeReserved : 0n
+  );
+
+  const allowNewStake = minStakeCalculated > 0n || maxStakeCalculated > 0n;
 
   const formSchema = getStakeFormSchema({
     stakeAmount: {
@@ -166,7 +190,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
   const watchedRewardsAddress = form.watch('rewardsAddress');
 
   return (
-    <StakeInfo contract={contract} totalStaked={totalStaked} isSubmitting={isSubmitting}>
+    <StakeInfo contract={contract} isSubmitting={isSubmitting}>
       {address ? (
         <ContributeFundsFeeActionModuleRow
           contract={contract}
@@ -217,7 +241,9 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className={cn(stakingParams ? 'hidden' : 'flex flex-col gap-4')}
+          className={cn(
+            address && !stakingParams && allowNewStake ? 'flex flex-col gap-4' : 'hidden'
+          )}
         >
           {!stakingParams ? (
             <FormField
