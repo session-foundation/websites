@@ -66,7 +66,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
           <div className={cn('text-center sm:text-start', className)}>
             <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
               {statusIndicatorColour ? (
-                <div className="-mr-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
+                <div className="-me-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
                   <StatusIndicator status={statusIndicatorColour} />
                 </div>
               ) : null}

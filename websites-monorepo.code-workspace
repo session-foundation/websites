@@ -49,12 +49,8 @@
     "unwantedRecommendations": [],
   },
   "settings": {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "always",
-    },
+    "typescript.tsdk": "./node_modules/typescript/lib",
     "editor.formatOnSave": true,
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.associations": {

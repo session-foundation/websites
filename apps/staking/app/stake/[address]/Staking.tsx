@@ -12,6 +12,7 @@ import { getContributionContracts } from '@/lib/queries/getContributionContracts
 import { areHexesEqual } from '@session/util-crypto/string';
 import { ManageStake } from '@/app/stake/[address]/ManageStake';
 import { NewStake } from '@/app/stake/[address]/NewStake';
+import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 
 export function getContractAndContributor({
   data,
@@ -33,10 +34,7 @@ export function getContractAndContributor({
     };
   }
 
-  const foundContributor =
-    foundContract.contributors.find((contributor) =>
-      areHexesEqual(contributor.address, connectedAddress)
-    ) ?? null;
+  const foundContributor = getContributedContributor(foundContract, connectedAddress as Address);
 
   return {
     contract: foundContract,

@@ -12,15 +12,16 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { useNetworkStatus } from '@/components/StatusBar';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
 import { useStakes } from '@/hooks/useStakes';
+import { getContributionRangeFromContributors } from '@/lib/maths';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 
 export default function OpenNodes() {
   const dictionary = useTranslations('modules.openNodes');
-
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts();
-
+  const { address } = useWallet();
   const { hiddenContractsWithStakes } = useStakes();
-
   const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
 
   const openContractBlsKeys = useMemo(() => {
@@ -50,9 +51,17 @@ export default function OpenNodes() {
         .map((contract) => (
           <OpenNodeCard key={contract.address} contract={contract} showAlreadyRunningWarning />
         ))}
-      {contracts.map((contract) => (
-        <OpenNodeCard key={contract.address} contract={contract} />
-      ))}
+      {contracts
+        .filter((contract) => {
+          const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
+            getContributionRangeFromContributors(contract.contributors);
+          const contributor = getContributedContributor(contract, address);
+
+          return contributor || minStakeCalculated > 0n || maxStakeCalculated > 0n;
+        })
+        .map((contract) => (
+          <OpenNodeCard key={contract.address} contract={contract} />
+        ))}
     </>
   ) : (
     <NoNodes />

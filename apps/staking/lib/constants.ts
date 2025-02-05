@@ -78,6 +78,8 @@ export enum NETWORK {
   TESTNET = 'Testnet',
 }
 
+export const SESSION_NETWORK = 'Session Network' as const;
+
 type LinkItem = {
   href: string;
   dictionaryKey: keyof Omit<LocaleKey['navigation'], 'hamburgerDropdown'>;
@@ -139,6 +141,8 @@ export enum SESSION_NODE {
   MIN_OPERATOR_FEE = 0,
   /** Max Operator Fee */
   MAX_OPERATOR_FEE = 100,
+  /** Max contributors */
+  MAX_CONTRIBUTORS = 10,
 }
 
 export enum SESSION_NODE_TIME_STATIC {

@@ -14,9 +14,7 @@ export function RewardsAddressTab() {
       <Button
         data-testid={ButtonDataTestId.Registration_Rewards_Address_Same}
         aria-label={dict('buttonSame.aria')}
-        onClick={() => changeTab(REG_TAB.AUTO_ACTIVATE)}
-        // TODO: Implement reserve slots
-        // onClick={() => changeTab(REG_TAB.RESERVE_SLOTS)}
+        onClick={() => changeTab(REG_TAB.RESERVE_SLOTS)}
       >
         {dict('buttonSame.text')}
       </Button>

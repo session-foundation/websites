@@ -9,6 +9,7 @@ import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import {
   FAUCET,
   NETWORK,
+  SESSION_NETWORK,
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
   SESSION_NODE_MIN_STAKE_SOLO_OPERATOR,
@@ -108,6 +109,8 @@ export const defaultTranslationElements = {
 
 export const defaultTranslationVariables = {
   tokenSymbol: TOKEN.SYMBOL,
+  gas: 'Gas',
+  gasPrice: 'Gas Price',
   gasTokenSymbol: TICKER.ETH,
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
@@ -116,6 +119,7 @@ export const defaultTranslationVariables = {
   testNetworkChain: arbitrumSepolia.name,
   minimumFaucetGasAmount: FAUCET.MIN_ETH_BALANCE,
   faucetDrip: FAUCET.DRIP,
+  sessionNetwork: SESSION_NETWORK,
   oxenProgram: 'Oxen Service Node Bonus program',
   notFoundContentType: 'page',
   smallContributorLeaveRequestDelay:

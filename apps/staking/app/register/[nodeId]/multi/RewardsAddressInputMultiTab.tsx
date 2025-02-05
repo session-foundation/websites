@@ -28,9 +28,7 @@ export function RewardsAddressInputMultiTab() {
 
   const handleSubmit = (data: MultiRegistrationFormSchema) => {
     pushQueryParam(REGISTRATION_QUERY_PARAM.REWARDS_ADDRESS, data.rewardsAddress);
-    // TODO: Implement the reserve slots
-    // changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.RESERVE_SLOTS);
-    changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.AUTO_ACTIVATE);
+    changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.RESERVE_SLOTS);
   };
 
   useEffect(() => {

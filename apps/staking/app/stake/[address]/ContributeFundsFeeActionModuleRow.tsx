@@ -102,8 +102,8 @@ export function ContributeFundsFeeActionModuleRow({
           label: dictShared('proxyApprovalCost'),
           fee: feeFormattedProxyApproval,
           tooltip: formulaProxyApproval,
-          noFee: !needsApproval,
-          noFeeReason: dictShared('proxyApprovalNotNeededTooltip', {
+          hasExemption: !needsApproval,
+          exemptionReason: dictShared('proxyApprovalNotNeededTooltip', {
             amount: formatSENTBigInt(allowance, 0),
           }),
         },

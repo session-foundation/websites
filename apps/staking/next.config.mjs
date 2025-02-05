@@ -73,11 +73,6 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: '/nodes',
-        destination: '/stake',
-        permanent: false,
-      },
-      {
         source: '/bridge',
         destination:
           'https://bridge.arbitrum.io/?destinationChain=arbitrum-sepolia&sourceChain=sepolia',

@@ -65,6 +65,7 @@ export type StakeAmountFieldProps = {
   minStake: bigint;
   stickiness?: number;
   watchedStakeAmount: string;
+  stakeAmountDescription?: string;
 };
 
 export default function StakeAmountField({
@@ -76,6 +77,7 @@ export default function StakeAmountField({
   minStake,
   stickiness = 400,
   watchedStakeAmount,
+  stakeAmountDescription,
 }: StakeAmountFieldProps) {
   const dictionary = useTranslations('general');
   const dictionaryStakeAmount = useTranslations('actionModules.registration.stakeAmount');
@@ -135,7 +137,7 @@ export default function StakeAmountField({
             <span className="inline-flex items-center gap-2 text-nowrap align-middle">
               {actionModuleSharedDictionary('stakeAmount')}
               <ActionModuleTooltip>
-                {actionModuleSharedDictionary('stakeAmountDescription')}
+                {stakeAmountDescription ?? actionModuleSharedDictionary('stakeAmountDescription')}
               </ActionModuleTooltip>
               {watchedStakeAmount &&
               balanceValue !== undefined &&

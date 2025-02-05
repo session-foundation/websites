@@ -28,6 +28,23 @@ export const sortingTotalStakedDesc = (
   const stakedB = address ? getTotalStakedAmountForAddress(b.contributors, address) : 0;
   return stakedB - stakedA;
 };
+
+export const sortingReservedContractsDesc = (
+  a: ContributorContractInfo,
+  b: ContributorContractInfo,
+  connectedAddress?: Address
+) => {
+  const reservedA = connectedAddress
+    ? a.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ?? 0
+    : 0;
+
+  const reservedB = connectedAddress
+    ? b.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ?? 0
+    : 0;
+
+  return reservedB - reservedA;
+};
+
 const stakeStateSortOrder = {
   [STAKE_STATE.DECOMMISSIONED]: 1,
   [STAKE_STATE.AWAITING_EXIT]: 2,
@@ -36,6 +53,7 @@ const stakeStateSortOrder = {
   [STAKE_STATE.EXITED]: 5,
   [STAKE_STATE.UNKNOWN]: 6,
 } as const;
+
 const contractStateSortOrderIfOperator = {
   [CONTRIBUTION_CONTRACT_STATUS.WaitForFinalized]: 1,
   [CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib]: 2,
@@ -118,10 +136,17 @@ export function sortContracts(
     return priorityA - priorityB;
   }
 
+  const reservedSort = sortingReservedContractsDesc(a, b, address);
+
+  if (reservedSort !== 0) {
+    return reservedSort;
+  }
+
   const stakeSort = sortingTotalStakedDesc(a, b, address);
   if (stakeSort !== 0) {
     return stakeSort;
   }
+
   // fee ascending
   return (a.fee ?? 0) - (b.fee ?? 0);
 }

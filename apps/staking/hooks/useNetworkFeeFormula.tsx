@@ -7,6 +7,7 @@ import { XIcon } from '@session/ui/icons/XIcon';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { type ReactNode, useMemo } from 'react';
+import { defaultTranslationVariables } from '@/lib/locale-defaults';
 
 type UseNetworkFeeFormulaParams = {
   fee: bigint | null;
@@ -51,9 +52,11 @@ export function useNetworkFeeFormula({
 
     return (
       <span className="flex flex-row items-center gap-1">
-        <span>{gasAmountFormatted}</span> <span className="italic">Gas</span>
+        <span>{gasAmountFormatted}</span>{' '}
+        <span className="italic">{defaultTranslationVariables.gas}</span>
         <XIcon className="h-4 w-4" /> <span>{gasPriceFormatted}</span>
-        <span>{TICKER.ETH}</span> <span className="italic">Gas Price</span>
+        <span>{TICKER.ETH}</span>{' '}
+        <span className="italic">{defaultTranslationVariables.gasPrice}</span>
         <CopyToClipboardButton
           className="ms-0.5"
           textToCopy={`${gasAmountNumber}*${formatNumber(gasPriceNumber, { minimumSignificantDigits: ETH_DECIMALS })}`}

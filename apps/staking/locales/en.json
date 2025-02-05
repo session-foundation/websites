@@ -20,7 +20,9 @@
       "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
       "SignatureExpired": "signature expired, try again later",
       "InsufficientBalance": "insufficient {tokenSymbol} balance for transaction"
-    }
+    },
+    "reserved": "Reserved",
+    "staked": "Staked"
   },
   "maintenance": {
     "title": "Maintenance Notice",
@@ -323,7 +325,7 @@
     },
     "referral": {
       "title": "Referral Program",
-      "description1": "Grow the Session Network by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
+      "description1": "Grow the {sessionNetwork} by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
       "description2": "Learn more <link>here</link>.",
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
       "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",
@@ -334,7 +336,7 @@
     "general": {
       "publicKeyShort": "SN Key",
       "publicKeyLong": "Session Node Public Key",
-      "publicKeyDescription": "This node's unique public identifier on the Session Network",
+      "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}",
       "blsKey": "BLS Key",
       "blsKeyDescription": "This node's public cryptographic key for interacting Session smart contracts",
       "operatorAddress": "Operator Address",
@@ -377,11 +379,13 @@
       "rewardsAddressDescription": "The wallet address that you will claim rewards to",
       "operatorFee": "Operator Fee",
       "operatorFeeDescription": "Percentage of node rewards taken as a fee by the operator, with remaining rewards distributed to contributors, proportional to stake amount",
-      "reserveSlots": "Reserve Slots",
-      "reserveSlotsDescription": "You can reserve up stakes for specific contributors to your node.",
+      "reserveSlots": "Reserved Stakes",
+      "reserveSlotsDescription": "You can reserve stakes for specific contributors to your node.",
       "buttonEditField": {
         "aria": "Edit {field}"
       },
+      "enabled": "Enabled",
+      "disabled": "Disabled",
       "progress": "Progress",
       "retry": "Retry",
       "proxyApprovalCost": "Proxy Approval Cost:",
@@ -444,7 +448,7 @@
       "disabledReason": {
         "alreadyFinalized": "The node details are already finalized and can't be edited.",
         "alreadyContributedOperatorFee": "The operator fee can't be edited once another address has contributed to the node.",
-        "alreadyContributedReservedSlots": "The reserved slots can't be edited once another address has contributed to the node.",
+        "alreadyContributedReservedSlots": "The reserved stakes can't be edited once another address has contributed to the node.",
         "pastTimeLimitStakeAmountRemove": "You can't remove your stake from a node after {timeLimitAmount} from your previous stake to that node."
       }
     },
@@ -518,8 +522,8 @@
       "stakeAmount": {
         "title": "How much do you want to stake?",
         "description": "As the node operator, you must stake at least {minStakeMulti}.",
-        "min": "Min: {minStakeMulti}",
-        "max": "Max: {maxStakeMulti}",
+        "min": "Min: {min}",
+        "max": "Max: {max}",
         "errorUnderMin": "You cannot stake under the minimum of {min}"
       },
       "operatorFee": {
@@ -564,8 +568,21 @@
         "title": "Which addresses do you want to reserve stakes for?",
         "description": "Reserve stakes for 1-9 other contributors.",
         "address": "Address",
+        "addressDescription": "The wallet address of the contributor you want to reserve a stake for",
         "stakeAmount": "Stake Amount",
+        "stakeAmountDescription": "The amount of stake you want to reserve for this contributor",
         "percentage": "Percentage",
+        "remainingStake": "Remaining Unreserved Stake",
+        "remainingStakeCreationDescription": "{amount} will be available for anyone to stake. Contributors with reserved stakes will also be able to exceed their reserved stake amount.",
+        "remainingStakeViewDescription": "{amount} is available for anyone to stake. Contributors with reserved stakes are also able to exceed their reserved stake amount.",
+        "validation": {
+          "slotInvalid": "Invalid reserved stake, please try again",
+          "addressAlreadyUsed": "This address is already reserved",
+          "invalidReservedSlots": "Invalid reserved stakes",
+          "errorUnderMin": "This slot can't have less than {min} reserved",
+          "underMin": "This slot can't have less than {min} reserved",
+          "overMax": "This slot can't have more than {max} reserved"
+        },
         "buttonAdd": {
           "text": "Add",
           "aria": "Add a new address to reserve stakes for"
@@ -573,6 +590,14 @@
         "buttonRemove": {
           "text": "Remove",
           "aria": "Remove an address from reserving stakes for"
+        },
+        "buttonCancel": {
+          "text": "Cancel",
+          "aria": "Cancel adding a new address to reserve stakes for"
+        },
+        "buttonConfirm": {
+          "text": "Confirm Slot {number}",
+          "aria": "Confirm adding a new address to reserve stakes for"
         }
       },
       "autoActivate": {
@@ -611,11 +636,11 @@
           }
         },
         "network": {
-          "idle": "Registering node on Session network",
-          "pending": "Registering node on Session network ({progress} confirmations) estimated time remaining: {remainingTime}",
-          "success": "Registering node on Session network confirmed",
+          "idle": "Registering node on {sessionNetwork}",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations) estimated time remaining: {remainingTime}",
+          "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Registering node on Session network failed, {reason}, please try again later"
+            "template": "Registering node on {sessionNetwork} failed, {reason}, please try again later"
           }
         }
       },
@@ -625,7 +650,7 @@
       },
       "successSolo": {
         "specialTitle": "Single Contributor Node Created!",
-        "specialDescription": "Your node is staked and running on the Session Network."
+        "specialDescription": "Your node is staked and running on the {sessionNetwork}."
       },
       "submitMulti": {
         "deployCost": "Deploy Cost:",
@@ -702,6 +727,7 @@
         "ariaLabel": "View the node details in the side panel"
       },
       "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
+      "youReservedNotContributed": "You have a reserved amount of {tokenAmount} that has not been contributed to this node. You can contribute to this node by staking {tokenAmount} to this node.",
       "stakedTo": "Staked",
       "stakedToTooltip": "You have staked {tokenAmount}",
       "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
@@ -785,9 +811,9 @@
             "idle": "Session node network exit confirming",
             "pending": "Session node network exit confirming",
             "success": "Session node network exit confirmed",
-            "errorTemplate": "Failed to confirm the node exit with the Session network, {reason}",
+            "errorTemplate": "Failed to confirm the node exit with the {sessionNetwork}, {reason}",
             "errors": {
-              "UnableToReachNetwork": "unable to reach the Session network"
+              "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
             }
           }
         }
@@ -839,9 +865,9 @@
               "idle": "Session node exit request confirming",
               "pending": "Session node exit request confirming",
               "success": "Session node exit request confirmed",
-              "errorTemplate": "Failed to confirm the submission of the node exit request to the Session network, {reason}",
+              "errorTemplate": "Failed to confirm the submission of the node exit request to the {sessionNetwork}, {reason}",
               "errors": {
-                "UnableToReachNetwork": "unable to reach the Session network"
+                "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
               }
             }
           }

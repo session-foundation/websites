@@ -13,15 +13,20 @@ import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef } from 'react';
+import { stringToBigInt } from '@session/util-crypto/maths';
+import { TOKEN } from '@session/contracts';
+import { useDecimalDelimiter } from '@/lib/locale-client';
 
 const FIELD_NAME = 'stakeAmount';
 
 export function StakeAmountTab() {
-  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
+  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam, address } =
     useRegistrationWizard();
 
   const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
   const dictContinue = useTranslations('actionModules.registration.shared.buttonContinue');
+
+  const decimalDelimiter = useDecimalDelimiter();
 
   const stakeAmount = formMulti.watch(FIELD_NAME);
   const initial = useRef<string>(stakeAmount);
@@ -40,6 +45,19 @@ export function StakeAmountTab() {
    */
   const handleSubmit = () => {
     if (formMulti.getFieldState(FIELD_NAME).invalid) return;
+
+    const reservedContributors = formMulti.getValues('reservedContributors');
+    const stakeAmount = formMulti.getValues('stakeAmount');
+
+    reservedContributors[0] = {
+      addr: address,
+      amount: stringToBigInt(stakeAmount, TOKEN.DECIMALS, decimalDelimiter),
+    };
+
+    formMulti.setValue('reservedContributors', reservedContributors);
+    
+    // TODO: check if this causes a reserved slot error and send to that tab if it does
+    //  (for edits once we make advanced editing allowed)
 
     pushQueryParam(REGISTRATION_QUERY_PARAM.STAKE_AMOUNT, stakeAmount);
     changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.OPERATOR_FEE);
