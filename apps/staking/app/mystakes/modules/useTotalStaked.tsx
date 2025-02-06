@@ -19,8 +19,7 @@ export function useTotalStaked(addressOverride?: Address) {
     const stakedStakes = stakes.filter((stake) => {
       const eventState = parseStakeEventState(stake);
       return (
-        !(eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED) &&
-        currentContractIds?.has(stake.contract_id)
+        !(eventState === STAKE_EVENT_STATE.EXITED) && currentContractIds?.has(stake.contract_id)
       );
     });
 
