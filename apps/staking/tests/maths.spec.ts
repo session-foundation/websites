@@ -192,7 +192,8 @@ function createRandomContributorArray() {
   return contributors;
 }
 
-const fuzzAmount = isCI ? 20 : 1000;
+// Needs to be low on CI as GitHub Actions get rate limited quickly
+const fuzzAmount = isCI ? 10 : 1000;
 
 describe(`parseContributorDetails fuzzing (fuzzAmount: ${fuzzAmount}`, () => {
   const tests = [];
