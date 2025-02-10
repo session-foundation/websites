@@ -53,26 +53,26 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         ref={ref}
         {...props}
         className={cn(
-          'reduced-motion:transition-none flex flex-col items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out',
-          forceSmall ? '' : 'sm:flex-row md:gap-10',
+          'reduced-motion:transition-none flex flex-row flex-wrap items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out',
+          forceSmall ? '' : 'md:gap-10',
           isActive && 'border-session-green',
           className
         )}
       >
-        <div className="flex flex-row gap-6">
+        <div className="flex flex-row gap-2 md:gap-4">
           {warnings ? (
             <div className="flex w-max flex-row items-center gap-2 align-middle">{warnings}</div>
           ) : null}
-          <div className={cn('text-center sm:text-start', className)}>
-            <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
+          <div className={cn('text-start', className)}>
+            <div className="flex w-full cursor-pointer items-baseline gap-1 align-middle md:gap-3">
               {statusIndicatorColour ? (
-                <div className="-me-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
+                <div className="scale-75 p-0 sm:mb-0.5 sm:pt-0.5 md:scale-100 md:pt-0">
                   <StatusIndicator status={statusIndicatorColour} />
                 </div>
               ) : null}
               <NodeCardTitle
                 className={cn(
-                  'inline-flex flex-wrap gap-2',
+                  'inline-flex flex-wrap gap-1.5',
                   forceSmall ? 'text-xs md:text-base' : 'text-sm md:text-lg'
                 )}
               >
@@ -84,7 +84,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
             </div>
             <NodeCardText
               className={cn(
-                'col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row',
+                'col-span-10 inline-flex max-h-max flex-row-reverse justify-start gap-2 text-center align-middle font-normal sm:text-start md:mt-0 md:flex-row',
                 forceSmall ? 'text-xs md:text-xs' : 'text-xs md:text-base'
               )}
             >
@@ -92,17 +92,17 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
             </NodeCardText>
           </div>
         </div>
-        <div className="flex flex-row items-center gap-2 align-middle">
+        <div className="flex w-full flex-row items-center gap-2 align-middle sm:w-auto">
           {buttonSiblings}
           {button ? (
-            <Link href={button.link} className="w-full sm:w-auto" prefetch>
+            <Link href={button.link} className="w-full md:w-auto" prefetch>
               <Button
                 variant={isActive ? 'default' : 'outline'}
                 size={forceSmall ? 'sm' : 'md'}
                 rounded="md"
                 aria-label={button.ariaLabel}
                 data-testid={button.dataTestId}
-                className="w-full sm:w-auto"
+                className="w-full md:w-auto"
               >
                 {button.text}
               </Button>

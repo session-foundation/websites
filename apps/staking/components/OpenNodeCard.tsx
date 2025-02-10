@@ -117,11 +117,11 @@ const OpenNodeCard = forwardRef<
       className={className}
       pubKey={pubKey}
       statusIndicatorColour={
-        state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION ||
-        showAlreadyRunningWarning ||
-        connectedWalletNoncontributedReservedStakeAmount
+        state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION || showAlreadyRunningWarning
           ? 'yellow'
-          : 'blue'
+          : connectedWalletNoncontributedReservedStakeAmount
+            ? 'green'
+            : 'blue'
       }
       isActive={pathname === `/stake/${contract.address}`}
       forceSmall={forceSmall}
@@ -139,7 +139,7 @@ const OpenNodeCard = forwardRef<
         <>
           {showAlreadyRunningWarning ? (
             <AlertTooltip
-              iconClassName="h-10 w-10"
+              iconClassName="h-4 w-4 md:h-10 md:w-10"
               tooltipContent={dictionary('errorStakedButAlreadyRunning')}
             />
           ) : null}
@@ -155,7 +155,7 @@ const OpenNodeCard = forwardRef<
                 tokenAmount: formatSENTNumber(connectedWalletNoncontributedReservedStakeAmount),
               })}
             >
-              <ContactIcon className="stroke-warning h-10 w-10" />
+              <ContactIcon className="stroke-session-green h-10 w-10" />
             </Tooltip>
           ) : null}
         </>
@@ -172,11 +172,11 @@ const OpenNodeCard = forwardRef<
           <NodeItemSeparator className="ms-2 hidden md:block" />
         </NodeItem>
       ) : null}
-      <NodeItem>
-        <NodeItemLabel className="inline-flex md:hidden">
+      <NodeItem className="sm:flex-nowrap sm:text-nowrap">
+        <NodeItemLabel className="inline-flex sm:flex-nowrap sm:text-nowrap lg:hidden">
           {titleFormat('format', { title: dictionary('min') })}
         </NodeItemLabel>
-        <NodeItemLabel className="hidden md:inline-flex">
+        <NodeItemLabel className="hidden sm:flex-nowrap sm:text-nowrap lg:inline-flex">
           {titleFormat('format', { title: dictionary('minContribution') })}
         </NodeItemLabel>
         <NodeItemValue>
