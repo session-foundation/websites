@@ -96,7 +96,7 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
     reservedContributor ? maxStakeReserved : 0n
   );
 
-  const allowNewStake = minStakeCalculated > 0n || maxStakeCalculated > 0n;
+  const allowNewStake = minStake > 0n || maxStake > 0n;
 
   const formSchema = getStakeFormSchema({
     stakeAmount: {
