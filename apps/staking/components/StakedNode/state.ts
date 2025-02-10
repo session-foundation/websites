@@ -6,9 +6,13 @@ import {
 } from '@session/staking-api-js/client';
 
 enum EVENT {
+  /** Emitted when a new service node is added to the network */
   NewServiceNodeV2 = 'NewServiceNodeV2',
+  /** Emitted when a service node exit request is initiated */
   ServiceNodeExitRequest = 'ServiceNodeExitRequest',
+  /** Emitted when a service node exits (by request or liquidation) */
   ServiceNodeExit = 'ServiceNodeExit',
+  /** Emitted when a service node is liquidated NOTE: Always followed by ServiceNodeExit */
   ServiceNodeLiquidated = 'ServiceNodeLiquidated',
 }
 
@@ -17,7 +21,6 @@ export enum STAKE_EVENT_STATE {
   ACTIVE,
   EXIT_REQUESTED,
   EXITED,
-  LIQUIDATED,
 }
 
 export function parseStakeEventState(stake: Stake) {
@@ -32,9 +35,8 @@ export function parseStakeEventState(stake: Stake) {
     case EVENT.ServiceNodeExitRequest:
       return STAKE_EVENT_STATE.EXIT_REQUESTED;
     case EVENT.ServiceNodeExit:
-      return STAKE_EVENT_STATE.EXITED;
     case EVENT.ServiceNodeLiquidated:
-      return STAKE_EVENT_STATE.LIQUIDATED;
+      return STAKE_EVENT_STATE.EXITED;
     default:
       return STAKE_EVENT_STATE.UNKNOWN;
   }
@@ -42,8 +44,6 @@ export function parseStakeEventState(stake: Stake) {
 
 export enum STAKE_STATE {
   /** @see {STAKE_EVENT_STATE.EXITED}
-   * OR
-   * @see {STAKE_EVENT_STATE.LIQUIDATED}
    *
    * To determine if the stake was exited by `unlock` or `deregistration`, use {@link isStakeDeregistered}
    * */
@@ -89,12 +89,12 @@ export function isStakeReadyToExit(stake: Stake, blockHeight: number) {
 export function parseStakeState(stake: Stake, blockHeight: number) {
   const eventState = parseStakeEventState(stake);
 
-  if (eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED) {
-    return STAKE_STATE.EXITED;
-  }
-
   if (isStakeDeregistered(stake)) {
     return STAKE_STATE.DEREGISTERED;
+  }
+
+  if (eventState === STAKE_EVENT_STATE.EXITED) {
+    return STAKE_STATE.EXITED;
   }
 
   if (eventState === STAKE_EVENT_STATE.EXIT_REQUESTED) {

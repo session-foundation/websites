@@ -57,27 +57,10 @@ export const isReadyToExitByUnlock = (
   !!(
     state === STAKE_STATE.AWAITING_EXIT &&
     eventState !== STAKE_EVENT_STATE.EXITED &&
-    eventState !== STAKE_EVENT_STATE.LIQUIDATED &&
     unlockHeight &&
     blockHeight &&
     unlockHeight <= blockHeight
   );
-
-export const useIsReadyToExitByDeregistrationUnlock = (
-  state: STAKE_STATE,
-  eventState: STAKE_EVENT_STATE,
-  deregistrationHeight?: number | null,
-  blockHeight?: number
-) => {
-  return !!(
-    state === STAKE_STATE.DEREGISTERED &&
-    eventState !== STAKE_EVENT_STATE.EXITED &&
-    eventState !== STAKE_EVENT_STATE.LIQUIDATED &&
-    deregistrationHeight &&
-    blockHeight &&
-    deregistrationHeight <= blockHeight
-  );
-};
 
 function getNodeStatus(state: STAKE_STATE): VariantProps<typeof statusVariants>['status'] {
   switch (state) {
@@ -236,11 +219,19 @@ const ExitUnlockTimerNotification = ({
   const notFoundString = dictionaryGeneral('notFound');
   const soonString = dictionaryGeneral('soon');
 
-  const isExitableSoon = useMemo(() => isDateSoonOrPast(date), [date]);
+  const [isExitableSoon, isPastTime] = useMemo(
+    () => [isDateSoonOrPast(date), date && Date.now() > date.getTime()],
+    [date]
+  );
+
   const relativeTime = useMemo(
     () => (!isExitableSoon ? timeString : soonString),
     [isExitableSoon, timeString, soonString, notFoundString]
   );
+
+  if (isPastTime) {
+    return null;
+  }
 
   return (
     <Tooltip
@@ -335,15 +326,7 @@ const NodeSummary = ({
   isInContractIdList,
 }: NodeSummaryProps) => {
   const eventState = parseStakeEventState(node);
-  const isExited =
-    eventState === STAKE_EVENT_STATE.EXITED || eventState === STAKE_EVENT_STATE.LIQUIDATED;
-
-  const isReadyToUnlockByDeregistration = useIsReadyToExitByDeregistrationUnlock(
-    state,
-    eventState,
-    node.deregistration_height,
-    blockHeight
-  );
+  const isExited = eventState === STAKE_EVENT_STATE.EXITED;
 
   const contributors = (
     <NodeContributorList
@@ -357,20 +340,18 @@ const NodeSummary = ({
       <>
         {contributors}
         {!isExited && isInContractIdList ? (
-          isReadyToUnlockByDeregistration ? (
-            <ReadyForExitNotification
-              timeString={liquidationTime}
-              date={liquidationDate}
-              isDeregistered
-            />
-          ) : (
-            <ExitUnlockTimerNotification
-              timeString={deregistrationUnlockTime}
-              date={deregistrationUnlockDate}
-              isDeregistered
-            />
-          )
-        ) : null}
+          <ReadyForExitNotification
+            timeString={liquidationTime}
+            date={liquidationDate}
+            isDeregistered
+          />
+        ) : (
+          <ExitUnlockTimerNotification
+            timeString={deregistrationUnlockTime}
+            date={deregistrationUnlockDate}
+            isDeregistered
+          />
+        )}
       </>
     );
   }
@@ -708,7 +689,6 @@ function StakeNodeCardButton({
   if (
     state === STAKE_STATE.EXITED ||
     eventState === STAKE_EVENT_STATE.EXITED ||
-    eventState === STAKE_EVENT_STATE.LIQUIDATED ||
     state === STAKE_STATE.DEREGISTERED
   ) {
     return null;
