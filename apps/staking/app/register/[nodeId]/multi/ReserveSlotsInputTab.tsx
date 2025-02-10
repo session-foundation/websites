@@ -346,7 +346,7 @@ export function ReserveSlotsInputTab() {
               disabled={!formSlot.formState.isValid}
               onClick={formSlot.handleSubmit(handleSubmitSlot)}
             >
-              {dict('buttonConfirm.text', { number: reservedStakes.length + 1 })}
+              {dict('buttonConfirm.text')}
             </Button>
           </form>
         </Form>

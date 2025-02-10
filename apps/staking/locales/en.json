@@ -30,9 +30,9 @@
   },
   "fee": {
     "networkFee": "Network Fee",
-    "networkFeeTooltip": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link>",
+    "networkFeeTooltip": "The estimated amount of {gasTokenSymbol} it will cost to process this transaction on the {mainNetworkChain} network. <link>Learn more</link>",
     "networkFeeTooltipWithFormula": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link> <br></br> <formula></formula>",
-    "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate will be inaccurate.",
+    "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate may be inaccurate",
     "gasHigh": "The network fee is higher than usual, the price of Gas is higher than normal on {mainNetworkChain} due to high demand. <link>Learn more</link>"
   },
   "maths": {
@@ -208,7 +208,7 @@
       "title": "Session Nodes"
     },
     "openNodes": {
-      "title": "Open Session Nodes",
+      "title": "Available Nodes",
       "description": "Nodes that are open for staking. <link>Learn more</link>",
       "noNodesP1": "There are currently no Open Session Nodes available to stake to.",
       "noNodesP2": "Check out the <link>docs</link> to learn about setting up and registering your own Session Node.",
@@ -338,14 +338,14 @@
       "publicKeyLong": "Session Node Public Key",
       "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}",
       "blsKey": "BLS Key",
-      "blsKeyDescription": "This node's public cryptographic key for interacting Session smart contracts",
+      "blsKeyDescription": "This node’s public cryptographic key for interacting with Session smart contracts",
       "operatorAddress": "Operator Address",
       "operatorAddressTooltip": "The wallet address of the node operator.",
       "beneficiaryAddress": "Beneficiary Address",
       "beneficiaryAddressTooltip": "The wallet address rewards are sent to.",
       "operatorFee": "Operator Fee",
       "operatorFeeShort": "Fee",
-      "operatorFeeDescription": "Operators of multi-contributor nodes can set an operator fee to help cover operating costs. The operator fee is a percentage of the total node rewards. After this fee is deducted, the remaining rewards are distributed to all contributors, including the operator, based on their respective stake amounts.",
+      "operatorFeeDescription": "Operators of multicontributor nodes can set an operator fee to help cover operating costs. The operator fee is a percentage of the total node rewards. After this fee is deducted, the remaining rewards are distributed to all contributors, including the operator, based on their respective stake amounts.",
       "rawData": "Raw Data"
     },
     "staking": {
@@ -430,10 +430,10 @@
           "aria": "Remove stake from the node"
         },
         "withdrawContribution": {
-          "idle": "Withdrawing {tokenSymbol} from Open Node",
-          "pending": "Withdrawing {tokenSymbol} from Open Node",
-          "success": "Withdrawing {tokenSymbol} from Open Node",
-          "errorTemplate": "Failed to withdraw {tokenSymbol} from Open Node, {reason}",
+          "idle": "Withdrawing {tokenSymbol} from Multicontributor Contract",
+          "pending": "Withdrawing {tokenSymbol} from Multicontributor Contract",
+          "success": "Withdrawing {tokenSymbol} from Multicontributor Contract",
+          "errorTemplate": "Failed to withdraw {tokenSymbol} from Multicontributor Contract, {reason}",
           "errors": {}
         }
       },
@@ -479,7 +479,7 @@
         },
         "registerANewNode": "Register a New Node",
         "singleContributorNode": "Single Contributor Node",
-        "multiContributorNode": "Multi Contributor Node",
+        "multiContributorNode": "Multicontributor Node",
         "submit": {
           "preparedAt": "Registration Prepared",
           "preparedAtDescription": "Time since this node's registration was prepared"
@@ -497,8 +497,8 @@
       },
       "start": {
         "title": "Do you want to stake by yourself or with others?",
-        "description": "To stake by yourself, you need to stake <text-bold>{minStakeSolo}</text-bold>.",
-        "description2": "To operate a node and stake with others, you need to stake at least <text-bold>{minStakeMulti}</text-bold>.",
+        "description": "To stake by yourself, you need to stake {minStakeSolo}.",
+        "description2": "To operate a node and stake with others, you need to stake at least {minStakeMulti}.",
         "buttonSolo": {
           "text": "Stake by myself",
           "aria": "Continue the registration process by staking the full {minStakeSolo} yourself."
@@ -570,18 +570,18 @@
         "address": "Address",
         "addressDescription": "The wallet address of the contributor you want to reserve a stake for",
         "stakeAmount": "Stake Amount",
-        "stakeAmountDescription": "The amount of stake you want to reserve for this contributor",
+        "stakeAmountDescription": "The amount you want to reserve for this contributor",
         "percentage": "Percentage",
-        "remainingStake": "Remaining Unreserved Stake",
-        "remainingStakeCreationDescription": "{amount} will be available for anyone to stake. Contributors with reserved stakes will also be able to exceed their reserved stake amount.",
-        "remainingStakeViewDescription": "{amount} is available for anyone to stake. Contributors with reserved stakes are also able to exceed their reserved stake amount.",
+        "remainingStake": "Remaining Stake",
+        "remainingStakeCreationDescription": "{amount} will be available for anyone to stake. Contributors with reserved stakes will also be able to stake more than their reserved amount.",
+        "remainingStakeViewDescription": "{amount} is available for anyone to stake. Contributors with reserved stakes will also be able to stake more than their reserved amount.",
         "validation": {
           "slotInvalid": "Invalid reserved stake, please try again",
-          "addressAlreadyUsed": "This address is already reserved",
+          "addressAlreadyUsed": "You have already reserved a stake for this address",
           "invalidReservedSlots": "Invalid reserved stakes",
-          "errorUnderMin": "This slot can't have less than {min} reserved",
-          "underMin": "This slot can't have less than {min} reserved",
-          "overMax": "This slot can't have more than {max} reserved"
+          "errorUnderMin": "You must reserve more than {min}",
+          "underMin": "You must reserve more than {min}",
+          "overMax": "You must reserve less than {max}"
         },
         "buttonAdd": {
           "text": "Add",
@@ -596,7 +596,7 @@
           "aria": "Cancel adding a new address to reserve stakes for"
         },
         "buttonConfirm": {
-          "text": "Confirm Slot {number}",
+          "text": "Add Reserved Stake",
           "aria": "Confirm adding a new address to reserve stakes for"
         }
       },
@@ -657,17 +657,17 @@
         "proxyApprovalCost": "Proxy Approval Cost:",
         "contributeFundsCost": "Contribute Funds Cost:",
         "create": {
-          "idle": "Creating Open Node contract",
-          "pending": "Creating Open Node contract",
-          "success": "Created Open Node contract",
-          "errorTemplate": "Failed to create Open Node contract, {reason}",
+          "idle": "Creating Multicontributor Contract",
+          "pending": "Creating Multicontributor Contract",
+          "success": "Created Multicontributor Contract",
+          "errorTemplate": "Failed to create Multicontributor Contract, {reason}",
           "errors": {}
         },
         "address": {
-          "idle": "Finalising Open Node contract address",
-          "pending": "Finalising Open Node contract address",
-          "success": " Finalised Node contract address. <link>View on Arbiscan</link>",
-          "errorTemplate": "Failed to finalise Open Node contract address, {reason}",
+          "idle": "Finalising Multicontributor Contract address",
+          "pending": "Finalising Multicontributor Contract address",
+          "success": " Finalised Multicontributor Contract address. <link>View on Arbiscan</link>",
+          "errorTemplate": "Failed to finalise Multicontributor Contract address, {reason}",
           "errors": {}
         },
         "approve": {
@@ -678,10 +678,10 @@
           "errors": {}
         },
         "contribute": {
-          "idle": "Contributing {tokenSymbol} to Open Node contract",
-          "pending": "Contributing {tokenSymbol} to Open Node contract",
-          "success": "Contributed {tokenSymbol} to Open Node contract",
-          "errorTemplate": "Failed to contribute {tokenSymbol} to Open Node contract, {reason}",
+          "idle": "Contributing {tokenSymbol} to Multicontributor Contract",
+          "pending": "Contributing {tokenSymbol} to Multicontributor Contract",
+          "success": "Contributed {tokenSymbol} to Multicontributor Contract",
+          "errorTemplate": "Failed to contribute {tokenSymbol} to Multicontributor Contract, {reason}",
           "errors": {}
         }
       },
@@ -704,8 +704,8 @@
     },
     "node": {
       "title": "Stake to a Node",
-      "contributors": "Shared Contributors",
-      "contributorsTooltip": "The number of stakers on this node",
+      "contributors": "Contributors",
+      "contributorsTooltip": "The number of contributors to this node ",
       "feeEstimate": "Fee Estimate",
       "feeEstimateTooltip": "An estimate of the amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link> <br></br> {formula}",
       "button": {
@@ -726,19 +726,13 @@
         "text": "View",
         "ariaLabel": "View the node details in the side panel"
       },
-      "youOperatorNotStaked": "You are the operator of this contract, but you have not staked yet. It won't be shown as an open node until you stake.",
-      "youReservedNotContributed": "You have a reserved amount of {tokenAmount} that has not been contributed to this node. You can contribute to this node by staking {tokenAmount} to this node.",
+      "youOperatorNotStaked": "You are the operator of this multicontributor node, but haven't staked yet. It won’t be listed as an available node until you stake",
+      "youReservedNotContributed": "{tokenAmount} has been reserved for you to stake to this node",
       "stakedTo": "Staked",
       "stakedToTooltip": "You have staked {tokenAmount}",
       "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
     },
     "pending": {
-      "type": "Type",
-      "typeDescription": "The node type",
-      "solo": "Single Contributor Node",
-      "multi": "Multi Contributor Node",
-      "soloDescription": "A single contributor node is a node that has the full stake amount contributed by the node operator.",
-      "multiDescription": "A multi contributor node is a node that has a stake amount contributed by multiple contributors.",
       "registerButton": {
         "text": "View",
         "ariaLabel": "View the node registration details in the side panel"
@@ -771,9 +765,9 @@
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
       "finalize": {
-        "buttonText": "Start Node",
-        "buttonAria": "Start the node on the network",
-        "successToast": "Node start success, node will be registered in a few minutes"
+        "buttonText": "Activate",
+        "buttonAria": "Activate the node on the network",
+        "successToast": "Node activation success, node will be registered in a few minutes"
       },
       "exit": {
         "buttonText": "Exit",
