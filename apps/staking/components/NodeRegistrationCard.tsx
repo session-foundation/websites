@@ -85,12 +85,16 @@ const NodeRegistrationCard = forwardRef<
           </Button>
         ) : null
       }*/
-      button={{
-        ariaLabel: dictionary('registerButton.ariaLabel'),
-        text: dictionary('registerButton.text'),
-        dataTestId: ButtonDataTestId.Node_Card_Register,
-        link: `/register/${pubKey}`,
-      }}
+      button={
+        !isRegistrationFormOpen
+          ? {
+              ariaLabel: dictionary('registerButton.ariaLabel'),
+              text: dictionary('registerButton.text'),
+              dataTestId: ButtonDataTestId.Node_Card_Register,
+              link: `/register/${pubKey}`,
+            }
+          : undefined
+      }
       {...props}
     >
       <NodeItem>
