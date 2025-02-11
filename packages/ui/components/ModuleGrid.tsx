@@ -115,16 +115,14 @@ const ModuleGridContent = forwardRef<HTMLDivElement, ModuleGridContentProps>(
       ref={ref}
       className={cn(
         'flex h-full flex-col overflow-y-auto',
-        alignment === MODULE_GRID_ALIGNMENT.CENTER
-          ? 'justify-center'
-          : 'justify-center md:justify-start',
+        alignment === MODULE_GRID_ALIGNMENT.CENTER ? 'justify-center' : 'justify-start',
         containerClassName
       )}
       {...props}
     >
       <div
         className={cn(
-          'fade-to-transparent-b flex h-max flex-col gap-2 p-4 align-middle md:p-6',
+          'fade-to-transparent-b flex h-max flex-col gap-2 p-4 align-middle',
           alignment === MODULE_GRID_ALIGNMENT.TOP_1_3 ? 'py-[20vh] xl:py-0 xl:pt-[20vh]' : '',
           className
         )}
