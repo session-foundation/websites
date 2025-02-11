@@ -83,9 +83,13 @@ export function ReservedStakesTable({
             <TableRow className="border-b-transparent bg-transparent hover:bg-transparent">
               <TableHead />
               <TableHead className="ps-0">{dict('address')}</TableHead>
-              <TableHead>{dict('stakeAmount')}</TableHead>
-              <TableHead>{dict('percentage')}</TableHead>
-              {isEditable ? <TableHead /> : null}
+              <TableHead className="text-end">{dict('stakeAmount')}</TableHead>
+              <TableHead
+                className={isEditable && slotRows.length > 1 ? '' : 'text-end'}
+                colSpan={isEditable ? 2 : 1}
+              >
+                {dict('percentage')}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -112,8 +116,10 @@ export function ReservedStakesTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{formatSENTBigIntNoRounding(amount)}</TableCell>
-                <TableCell>{formatPercentage(percentage, { minimumFractionDigits: 0 })}</TableCell>
+                <TableCell className="text-end">{formatSENTBigIntNoRounding(amount)}</TableCell>
+                <TableCell className="text-end">
+                  {formatPercentage(percentage, { minimumFractionDigits: 0 })}
+                </TableCell>
                 {isEditable ? (
                   <TableCell>
                     {/* Only the last slot can be edited TODO: investigate if we can do out of order mutations. */}
@@ -141,21 +147,27 @@ export function ReservedStakesTable({
           <TableFooter>
             <TableRow className="[&>td]:py-3">
               <TableCell colSpan={1} className="px-2.5" />
-              <TableCell colSpan={1} className="px-2.5">
+              <TableCell colSpan={unreservedStake ? 1 : 3} className="px-2.5">
                 <div className="flex flex-row items-center gap-2">
-                  {dict('remainingStake')}
-                  <ActionModuleTooltip>
-                    {dict(
-                      isEditable
-                        ? 'remainingStakeCreationDescription'
-                        : 'remainingStakeViewDescription',
-                      { amount: remainingStake }
-                    )}
-                  </ActionModuleTooltip>
+                  {dict(unreservedStake ? 'remainingStake' : 'remainingStakeNone')}
+                  {unreservedStake ? (
+                    <ActionModuleTooltip>
+                      {dict(
+                        isEditable
+                          ? 'remainingStakeCreationDescription'
+                          : 'remainingStakeViewDescription',
+                        { amount: remainingStake }
+                      )}
+                    </ActionModuleTooltip>
+                  ) : null}
                 </div>
               </TableCell>
-              <TableCell className="px-2.5">{remainingStake}</TableCell>
-              <TableCell className="px-2.5">{remainingStakePercent}</TableCell>
+              {unreservedStake ? (
+                <TableCell className="px-2.5 text-end">{remainingStake}</TableCell>
+              ) : null}
+              {unreservedStake ? (
+                <TableCell className="px-2.5 text-end">{remainingStakePercent}</TableCell>
+              ) : null}
               {isEditable ? <TableCell></TableCell> : null}
             </TableRow>
             <TableRow className="hover:bg-session-black">

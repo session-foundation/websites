@@ -95,6 +95,7 @@ export type ReservedStakeSchema = z.infer<ReturnType<typeof getReservedStakeSche
 
 export function ReserveSlotsInputTab() {
   const [isNewSlotFormVisible, setIsNewSlotFormVisible] = useState<boolean>(false);
+  const [isEditingExistingSlot, setIsEditingExistingSlot] = useState<boolean>(false);
 
   const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
@@ -225,6 +226,7 @@ export function ReserveSlotsInputTab() {
 
     formMulti.setValue('reservedContributors', newSlots);
     setIsNewSlotFormVisible(false);
+    setIsEditingExistingSlot(false);
     recomputeFormDefaultsAndReset(newSlots);
   };
 
@@ -255,6 +257,7 @@ export function ReserveSlotsInputTab() {
     recomputeFormDefaultsAndReset(newSlots);
     formSlot.setValue('amount', bigIntToString(slot.amount, TOKEN.DECIMALS, decimalDelimiter));
     formSlot.setValue('addr', slot.addr);
+    setIsEditingExistingSlot(true);
     setIsNewSlotFormVisible(true);
   };
 
@@ -333,20 +336,24 @@ export function ReserveSlotsInputTab() {
               )}
             />
             <Button
-              variant="destructive-outline"
-              aria-label={dict('buttonCancel.aria')}
+              variant={isEditingExistingSlot ? 'destructive' : 'destructive-outline'}
+              aria-label={dict(
+                isEditingExistingSlot ? 'buttonDeleteCancel.aria' : 'buttonCancel.aria'
+              )}
               onClick={() => setIsNewSlotFormVisible(false)}
               data-testid={ButtonDataTestId.Registration_Reserved_Stakes_Cancel_Slot}
             >
-              {dict('buttonCancel.text')}
+              {dict(isEditingExistingSlot ? 'buttonDeleteCancel.text' : 'buttonCancel.text')}
             </Button>
             <Button
               data-testid={ButtonDataTestId.Registration_Reserved_Stakes_Confirm_Slot}
-              aria-label={dict('buttonConfirm.aria')}
+              aria-label={dict(
+                isEditingExistingSlot ? 'buttonConfirmEdit.aria' : 'buttonConfirm.aria'
+              )}
               disabled={!formSlot.formState.isValid}
               onClick={formSlot.handleSubmit(handleSubmitSlot)}
             >
-              {dict('buttonConfirm.text')}
+              {dict(isEditingExistingSlot ? 'buttonConfirmEdit.text' : 'buttonConfirm.text')}
             </Button>
           </form>
         </Form>

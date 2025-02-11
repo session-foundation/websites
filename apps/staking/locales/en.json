@@ -573,6 +573,7 @@
         "stakeAmountDescription": "The amount you want to reserve for this contributor",
         "percentage": "Percentage",
         "remainingStake": "Remaining Stake",
+        "remainingStakeNone": "This node is fully reserved",
         "remainingStakeCreationDescription": "{amount} will be available for anyone to stake. Contributors with reserved stakes will also be able to stake more than their reserved amount.",
         "remainingStakeViewDescription": "{amount} is available for anyone to stake. Contributors with reserved stakes will also be able to stake more than their reserved amount.",
         "validation": {
@@ -595,9 +596,17 @@
           "text": "Cancel",
           "aria": "Cancel adding a new address to reserve stakes for"
         },
+        "buttonDeleteCancel": {
+          "text": "Delete",
+          "aria": "Delete the address from reserving stakes for"
+        },
         "buttonConfirm": {
           "text": "Add Reserved Stake",
           "aria": "Confirm adding a new address to reserve stakes for"
+        },
+        "buttonConfirmEdit": {
+          "text": "Confirm Reserved Stake",
+          "aria": "Confirm editing the address and amount of stake to reserve for"
         }
       },
       "autoActivate": {
