@@ -275,6 +275,7 @@ export function SubmitMultiTab() {
           aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Stake_Amount}
           tab={REG_TAB.STAKE_AMOUNT}
+          disabled={formMulti.watch('reservedContributors').length > 1}
         />
       </ActionModuleRow>
       <ActionModuleRow
