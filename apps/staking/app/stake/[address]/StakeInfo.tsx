@@ -19,7 +19,6 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { type Address, isAddress } from 'viem';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import { getTotalStaked } from '@/lib/maths';
 import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
 import { numberToBigInt } from '@session/util-crypto/maths';
 
@@ -45,6 +44,14 @@ export function getContributedContributor(contract: ContributorContractInfo, add
   );
 }
 
+export function getReservedContributor(contract: ContributorContractInfo, address?: Address) {
+  if (!address) return undefined;
+  return contract.contributors.find(
+    ({ address: contributorAddress, reserved }) =>
+      areHexesEqual(contributorAddress, address) && reserved > 0
+  );
+}
+
 export function getReservedContributorNonContributed(
   contract: ContributorContractInfo,
   address?: Address
@@ -60,7 +67,7 @@ export const getContributionRangeForWallet = (
   contract: ContributorContractInfo,
   address?: Address
 ) => {
-  const reservedContributor = getReservedContributorNonContributed(contract, address);
+  const reservedContributor = getReservedContributor(contract, address);
 
   const { minStake: minStakeCalculated, maxStake } =
     getContributionRangeFromContributorsIgnoreAddress(contract.contributors, address);
