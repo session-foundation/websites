@@ -209,17 +209,17 @@
     },
     "openNodes": {
       "title": "Available Nodes",
-      "description": "Nodes that are open for staking. <link>Learn more</link>",
-      "noNodesP1": "There are currently no Open Session Nodes available to stake to.",
+      "description": "Nodes that are available for staking. <link>Learn more</link>",
+      "noNodesP1": "There are currently no Session Nodes available to stake to.",
       "noNodesP2": "Check out the <link>docs</link> to learn about setting up and registering your own Session Node.",
       "landingP1": "Stake your {tokenSymbol} to multicontributor nodes and help secure the network. ",
       "landingP2": "You can also set up your own multicontributor node for others to stake to.",
-      "landingP1Mainnet": "Click on an Open Session Node to stake {tokenSymbol} and earn rewards for securing the network.",
+      "landingP1Mainnet": "Click on an available Session Node to stake {tokenSymbol} and earn rewards for securing the network.",
       "landingP2Mainnet": "Want to run your own Session Node?",
       "learnMoreButtonText": "Learn More",
       "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
       "showHiddenPendingNodesText": "Show Pending Nodes",
-      "error": "An error occurred while fetching open nodes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "error": "An error occurred while fetching available nodes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
       "errorButton": "Retry"
     },
     "nodeRegistrations": {
@@ -240,9 +240,9 @@
       "noWalletP1": "You currently have no wallet connected.",
       "noWalletP2": "Click the Connect button to view your staked Session node.",
       "noNodesP1": "You have no staked Session Nodes.",
-      "noNodesP2": "Click the <link>Stake Now</link> button to stake to an open node or register a new Session node.",
+      "noNodesP2": "Click the <link>Stake Now</link> button to stake to an available node or register a new Session node.",
       "stakeNowButtonText": "Stake Now",
-      "stakeNowButtonAria": "Navigate to the staking page to stake to an open node.",
+      "stakeNowButtonAria": "Navigate to the staking page to stake to an available node.",
       "error": "An error occurred while fetching your stakes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
       "errorButton": "Retry"
     },
@@ -493,7 +493,7 @@
         "title": "Checking for existing registrations",
         "error": "Something went wrong",
         "foundRunning": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network.",
-        "foundOpen": "An open node was found with the same key, you need to delete the node before creating a new one."
+        "foundOpen": "A multicontributor node was found with the same key, you need to delete the node before creating a new one."
       },
       "start": {
         "title": "Do you want to stake by yourself or with others?",
@@ -704,7 +704,7 @@
       },
       "alreadyRegisteredMulti": {
         "specialTitle": "Already Registered!",
-        "specialDescription": "An open node was found with the same key, you can continue using this registration or if you want to create a new registration you will need to reset your node's keys."
+        "specialDescription": "A multicontributor node was found with the same key, you can continue using this registration or if you want to create a new registration you will need to reset your node's keys."
       },
       "alreadyRegisteredRunning": {
         "specialTitle": "Already Registered!",
