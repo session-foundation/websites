@@ -36,7 +36,7 @@ function getContractStatusColor(
 ): VariantProps<typeof statusVariants>['status'] {
   switch (state) {
     case STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION:
-    case STAKE_CONTRACT_STATE.AWAITING_OPERATOR_START:
+    case STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION:
       return 'yellow';
     case STAKE_CONTRACT_STATE.AWAITING_CONTRIBUTORS:
     case STAKE_CONTRACT_STATE.JOINING:
@@ -53,7 +53,7 @@ type ContractSummaryProps = {
 };
 
 const ContractSummary = ({ contract, state, isOperator }: ContractSummaryProps) => {
-  if (state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_START) {
+  if (state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION) {
     return (
       <>
         <NodeContributorList

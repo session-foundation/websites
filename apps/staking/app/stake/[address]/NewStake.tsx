@@ -6,13 +6,7 @@ import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
-import {
-  bigIntMax,
-  bigIntMin,
-  bigIntToString,
-  numberToBigInt,
-  stringToBigInt,
-} from '@session/util-crypto/maths';
+import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { safeTrySync } from '@session/util-js/try';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
@@ -24,10 +18,6 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import type { ContributorContractInfo } from '@session/staking-api-js/client';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  getContributionRangeFromContributors,
-  getContributionRangeFromContributorsIgnoreReserved,
-} from '@/lib/maths';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { z } from 'zod';
 import EthereumAddressField, {
@@ -38,7 +28,7 @@ import StakeAmountField, {
   getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
 } from '@/components/Form/StakeAmountField';
-import { getReservedContributorNonContributed, StakeInfo } from '@/app/stake/[address]/StakeInfo';
+import { getContributionRangeForWallet, StakeInfo } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { PubKey } from '@session/ui/components/PubKey';
 import { EditButton } from '@session/ui/components/EditButton';
@@ -76,27 +66,12 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
   const decimalDelimiter = useDecimalDelimiter();
 
   const isOperator = areHexesEqual(contract.operator_address, address);
-  const reservedContributor = getReservedContributorNonContributed(contract, address);
 
   const { value: balanceValue } = useWalletTokenBalance();
 
-  const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
-    getContributionRangeFromContributors(contract.contributors);
+  const { minStake, maxStake } = getContributionRangeForWallet(contract, address);
 
-  const { maxStake: maxStakeReserved } = getContributionRangeFromContributorsIgnoreReserved(
-    contract.contributors
-  );
-
-  const minStake = reservedContributor?.reserved
-    ? numberToBigInt(reservedContributor?.reserved)
-    : minStakeCalculated;
-
-  const maxStake = bigIntMax(
-    bigIntMax(maxStakeCalculated, minStake),
-    reservedContributor ? maxStakeReserved : 0n
-  );
-
-  const allowNewStake = minStakeCalculated > 0n || maxStakeCalculated > 0n;
+  const allowNewStake = minStake > 0n || maxStake > 0n;
 
   const formSchema = getStakeFormSchema({
     stakeAmount: {

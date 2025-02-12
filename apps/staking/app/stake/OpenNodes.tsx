@@ -14,7 +14,10 @@ import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts
 import { useStakes } from '@/hooks/useStakes';
 import { getContributionRangeFromContributors } from '@/lib/maths';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
+import {
+  getContributedContributor,
+  getReservedContributorNonContributed,
+} from '@/app/stake/[address]/StakeInfo';
 
 export default function OpenNodes() {
   const dictionary = useTranslations('modules.openNodes');
@@ -56,8 +59,9 @@ export default function OpenNodes() {
           const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
             getContributionRangeFromContributors(contract.contributors);
           const contributor = getContributedContributor(contract, address);
+          const reserved = getReservedContributorNonContributed(contract, address);
 
-          return contributor || minStakeCalculated > 0n || maxStakeCalculated > 0n;
+          return contributor || reserved || minStakeCalculated > 0n || maxStakeCalculated > 0n;
         })
         .map((contract) => (
           <OpenNodeCard key={contract.address} contract={contract} />

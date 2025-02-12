@@ -55,7 +55,7 @@ export function StakeAmountTab() {
     };
 
     formMulti.setValue('reservedContributors', reservedContributors);
-    
+
     // TODO: check if this causes a reserved slot error and send to that tab if it does
     //  (for edits once we make advanced editing allowed)
 
@@ -80,6 +80,7 @@ export function StakeAmountTab() {
                 minStake={SESSION_NODE_MIN_STAKE_MULTI_OPERATOR}
                 maxStake={SESSION_NODE_FULL_STAKE_AMOUNT}
                 watchedStakeAmount={stakeAmount}
+                disabled={formMulti.watch('reservedContributors').length > 1}
                 field={field}
                 dataTestId={InputDataTestId.Registration_Stake_Amount}
                 dataTestIds={{

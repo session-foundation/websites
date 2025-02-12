@@ -48,11 +48,11 @@ import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@
 import { useCreateOpenNodeFeeEstimate } from '@session/contracts/hooks/ServiceNodeContributionFactory';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
+import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 
 export function SubmitMultiTab() {
   const [creationParams, setCreationParams] = useState<UseCreateOpenNodeContractParams | null>(
@@ -275,6 +275,7 @@ export function SubmitMultiTab() {
           aria-label={dictRegistrationShared('buttonEditField.aria')}
           data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Stake_Amount}
           tab={REG_TAB.STAKE_AMOUNT}
+          disabled={formMulti.watch('reservedContributors').length > 1}
         />
       </ActionModuleRow>
       <ActionModuleRow
@@ -556,7 +557,7 @@ function SubmitMulti({
 
   const isContractStakedToByOperator = useMemo(() => {
     if (!contract) return false;
-    return contract.contributors.some((contributor) => areHexesEqual(contributor.address, address));
+    return !!getContributedContributor(contract, address);
   }, [contract, address]);
 
   const isContractStakeable = !!(

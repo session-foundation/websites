@@ -109,7 +109,7 @@ export function parseStakeState(stake: Stake, blockHeight: number) {
 }
 
 export enum STAKE_CONTRACT_STATE {
-  AWAITING_OPERATOR_START = 'Awaiting Operator Start',
+  AWAITING_OPERATOR_ACTIVATION = 'Awaiting Operator Activation',
   // NOTE: only show a joining contract if there is no related stake from the stakes list
   JOINING = 'Joining',
   AWAITING_CONTRIBUTORS = 'Awaiting Contributors',
@@ -124,7 +124,7 @@ export function parseStakeContractState(contract: ContributorContractInfo) {
     case CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib:
       return STAKE_CONTRACT_STATE.AWAITING_CONTRIBUTORS;
     case CONTRIBUTION_CONTRACT_STATUS.WaitForFinalized:
-      return STAKE_CONTRACT_STATE.AWAITING_OPERATOR_START;
+      return STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION;
     case CONTRIBUTION_CONTRACT_STATUS.Finalized:
       return STAKE_CONTRACT_STATE.JOINING;
     default:
