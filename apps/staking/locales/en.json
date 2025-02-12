@@ -598,7 +598,7 @@
         },
         "buttonDeleteCancel": {
           "text": "Delete",
-          "aria": "Delete the address from reserving stakes for"
+          "aria": "Delete the address reserved stake information"
         },
         "buttonConfirm": {
           "text": "Add Reserved Stake",
