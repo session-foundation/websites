@@ -20,6 +20,8 @@ import { type Address, isAddress } from 'viem';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import { getTotalStaked } from '@/lib/maths';
+import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
+import { numberToBigInt } from '@session/util-crypto/maths';
 
 export function getReservedSlots(
   contract: ContributorContractInfo
@@ -53,6 +55,25 @@ export function getReservedContributorNonContributed(
       areHexesEqual(contributorAddress, address) && reserved > 0 && amount === 0
   );
 }
+
+export const getContributionRangeForWallet = (
+  contract: ContributorContractInfo,
+  address?: Address
+) => {
+  const reservedContributor = getReservedContributorNonContributed(contract, address);
+
+  const { minStake: minStakeCalculated, maxStake } =
+    getContributionRangeFromContributorsIgnoreAddress(contract.contributors, address);
+
+  const minStake = reservedContributor?.reserved
+    ? numberToBigInt(reservedContributor?.reserved)
+    : minStakeCalculated;
+
+  return {
+    minStake,
+    maxStake,
+  };
+};
 
 type EditableField = 'stakeAmount' | 'rewardsAddress' | 'operatorFee' | 'autoActivate';
 

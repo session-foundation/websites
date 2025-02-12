@@ -1,6 +1,7 @@
 import type { StakeContributor } from '@session/staking-api-js/client';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import type { Address } from 'viem';
+import { areHexesEqual } from '@session/util-crypto/string';
 
 const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
 
@@ -80,13 +81,14 @@ export const getContributionRangeFromContributors = (contributors: Array<StakeCo
     })
   );
 
-export const getContributionRangeFromContributorsIgnoreReserved = (
-  contributors: Array<StakeContributor> = []
+export const getContributionRangeFromContributorsIgnoreAddress = (
+  contributors: Array<StakeContributor> = [],
+  address?: Address
 ) =>
-  parseContributorDetails(
-    contributors.map(({ amount, address }) => {
-      return { amount: BigInt(amount), addr: address as Address };
-    })
+  getContributionRangeFromContributors(
+    contributors.filter(
+      ({ address: contributorAddress }) => !areHexesEqual(contributorAddress, address)
+    )
   );
 
 export const getTotalStaked = (contributors: Array<StakeContributor> = []) =>

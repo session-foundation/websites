@@ -17,18 +17,15 @@ import { usePathname } from 'next/navigation';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
-import {
-  getContributionRangeFromContributors,
-  getContributionRangeFromContributorsIgnoreReserved,
-} from '@/lib/maths';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
 import { cn } from '@session/ui/lib/utils';
 import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
-import { bigIntMax, numberToBigInt } from '@session/util-crypto/maths';
+import { numberToBigInt } from '@session/util-crypto/maths';
 import { parseStakeContractState, STAKE_CONTRACT_STATE } from '@/components/StakedNode/state';
 import { ContactIcon } from '@session/ui/icons/ContactIcon';
 import {
   getContributedContributor,
+  getContributionRangeForWallet,
   getReservedContributorNonContributed,
 } from '@/app/stake/[address]/StakeInfo';
 
@@ -88,23 +85,9 @@ const OpenNodeCard = forwardRef<
   const contributor = getContributedContributor(contract, address);
   const reservedContributor = getReservedContributorNonContributed(contract, address);
 
-  const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
-    getContributionRangeFromContributors(contract.contributors);
+  const { minStake, maxStake } = getContributionRangeForWallet(contract, address);
 
-  const { maxStake: maxStakeReserved } = getContributionRangeFromContributorsIgnoreReserved(
-    contract.contributors
-  );
-
-  const minStake = reservedContributor?.reserved
-    ? numberToBigInt(reservedContributor?.reserved)
-    : minStakeCalculated;
-
-  const maxStake = bigIntMax(
-    bigIntMax(maxStakeCalculated, minStake),
-    reservedContributor ? maxStakeReserved : 0n
-  );
-
-  const connectedWalletNoncontributedReservedStakeAmount =
+  const connectedWalletNonContributedReservedStakeAmount =
     (!contributor && reservedContributor?.reserved) || 0;
 
   const state = parseStakeContractState(contract);
@@ -119,7 +102,7 @@ const OpenNodeCard = forwardRef<
       statusIndicatorColour={
         state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION || showAlreadyRunningWarning
           ? 'yellow'
-          : connectedWalletNoncontributedReservedStakeAmount
+          : connectedWalletNonContributedReservedStakeAmount
             ? 'green'
             : 'blue'
       }
@@ -149,10 +132,10 @@ const OpenNodeCard = forwardRef<
               tooltipContent={dictionary('youOperatorNotStaked')}
             />
           ) : null}
-          {connectedWalletNoncontributedReservedStakeAmount ? (
+          {connectedWalletNonContributedReservedStakeAmount ? (
             <Tooltip
               tooltipContent={dictionary('youReservedNotContributed', {
-                tokenAmount: formatSENTNumber(connectedWalletNoncontributedReservedStakeAmount),
+                tokenAmount: formatSENTNumber(connectedWalletNonContributedReservedStakeAmount),
               })}
             >
               <ContactIcon className="stroke-session-green h-10 w-10" />
