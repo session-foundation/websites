@@ -1,5 +1,6 @@
 import { SessionStakingClient } from '@session/staking-api-js/client';
 
-export function getContributionContracts(client: SessionStakingClient) {
-  return client.getContributionContracts();
-}
+export const getContributionContracts = (client: SessionStakingClient) =>
+  client.getContributionContracts();
+
+getContributionContracts.fnName = 'getContributionContracts';

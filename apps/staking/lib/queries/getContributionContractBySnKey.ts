@@ -1,8 +1,8 @@
 import type { SessionStakingClient } from '@session/staking-api-js/client';
 
-export function getContributionContractBySnKey(
+export const getContributionContractBySnKey = (
   client: SessionStakingClient,
   { nodePubKey }: { nodePubKey: string }
-) {
-  return client.getContributionContractForNodePubkey({ nodePubKey });
-}
+) => client.getContributionContractForNodePubkey({ nodePubKey });
+
+getContributionContractBySnKey.fnName = 'getContributionContractBySnKey';

@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export const BlockExplorerLink = ({ address }: { address: string }) => {
   return (
-    <Link href={`/explorer/address/${address}`} target="_blank">
+    <Link href={`/explorer/address/${address}`} target="_blank" prefetch={false}>
       <BlockExplorerLinkText />
     </Link>
   );

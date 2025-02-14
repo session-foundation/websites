@@ -1,8 +1,8 @@
 import { SessionStakingClient } from '@session/staking-api-js/client';
 
-export async function getNodeRegistrations(
+export const getNodeRegistrations = (
   client: SessionStakingClient,
   { address }: { address: string }
-) {
-  return client.getOperatorRegistrations({ operator: address });
-}
+) => client.getOperatorRegistrations({ operator: address });
+
+getNodeRegistrations.fnName = 'getNodeRegistrations';
