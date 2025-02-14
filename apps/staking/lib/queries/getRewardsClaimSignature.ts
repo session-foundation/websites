@@ -1,8 +1,8 @@
 import { SessionStakingClient } from '@session/staking-api-js/client';
 
-export function getRewardsClaimSignature(
+export const getRewardsClaimSignature = (
   client: SessionStakingClient,
   { address }: { address: string }
-) {
-  return client.getRewardsClaimSignature({ address });
-}
+) => client.getRewardsClaimSignature({ address });
+
+getRewardsClaimSignature.fnName = 'getRewardsClaimSignature';

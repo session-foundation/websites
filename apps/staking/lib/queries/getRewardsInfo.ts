@@ -1,5 +1,6 @@
 import { SessionStakingClient } from '@session/staking-api-js/client';
 
-export function getRewardsInfo(client: SessionStakingClient, { address }: { address: string }) {
-  return client.getRewardsInfo({ address });
-}
+export const getRewardsInfo = (client: SessionStakingClient, { address }: { address: string }) =>
+  client.getRewardsInfo({ address });
+
+getRewardsInfo.fnName = 'getRewardsInfo';
