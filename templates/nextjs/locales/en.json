@@ -1,0 +1,11 @@
+{
+  "landing": {
+    "title": "Hello World"
+  },
+  "notFound": {
+    "description": "Sorry! We couldn't find the page you were looking for.",
+    "homeButton": "Return Home",
+    "metaTitle": "Page not found",
+    "metaDescription": "Sorry! We couldn't find the page you were looking for."
+  }
+}
