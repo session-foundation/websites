@@ -1,7 +1,12 @@
 'use client';
 
 import { forwardRef, type ReactNode, useState } from 'react';
-import { createWeb3WalletConfig, QueryProvider, WalletProvider } from '@web3sheet/core';
+import {
+  createWeb3WalletConfig,
+  QueryProvider,
+  WalletProvider,
+  type WalletProviderProps,
+} from '@web3sheet/core';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 import { Button, type ButtonProps } from '@session/ui/ui/button';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
@@ -18,6 +23,9 @@ import {
   SheetOverlay,
   SheetTitle,
 } from '@session/ui/ui/sheet';
+import { Input } from '@session/ui/ui/input';
+import { PubKey } from '@session/ui/components/PubKey';
+import { Tooltip } from '@session/ui/ui/tooltip';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => (
@@ -74,12 +82,21 @@ const componentLibrary: Web3WalletComponentLibrary = {
   SheetHeader,
   SheetTitle,
   SheetOverlay,
+  Input,
+  PubKey,
+  Tooltip,
 };
 
 function TokenActionButton({ href, children }: { href: string; children: ReactNode }) {
   return (
     <a href={href} target="_blank" rel="noreferrer">
-      <Button size="xs" variant="outline" data-testid="button:token-action">
+      <Button
+        size="xs"
+        className="h-4 px-1.5"
+        variant="outline"
+        rounded="md"
+        data-testid="button:token-action"
+      >
         {children}
       </Button>
     </a>
@@ -139,7 +156,7 @@ const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
 };
 
 const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
-  tokenAddress: '0xd1e2d5085b39b80c9948aeb1b9aa83af6756bcc5',
+  tokenAddress: '0xd1e2d5085b39B80C9948AeB1b9aA83AF6756bcc5',
   name: 'Wrapped OXEN',
   iconSrc: '/images/woxen.svg',
   network: {
@@ -148,6 +165,7 @@ const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
     iconSrc: '/images/eth.svg',
     className: 'bg-session-white',
   },
+  hideIfZero: true,
   children: <TokenActionButton href="https://ethereum.oxen.io">Swap</TokenActionButton>,
 };
 
@@ -179,17 +197,25 @@ const createConfig = (projectId: string) => {
   return config;
 };
 
-export type Web3WalletProviderProps = {
-  children: ReactNode;
+export type Web3WalletProviderProps = Omit<WalletProviderProps, 'config'> & {
   projectId: string;
-  wagmiCookie?: string | undefined | null;
+  children: ReactNode;
 };
 
-export function Web3WalletProvider({ children, projectId, wagmiCookie }: Web3WalletProviderProps) {
+export function Web3WalletProvider({
+  children,
+  projectId,
+  wagmiCookie,
+  settingsPreferenceStorage,
+}: Web3WalletProviderProps) {
   const [config] = useState(createConfig(projectId));
 
   return (
-    <WalletProvider config={config} wagmiCookie={wagmiCookie}>
+    <WalletProvider
+      settingsPreferenceStorage={settingsPreferenceStorage}
+      config={config}
+      wagmiCookie={wagmiCookie}
+    >
       <QueryProvider>{children}</QueryProvider>
     </WalletProvider>
   );
