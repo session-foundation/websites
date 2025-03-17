@@ -25,7 +25,7 @@ export default function OpenNodes() {
     useOpenContributorContracts();
   const { address } = useWallet();
   const { hiddenContractsWithStakes } = useStakes();
-  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
+  const { setNetworkStatusVisible } = useNetworkStatus({ network, isFetching, refetch });
 
   const openContractBlsKeys = useMemo(() => {
     return new Set(contracts.map(({ pubkey_bls }) => pubkey_bls));
