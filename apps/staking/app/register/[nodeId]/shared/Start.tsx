@@ -5,7 +5,7 @@ import {
   REG_MODE,
 } from '@/app/register/[nodeId]/types';
 import { ActionModuleTooltip } from '@/components/ActionModule';
-import { PREFERENCE, preferenceStorageDefaultItems } from '@/lib/constants';
+import { prefDetails, PREFERENCE } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -39,7 +39,7 @@ export function StartTab() {
     defaultValues: {
       mode: isUserSelectableRegistrationMode(mode)
         ? mode
-        : preferenceStorageDefaultItems[PREFERENCE.PREF_REGISTRATION_MODE],
+        : prefDetails[PREFERENCE.PREF_REGISTRATION_MODE].defaultValue,
       nodeType: NODE_TYPE.SOLO,
     },
   });
