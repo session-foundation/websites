@@ -1,30 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "NEXT_PUBLIC_ENV_FLAG"
-  ],
+  "globalEnv": ["NEXT_PUBLIC_ENV_FLAG"],
   "tasks": {
     "build:ci": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env.local"
-      ],
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local"],
       "env": [
         "NO_MINIFY",
         "NEXT_PUBLIC_IS_CANARY",
-        "NEXT_PUBLIC_HIDE_FAUCET",
+        "NEXT_PUBLIC_ENABLE_FAUCET",
+        "NEXT_PUBLIC_ENABLE_LEADERBOARD",
         "NEXT_PUBLIC_SENT_STAKING_API_URL",
         "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
         "FAUCET_WALLET_PRIVATE_KEY",
@@ -50,30 +39,22 @@
       "cache": false
     },
     "check-types": {
-      "dependsOn": [
-        "^check-types"
-      ]
+      "dependsOn": ["^check-types"]
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
+      "dependsOn": ["^lint"]
+    },
+    "check": {
+      "dependsOn": ["^check"]
     },
     "check-telemetry": {
       "cache": false
     },
     "test": {
-      "inputs": [
-        "**/*.spec.ts"
-      ]
+      "inputs": ["**/*.spec.ts"]
     },
     "gh": {
-      "dependsOn": [
-        "^check-types",
-        "^lint",
-        "^test",
-        "^build"
-      ]
+      "dependsOn": ["^check-types", "^lint", "^test", "^build"]
     }
   }
 }
