@@ -5,24 +5,21 @@ import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import {
-  getVariableFontSizeForSmallModule,
-  ModuleDynamicQueryText,
-} from '@/components/ModuleDynamic';
+import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import type { QUERY_STATUS } from '@/lib/query';
 import { useMemo } from 'react';
-import { Address } from 'viem';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from '@session/ui/lib/toast';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { formatNumber, formatPercentage } from '@/lib/locale-client';
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 
 const noPointsObject = {
   score: 0,
   percent: 0,
 };
 
-export default function TestnetPointsModule(params?: { addressOverride?: Address }) {
+export default function TestnetPointsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.points');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
@@ -83,9 +80,6 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
             success: toastDictionary('refetchSuccess', { module: title }),
           },
           refetch,
-        }}
-        style={{
-          fontSize: getVariableFontSizeForSmallModule(points?.length ?? 1),
         }}
       >
         {points}

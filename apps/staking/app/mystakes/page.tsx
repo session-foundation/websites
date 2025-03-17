@@ -1,14 +1,14 @@
 import { siteMetadata } from '@/lib/metadata';
 import { ModuleGrid } from '@session/ui/components/ModuleGrid';
-import BalanceModule from './modules/BalanceModule';
+import StakedBalanceModule from './modules/StakedBalanceModule';
 import ClaimTokensModule from './modules/ClaimTokensModule';
 import DailyNodeReward from './modules/DailyNodeReward';
 import StakedNodesModule from './modules/StakedNodesModule';
 import TotalRewardsModule from './modules/TotalRewardsModule';
 import UnclaimedTokensModule from './modules/UnclaimedTokensModule';
+import PriceModule from '@/app/mystakes/modules/PriceModule';
 import TestnetPointsModule from '@/app/mystakes/modules/TestnetPointsModule';
 import ComingSoonModule from '@/app/mystakes/modules/ComingSoon';
-import PriceModule from '@/app/mystakes/modules/PriceModule';
 
 export async function generateMetadata() {
   return siteMetadata({
@@ -22,11 +22,11 @@ export default function Page() {
     <ModuleGrid size="lg" className="h-full px-4 md:px-10 xl:auto-rows-auto">
       <div className="md:max-h-screen-without-header col-span-1 flex h-full min-h-max flex-col gap-4 pb-8 md:overflow-y-auto md:overflow-x-hidden">
         <ModuleGrid className="mr-1">
-          <BalanceModule />
-          <ComingSoonModule />
-          <UnclaimedTokensModule />
-          <TotalRewardsModule />
+          <StakedBalanceModule />
           <DailyNodeReward />
+          <ComingSoonModule />
+          <TotalRewardsModule />
+          <UnclaimedTokensModule />
           <TestnetPointsModule />
           <ClaimTokensModule />
         </ModuleGrid>

@@ -1,13 +1,10 @@
 'use client';
 
-import {
-  getVariableFontSizeForSmallModule,
-  ModuleDynamicContractReadText,
-} from '@/components/ModuleDynamic';
+import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import useDailyNodeReward from '@/hooks/useDailyNodeReward';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
-import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
+import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
@@ -20,10 +17,10 @@ export default function DailyNodeReward() {
   const titleFormat = useTranslations('modules.title');
 
   const title = dictionary('title');
+  const titleShort = dictionary('titleShort');
 
   const formattedDailyNodeRewardAmount = useMemo(
-    () =>
-      `~ ${formatSENTBigInt(dailyNodeReward ?? BigInt(0), DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS)}`,
+    () => `${formatSENTBigInt(dailyNodeReward ?? BigInt(0), DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS)}`,
     [dailyNodeReward]
   );
 
@@ -32,7 +29,10 @@ export default function DailyNodeReward() {
       <ModuleTooltip>
         {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_DAILY_REWARDS) })}
       </ModuleTooltip>
-      <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
+      <ModuleTitleDynamic
+        longText={titleFormat('format', { title })}
+        shortText={titleFormat('format', { title: titleShort })}
+      />
       <ModuleDynamicContractReadText
         status={status}
         fallback={0}
@@ -45,9 +45,6 @@ export default function DailyNodeReward() {
             success: toastDictionary('refetchSuccess', { module: title }),
           },
           refetch,
-        }}
-        style={{
-          fontSize: getVariableFontSizeForSmallModule(formattedDailyNodeRewardAmount.length ?? 1),
         }}
       >
         {formattedDailyNodeRewardAmount}

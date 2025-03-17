@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import { Loading } from './loading';
 import { Tooltip } from './ui/tooltip';
 import { Button, type ButtonProps } from './ui/button';
+import './Module.css';
 
 export const outerModuleVariants = cva(
   'rounded-2xl transition-all overflow-hidden ease-in-out bg-blend-lighten shadow-md p-px',
@@ -45,14 +46,14 @@ const innerModuleVariants = cva(
           '[&>span]:text-3xl [&>*>span]:text-3xl [&>h3]:font-normal [&>*>h3]:font-normal'
         ),
         hero: cn(
-          'gap-3 sm:gap-5 hover:brightness-125',
+          'gap-3 sm:gap-4 hover:brightness-125',
           '[&>h3]:text-3xl [&>h3]:font-normal [&>*>h3]:text-2xl [&>*>h3]:font-normal [&>h3]:text-session-white',
           '[&>span]:text-8xl [&>*>span]:text-8xl [&>span]:text-session-white [&>*>span]:text-session-white'
         ),
       },
       size: {
         default: 'p-4 sm:p-6',
-        lg: 'px-6 sm:px-10 py-8 sm:py-10',
+        lg: 'p-8',
       },
     },
     defaultVariants: {
@@ -82,16 +83,17 @@ const Module = forwardRef<HTMLDivElement, ModuleProps>(
           )}
           ref={ref}
           {...props}
-          style={
-            variant === 'hero'
+          style={{
+            containerType: 'inline-size',
+            ...(variant === 'hero'
               ? {
                   background: 'url(/images/module-hero.png)',
                   backgroundPositionX: '35%',
                   backgroundPositionY: '35%',
                   backgroundSize: '150%',
                 }
-              : undefined
-          }
+              : {}),
+          }}
         >
           {loading ? <Loading /> : children}
         </div>
@@ -184,20 +186,46 @@ const ModuleHeader = forwardRef<HTMLDivElement, ModuleHeaderProps>(
 );
 ModuleHeader.displayName = 'ModuleHeader';
 
+const moduleTitleClassName = 'text-gradient-white-mock truncate leading-none tracking-tight';
+
 const ModuleTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3
-      ref={ref}
-      className={cn('text-gradient-white leading-none tracking-tight', className)}
-      {...props}
-    />
+    <h3 ref={ref} className={cn(moduleTitleClassName, className)} {...props} />
   )
 );
 ModuleTitle.displayName = 'ModuleTitle';
 
-const ModuleText = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
-  ({ className, ...props }, ref) => (
-    <span ref={ref} className={cn('text-gradient-white overflow-hidden', className)} {...props} />
+type ModuleTitleDynamicProps = Omit<HTMLAttributes<HTMLHeadingElement>, 'children'> & {
+  longText: string;
+  shortText?: string;
+};
+
+const ModuleTitleDynamic = forwardRef<HTMLHeadingElement, ModuleTitleDynamicProps>(
+  ({ shortText, longText, ...props }, ref) => (
+    <ModuleTitle ref={ref} {...props}>
+      {shortText ? (
+        <>
+          <div className={cn('module-title-dynamic-short', moduleTitleClassName)}>{shortText}</div>
+          <div className={cn('module-title-dynamic-long', moduleTitleClassName)}>{longText}</div>
+        </>
+      ) : (
+        longText
+      )}
+    </ModuleTitle>
+  )
+);
+ModuleTitleDynamic.displayName = 'ModuleTitleDynamic';
+
+export type ModuleTextProps = HTMLAttributes<HTMLSpanElement> & { isLarge?: boolean };
+
+const ModuleText = forwardRef<HTMLSpanElement, ModuleTextProps>(
+  ({ className, isLarge, ...props }, ref) => (
+    <span
+      ref={ref}
+      className={cn('text-gradient-white overflow-hidden', className)}
+      {...props}
+      style={{ fontSize: isLarge ? 'clamp(24px, 12cqi, 48px)' : 'clamp(18px, 12cqi, 30px)' }}
+    />
   )
 );
 ModuleText.displayName = 'ModuleText';
@@ -243,7 +271,7 @@ const ModuleContent = forwardRef<HTMLDivElement, ModuleContentProps>(
 const ModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     return (
-      <Tooltip ref={ref} tooltipContent={children}>
+      <Tooltip ref={ref} tooltipContent={children} putContentInPortal>
         <div className={cn('absolute right-5 top-4 cursor-pointer', className)} {...props}>
           <QuestionIcon className="fill-session-text h-4 w-4" />
         </div>
@@ -264,5 +292,6 @@ export {
   ModuleTitle,
   ModuleTooltip,
   ButtonModule,
+  ModuleTitleDynamic,
   innerModuleVariants as moduleVariants,
 };

@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { useStakes } from '@/hooks/useStakes';
 import { parseStakeEventState, STAKE_EVENT_STATE } from '@/components/StakedNode/state';
 
+// TODO: replace with sn data once available
 export function useTotalStaked(addressOverride?: Address) {
   const { address: connectedAddress } = useWallet();
   const address = addressOverride ?? connectedAddress;
@@ -13,8 +14,8 @@ export function useTotalStaked(addressOverride?: Address) {
   const { stakes, contracts, refetch, status, enabled, currentContractIds } =
     useStakes(addressOverride);
 
-  const totalStakedAmount = useMemo(() => {
-    if (!address) return formatSENTBigInt(0n);
+  const { totalStakedBigInt, totalStakedFormatted } = useMemo(() => {
+    if (!address) return { totalStakedBigInt: 0n, totalStakedFormatted: formatSENTBigInt(0n) };
 
     const stakedStakes = stakes.filter((stake) => {
       const eventState = parseStakeEventState(stake);
@@ -43,8 +44,13 @@ export function useTotalStaked(addressOverride?: Address) {
         }, BigInt(0))
       : 0n;
 
-    return formatSENTBigInt(totalStakedAmountContracts + totalStakedAmountStakes);
+    const total = totalStakedAmountContracts + totalStakedAmountStakes;
+
+    return {
+      totalStakedBigInt: total,
+      totalStakedFormatted: formatSENTBigInt(total),
+    };
   }, [stakes, contracts, address]);
 
-  return { totalStakedAmount, status, refetch, enabled };
+  return { totalStakedFormatted, totalStakedBigInt, status, refetch, enabled };
 }

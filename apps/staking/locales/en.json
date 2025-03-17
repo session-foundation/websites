@@ -257,16 +257,30 @@
       "description": "Total {tokenSymbol} you have staked to nodes."
     },
     "dailyRewards": {
-      "title": "Daily Node Rewards",
-      "description": "The current daily rewards for running one node. <link>Learn more</link>"
+      "title": "Estimated Daily Reward",
+      "titleShort": "Est. Daily Reward",
+      "description": "Estimated reward for one node based on latest information. Actual protocol rewards vary. <link>Learn more</link>"
     },
     "totalRewards": {
       "title": "Total Rewards Earned",
+      "titleShort": "Total Rewards",
       "description": "The total amount of lifetime rewards earned from staking. <link>Learn more</link>"
     },
     "unclaimedTokens": {
       "title": "Unclaimed Tokens",
       "description": "The total amount of rewards that have not been claimed yet. <link>Learn more</link>"
+    },
+    "unclaimedStakes": {
+      "title": "Unclaimed Stakes",
+      "description": "The total amount of stakes that have not been claimed yet. <link>Learn more</link>"
+    },
+    "unclaimedRewards": {
+      "title": "Unclaimed Rewards",
+      "description": "The total amount of rewards that have not been claimed yet. <link>Learn more</link>"
+    },
+    "totalNodes": {
+      "title": "Total Nodes",
+      "description": "The total number of nodes you are currently staked to. <link>Learn more</link>"
     },
     "claim": {
       "title": "Claim",
@@ -325,7 +339,7 @@
     },
     "referral": {
       "title": "Referral Program",
-      "description1": "Grow the {sessionNetwork} by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SENT tokens and stake to multicontributor nodes.",
+      "description1": "Grow the {sessionNetwork} by inviting others to join the testnet. Share your unique referral link to invite newcomers to claim test SESH tokens and stake to multicontributor nodes.",
       "description2": "Learn more <link>here</link>.",
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
       "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",

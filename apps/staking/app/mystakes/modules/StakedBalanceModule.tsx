@@ -1,17 +1,14 @@
 'use client';
 
-import {
-  getVariableFontSizeForLargeModule,
-  ModuleDynamicQueryText,
-} from '@/components/ModuleDynamic';
+import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import { Module, ModuleTitle } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import type { Address } from 'viem';
 import type { QUERY_STATUS } from '@/lib/query';
+import type { Address } from 'viem';
 import { useTotalStaked } from '@/app/mystakes/modules/useTotalStaked';
 
-export default function BalanceModule({ addressOverride }: { addressOverride?: Address }) {
-  const { totalStakedAmount, status, refetch, enabled } = useTotalStaked(addressOverride);
+export default function StakedBalanceModule({ addressOverride }: { addressOverride?: Address }) {
+  const { totalStakedFormatted, status, refetch, enabled } = useTotalStaked(addressOverride);
   const dictionary = useTranslations('modules.balance');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
@@ -25,6 +22,7 @@ export default function BalanceModule({ addressOverride }: { addressOverride?: A
         status={status as QUERY_STATUS}
         enabled={enabled}
         fallback={0}
+        isLarge
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
@@ -34,11 +32,8 @@ export default function BalanceModule({ addressOverride }: { addressOverride?: A
           },
           refetch,
         }}
-        style={{
-          fontSize: getVariableFontSizeForLargeModule(totalStakedAmount?.length ?? 6),
-        }}
       >
-        {totalStakedAmount}
+        {totalStakedFormatted}
       </ModuleDynamicQueryText>
     </Module>
   );
