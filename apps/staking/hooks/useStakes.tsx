@@ -6,7 +6,7 @@ import {
   STAKE_EVENT_STATE,
   STAKE_STATE,
 } from '@/components/StakedNode/state';
-import { CONTRIBUTION_CONTRACT } from '@/lib/constants';
+import { BACKEND, CONTRIBUTION_CONTRACT, PREFERENCE } from '@/lib/constants';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import {
@@ -18,6 +18,7 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
+import { usePreferences } from 'usepref';
 
 export const sortingTotalStakedDesc = (
   a: Stake | ContributorContractInfo,
@@ -154,8 +155,10 @@ export function sortContracts(
 export function useStakes(overrideAddress?: Address) {
   const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
+  const { getItem } = usePreferences();
 
   const enabled = !!address;
+  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
   const { data, isLoading, isFetching, refetch, isError, status } =
     useStakingBackendQueryWithParams(
@@ -163,7 +166,12 @@ export function useStakes(overrideAddress?: Address) {
       {
         address: address!,
       },
-      { enabled }
+      {
+        enabled,
+        refetchInterval: autoRefresh
+          ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000
+          : undefined,
+      }
     );
 
   const [
