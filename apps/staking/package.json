@@ -41,7 +41,7 @@
     "server-only": "^0.0.1",
     "sharp": "0.32.6",
     "sqids": "^0.3.0",
-    "usepref": "^0.0.4",
+    "usepref": "^1.0.1",
     "utf-8-validate": "^6.0.5",
     "viem": "2.21.54",
     "zod": "^3.23.8"
