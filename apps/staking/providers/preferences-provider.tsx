@@ -13,7 +13,7 @@ function createPreferencesStorage() {
   });
 }
 
-function getPreferencesStorage() {
+export function getPreferencesStorage() {
   if (!browserPreferencesStorage) browserPreferencesStorage = createPreferencesStorage();
   return browserPreferencesStorage;
 }

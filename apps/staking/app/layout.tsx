@@ -8,16 +8,16 @@ import { cn } from '@session/ui/lib/utils';
 import { getLocalizationData } from '@/lib/locale-server';
 import { headers } from 'next/headers';
 import { GlobalProvider } from '@/providers/global-provider';
-import WalletUserSheet from '@session/wallet/components/WalletUserSheet';
 import { isProduction } from '@/lib/env';
 import { DevSheet } from '@/components/DevSheet';
 import { TOSHandler } from '@/components/TOSHandler';
 import { StatusBar } from '@/components/StatusBar';
-import { Toaster } from '@session/ui/ui/sonner';
 import { getRemoteFeatureFlags } from '@/lib/feature-flags-server';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import Maintenance from '@/components/Maintenance';
 import RemoteBanner from '@/components/RemoteBanner';
+import { WalletUserSheet } from '@/components/WalletUserSheet';
+import { Toaster } from '@session/ui/ui/sonner';
 
 export async function generateMetadata() {
   return siteMetadata({});

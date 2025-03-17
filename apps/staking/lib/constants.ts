@@ -5,6 +5,7 @@ import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 import type { LocaleKey } from './locale-util';
+import type { WalletSheetSettingDetails } from '@session/wallet/components/WalletUserSheet';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -226,19 +227,71 @@ export const HANDRAIL_THRESHOLD_DYNAMIC = (chainId?: number) => {
   }
 };
 
-export const preferenceStorageKey = 'stake';
+export const preferenceStorageKey = 'stake_settings';
 
 export enum PREFERENCE {
   BACKEND_URL = 'backendUrl',
   PREF_REGISTRATION_MODE = 'prefRegistrationMode',
   SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
+  SKIP_VESTING_POPUP_ON_STARTUP = 'skipVestingPopupOnStartup',
+  ANONYMIZE_UI = 'anonymizeUI',
+  AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
 }
 
-export const preferenceStorageDefaultItems = {
-  [PREFERENCE.BACKEND_URL]: '/api/ssb',
-  [PREFERENCE.PREF_REGISTRATION_MODE]: REG_MODE.EXPRESS satisfies UserSelectableRegistrationMode,
-  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: false,
-} as const;
+export const preferenceStorageDefaultItems = {} as const;
+
+type WalletSheetSettingDetailsGenerator = Record<
+  PREFERENCE,
+  Omit<WalletSheetSettingDetails, 'key'>
+>;
+
+export const prefDetails = {
+  [PREFERENCE.AUTO_REFRESH_BACKEND]: {
+    label: 'Auto Refresh',
+    type: 'boolean',
+    defaultValue: true,
+  },
+  [PREFERENCE.BACKEND_URL]: {
+    label: 'Backend URL',
+    type: 'string',
+    defaultValue: '/api/ssb',
+  },
+  [PREFERENCE.PREF_REGISTRATION_MODE]: {
+    label: 'Registration Mode',
+    type: 'string',
+    defaultValue: REG_MODE.EXPRESS as UserSelectableRegistrationMode,
+  },
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: {
+    label: 'Show L2 Height On Status Bar',
+    type: 'boolean',
+    defaultValue: false,
+  },
+  [PREFERENCE.SKIP_VESTING_POPUP_ON_STARTUP]: {
+    label: 'Skip Vesting Popup On Startup',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Disable the vesting popup on startup',
+  },
+  [PREFERENCE.ANONYMIZE_UI]: {
+    label: 'Anonymize UI',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Hide wallet addresses and other identifying information',
+  },
+} as const satisfies WalletSheetSettingDetailsGenerator;
+
+const hiddenPreferences = [
+  PREFERENCE.PREF_REGISTRATION_MODE,
+  PREFERENCE.ANONYMIZE_UI,
+  PREFERENCE.BACKEND_URL,
+];
+
+export const customSettings = Object.entries(prefDetails)
+  .map(([key, value]) => ({
+    ...value,
+    key,
+  }))
+  .filter(({ key }) => !hiddenPreferences.includes(key as PREFERENCE));
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
   [REG_TAB.START]:

@@ -11,7 +11,7 @@ import { isProduction } from '@/lib/env';
 import { useMemo } from 'react';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { usePreferences } from 'usepref';
-import { PREFERENCE, preferenceStorageDefaultItems } from '@/lib/constants';
+import { prefDetails, PREFERENCE } from '@/lib/constants';
 
 export type QueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
   Parameters<typeof useQuery<Awaited<ReturnType<Q>>['data']>>[0],
@@ -25,7 +25,7 @@ export function useStakingBackendBrowserClient() {
   let baseUrl = getItem<string>(PREFERENCE.BACKEND_URL);
 
   if (!baseUrl) {
-    const defaultBackendUrl = preferenceStorageDefaultItems[PREFERENCE.BACKEND_URL];
+    const defaultBackendUrl = prefDetails[PREFERENCE.BACKEND_URL].defaultValue;
     setItem(PREFERENCE.BACKEND_URL, defaultBackendUrl);
     baseUrl = defaultBackendUrl;
   }
