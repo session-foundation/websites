@@ -1,11 +1,11 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import {
-  isUserSelectableRegistrationMode,
   NODE_TYPE,
   REG_MODE,
+  isUserSelectableRegistrationMode,
 } from '@/app/register/[nodeId]/types';
 import { ActionModuleTooltip } from '@/components/ActionModule';
-import { prefDetails, PREFERENCE } from '@/lib/constants';
+import { PREFERENCE, prefDetails } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,7 +19,6 @@ import {
 } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
 import { RadioGroup, RadioGroupItem } from '@session/ui/ui/radio-group';
-import React from 'react';
 import { z } from 'zod';
 
 export const RegistrationStartFormSchema = z.object({

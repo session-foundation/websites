@@ -1,4 +1,4 @@
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { type CountType, FLAGS_TABLE, TABLE } from '../db';
 import type { GenericRemoteFeatureFlag } from '../utils';
 

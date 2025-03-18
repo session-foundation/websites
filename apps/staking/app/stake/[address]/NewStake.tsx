@@ -1,25 +1,8 @@
 import { type ErrorBoxProps, ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
-import { type UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
-import { useDecimalDelimiter } from '@/lib/locale-client';
-import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
-import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
-import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
-import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
-import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { safeTrySync } from '@session/util-js/try';
-import { useTranslations } from 'next-intl';
-import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
-import { useMemo, useState } from 'react';
-import { isAddress } from 'viem';
-import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
-import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
-import { z } from 'zod';
+import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
+import { StakeInfo, getContributionRangeForWallet } from '@/app/stake/[address]/StakeInfo';
+import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
+import { ActionModuleRow } from '@/components/ActionModule';
 import EthereumAddressField, {
   getEthereumAddressFormFieldSchema,
   type GetEthereumAddressFormFieldSchemaArgs,
@@ -28,12 +11,29 @@ import StakeAmountField, {
   getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
 } from '@/components/Form/StakeAmountField';
-import { getContributionRangeForWallet, StakeInfo } from '@/app/stake/[address]/StakeInfo';
-import { ActionModuleRow } from '@/components/ActionModule';
-import { PubKey } from '@session/ui/components/PubKey';
+import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
+import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
+import { useDecimalDelimiter } from '@/lib/locale-client';
+import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import type { ContributorContractInfo } from '@session/staking-api-js/client';
 import { EditButton } from '@session/ui/components/EditButton';
-import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
-import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
+import { PubKey } from '@session/ui/components/PubKey';
+import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
+import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
+import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { safeTrySync } from '@session/util-js/try';
+import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
+import { useMemo, useState } from 'react';
+import { isAddress } from 'viem';
+import { z } from 'zod';
 
 type GetStakeFormSchemaArgs = {
   stakeAmount: GetStakeAmountFormFieldSchemaArgs;

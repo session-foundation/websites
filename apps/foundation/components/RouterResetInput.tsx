@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 type RouterResetInputProps = {
   id: string;
@@ -20,6 +20,7 @@ export default function RouterResetInput({ id, className }: RouterResetInputProp
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This is fine
   useEffect(() => {
     setCheckboxToFalse();
   }, [pathname]);

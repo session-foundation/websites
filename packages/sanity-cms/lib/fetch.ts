@@ -1,7 +1,7 @@
-import type { FilteredResponseQueryOptions, QueryParams, SanityClient } from 'next-sanity';
-import { isDraftModeEnabled } from './util';
 import { safeTry } from '@session/util-js/try';
+import type { FilteredResponseQueryOptions, QueryParams, SanityClient } from 'next-sanity';
 import logger from './logger';
+import { isDraftModeEnabled } from './util';
 
 /**
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/fetch#optionsnextrevalidate}
@@ -15,7 +15,7 @@ export type NextRevalidate = number | false;
  * @see {@link https://nextjs.org/docs/app/api-reference/functions/fetch#optionscache}
  *
  * - force-cache (default): Next.js looks for a matching request in its Data Cache.
- *   - If there is a match and it is fresh, it will be returned from the cache.
+ *   - If there is a match, and it is fresh, it will be returned from the cache.
  *   - If there is no match or a stale match, Next.js will fetch the resource from the remote server and update the cache with the downloaded resource.
  * - no-store: Next.js fetches the resource from the remote server on every request without looking in the cache, and it will not update the cache with the downloaded resource.
  *
@@ -67,7 +67,7 @@ export const sanityFetchGeneric = async <R = unknown>({
   fetchOptions: { query, params = {}, revalidate, tags, isClient },
 }: SanityFetchGenericOptions) =>
   safeTry<R>(
-    (async () => {
+    (() => {
       const isDraftMode = !isClient && token && isDraftModeEnabled();
 
       const perspective = isDraftMode ? 'previewDrafts' : 'published';

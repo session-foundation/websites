@@ -1,15 +1,15 @@
 'use client';
 
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
-import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
-import { useMemo } from 'react';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
-import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 export default function TotalRewardsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.totalRewards');

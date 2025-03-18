@@ -1,23 +1,24 @@
 'use client';
 
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
-import { Button } from '@session/ui/ui/button';
-import { useToasterHistory } from '@session/ui/ui/sonner';
-import { ListXIcon } from '@session/ui/icons/ListX';
-import { ListChecksIcon } from '@session/ui/icons/ListChecks';
+import useRelativeTime from '@/hooks/useRelativeTime';
+import { LAST_UPDATED_BEHIND_TRIGGER, PREFERENCE } from '@/lib/constants';
+import { clickableText } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { NetworkInfo } from '@session/staking-api-js/client';
-import { LAST_UPDATED_BEHIND_TRIGGER, PREFERENCE } from '@/lib/constants';
 import { StatusIndicator } from '@session/ui/components/StatusIndicator';
-import useRelativeTime from '@/hooks/useRelativeTime';
-import { Tooltip } from '@session/ui/ui/tooltip';
-import { useTranslations } from 'next-intl';
-import { clickableText } from '@/lib/locale-defaults';
-import { usePreferences } from 'usepref';
-import { portalChildClassName, ReactPortal } from '@session/ui/components/util/ReactPortal';
+import { ReactPortal, portalChildClassName } from '@session/ui/components/util/ReactPortal';
+import { ListChecksIcon } from '@session/ui/icons/ListChecks';
+import { ListXIcon } from '@session/ui/icons/ListX';
 import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
+import { useToasterHistory } from '@session/ui/ui/sonner';
+import { Tooltip } from '@session/ui/ui/tooltip';
 import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
+import { useTranslations } from 'next-intl';
+import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { usePreferences } from 'usepref';
 
+//biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex but readable
 export function StatusBar() {
   const now = Date.now();
   const { toastHistory, showHistory, setShowHistory } = useToasterHistory();
@@ -176,7 +177,7 @@ export function StatusBar() {
               <span className={l2HeightStatusIndicatorClassName}>
                 {networkInfoIsLoading
                   ? dictionary('l2.loading')
-                  : l2BlockNumber ?? dictionary('network.unreachable')}
+                  : (l2BlockNumber ?? dictionary('network.unreachable'))}
               </span>
             </div>
           </Tooltip>
@@ -210,7 +211,7 @@ export function StatusBar() {
               <span className={networkStatusIndicatorClassName}>
                 {networkInfoIsLoading
                   ? dictionary('network.loading')
-                  : networkInfo?.block_height ?? dictionary('network.unreachable')}
+                  : (networkInfo?.block_height ?? dictionary('network.unreachable'))}
               </span>
             </div>
           </Tooltip>
@@ -242,7 +243,9 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | undefined>(undefined);
   const [networkInfoIsFetching, setNetworkInfoIsFetching] = useState<boolean>(false);
   const [networkInfoIsLoading, setNetworkInfoIsLoading] = useState<boolean>(false);
-  const [refetch, setRefetch] = useState<() => void>(() => {});
+  const [refetch, setRefetch] = useState<() => void>(() => {
+    /* Do nothing */
+  });
 
   const { data: l2BlockNumber, refetch: refetchL2BlockNumber } = useBlockNumber();
 
@@ -256,6 +259,7 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
     refetchL2BlockNumber();
   };
 
+  // biome-ignore  lint/correctness/useExhaustiveDependencies: We want this to update when the network info changes
   const lastFetchTimeStamp = useMemo(() => Date.now(), [networkInfo, l2BlockNumber]);
 
   return (

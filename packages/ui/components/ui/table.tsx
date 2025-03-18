@@ -1,18 +1,18 @@
 import type { HTMLAttributes } from 'react';
 import * as React from 'react';
 
-import { cn, cva } from '../../lib/utils';
 import type { VariantProps } from 'class-variance-authority';
+import { cn, cva } from '../../lib/utils';
 
 const tableVariants = cva('w-full caption-bottom text-sm', {
   variants: {
     size: {
       compact:
-        '[&>thead>tr>th]:min-h-10 [&>thead>tr>th]:p-3 [&>thead>tr>th]:px-2 [&>tbody>tr>td]:p-2.5',
+        '[&>tbody>tr>td]:p-2.5 [&>thead>tr>th]:min-h-10 [&>thead>tr>th]:p-3 [&>thead>tr>th]:px-2',
       normal:
-        '[&>thead>tr>th]:min-h-12 [&>thead>tr>th]:p-5 [&>thead>tr>th]:px-4 [&>tbody>tr>td]:p-4',
+        '[&>tbody>tr>td]:p-4 [&>thead>tr>th]:min-h-12 [&>thead>tr>th]:p-5 [&>thead>tr>th]:px-4',
       large:
-        '[&>thead>tr>th]:min-h-14 [&>thead>tr>th]:p-7 [&>thead>tr>th]:px-6 [&>tbody>tr>td]:p-6',
+        '[&>tbody>tr>td]:p-6 [&>thead>tr>th]:min-h-14 [&>thead>tr>th]:p-7 [&>thead>tr>th]:px-6',
     },
   },
   defaultVariants: {
@@ -53,7 +53,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', className)}
+    className={cn('border-t bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
     {...props}
   />
 ));
@@ -64,7 +64,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
     <tr
       ref={ref}
       className={cn(
-        'data-[state=selected]:bg-muted bg-session-black border-session-white hover:bg-gray-darker border-b transition-colors',
+        'border-session-white border-b bg-session-black transition-colors hover:bg-gray-darker data-[state=selected]:bg-muted',
         className
       )}
       {...props}
@@ -80,7 +80,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'text-session-text text-left align-middle font-medium [&:has([role=checkbox])]:pr-0',
+      'text-left align-middle font-medium text-session-text [&:has([role=checkbox])]:pr-0',
       className
     )}
     {...props}
@@ -104,7 +104,7 @@ const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
-  <caption ref={ref} className={cn('text-muted-foreground mt-4 text-sm', className)} {...props} />
+  <caption ref={ref} className={cn('mt-4 text-muted-foreground text-sm', className)} {...props} />
 ));
 TableCaption.displayName = 'TableCaption';
 

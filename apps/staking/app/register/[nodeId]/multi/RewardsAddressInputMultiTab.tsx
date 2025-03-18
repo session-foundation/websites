@@ -9,7 +9,7 @@ import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function RewardsAddressInputMultiTab() {
   const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
@@ -31,6 +31,7 @@ export function RewardsAddressInputMultiTab() {
     changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.RESERVE_SLOTS);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);

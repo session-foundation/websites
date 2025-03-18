@@ -1,8 +1,8 @@
+import { safeTry } from '@session/util-js/try';
+import { parseBody } from 'next-sanity/webhook';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
-import { parseBody } from 'next-sanity/webhook';
 import logger from '../lib/logger';
-import { safeTry } from '@session/util-js/try';
 import type { PageSchemaType } from '../schemas/page';
 import type { PostSchemaType } from '../schemas/post';
 
@@ -67,7 +67,7 @@ export const createRevalidateHandler = ({
     }
 
     if (rssGenerators.length > 0) {
-      rssGenerators.forEach(({ _type, generateRssFeed }) => {
+      for (const { _type, generateRssFeed } of rssGenerators) {
         if (typeof _type !== 'string' || _type.length === 0) {
           throw new TypeError('_type must be a non-empty string');
         }
@@ -77,7 +77,7 @@ export const createRevalidateHandler = ({
         }
 
         rssGeneratorsMap.set(_type, generateRssFeed);
-      });
+      }
       logger.info(`Creating revalidate handler with rss generators: ${rssGeneratorsMap.keys()}`);
     }
   }
@@ -95,6 +95,7 @@ export const createRevalidateHandler = ({
    * and a signature to verify the request
    * @returns The result of the revalidation as a JSON response
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complexity out of necessity
   const revalidateHandler = async (req: NextRequest) => {
     try {
       if (!revalidateSecret) {

@@ -1,8 +1,8 @@
-import { defineArrayMember, type PortableTextBlock } from 'sanity';
 import { SplitVerticalIcon } from '@sanity/icons';
+import { type PortableTextBlock, defineArrayMember } from 'sanity';
+import { imageField } from '../basic/image';
 import { pickLinkField } from '../basic/links';
 import { tilesFields } from '../component/tiles';
-import { imageField } from '../basic/image';
 
 export const copyFieldOf = [
   defineArrayMember({
@@ -21,7 +21,7 @@ export const copyFieldOf = [
             </strong>
           ),
           component: ({ children }) => (
-            <strong className="text-lg font-semibold md:text-xl">{children}</strong>
+            <strong className="font-semibold text-lg md:text-xl">{children}</strong>
           ),
         },
       ],

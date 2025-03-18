@@ -1,8 +1,8 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, type REG_TAB } from '@/app/register/[nodeId]/types';
 import { EditButton } from '@session/ui/components/EditButton';
-import { forwardRef, MouseEvent } from 'react';
 import type { ButtonProps } from '@session/ui/ui/button';
+import { type MouseEvent, forwardRef } from 'react';
 
 export const RegistrationEditButton = forwardRef<
   HTMLButtonElement,

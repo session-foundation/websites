@@ -16,6 +16,7 @@ export const toastErrorRefetch = ({
   refetch,
   toastId,
 }: ToastErrorRefetchProps) => {
+  // biome-ignore lint/correctness/useHookAtTopLevel: toastId's nullness is constant
   const id = toastId ?? useId();
   toast.error(error, {
     id,

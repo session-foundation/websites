@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes } from 'react';
+import { type HTMLAttributes, forwardRef } from 'react';
 import { cn } from '../lib/utils';
 
 export interface BannerProps extends HTMLAttributes<HTMLDivElement> {
@@ -10,7 +10,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ className, children, .
   return (
     <div
       className={cn(
-        'bg-session-green text-session-black flex flex-wrap items-center justify-around p-2 text-sm',
+        'flex flex-wrap items-center justify-around bg-session-green p-2 text-session-black text-sm',
         className
       )}
       ref={ref}

@@ -1,10 +1,10 @@
 'use client';
 
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import type { ReadContractData } from 'wagmi/query';
 import type { RewardRatePoolAbi } from '../abis';
 import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 type RewardRate = ReadContractData<typeof RewardRatePoolAbi, 'rewardRate', []>;
 

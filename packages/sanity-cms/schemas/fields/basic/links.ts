@@ -1,14 +1,14 @@
-import { defineArrayMember, defineField } from 'sanity';
-import { linkFields, type LinkFieldsSchemaType } from '../groups/link';
-import { type PageSchemaType } from '../../page';
 import { DocumentIcon, LaunchIcon } from '@sanity/icons';
 import type { ArrayMemberFields } from '@session/sanity-types';
-import { type SocialSchemaType } from '../../social';
-import type { SchemaFieldsType } from '../../types';
-import type { PostSchemaType } from '../../post';
+import { defineArrayMember, defineField } from 'sanity';
 import type { SessionSanityClient } from '../../../lib/client';
 import logger from '../../../lib/logger';
 import { getContentById } from '../../../queries/getContent';
+import type { PageSchemaType } from '../../page';
+import type { PostSchemaType } from '../../post';
+import type { SocialSchemaType } from '../../social';
+import type { SchemaFieldsType } from '../../types';
+import { type LinkFieldsSchemaType, linkFields } from '../groups/link';
 
 export type ExternalLinkArrayMember = LinkFieldsSchemaType &
   ArrayMemberFields & { _type: 'externalLink' };
@@ -133,19 +133,19 @@ export async function resolvePickLink(
   let link: ExternalLinkArrayMember | InternalLinkArrayMember | SocialLinkArrayMember;
   if (type === 'externalLink') {
     if (!externalLink) {
-      logger.error(`External link is missing`);
+      logger.error('External link is missing');
       return { href: undefined, label: overrideLabel };
     }
     link = externalLink;
   } else if (type === 'internalLink') {
     if (!internalLink) {
-      logger.error(`Internal link is missing`);
+      logger.error('Internal link is missing');
       return { href: undefined, label: overrideLabel };
     }
     link = internalLink;
   } else if (type === 'socialLink') {
     if (!socialLink) {
-      logger.error(`Social link is missing`);
+      logger.error('Social link is missing');
       return { href: undefined, label: overrideLabel };
     }
     const social = await getContentById<SocialSchemaType>({
@@ -154,7 +154,7 @@ export async function resolvePickLink(
     });
 
     if (!social) {
-      logger.error(`Social link is missing`);
+      logger.error('Social link is missing');
       return { href: undefined, label: overrideLabel };
     }
 
@@ -178,6 +178,7 @@ export async function resolvePickLink(
  *
  * @see {PickLinkSchemaType}
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify this function
 export async function resolveAmbiguousLink(
   client: SessionSanityClient,
   link: ExternalLinkArrayMember | InternalLinkArrayMember,
@@ -185,7 +186,9 @@ export async function resolveAmbiguousLink(
 ) {
   if (link._type === 'externalLink') {
     return { href: link.url, label: link.label };
-  } else if (link._type === 'reference' || link._type === 'internalLink') {
+  }
+
+  if (link._type === 'reference' || link._type === 'internalLink') {
     const content = await getContentById<PageSchemaType | PostSchemaType>({
       client,
       id: link._ref,
@@ -206,12 +209,10 @@ export async function resolveAmbiguousLink(
           baseUrl = `${baseUrl}/`;
         }
         return { href: slug ? `${baseUrl}${slug}` : undefined, label: content.title };
-      } else {
-        return { href: `/${slug}`, label: content.label };
       }
-    } else {
-      logger.warn(`No content found for id ${link._ref}`);
+      return { href: `/${slug}`, label: content.label };
     }
+    logger.warn(`No content found for id ${link._ref}`);
   }
 
   return { href: undefined, label: undefined };

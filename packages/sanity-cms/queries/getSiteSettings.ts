@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 import type { SiteSchemaType } from '../schemas/site';
 
@@ -19,7 +19,7 @@ export async function getSiteSettings({ client }: { client: SessionSanityClient 
   const siteSettings = result[0];
 
   if (!siteSettings) {
-    logger.info(`Site settings not found`);
+    logger.info('Site settings not found');
     return null;
   }
 

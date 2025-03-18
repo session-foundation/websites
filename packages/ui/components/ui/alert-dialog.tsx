@@ -1,14 +1,14 @@
 'use client';
 
+import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import type { ReactNode } from 'react';
 import * as React from 'react';
-import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 
-import { cn } from '../../lib/utils';
-import { buttonVariants } from './button';
-import { MODULE_GRID_ALIGNMENT, ModuleGridContent, ModuleGridHeader } from '../ModuleGrid';
-import { Module } from '../Module';
 import { X } from 'lucide-react';
+import { cn } from '../../lib/utils';
+import { Module } from '../Module';
+import { MODULE_GRID_ALIGNMENT, ModuleGridContent, ModuleGridHeader } from '../ModuleGrid';
+import { buttonVariants } from './button';
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -28,7 +28,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 bg-session-black fixed inset-0 z-50 opacity-50',
+      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-session-black opacity-50 data-[state=closed]:animate-out data-[state=open]:animate-in',
       className
     )}
     {...props}

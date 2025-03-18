@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { SOCIALS } from '@/lib/constants';
 import { Social } from '@session/ui/components/SocialLinkList';
-import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 export function ClaimRewardsDisabledInfo() {
   const dictionary = useTranslations('banner');

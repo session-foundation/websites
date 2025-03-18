@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 import type { PageSchemaType } from '../schemas/page';
 
@@ -14,7 +14,7 @@ export async function getPageBySlug({
   slug: string;
 }) {
   if (!slug || slug.length === 0) {
-    logger.warn(`No slug provided, returning null`);
+    logger.warn('No slug provided, returning null');
     return null;
   }
 
@@ -44,7 +44,7 @@ const QUERY_GET_PAGES_WITH_ID = groq`*[_type == 'page' && _id == $id]`;
 
 export async function getPageById({ client, id }: { client: SessionSanityClient; id: string }) {
   if (!id || id.length === 0) {
-    logger.warn(`No id provided, returning null`);
+    logger.warn('No id provided, returning null');
     return null;
   }
 

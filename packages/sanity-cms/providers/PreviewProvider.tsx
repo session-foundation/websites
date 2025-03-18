@@ -1,9 +1,9 @@
 'use client';
 
 import { LiveQueryProvider } from '@sanity/preview-kit';
+import type { SanityClient } from 'next-sanity';
 import type { ReactNode } from 'react';
 import type { SessionSanityClient } from '../lib/client';
-import type { SanityClient } from 'next-sanity';
 import logger from '../lib/logger';
 
 export default function PreviewProvider({

@@ -1,17 +1,17 @@
 'use client';
 
+import { navlinkVariants } from '@session/ui/components/NavLink';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
-import { navlinkVariants } from '@session/ui/components/NavLink';
 
 function scrollToHeading(text: string) {
-  document.querySelectorAll('h2').forEach((heading) => {
+  for (const heading of document.querySelectorAll('h2')) {
     if (text && heading.textContent && heading.textContent === text) {
       heading.scrollIntoView({
         behavior: 'smooth',
       });
     }
-  });
+  }
 }
 
 type HeadingOutlineProps = {
@@ -25,7 +25,7 @@ export default function HeadingOutline({ title, headings }: HeadingOutlineProps)
       <Typography variant="h2" className="mb-3">
         {title}
       </Typography>
-      <ul className="text-session-text-black-secondary flex flex-col gap-2">
+      <ul className="flex flex-col gap-2 text-session-text-black-secondary">
         {headings.map((heading) => (
           <li key={`scroll-to-${heading}`}>
             <button
@@ -33,6 +33,7 @@ export default function HeadingOutline({ title, headings }: HeadingOutlineProps)
                 scrollToHeading(heading);
               }}
               className={cn(navlinkVariants({ active: false }), 'w-max text-wrap text-start')}
+              type="button"
             >
               {heading}
             </button>

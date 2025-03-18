@@ -1,7 +1,7 @@
-import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
 import { encodeAddBlsPubKeyArgs } from './ServiceNodeRewards';
+import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useEstimateContractFee } from './useEstimateContractFee';
 
 export type UseCreateOpenNode = ContractWriteQueryProps & {

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from '@/lib/locale-client';
-import { formatDistanceToNowStrict, FormatDistanceToNowStrictOptions } from 'date-fns';
 import { getDateFnsLocale } from '@/lib/locale-util';
+import { type FormatDistanceToNowStrictOptions, formatDistanceToNowStrict } from 'date-fns';
+import { useEffect, useMemo, useState } from 'react';
 
 /**
  * Returns the time to next unit change (e.g. 1000 for seconds, 60_000 for minutes)
@@ -69,7 +69,7 @@ export default function useRelativeTime(
     return () => {
       clearTimeout(timer);
     };
-  }, [targetDate]);
+  }, [targetDate, dateFnsLocale, options]);
 
   return relativeTime;
 }

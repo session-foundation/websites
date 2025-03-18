@@ -1,5 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes, ReactNode } from 'react';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 import { cn } from '../lib/utils';
 import { Loading } from './loading';
 
@@ -8,19 +8,19 @@ const moduleGridVariants = cva('module-grid', {
     variant: {
       grid: 'grid auto-rows-min',
       section:
-        'from-[#0A0C0C] to-[#081512] bg-gradient-to-b bg-blend-lighten shadow-md border-[2px] rounded-2xl border-[#54797241] flex flex-col',
+        'flex flex-col rounded-2xl border-[#54797241] border-[2px] bg-gradient-to-b from-[#0A0C0C] to-[#081512] bg-blend-lighten shadow-md',
       action:
-        'shadow-md border-[2px] rounded-2xl border-[#668C83] border-opacity-80 flex flex-col overflow-hidden',
+        'flex flex-col overflow-hidden rounded-2xl border-[#668C83] border-[2px] border-opacity-80 shadow-md',
     },
     size: {
-      md: 'gap-1 md:gap-2 grid-cols-1 sm:grid-cols-2',
-      lg: 'lg:gap-8 xl:grid-cols-3 grid-cols-1',
+      md: 'grid-cols-1 gap-1 sm:grid-cols-2 md:gap-2',
+      lg: 'grid-cols-1 lg:gap-8 xl:grid-cols-3',
     },
     colSpan: {
-      1: 'xl:col-span-1 col-span-1',
-      2: 'xl:col-span-2 col-span-1',
-      3: 'xl:col-span-3 col-span-2',
-      4: 'xl:col-span-4 col-span-2',
+      1: 'col-span-1 xl:col-span-1',
+      2: 'col-span-1 xl:col-span-2',
+      3: 'col-span-2 xl:col-span-3',
+      4: 'col-span-2 xl:col-span-4',
     },
   },
   defaultVariants: {
@@ -76,7 +76,7 @@ const ModuleGridHeader = forwardRef<HTMLDivElement, ModuleGridHeaderProps>(
       ref={ref}
       className={cn(
         'flex w-full flex-row items-center justify-between px-2 pt-3',
-        keepDesktopHeaderOnMobile ? 'relative top-0' : 'absolute -top-14 md:relative md:top-0',
+        keepDesktopHeaderOnMobile ? 'relative top-0' : '-top-14 absolute md:relative md:top-0',
         className
       )}
       {...props}
@@ -145,7 +145,7 @@ function ModuleGridInfoContent({
     <ModuleGridContent
       alignment={MODULE_GRID_ALIGNMENT.CENTER}
       className={cn(
-        'text-session-text flex w-full max-w-xl flex-col items-center gap-6 self-center text-center text-xl',
+        'flex w-full max-w-xl flex-col items-center gap-6 self-center text-center text-session-text text-xl',
         className
       )}
     >

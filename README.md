@@ -25,8 +25,6 @@ This repository contains the following apps and packages:
   using [NextAuth.js](https://next-auth.js.org/). [Read more](packages/auth/README.md).
 - `@session/contracts`: Session smart contract js library for interacting with the Session smart
   contracts. [Read more](packages/contracts/README.md).
-- `@session/eslint-config`: `eslint`
-  configurations. [Read more](packages/eslint-config/README.md). [Read more](packages/eslint-config/README.md).
 - `@session/feture-flags`: Feature flags library for [Next.js](https://nextjs.org/) apps. Supporting client, server, and
   remote flags. [Read more](packages/feature-flags/README.md).
 - `@session/logger`: An opinionated logging wrapper. [Read more](packages/logger/README.md).
@@ -50,8 +48,7 @@ This repository contains the following apps and packages:
 ### Utilities
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking.
-- [ESLint](https://eslint.org/) for code linting.
-- [Prettier](https://prettier.io) for code formatting.
+- [Biome](https://biomejs.dev/) for code linting & formatting.
 - [Tailwind CSS](https://tailwindcss.com/) for styling.
 - [Next.js](https://nextjs.org/) for server-side rendering.
 - [shadcn-ui](https://ui.shadcn.com/) for UI components.

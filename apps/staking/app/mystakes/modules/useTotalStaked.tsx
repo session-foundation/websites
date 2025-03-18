@@ -1,10 +1,10 @@
-import type { Address } from 'viem';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { useMemo } from 'react';
+import { STAKE_EVENT_STATE, parseStakeEventState } from '@/components/StakedNode/state';
 import { useStakes } from '@/hooks/useStakes';
-import { parseStakeEventState, STAKE_EVENT_STATE } from '@/components/StakedNode/state';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useMemo } from 'react';
+import type { Address } from 'viem';
 
 // TODO: replace with sn data once available
 export function useTotalStaked(addressOverride?: Address) {
@@ -50,7 +50,7 @@ export function useTotalStaked(addressOverride?: Address) {
       totalStakedBigInt: total,
       totalStakedFormatted: formatSENTBigInt(total),
     };
-  }, [stakes, contracts, address]);
+  }, [stakes, contracts, address, currentContractIds]);
 
   return { totalStakedFormatted, totalStakedBigInt, status, refetch, enabled };
 }

@@ -1,15 +1,15 @@
 import { ActionModuleRow } from '@/components/ActionModule';
 import { NodeContributorList } from '@/components/NodeCard';
-import { PubKey } from '@session/ui/components/PubKey';
-import { externalLink } from '@/lib/locale-defaults';
-import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { LoadingText } from '@session/ui/components/loading-text';
-import { useTranslations } from 'next-intl';
-import type { Stake } from '@session/staking-api-js/client';
-import { formattedTotalStakedInContract } from '@/lib/contracts';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { formattedTotalStakedInContract } from '@/lib/contracts';
+import { externalLink } from '@/lib/locale-defaults';
+import type { Stake } from '@session/staking-api-js/client';
+import { PubKey } from '@session/ui/components/PubKey';
+import { LoadingText } from '@session/ui/components/loading-text';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
 
 export default function NodeActionModuleInfo({
   node,

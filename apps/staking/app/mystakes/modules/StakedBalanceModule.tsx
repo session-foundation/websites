@@ -1,11 +1,11 @@
 'use client';
 
+import { useTotalStaked } from '@/app/mystakes/modules/useTotalStaked';
 import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
+import type { QUERY_STATUS } from '@/lib/query';
 import { Module, ModuleTitle } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import type { QUERY_STATUS } from '@/lib/query';
 import type { Address } from 'viem';
-import { useTotalStaked } from '@/app/mystakes/modules/useTotalStaked';
 
 export default function StakedBalanceModule({ addressOverride }: { addressOverride?: Address }) {
   const { totalStakedFormatted, status, refetch, enabled } = useTotalStaked(addressOverride);

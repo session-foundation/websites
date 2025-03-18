@@ -1,26 +1,26 @@
-import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
 import { siteMetadata } from '@/lib/metadata';
+import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
 import '@session/ui/styles';
-import { getBuildInfo } from '@session/util-js/build';
-import Header from '@/components/Header';
-import { type ReactNode } from 'react';
-import { cn } from '@session/ui/lib/utils';
-import { getLocalizationData } from '@/lib/locale-server';
-import { headers } from 'next/headers';
-import { GlobalProvider } from '@/providers/global-provider';
-import { isProduction } from '@/lib/env';
 import { DevSheet } from '@/components/DevSheet';
-import { TOSHandler } from '@/components/TOSHandler';
-import { StatusBar } from '@/components/StatusBar';
-import { getRemoteFeatureFlags } from '@/lib/feature-flags-server';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import Header from '@/components/Header';
 import Maintenance from '@/components/Maintenance';
 import RemoteBanner from '@/components/RemoteBanner';
+import { StatusBar } from '@/components/StatusBar';
+import { TOSHandler } from '@/components/TOSHandler';
 import { WalletUserSheet } from '@/components/WalletUserSheet';
+import { isProduction } from '@/lib/env';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { getRemoteFeatureFlags } from '@/lib/feature-flags-server';
+import { getLocalizationData } from '@/lib/locale-server';
+import { GlobalProvider } from '@/providers/global-provider';
+import { cn } from '@session/ui/lib/utils';
 import { Toaster } from '@session/ui/ui/sonner';
+import { getBuildInfo } from '@session/util-js/build';
+import { headers } from 'next/headers';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata() {
-  return siteMetadata({});
+  return await siteMetadata({});
 }
 
 const buildInfo = getBuildInfo();
@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       className={cn(RobotoFlex.variable, MonumentExtended.variable)}
     >
       <GlobalProvider messages={messages} locale={locale} wagmiCookie={wagmiCookie}>
-        <body className="bg-session-black font-roboto-flex text-session-text overflow-x-hidden">
+        <body className="overflow-x-hidden bg-session-black font-roboto-flex text-session-text">
           {enabledFlags.has(REMOTE_FEATURE_FLAG.ENABLE_MAINTENANCE_MODE) ? (
             <Maintenance />
           ) : (

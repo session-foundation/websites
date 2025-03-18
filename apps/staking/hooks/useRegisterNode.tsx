@@ -6,11 +6,11 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { addresses, isValidChainId } from '@session/contracts';
-import { useProxyApproval } from '@session/contracts/hooks/Token';
 import {
   type RegisterNodeContributor,
   useAddBLSPubKey,
 } from '@session/contracts/hooks/ServiceNodeRewards';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,7 +20,7 @@ export type UseRegisterNodeParams = {
   blsSignature: string;
   nodePubKey: string;
   userSignature: string;
-  contributors?: Array<RegisterNodeContributor>;
+  contributors: Array<RegisterNodeContributor>;
 };
 
 export default function useRegisterNode({
@@ -28,7 +28,7 @@ export default function useRegisterNode({
   blsSignature,
   nodePubKey,
   userSignature,
-  contributors = [],
+  contributors,
 }: UseRegisterNodeParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
   const { chainId } = useWallet();
@@ -87,7 +87,7 @@ export default function useRegisterNode({
         writeError: approveWriteError,
         transactionError: approveTransactionError,
       }),
-    [approveSimulateError, approveWriteError, approveTransactionError]
+    [approveSimulateError, approveWriteError, approveTransactionError, dict, dictGeneral]
   );
 
   const addBLSErrorMessage = useMemo(
@@ -100,7 +100,7 @@ export default function useRegisterNode({
         writeError: addBLSWriteError,
         transactionError: addBLSTransactionError,
       }),
-    [addBLSSimulateError, addBLSWriteError, addBLSTransactionError]
+    [addBLSSimulateError, addBLSWriteError, addBLSTransactionError, dict, dictGeneral]
   );
 
   const allowanceReadStatus = useMemo(
@@ -119,6 +119,7 @@ export default function useRegisterNode({
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on success
   useEffect(() => {
     if (enabled && approveWriteStatusRaw === 'success') {
       addBLSPubKey();

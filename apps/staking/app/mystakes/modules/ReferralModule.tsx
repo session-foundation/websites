@@ -1,23 +1,24 @@
 'use client';
 
-import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { Input } from '@session/ui/ui/input';
-import { useRef, useState } from 'react';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { encodeAddressToHashId } from '@/lib/hashid';
+import { getReferralCodeInfo } from '@/app/faucet/actions';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { Button } from '@session/ui/ui/button';
-import { toast } from '@session/ui/lib/toast';
+import { encodeAddressToHashId } from '@/lib/hashid';
 import { externalLink } from '@/lib/locale-defaults';
-import { useQuery } from '@tanstack/react-query';
-import { getReferralCodeInfo } from '@/app/faucet/actions';
-import { LoadingText } from '@session/ui/components/loading-text';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { toast } from '@session/ui/lib/toast';
+import { Button } from '@session/ui/ui/button';
+import { Input } from '@session/ui/ui/input';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is fine
 export default function ReferralModule() {
   const [hidden, setHidden] = useState<boolean>(true);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +36,7 @@ export default function ReferralModule() {
     queryFn: async () => {
       try {
         return await getReferralCodeInfo({ code: hashId });
-      } catch (error) {
+      } catch (_error) {
         toast.error('Failed to get referral code info');
         return null;
       }
@@ -81,20 +82,20 @@ export default function ReferralModule() {
                       />
                     </div>
                   ) : (
-                    <span className="text-destructive text-base">
+                    <span className="text-base text-destructive">
                       This wallet is not eligible for a referral code
                     </span>
                   )
                 ) : (
                   <LoadingText />
                 )}
-                <div className="text-session-text-secondary mt-2 text-xs">
+                <div className="mt-2 text-session-text-secondary text-xs">
                   {status === 'success' ? (
                     data ? (
                       dictionary.rich('description4', {
                         uses: data?.uses ?? 0,
                         remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
-                        drip: formatSENTNumber(parseInt(data?.drip ?? '0'), 0),
+                        drip: formatSENTNumber(Number.parseInt(data?.drip ?? '0'), 0),
                       })
                     ) : null
                   ) : (

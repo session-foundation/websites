@@ -1,45 +1,54 @@
 'use client';
 
-import { formatDate, formatLocalizedTimeFromSeconds, formatNumber, formatPercentage } from '@/lib/locale-client';
-import { ButtonDataTestId, NodeCardDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
-import { Stake } from '@session/staking-api-js/client';
-import { statusVariants } from '@session/ui/components/StatusIndicator';
-import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
-import { cn } from '@session/ui/lib/utils';
-import { type VariantProps } from 'class-variance-authority';
-import { useTranslations } from 'next-intl';
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import {
-  CollapsableContent,
-  getTotalStakedAmountForAddressFormatted,
-  NodeContributorList,
-  RowLabel,
-} from './NodeCard';
-import { PubKey } from '@session/ui/components/PubKey';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
-import { Tooltip } from '@session/ui/ui/tooltip';
-import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
-import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
-import { externalLink } from '@/lib/locale-defaults';
-import useRelativeTime from '@/hooks/useRelativeTime';
-import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { ActionModuleDivider } from '@/components/ActionModule';
-import { Address } from 'viem';
-import { useWallet } from '@session/wallet/hooks/useWallet';
+import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
+import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
+import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
 import {
+  STAKE_EVENT_STATE,
+  STAKE_STATE,
   isStakeRequestingExit,
   parseStakeEventState,
   parseStakeState,
-  STAKE_EVENT_STATE,
-  STAKE_STATE,
 } from '@/components/StakedNode/state';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
+import useRelativeTime from '@/hooks/useRelativeTime';
 import { useStakes } from '@/hooks/useStakes';
+import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
+import { FEATURE_FLAG } from '@/lib/feature-flags';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import {
+  formatDate,
+  formatLocalizedTimeFromSeconds,
+  formatNumber,
+  formatPercentage,
+} from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
+import {
+  ButtonDataTestId,
+  NodeCardDataTestId,
+  StakedNodeDataTestId,
+} from '@/testing/data-test-ids';
+import type { Stake } from '@session/staking-api-js/client';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { PubKey } from '@session/ui/components/PubKey';
+import type { statusVariants } from '@session/ui/components/StatusIndicator';
+import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
+import { cn } from '@session/ui/lib/utils';
+import { Tooltip } from '@session/ui/ui/tooltip';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import type { VariantProps } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
+import { type HTMLAttributes, forwardRef, useMemo } from 'react';
+import type { Address } from 'viem';
+import {
+  CollapsableContent,
+  NodeContributorList,
+  RowLabel,
+  getTotalStakedAmountForAddressFormatted,
+} from './NodeCard';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -101,7 +110,7 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
     <span
       ref={ref}
       className={cn(
-        'flex w-3/4 flex-row gap-2 text-xs font-normal sm:w-max md:text-base',
+        'flex w-3/4 flex-row gap-2 font-normal text-xs sm:w-max md:text-base',
         level === 'warning'
           ? 'text-warning'
           : level === 'error'
@@ -135,12 +144,12 @@ export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeOperatorIndi
         <div
           ref={ref}
           className={cn(
-            'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
+            'flex flex-row items-center gap-1 align-middle font-normal text-session-green text-sm md:text-base',
             className
           )}
           {...props}
         >
-          <SpannerAndScrewdriverIcon className="fill-session-green h-3.5 w-3.5" />
+          <SpannerAndScrewdriverIcon className="h-3.5 w-3.5 fill-session-green" />
         </div>
       </Tooltip>
     );
@@ -226,7 +235,7 @@ const ExitUnlockTimerNotification = ({
 
   const relativeTime = useMemo(
     () => (!isExitableSoon ? timeString : soonString),
-    [isExitableSoon, timeString, soonString, notFoundString]
+    [isExitableSoon, timeString, soonString]
   );
 
   if (isPastTime) {
@@ -431,8 +440,8 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
       liquidationDate,
     };
   }, [
+    chainId,
     blockTime,
-    networkTime,
     currentBlock,
     earnedDowntimeBlocks,
     lastUptimeProofSeconds,
@@ -453,6 +462,7 @@ const StakedNodeCard = forwardRef<
     networkTime: number;
     hideButton?: boolean;
   }
+  //biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: consider simplifying this component
 >(({ stake, blockHeight, networkTime, hideButton, targetWalletAddress, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.staked');
   const generalDictionary = useTranslations('general');
@@ -558,7 +568,7 @@ const StakedNodeCard = forwardRef<
                     : notFoundString,
                 })}
               >
-                <span className="text-gray-lightest font-normal">
+                <span className="font-normal text-gray-lightest">
                   {dictionary('lastReward', {
                     relativeTime: lastRewardTime ?? notFoundString,
                   })}
@@ -580,7 +590,7 @@ const StakedNodeCard = forwardRef<
                     : notFoundString,
                 })}
               >
-                <span className="text-gray-lightest font-normal">
+                <span className="font-normal text-gray-lightest">
                   {dictionary('lastUptime', { relativeTime: lastUptimeTime ?? notFoundString })}
                 </span>
               </Tooltip>

@@ -1,8 +1,7 @@
-import { type ExternalToast, toast as sonnerToast } from 'sonner';
 import { collapseString } from '@session/util-crypto/string';
+import { type ExternalToast, toast as sonnerToast } from 'sonner';
 import { CopyToClipboardButton } from '../components/CopyToClipboardButton';
 import { ButtonDataTestId } from '../data-test-ids';
-import React from 'react';
 
 type Toast = typeof sonnerToast & {
   handleError: (error: Error, data?: ExternalToast) => void;

@@ -1,7 +1,8 @@
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
-import Database from 'better-sqlite3-multiple-ciphers';
-import path from 'path';
+// biome-ignore lint/correctness/noNodejsModules: runs on server
+import path from 'node:path';
 import { isProduction } from '@session/util-js/env';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 
 export enum TABLE {
   FLAGS = 'flags',

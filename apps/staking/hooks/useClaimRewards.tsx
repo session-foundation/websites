@@ -1,13 +1,13 @@
 'use client';
 
+import { getContractErrorName } from '@session/contracts';
 import {
+  type UseUpdateRewardsBalanceQueryParams,
   useClaimRewardsQuery,
   useUpdateRewardsBalanceQuery,
-  type UseUpdateRewardsBalanceQueryParams,
 } from '@session/contracts/hooks/ServiceNodeRewards';
-import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { getContractErrorName } from '@session/contracts';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   formatAndHandleLocalizedContractErrorMessages,
@@ -80,7 +80,13 @@ export default function useClaimRewards({
         writeError: updateBalanceWriteError,
         transactionError: updateBalanceTransactionError,
       }),
-    [updateBalanceSimulateError, updateBalanceWriteError, updateBalanceTransactionError]
+    [
+      updateBalanceSimulateError,
+      updateBalanceWriteError,
+      updateBalanceTransactionError,
+      dict,
+      dictGeneral,
+    ]
   );
 
   const claimRewardsErrorMessage = useMemo(
@@ -93,9 +99,10 @@ export default function useClaimRewards({
         writeError: claimWriteError,
         transactionError: claimTransactionError,
       }),
-    [claimSimulateError, claimWriteError, claimTransactionError]
+    [claimSimulateError, claimWriteError, claimTransactionError, dict, dictGeneral]
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on success
   useEffect(() => {
     if (enabled && (skipUpdateBalance || updateBalanceTransactionStatus === 'success')) {
       claimRewards();

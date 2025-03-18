@@ -1,3 +1,4 @@
+import { InfoNodeCardSkeleton } from '@/components/InfoNodeCard';
 import {
   MODULE_GRID_ALIGNMENT,
   ModuleGrid,
@@ -6,7 +7,6 @@ import {
   ModuleGridTitle,
 } from '@session/ui/components/ModuleGrid';
 import type { ReactNode } from 'react';
-import { InfoNodeCardSkeleton } from '@/components/InfoNodeCard';
 
 export function NodeListModuleContent({ children }: { children: ReactNode }) {
   return (

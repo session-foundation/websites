@@ -1,22 +1,22 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
+import { getNonFinalizedLatestDeployedContributorContract } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { Loading } from '@session/ui/components/loading';
-import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
-import { Button } from '@session/ui/ui/button';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import React, { useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
-import { getNonFinalizedLatestDeployedContributorContract } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { TOKEN } from '@session/contracts';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
   type StakeContributor,
 } from '@session/staking-api-js/client';
-import { TOKEN } from '@session/contracts';
+import { Loading } from '@session/ui/components/loading';
+import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
+import { Button } from '@session/ui/ui/button';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useMemo } from 'react';
 
 export function SuccessMultiTab() {
   const { contract, props, formMulti, address } = useRegistrationWizard();
@@ -68,7 +68,7 @@ export function SuccessMultiTab() {
       contractDetails.contributors = [
         {
           address: address!,
-          amount: parseInt(amount) * Math.pow(10, TOKEN.DECIMALS),
+          amount: Number.parseInt(amount) * 10 ** TOKEN.DECIMALS,
           beneficiary,
           reserved: 0,
         },

@@ -3,6 +3,7 @@ import { forwardRef } from 'react';
 
 export const TelegramIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, ref) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 35 28" {...props} ref={ref}>
+    <title>Telegram</title>
     <path
       fill="#000"
       fillRule="evenodd"

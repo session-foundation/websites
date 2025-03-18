@@ -15,7 +15,7 @@ export function ErrorMessage({
 }) {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      <TriangleAlertIcon className="stroke-warning h-16 w-16" />
+      <TriangleAlertIcon className="h-16 w-16 stroke-warning" />
       <p>{message}</p>
       <Button data-testid={buttonDataTestId} rounded="md" size="lg" onClick={refetch}>
         {buttonText}

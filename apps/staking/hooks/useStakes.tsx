@@ -1,10 +1,10 @@
 import { getTotalStakedAmountForAddress } from '@/components/NodeCard';
 import {
+  STAKE_EVENT_STATE,
+  STAKE_STATE,
   isStakeRequestingExit,
   parseStakeEventState,
   parseStakeState,
-  STAKE_EVENT_STATE,
-  STAKE_STATE,
 } from '@/components/StakedNode/state';
 import { BACKEND, CONTRIBUTION_CONTRACT, PREFERENCE } from '@/lib/constants';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
@@ -17,8 +17,8 @@ import {
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
-import type { Address } from 'viem';
 import { usePreferences } from 'usepref';
+import type { Address } from 'viem';
 
 export const sortingTotalStakedDesc = (
   a: Stake | ContributorContractInfo,
@@ -36,11 +36,13 @@ export const sortingReservedContractsDesc = (
   connectedAddress?: Address
 ) => {
   const reservedA = connectedAddress
-    ? a.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ?? 0
+    ? (a.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ??
+      0)
     : 0;
 
   const reservedB = connectedAddress
-    ? b.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ?? 0
+    ? (b.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ??
+      0)
     : 0;
 
   return reservedB - reservedA;
@@ -129,8 +131,8 @@ export function sortContracts(
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  const priorityA = operatorA ? contractStateSortOrderIfOperator[a.status] ?? 999 : 999;
-  const priorityB = operatorB ? contractStateSortOrderIfOperator[b.status] ?? 999 : 999;
+  const priorityA = operatorA ? (contractStateSortOrderIfOperator[a.status] ?? 999) : 999;
+  const priorityB = operatorB ? (contractStateSortOrderIfOperator[b.status] ?? 999) : 999;
 
   if (priorityA !== priorityB) {
     // Priority ascending
@@ -184,6 +186,7 @@ export function useStakes(overrideAddress?: Address) {
     blockHeight,
     networkTime,
     network,
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: reduce complexity when backend fixes staked status
   ] = useMemo(() => {
     if (!address || !data) return [[], [], [], null, null, null, null];
     const stakesArr = 'stakes' in data && Array.isArray(data.stakes) ? data.stakes : [];

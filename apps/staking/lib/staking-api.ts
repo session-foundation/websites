@@ -1,4 +1,4 @@
-import { SessionStakingClient, StakingBackendResponse } from '@session/staking-api-js/client';
+import type { SessionStakingClient, StakingBackendResponse } from '@session/staking-api-js/client';
 
 export type StakingBackendQuery = (
   stakingBackendClient: SessionStakingClient
@@ -6,7 +6,7 @@ export type StakingBackendQuery = (
 
 export type StakingBackendQueryWithParams = (
   stakingBackendClient: SessionStakingClient,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: resolve proper type
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: resolve proper type
   params: any
 ) => Promise<StakingBackendResponse<unknown>>;
 

@@ -1,4 +1,4 @@
-import { defineField, type SlugRule } from 'sanity';
+import { type SlugRule, defineField } from 'sanity';
 
 export const slugFieldDefinition = {
   name: 'slug' as const,

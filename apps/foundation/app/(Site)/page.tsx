@@ -1,7 +1,7 @@
-import { getLandingPageSlug } from '@/lib/sanity/sanity-server';
-import UniversalPage, { generateMetadata as generateMetadataUniversalPage } from './[slug]/page';
 import UniversalPageLayout from '@/app/(Site)/[slug]/layout';
+import { getLandingPageSlug } from '@/lib/sanity/sanity-server';
 import type { ResolvingMetadata } from 'next';
+import UniversalPage, { generateMetadata as generateMetadataUniversalPage } from './[slug]/page';
 
 /**
  * Force static rendering and cache the data of a layout or page by forcing `cookies()`, `headers()`

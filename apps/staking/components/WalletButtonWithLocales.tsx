@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { WalletButton, type WalletButtonProps } from '@session/wallet/components/WalletButton';
+import { useTranslations } from 'next-intl';
 
 export function WalletButtonWithLocales(props: Partial<WalletButtonProps>) {
   const dictionary = useTranslations('wallet.modalButton');

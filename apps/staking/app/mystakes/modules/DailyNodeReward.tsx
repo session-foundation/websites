@@ -4,10 +4,10 @@ import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import useDailyNodeReward from '@/hooks/useDailyNodeReward';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 
 export default function DailyNodeReward() {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();

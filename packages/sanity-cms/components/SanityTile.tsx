@@ -1,8 +1,8 @@
-import type { TileSchemaType } from '../schemas/fields/component/tile';
-import { SanityImage } from './SanityImage';
-import type { SessionSanityClient } from '../lib/client';
 import { cn } from '@session/ui/lib/utils';
+import type { SessionSanityClient } from '../lib/client';
+import type { TileSchemaType } from '../schemas/fields/component/tile';
 import { TILES_VARIANT } from '../schemas/fields/component/tiles';
+import { SanityImage } from './SanityImage';
 
 export function SanityTile({
   value,
@@ -41,11 +41,11 @@ export function SanityTileTextOnTopOfImage({
       className={cn(
         'group',
         'flex h-full w-60 flex-col rounded-2xl border border-gray-200 shadow-md',
-        'text-session-white relative h-80 items-center justify-center gap-2 overflow-hidden p-6 text-center',
+        'relative h-80 items-center justify-center gap-2 overflow-hidden p-6 text-center text-session-white',
         'transition-all duration-300 ease-in-out motion-reduce:transition-none'
       )}
     >
-      <strong className="text-lg font-semibold [text-shadow:_0_0_8px_var(--session-black)] md:text-xl">
+      <strong className="font-semibold text-lg [text-shadow:_0_0_8px_var(--session-black)] md:text-xl">
         {value.title}
       </strong>
       <p
@@ -68,7 +68,7 @@ export function SanityTileTextOnTopOfImage({
         isInline={false}
         cover
         className={cn(
-          'absolute inset-0 -z-10 h-full w-full rounded-2xl',
+          '-z-10 absolute inset-0 h-full w-full rounded-2xl',
           'group-hover:darken group-hover:blur-sm group-hover:brightness-50',
           'group-active:darken group-active:blur-sm group-active:brightness-50',
           'transition-all duration-300 ease-in-out motion-reduce:transition-none'
@@ -99,7 +99,7 @@ export function SanityTileTextUnderImage({
         className="h-60 w-full rounded-2xl border border-gray-200 shadow-md"
       />
       <span className="ms-2 text-sm md:text-base">{value.title}</span>
-      <span className="ms-2 text-xs font-light md:text-sm">{value.description ?? ' '}</span>
+      <span className="ms-2 font-light text-xs md:text-sm">{value.description ?? ' '}</span>
     </div>
   );
 }

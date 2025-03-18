@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
+import { BinIcon } from '../icons/BinIcon';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './ui/button';
-import { BinIcon } from '../icons/BinIcon';
 
 const RemoveButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?: string }>(
   ({ className, iconClassName, ...props }, ref) => {
@@ -15,7 +15,7 @@ const RemoveButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName
         {...props}
         data-testid={props['data-testid']}
       >
-        <BinIcon className={cn('stroke-destructive h-5 w-5', iconClassName)} />
+        <BinIcon className={cn('h-5 w-5 stroke-destructive', iconClassName)} />
       </Button>
     );
   }

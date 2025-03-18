@@ -1,9 +1,9 @@
 'use client';
 
-import { PubKey } from '@session/ui/components/PubKey';
 import { TICKER } from '@/lib/constants';
 import { formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
 import { TOKEN } from '@session/contracts';
+import { PubKey } from '@session/ui/components/PubKey';
 import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import {
   Table,
@@ -19,7 +19,7 @@ import { ETH } from '@session/wallet/lib/eth';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { TransactionHistory } from './utils';
+import type { TransactionHistory } from './utils';
 
 interface TransactionRow {
   date: Date;
@@ -62,7 +62,7 @@ export function FaucetTransactions({
   }, [transactionHistory]);
 
   return (
-    <div className="border-session-text overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-xl border border-session-text">
       <Table className="bg-transparent">
         <TableCaption className="pb-3">{transactionsDictionary('tableCaption')}</TableCaption>
         <TableHeader>
@@ -91,7 +91,7 @@ export function FaucetTransactions({
               </TableCell>
               <TableCell className="text-right">
                 <Link href={`/explorer/tx/${hash}`} target="_blank">
-                  <span className="text-session-green fill-session-green inline-flex w-max items-center gap-1 align-middle">
+                  <span className="inline-flex w-max items-center gap-1 fill-session-green align-middle text-session-green">
                     <span className="hidden 2xl:flex">{dictionary('viewOnExplorer')}</span>
                     <span className="flex 2xl:hidden">{dictionary('viewOnExplorerShort')}</span>
                     <LinkOutIcon className="h-4 w-4" />

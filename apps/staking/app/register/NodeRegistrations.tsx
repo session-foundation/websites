@@ -1,8 +1,11 @@
 'use client';
 
+import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
 import { NodesListSkeleton } from '@/components/NodesListModule';
+import { useNetworkStatus } from '@/components/StatusBar';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import { useStakes } from '@/hooks/useStakes';
 import { QUERY, URL } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
@@ -11,14 +14,11 @@ import { externalLink } from '@/lib/locale-defaults';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Registration } from '@session/staking-api-js/client';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
-import { useStakes } from '@/hooks/useStakes';
-import type { Registration } from '@session/staking-api-js/client';
-import { ErrorMessage } from '@/components/ErrorMessage';
-import { useNetworkStatus } from '@/components/StatusBar';
 
 export default function NodeRegistrations() {
   const dictionary = useTranslations('modules.nodeRegistrations');
@@ -85,6 +85,7 @@ export default function NodeRegistrations() {
       });
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     if (isConnected) {
       setNetworkStatusVisible(true);
@@ -94,6 +95,7 @@ export default function NodeRegistrations() {
     };
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On connected state change
   useEffect(() => {
     setNetworkStatusVisible(isConnected);
     return () => {

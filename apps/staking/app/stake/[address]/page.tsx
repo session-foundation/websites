@@ -1,12 +1,12 @@
 import ActionModule from '@/components/ActionModule';
 import { BlockExplorerLink, BlockExplorerLinkText } from '@/components/BlockExplorerLink';
-import Staking, { NodeStakingFormSkeleton, StakingActionModuleTitle } from './Staking';
-import { Suspense, use } from 'react';
-import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { stakingBackendPrefetchQuery } from '@/lib/staking-api-server';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { stakingBackendPrefetchQuery } from '@/lib/staking-api-server';
 import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
 import { LoadingText } from '@session/ui/components/loading-text';
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { Suspense, use } from 'react';
+import Staking, { NodeStakingFormSkeleton, StakingActionModuleTitle } from './Staking';
 
 interface NodePageParams {
   params: Promise<{

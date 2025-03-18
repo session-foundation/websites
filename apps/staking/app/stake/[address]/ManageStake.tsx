@@ -1,15 +1,15 @@
 import { type ErrorBoxProps, ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
-import { useTranslations } from 'next-intl';
-import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
-import { useMemo, useState } from 'react';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
+import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
 } from '@session/staking-api-js/client';
-import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
-import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
+import { useMemo, useState } from 'react';
 
 enum EditableStakeGroup {
   Contribution = 'contribution',
@@ -72,7 +72,7 @@ export function ManageStake({ contract }: { contract: ContributorContractInfo })
     }
 
     return fields;
-  }, [isFinalized, haveOtherContributorsContributed, isOperator]);
+  }, [isFinalized, haveOtherContributorsContributed, isOperator, dictionary]);
 
   return (
     <StakeInfo contract={contract} isSubmitting={isSubmitting} editableFields={editableFields}>

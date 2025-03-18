@@ -1,18 +1,18 @@
+import { type ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { SENT_DECIMALS } from '@session/contracts';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import type { StakeContributor } from '@session/staking-api-js/client';
 import { Loading } from '@session/ui/components/loading';
+import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
 import { cn } from '@session/ui/lib/utils';
-import { Tooltip } from '@session/ui/ui/tooltip';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { formatSENTNumber } from '@session/contracts/hooks/Token';
-import { StakeContributor } from '@session/staking-api-js/client';
-import { ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
-import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { Button } from '@session/ui/ui/button';
-import { SENT_DECIMALS } from '@session/contracts';
+import { Tooltip } from '@session/ui/ui/tooltip';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
+import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
 
 export interface Contributor {
   address: string;
@@ -20,7 +20,7 @@ export interface Contributor {
 }
 
 export const outerNodeCardVariants = cva(
-  'rounded-xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
+  'rounded-xl bg-module-outline p-px bg-blend-lighten shadow-md transition-all ease-in-out',
   {
     variants: {
       variant: {
@@ -34,7 +34,7 @@ export const outerNodeCardVariants = cva(
 );
 
 const innerNodeCardVariants = cva(
-  'rounded-xl w-full h-full flex align-middle flex-col py-5 px-6 bg-module',
+  'flex h-full w-full flex-col rounded-xl bg-module px-6 py-5 align-middle',
   {
     variants: {
       variant: {
@@ -67,7 +67,7 @@ const NodeCard = forwardRef<HTMLDivElement, StakeCardProps>(
 
 NodeCard.displayName = 'NodeCard';
 
-const nodeCardHeaderVariants = cva('w-full flex flex-row', {
+const nodeCardHeaderVariants = cva('flex w-full flex-row', {
   variants: {
     variant: {
       default: '',
@@ -99,7 +99,7 @@ const NodeCardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingE
   ({ className, ...props }, ref) => (
     <h4
       ref={ref}
-      className={cn('text-gradient-white text-lg font-medium leading-none md:text-xl', className)}
+      className={cn('font-medium text-gradient-white text-lg leading-none md:text-xl', className)}
       {...props}
     />
   )
@@ -110,7 +110,7 @@ const NodeCardText = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>
   ({ className, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn('text-gradient-white text-sm font-light md:text-base', className)}
+      className={cn('font-light text-gradient-white text-sm md:text-base', className)}
       {...props}
     />
   )
@@ -146,7 +146,7 @@ const ContributorIcon = ({
       }
     >
       <HumanIcon
-        className={cn('fill-text-primary h-4 w-4 cursor-pointer', className)}
+        className={cn('h-4 w-4 cursor-pointer fill-text-primary', className)}
         full={Boolean(contributor)}
       />
     </Tooltip>
@@ -199,7 +199,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
         .sort((a, b) => (b.amount || b.reserved) - (a.amount || a.reserved));
 
       return userContributor ? [userContributor, ...otherContributors] : otherContributors;
-    }, [contributors]);
+    }, [contributors, userAddress]);
 
     const emptyContributorSlots = useMemo(
       () =>
@@ -248,7 +248,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
           ))}
           {showEmptySlots
             ? emptyContributorSlots.map((key) => (
-                <ContributorIcon key={key} className="fill-text-primary h-4" />
+                <ContributorIcon key={key} className="h-4 fill-text-primary" />
               ))
             : null}
           <span
@@ -273,15 +273,18 @@ type ToggleCardExpansionButtonProps = HTMLAttributes<HTMLLabelElement> & {
 export const ToggleCardExpansionButton = forwardRef<
   HTMLLabelElement,
   ToggleCardExpansionButtonProps
->(({ className, ...props }, ref) => {
+>(({ htmlFor, className, ...props }, ref) => {
   const [expanded, setExpanded] = useState(false);
   const dictionary = useTranslations('nodeCard.staked');
   return (
     <label
       ref={ref}
+      htmlFor={htmlFor}
+      // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole lint/a11y/useSemanticElements: This is a toggle button
       role="button"
+      tabIndex={-1}
       onClick={() => setExpanded((prev) => !prev)}
-      aria-label={expanded ? dictionary(`ariaCollapse`) : dictionary(`ariaExpand`)}
+      aria-label={expanded ? dictionary('ariaCollapse') : dictionary('ariaExpand')}
       data-testid={
         expanded ? StakedNodeDataTestId.Collapse_Button : StakedNodeDataTestId.Expand_Button
       }
@@ -291,12 +294,12 @@ export const ToggleCardExpansionButton = forwardRef<
       )}
       {...props}
     >
-      <span className="text-gradient-white hidden font-medium lg:inline-block">
+      <span className="hidden font-medium text-gradient-white lg:inline-block">
         {expanded ? dictionary('labelCollapse') : dictionary('labelExpand')}
       </span>
       <ArrowDownIcon
         className={cn(
-          'fill-session-text stroke-session-text ms-1 h-4 w-4 transform transition-all duration-300 ease-in-out motion-reduce:transition-none'
+          'ms-1 h-4 w-4 transform fill-session-text stroke-session-text transition-all duration-300 ease-in-out motion-reduce:transition-none'
         )}
       />
     </label>
@@ -308,11 +311,11 @@ export const RowLabel = ({ children }: { children: ReactNode }) => (
 );
 
 const collapsableContentVariants = cva(
-  'inline-flex flex-wrap h-full max-h-0 select-none gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
+  'inline-flex h-full max-h-0 select-none flex-wrap gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
   {
     variants: {
       size: {
-        xs: 'text-xs md:text-xs peer-checked:max-h-4',
+        xs: 'text-xs peer-checked:max-h-4 md:text-xs',
         base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
         buttonMd: cn('peer-checked:max-h-11'),
         buttonSm: cn('peer-checked:max-h-9'),
@@ -352,7 +355,7 @@ export const CollapsableButton = forwardRef<
   }
 >(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
   <CollapsableContent
-    className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
+    className="end-6 bottom-4 flex w-max items-end min-[500px]:absolute"
     size="buttonSm"
   >
     <Button

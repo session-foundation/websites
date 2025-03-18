@@ -1,12 +1,12 @@
+import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
+import { sortContracts, useStakes } from '@/hooks/useStakes';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
-import { sortContracts, useStakes } from '@/hooks/useStakes';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
-import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
-import { areHexesEqual } from '@session/util-crypto/string';
 
 export function useOpenContributorContracts(overrideAddress?: Address) {
   const {

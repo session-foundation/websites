@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { createContext, type ReactNode, useContext, useState } from 'react';
+import { type ReactNode, createContext, useContext, useState } from 'react';
 import type {
   FeatureFlags,
   GenericExperimentalFeatureFlag,
@@ -39,6 +39,7 @@ function bootstrapFeatureFlags<Flag extends GenericFeatureFlag>(validFeatureFlag
     return {};
   }
   const featureFlags = loadFeatureFlagsFromStorage();
+  // biome-ignore lint/correctness/useHookAtTopLevel: window check determined ssr or csr
   const searchParamEntries = useSearchParams();
 
   if (validFeatureFlags?.length) {

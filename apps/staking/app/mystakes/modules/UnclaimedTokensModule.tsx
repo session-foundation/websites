@@ -1,13 +1,13 @@
 'use client';
 
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
+import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
 import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
+import type { QUERY_STATUS } from '@/lib/query';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
-import type { QUERY_STATUS } from '@/lib/query';
-import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
-import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 
 export default function UnclaimedTokensModule({
   addressOverride,

@@ -1,5 +1,5 @@
-import localFont from 'next/font/local';
 import { Roboto_Flex, Source_Serif_4 } from 'next/font/google';
+import localFont from 'next/font/local';
 
 type FontWeight =
   | 'Thin'

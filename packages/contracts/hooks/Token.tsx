@@ -1,20 +1,20 @@
 'use client';
 
-import { Address, SimulateContractErrorType, TransactionExecutionErrorType } from 'viem';
-import { ReadContractData } from 'wagmi/query';
-import { SENTAbi } from '../abis';
-import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
-import type { WriteContractErrorType } from 'wagmi/actions';
-import { useEffect, useMemo, useState } from 'react';
-import { isProduction } from '@session/util-js/env';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { SENT_DECIMALS, SENT_SYMBOL } from '../constants';
-import {
-  GenericContractStatus,
-  useContractWriteQuery,
-  type WriteContractStatus,
-} from './useContractWriteQuery';
+import { isProduction } from '@session/util-js/env';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useEffect, useMemo, useState } from 'react';
+import type { Address, SimulateContractErrorType, TransactionExecutionErrorType } from 'viem';
+import type { WriteContractErrorType } from 'wagmi/actions';
+import type { ReadContractData } from 'wagmi/query';
+import type { SENTAbi } from '../abis';
+import { SENT_DECIMALS, SENT_SYMBOL } from '../constants';
+import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
+import {
+  type GenericContractStatus,
+  type WriteContractStatus,
+  useContractWriteQuery,
+} from './useContractWriteQuery';
 import { useEstimateContractFee } from './useEstimateContractFee';
 
 export const formatSENTBigIntNoRounding = (value?: bigint | null, hideSymbol?: boolean) =>
@@ -37,6 +37,7 @@ export function useSENTBalanceQuery({ address }: { address?: Address }): SENTBal
   const { data: balance, ...rest } = useContractReadQuery({
     contract: 'Token',
     functionName: 'balanceOf',
+    //biome-ignore lint/style/noNonNullAssertion: limitation of the library
     args: [address!],
     enabled: !!address,
   });
@@ -188,17 +189,18 @@ export function useProxyApproval({
 
     if (readStatus === 'pending') {
       return 'pending';
-    } else {
-      return contractCallStatus;
     }
+    return contractCallStatus;
   }, [readStatus, contractCallStatus, hasEnoughAllowance]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only trigger on success or contract change
   useEffect(() => {
     if (readStatus === 'success' && tokenAmount > BigInt(0) && contractAddress) {
       approveWrite();
     }
   }, [readStatus, contractAddress, tokenAmount]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only trigger on address change
   useEffect(() => {
     if (contractAddress && (readStatusRaw === 'success' || readStatusRaw === 'error')) {
       void refetchAllowance();

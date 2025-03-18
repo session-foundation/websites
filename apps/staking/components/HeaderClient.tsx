@@ -1,8 +1,8 @@
 'use client';
 
+import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { WalletNetworkDropdownWithLocales } from '@/components/WalletNetworkDropdownWithLocales';
-import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 
 export default function HeaderClient() {
   return (

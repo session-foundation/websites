@@ -12,12 +12,12 @@ function ethereumAddressToNumberArray(address: string) {
   }
 
   // Step 3 and 4: Split into byte pairs and convert to numbers
-  const numberArray = [];
+  const numberArray: Array<number> = [];
   for (let i = 0; i < parsedAddress.length; i += 2) {
     const byteString = parsedAddress.slice(i, i + 2);
     // Parse each hex byte to an integer
-    const byteValue = parseInt(byteString, 16);
-    if (isNaN(byteValue)) {
+    const byteValue = Number.parseInt(byteString, 16);
+    if (Number.isNaN(byteValue)) {
       throw new Error(`Invalid hex character detected: ${byteString}`);
     }
     numberArray.push(byteValue);

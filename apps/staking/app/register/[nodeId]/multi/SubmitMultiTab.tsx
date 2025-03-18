@@ -10,7 +10,11 @@ import {
 } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { RegistrationEditButton } from '@/app/register/[nodeId]/shared/RegistrationEditButton';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
+import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRow } from '@/components/ActionModule';
+import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { ReservedStakesTable } from '@/components/ReservedStakesTable';
+import { useNetworkStatus } from '@/components/StatusBar';
 import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
 } from '@/hooks/useContributeStakeToOpenNode';
@@ -18,6 +22,8 @@ import useCreateOpenNodeRegistration, {
   type ReservedContributorStruct,
   type UseCreateOpenNodeContractParams,
 } from '@/hooks/useCreateOpenNodeRegistration';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import {
   formatDate,
   formatLocalizedRelativeTimeToNowClient,
@@ -28,31 +34,25 @@ import { externalLink } from '@/lib/locale-defaults';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { getContractErrorName, SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { SENT_DECIMALS, SENT_SYMBOL, getContractErrorName } from '@session/contracts';
+import { useCreateOpenNodeFeeEstimate } from '@session/contracts/hooks/ServiceNodeContributionFactory';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
 import { PubKey } from '@session/ui/components/PubKey';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { stringToBigInt } from '@session/util-crypto/maths';
 import { safeTrySync } from '@session/util-js/try';
+import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
-import { useNetworkStatus } from '@/components/StatusBar';
-import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
-import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { useCreateOpenNodeFeeEstimate } from '@session/contracts/hooks/ServiceNodeContributionFactory';
-import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
-import { ReservedStakesTable } from '@/components/ReservedStakesTable';
-import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 
 export function SubmitMultiTab() {
   const [creationParams, setCreationParams] = useState<UseCreateOpenNodeContractParams | null>(
@@ -474,13 +474,13 @@ function SubmitMulti({
 
   const isDeployed = createNodeContractStatus === PROGRESS_STATUS.SUCCESS;
 
-  const { setNetworkInfo } = useNetworkStatus();
-
   const {
     data,
     isError: isErrorFetchContractDetails,
     error: errorFetchContractDetails,
     isSuccess: isSuccessFetchContractDetails,
+    isFetching: isFetchingFetchContractDetails,
+    isLoading: isLoadingFetchContractDetails,
   } = useStakingBackendQueryWithParams(
     getContributionContractBySnKey,
     {
@@ -533,8 +533,15 @@ function SubmitMulti({
     }
   );
 
+  useNetworkStatus({
+    network: data?.network,
+    isLoading: isLoadingFetchContractDetails,
+    isFetching: isFetchingFetchContractDetails,
+  });
+
   const contract = useMemo(() => getNonFinalizedLatestDeployedContributorContract(data), [data]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't include setters
   useEffect(() => {
     if (contract) {
       setContract(contract);
@@ -542,12 +549,6 @@ function SubmitMulti({
       setContract(null);
     }
   }, [contract]);
-
-  useEffect(() => {
-    if (data && 'network' in data && data.network) {
-      setNetworkInfo(data.network);
-    }
-  }, [data]);
 
   /**
    * Contract address is null if the contract is finalized or if there is no contract yet.
@@ -652,6 +653,7 @@ function SubmitMulti({
     changeTab(REG_TAB.SUCCESS_MULTI);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't include setters
   useEffect(() => {
     /**
      * Don't do anything until the initial contract details are fetched (to see if one exists already)
@@ -685,12 +687,14 @@ function SubmitMulti({
     isCreateNodeEnabled,
   ]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
   useEffect(() => {
     if (contributeFundsStatus === PROGRESS_STATUS.SUCCESS) {
       handleSuccess();
     }
   }, [contributeFundsStatus]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
   useEffect(() => {
     if (isError) {
       handleError();

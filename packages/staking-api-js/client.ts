@@ -104,21 +104,21 @@ export type NodeInfo = {
 export enum CONTRIBUTION_CONTRACT_STATUS {
   // Contract is initialised w/ no contributions. Call `contributeFunds`
   // to transition into `OpenForPublicContrib`
-  WaitForOperatorContrib,
+  WaitForOperatorContrib = 0,
 
   // Contract has been initially funded by operator. Public and reserved
   // contributors can now call `contributeFunds`. When the contract is
   // collaterialised with exactly the staking requirement, the contract
   // transitions into `WaitForFinalized` state.
-  OpenForPublicContrib,
+  OpenForPublicContrib = 1,
 
   // Operator must invoke `finalizeNode` to transfer the tokens and the
   // node registration details to the `stakingRewardsContract` to
   // transition to `Finalized` state.
-  WaitForFinalized,
+  WaitForFinalized = 2,
 
   // Contract interactions are blocked until `reset` is called.
-  Finalized,
+  Finalized = 3,
 }
 
 export type ContributorContractInfo = {
@@ -145,6 +145,17 @@ export type ArbitrumEvent = {
   tx: string;
 };
 
+export type VestingContract = {
+  address: `0x${string}`;
+  beneficiary: string;
+  initial_amount: number;
+  initial_beneficiary: string;
+  revoker: string;
+  time_end: number;
+  time_start: number;
+  transferable_beneficiary: boolean;
+};
+
 export type Stake = NodeInfo & {
   events: Array<ArbitrumEvent>;
 };
@@ -153,6 +164,7 @@ export interface GetStakesResponse {
   network: NetworkInfo;
   contracts: Array<ContributorContractInfo>;
   stakes: Array<Stake>;
+  vesting: Array<VestingContract>;
   added_bls_keys: Record<string, number>;
 }
 
@@ -289,20 +301,9 @@ export interface StakingBackendResponse<T> {
   statusText: string;
 }
 
-export type Logger = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: resolve proper type
-  debug: (data: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: resolve proper type
-  error: (data: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: resolve proper type
-  time: (data: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: resolve proper type
-  timeEnd: (data: any) => void;
-};
-
 export interface SSBClientConfig {
   baseUrl: string;
-  logger?: Logger;
+  logger?: typeof console;
   errorOn404?: boolean;
   debug?: boolean;
 }
@@ -313,7 +314,7 @@ export interface SSBClientConfig {
 export class SessionStakingClient {
   readonly baseUrl: string;
   private readonly debug?: boolean;
-  private readonly logger: Logger = console;
+  private readonly logger = console;
   private readonly errorOn404: boolean = false;
 
   constructor(config: SSBClientConfig) {
@@ -361,10 +362,9 @@ export class SessionStakingClient {
         const errorMessage = `Staking Backend request failed (${res.status}): ${res.statusText}`;
         if (this.errorOn404) {
           throw new Error(errorMessage);
-        } else {
-          this.logger.error(errorMessage);
-          data = null;
         }
+        this.logger.error(errorMessage);
+        data = null;
       } else {
         data = await res.json();
       }
@@ -381,20 +381,20 @@ export class SessionStakingClient {
    */
   public async getNetworkInfo(): Promise<StakingBackendResponse<NetworkInfoResponse>> {
     const options: RequestOptions = {
-      endpoint: `/info`,
+      endpoint: '/info',
       method: 'GET',
     };
-    return this.request<NetworkInfoResponse>(options);
+    return await this.request<NetworkInfoResponse>(options);
   }
 
   public async getContributionContracts(): Promise<
     StakingBackendResponse<GetContributionContractsResponse>
   > {
     const options: RequestOptions = {
-      endpoint: `/contract/contribution`,
+      endpoint: '/contract/contribution',
       method: 'GET',
     };
-    return this.request<GetContributionContractsResponse>(options);
+    return await this.request<GetContributionContractsResponse>(options);
   }
 
   public async getContributionContractForNodePubkey({
@@ -406,7 +406,7 @@ export class SessionStakingClient {
       endpoint: `/contract/contribution/${nodePubKey}`,
       method: 'GET',
     };
-    return this.request<GetContributionContractForNodePubkeyResponse>(options);
+    return await this.request<GetContributionContractForNodePubkeyResponse>(options);
   }
 
   /**
@@ -423,15 +423,15 @@ export class SessionStakingClient {
       endpoint: `/stakes/${address}`,
       method: 'GET',
     };
-    return this.request<GetStakesResponse>(options);
+    return await this.request<GetStakesResponse>(options);
   }
 
   public async getNodesBlsKeys(): Promise<StakingBackendResponse<GetNodesBlsKeysResponse>> {
     const options: RequestOptions = {
-      endpoint: `/nodes/bls`,
+      endpoint: '/nodes/bls',
       method: 'GET',
     };
-    return this.request<GetNodesBlsKeysResponse>(options);
+    return await this.request<GetNodesBlsKeysResponse>(options);
   }
 
   public async getRewardsInfo({
@@ -443,7 +443,7 @@ export class SessionStakingClient {
       endpoint: `/rewards/${address}`,
       method: 'GET',
     };
-    return this.request<GetRewardsInfoResponse>(options);
+    return await this.request<GetRewardsInfoResponse>(options);
   }
 
   public async getRewardsClaimSignature({
@@ -455,7 +455,7 @@ export class SessionStakingClient {
       endpoint: `/rewards/${address}`,
       method: 'POST',
     };
-    return this.request<GetRewardsClaimSignatureResponse>(options);
+    return await this.request<GetRewardsClaimSignatureResponse>(options);
   }
 
   public async getNodeExitSignatures({
@@ -467,7 +467,7 @@ export class SessionStakingClient {
       endpoint: `/exit/${nodePubKey}`,
       method: 'GET',
     };
-    return this.request<GetNodeExitSignaturesResponse>(options);
+    return await this.request<GetNodeExitSignaturesResponse>(options);
   }
 
   public async getNodeLiquidation({
@@ -479,23 +479,23 @@ export class SessionStakingClient {
       endpoint: `/liquidation/${nodePubKey}`,
       method: 'GET',
     };
-    return this.request<GetNodeLiquidationResponse>(options);
+    return await this.request<GetNodeLiquidationResponse>(options);
   }
 
   public async exitLiquidationList() {
     const options: RequestOptions = {
-      endpoint: `/exit_liquidation_list`,
+      endpoint: '/exit_liquidation_list',
       method: 'GET',
     };
-    return this.request<GetExitLiquidationListResponse>(options);
+    return await this.request<GetExitLiquidationListResponse>(options);
   }
 
   public async getNodes(): Promise<StakingBackendResponse<GetNodesResponse>> {
     const options: RequestOptions = {
-      endpoint: `/nodes`,
+      endpoint: '/nodes',
       method: 'GET',
     };
-    return this.request<GetNodesResponse>(options);
+    return await this.request<GetNodesResponse>(options);
   }
 
   /**
@@ -516,7 +516,7 @@ export class SessionStakingClient {
       method: 'GET',
       body: queryParams,
     };
-    return this.request<StoreRegistrationResponse>(options);
+    return await this.request<StoreRegistrationResponse>(options);
   }
 
   /**
@@ -533,7 +533,7 @@ export class SessionStakingClient {
       endpoint: `/registrations/${snPubkey}`,
       method: 'GET',
     };
-    return this.request<LoadRegistrationsResponse>(options);
+    return await this.request<LoadRegistrationsResponse>(options);
   }
 
   /**
@@ -550,7 +550,7 @@ export class SessionStakingClient {
       endpoint: `/registrations/${operator}`,
       method: 'GET',
     };
-    return this.request<LoadRegistrationsResponse>(options);
+    return await this.request<LoadRegistrationsResponse>(options);
   }
 
   /**
@@ -564,11 +564,11 @@ export class SessionStakingClient {
     queryParams: BodyInit;
   }): Promise<StakingBackendResponse<ValidateRegistrationResponse>> {
     const options: RequestOptions = {
-      endpoint: `/validate`,
+      endpoint: '/validate',
       method: 'GET',
       body: queryParams,
     };
-    return this.request<ValidateRegistrationResponse>(options);
+    return await this.request<ValidateRegistrationResponse>(options);
   }
 }
 

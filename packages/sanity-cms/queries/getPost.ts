@@ -1,8 +1,8 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
-import type { PostSchemaType } from '../schemas/post';
 import type { AuthorSchemaType } from '../schemas/author';
+import type { PostSchemaType } from '../schemas/post';
 
 const QUERY_GET_POSTS_WITH_SLUG = groq`*[_type == 'post' && slug.current == $slug]{ ..., author -> {...}}`;
 export type FormattedPostType = Omit<PostSchemaType, 'author' | 'date'> & {
@@ -20,7 +20,7 @@ export async function getPostBySlug({
   slug: string;
 }) {
   if (!slug || slug.length === 0) {
-    logger.warn(`No slug provided, returning null`);
+    logger.warn('No slug provided, returning null');
     return null;
   }
 
@@ -53,7 +53,7 @@ const QUERY_GET_POSTS_WITH_ID = groq`*[_type == 'post' && _id == $id]`;
 
 export async function getPostById({ client, id }: { client: SessionSanityClient; id: string }) {
   if (!id || id.length === 0) {
-    logger.warn(`No id provided, returning null`);
+    logger.warn('No id provided, returning null');
     return null;
   }
 

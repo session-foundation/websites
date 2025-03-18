@@ -1,16 +1,16 @@
-import { getPageBySlug } from '@session/sanity-cms/queries/getPage';
-import { client } from '@/lib/sanity/sanity.client';
-import { getPagesSlugs } from '@session/sanity-cms/queries/getPages';
-import { notFound } from 'next/navigation';
-import { getLandingPageSlug } from '@/lib/sanity/sanity-server';
 import PortableText from '@/components/PortableText';
-import logger from '@/lib/logger';
 import { NEXTJS_EXPLICIT_IGNORED_ROUTES, NEXTJS_IGNORED_PATTERNS } from '@/lib/constants';
-import type { Metadata, ResolvingMetadata } from 'next';
+import logger from '@/lib/logger';
+import { getLandingPageSlug } from '@/lib/sanity/sanity-server';
+import { client } from '@/lib/sanity/sanity.client';
+import FileDownload from '@session/sanity-cms/components/SanityFileDownload';
 import { generateSanityMetadata } from '@session/sanity-cms/lib/metadata';
 import { getFileBySlug } from '@session/sanity-cms/queries/getFile';
-import FileDownload from '@session/sanity-cms/components/SanityFileDownload';
+import { getPageBySlug } from '@session/sanity-cms/queries/getPage';
+import { getPagesSlugs } from '@session/sanity-cms/queries/getPages';
+import type { Metadata, ResolvingMetadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 
 /**
  * Force static rendering and cache the data of a layout or page by forcing `cookies()`, `headers()`
@@ -30,7 +30,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const slug = params.slug;
   if (!slug) {
-    logger.warn(`No slug provided for metadata generation`);
+    logger.warn('No slug provided for metadata generation');
     return {};
   }
 

@@ -25,14 +25,14 @@ export const getOperatorFeeFormFieldSchema = ({
     .refine(
       (v) => {
         const n = Number.parseFloat(v);
-        return !isNaN(n) && n >= minOperatorFee;
+        return !Number.isNaN(n) && n >= minOperatorFee;
       },
       { message: underMinOperatorFeeMessage }
     )
     .refine(
       (v) => {
         const n = Number.parseFloat(v);
-        return !isNaN(n) && n <= maxOperatorFee;
+        return !Number.isNaN(n) && n <= maxOperatorFee;
       },
       { message: overMaxOperatorFeeMessage }
     );
@@ -41,7 +41,7 @@ export const getOperatorFeeFormFieldSchema = ({
 export type OperatorFeeFieldProps = {
   dataTestId: InputDataTestId;
   disabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- This is fine for now TODO: resolve properly
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: resolve properly
   field: any;
   maxFee: number;
   // TODO: investigate adding a min fee if needed
@@ -96,7 +96,7 @@ export default function OperatorFeeField({
           <Input
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full rounded-lg border-[2px] border-[#668C83] border-opacity-80 px-4 py-8 text-3xl shadow-md"
+            className="w-full rounded-lg border-[#668C83] border-[2px] border-opacity-80 px-4 py-8 text-3xl shadow-md"
             {...field}
             value={field.value ?? ''}
             data-testid={dataTestId}
@@ -108,7 +108,7 @@ export default function OperatorFeeField({
             }}
           />
         </FormControl>
-        <span className="mx-2 text-5xl font-light">%</span>
+        <span className="mx-2 font-light text-5xl">%</span>
       </div>
       <FormMessage />
     </FormItem>

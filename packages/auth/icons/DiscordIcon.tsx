@@ -3,6 +3,7 @@ import { forwardRef } from 'react';
 
 export const DiscordIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, ref) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 37 28" {...props} ref={ref}>
+    <title>Discord</title>
     <mask
       id="a"
       width="37"

@@ -1,13 +1,13 @@
-import { Address } from 'viem';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
-import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
-import { safeTrySync } from '@session/util-js/try';
-import { bigIntMax } from '@session/util-crypto/maths';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { DYNAMIC_MODULE, HANDRAIL_THRESHOLD } from '@/lib/constants';
+import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { bigIntMax } from '@session/util-crypto/maths';
+import { safeTrySync } from '@session/util-js/try';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
+import type { Address } from 'viem';
 
 /**
  * Hook to get the unclaimed tokens for an ethereum address.

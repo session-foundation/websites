@@ -1,26 +1,26 @@
 import { ActionModuleRow } from '@/components/ActionModule';
+import { NodeContributorList } from '@/components/NodeCard';
+import { ReservedStakesTable } from '@/components/ReservedStakesTable';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
+import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
-import { PubKey } from '@session/ui/components/PubKey';
-import { useTranslations } from 'next-intl';
-import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { EditButton } from '@session/ui/components/EditButton';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
 } from '@session/staking-api-js/client';
-import { NodeContributorList } from '@/components/NodeCard';
-import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
-import type { ReactNode } from 'react';
+import { EditButton } from '@session/ui/components/EditButton';
+import { PubKey } from '@session/ui/components/PubKey';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { type Address, isAddress } from 'viem';
-import { ReservedStakesTable } from '@/components/ReservedStakesTable';
-import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
 import { numberToBigInt } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+import { type Address, isAddress } from 'viem';
 
 export function getReservedSlots(
   contract: ContributorContractInfo
@@ -254,7 +254,7 @@ export function StakeInfo({
             pubKey={
               contributor.beneficiary && isAddress(contributor.beneficiary)
                 ? contributor.beneficiary
-                : address ?? dictGeneral('none')
+                : (address ?? dictGeneral('none'))
             }
             force="collapse"
             alwaysShowCopyButton

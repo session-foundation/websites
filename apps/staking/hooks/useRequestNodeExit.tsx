@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
-import { useInitiateRemoveBLSPublicKey } from '@session/contracts/hooks/ServiceNodeRewards';
-import { useTranslations } from 'next-intl';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { useInitiateRemoveBLSPublicKey } from '@session/contracts/hooks/ServiceNodeRewards';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 type UseRequestNodeExitParams = {
   contractId: number;
@@ -40,7 +40,7 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
         writeError,
         transactionError,
       }),
-    [simulateError, writeError, transactionError]
+    [simulateError, writeError, transactionError, dict, dictGeneral]
   );
 
   const status = useMemo(

@@ -1,15 +1,19 @@
 'use server';
 
 import { COMMUNITY_DATE, FAUCET, FAUCET_ERROR, TICKER } from '@/lib/constants';
-import { addresses, TOKEN } from '@session/contracts';
+import { TOKEN, addresses } from '@session/contracts';
 import { SENTAbi } from '@session/contracts/abis';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { ETH } from '@session/wallet/lib/eth';
 import { createPublicWalletClient, createServerWallet } from '@session/wallet/lib/server-wallet';
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { type Address, type Chain, formatEther, isAddress as isAddressViem } from 'viem';
-import { FaucetFormSchema } from './AuthModule';
+import { arbitrumSepolia } from 'viem/chains';
+import type { FaucetFormSchema } from './AuthModule';
 import {
+  TABLE,
+  type TransactionHistory,
   codeExists,
   getCodeUseTransactionHistory,
   getReferralCodeDetails,
@@ -18,11 +22,7 @@ import {
   idIsInTable,
   openDatabase,
   setupDatababse,
-  TABLE,
-  TransactionHistory,
 } from './utils';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { arbitrumSepolia } from 'viem/chains';
 
 class FaucetError extends Error {
   faucetError: FAUCET_ERROR;
@@ -77,7 +77,7 @@ const faucetGasWarning = BigInt(0.01 * Math.pow(10, ETH.DECIMALS));
 
 const minTargetEthBalance = BigInt(FAUCET.MIN_ETH_BALANCE * Math.pow(10, ETH.DECIMALS));
 
-const hoursBetweenTransactions = parseInt(process.env.FAUCET_HOURS_BETWEEN_USES ?? '0');
+const hoursBetweenTransactions = Number.parseInt(process.env.FAUCET_HOURS_BETWEEN_USES ?? '0');
 
 const isAddress = (address?: string): address is Address => {
   return !!address && isAddressViem(address, { strict: false });

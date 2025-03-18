@@ -1,9 +1,9 @@
 'use client';
 
-import SanityPdf from './SanityPdf';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { cleanSanityString } from '../lib/string';
+import SanityPdf from './SanityPdf';
 
 type FileDownloadProps = {
   fileName: string;
@@ -30,13 +30,13 @@ export default function FileDownload({ fileName, src, strings }: FileDownloadPro
     return <SanityPdf src={src} url={srcWithParams} strings={strings} />;
   }
 
-  // Download file on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies lint/correctness/useHookAtTopLevel: Download file on mount
   useEffect(() => {
     if (!downloaded) {
       setDownloaded(true);
-      void router.push(srcWithParams.href);
+      router.push(srcWithParams.href);
     }
-  }, [src]);
+  }, []);
 
   return (
     <div className="my-12 flex flex-col items-center justify-center gap-2">
@@ -49,7 +49,10 @@ export default function FileDownload({ fileName, src, strings }: FileDownloadPro
         download
         aria-label={strings.clickToDownloadAria}
       >
-        <button className="group-hover:decoration-session-green hover:decoration-session-green decoration-session-black mt-1 w-max text-sm underline group-hover:underline">
+        <button
+          className="mt-1 w-max text-sm underline decoration-session-black hover:decoration-session-green group-hover:underline group-hover:decoration-session-green"
+          type="button"
+        >
           {strings.clickToDownload}
         </button>
       </a>

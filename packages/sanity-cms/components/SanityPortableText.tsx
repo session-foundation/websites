@@ -1,8 +1,8 @@
 import { PortableText, type PortableTextProps } from '@portabletext/react';
 import { NavLink } from '@session/ui/components/NavLink';
-import logger from '../lib/logger';
-import { cn } from '@session/ui/lib/utils';
 import Typography from '@session/ui/components/Typography';
+import { cn } from '@session/ui/lib/utils';
+import logger from '../lib/logger';
 import { cleanSanityString } from '../lib/string';
 
 export type SanityPortableTextProps = PortableTextProps & {
@@ -19,7 +19,7 @@ export const basicComponents: BasicComponentsType = {
   block: {
     h1: ({ children }) => <Typography variant="h1">{children}</Typography>,
     h2: ({ children }) => (
-      <Typography variant="h2" className="mb-3 mt-7">
+      <Typography variant="h2" className="mt-7 mb-3">
         {children}
       </Typography>
     ),
@@ -64,6 +64,7 @@ export const basicComponents: BasicComponentsType = {
 };
 
 export function SanityPortableText({ value, className, ...props }: SanityPortableTextProps) {
+  // biome-ignore lint/suspicious/noEvolvingTypes: TODO: type this
   const blocks = [];
 
   if (!Array.isArray(value)) {
@@ -74,9 +75,7 @@ export function SanityPortableText({ value, className, ...props }: SanityPortabl
   let figureNumber = 1;
   for (const block of value) {
     if (block._type === 'block' && 'children' in block && block.children.length === 1) {
-      /**
-       * Remove empty blocks from the array
-       */
+      /** Remove empty blocks from the array */
       const child = block.children[0];
       if (
         child &&

@@ -1,6 +1,10 @@
 'use client';
 
-import { NavLink, NavLinkProps } from '@/components/NavLink';
+import { NavLink, type NavLinkProps } from '@/components/NavLink';
+import { EXTERNAL_ROUTES, SSR_LINKS } from '@/lib/constants';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
+import { Button } from '@session/ui/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,10 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
-import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
-import { EXTERNAL_ROUTES, ROUTES } from '@/lib/constants';
 
 function DropdownMenuItemNavLink({ label, children, ...props }: NavLinkProps) {
   return (
@@ -25,16 +25,16 @@ export function DropdownHamburgerMenu() {
   const dictionary = useTranslations('navigation.hamburgerDropdown');
   const navDictionary = useTranslations('navigation');
 
-  const routes: typeof ROUTES = [];
-  ROUTES.forEach(({ dictionaryKey, href }) => {
+  const routes: typeof SSR_LINKS = [];
+  for (const { dictionaryKey, href } of SSR_LINKS) {
     if (
-      process.env.NEXT_PUBLIC_HIDE_FAUCET?.toLowerCase() === 'true' &&
-      dictionaryKey === 'faucet'
+      dictionaryKey === 'faucet' &&
+      !(process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true')
     ) {
       return;
     }
     routes.push({ dictionaryKey, href });
-  });
+  }
 
   return (
     <DropdownMenu>
@@ -46,7 +46,7 @@ export function DropdownHamburgerMenu() {
           aria-label={dictionary('ariaLabel')}
           variant="outline"
         >
-          <HamburgerIcon className="stroke-session-green group-hover:stroke-session-black m-1.5 h-8 w-8" />
+          <HamburgerIcon className="m-1.5 h-8 w-8 stroke-session-green group-hover:stroke-session-black" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-max">

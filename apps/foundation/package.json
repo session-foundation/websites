@@ -8,7 +8,11 @@
     "start": "next start",
     "check-types": "tsc --noEmit",
     "check-telemetry": "next telemetry",
-    "lint": "eslint ."
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write"
   },
   "dependencies": {
     "@plaiceholder/next": "^3.0.0",
@@ -29,9 +33,7 @@
     "sharp": "0.32.6"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^14.1.1",
     "@sanity/client": "^6.22.0",
-    "@session/eslint-config": "workspace:*",
     "@session/typescript-config": "workspace:*",
     "@types/react": "^18.2.61",
     "@types/react-dom": "19.0.4",

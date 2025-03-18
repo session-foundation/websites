@@ -1,8 +1,15 @@
 'use client';
 
 import Loading from '@/app/loading';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { NodeListModuleContent } from '@/components/NodesListModule';
+import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
+import { useNetworkStatus } from '@/components/StatusBar';
 import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import { useStakes } from '@/hooks/useStakes';
+import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { internalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
@@ -16,14 +23,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
-import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
-import { Address } from 'viem';
-import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
-import { useNetworkStatus } from '@/components/StatusBar';
-import { useStakes } from '@/hooks/useStakes';
-import { NodeListModuleContent } from '@/components/NodesListModule';
-import { ErrorMessage } from '@/components/ErrorMessage';
+import type { Address } from 'viem';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
   const dictionary = useTranslations('modules.stakedNodes');
@@ -40,6 +40,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
   } = useStakes(address);
   const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setNetworkStatusVisible(true);
     return () => {

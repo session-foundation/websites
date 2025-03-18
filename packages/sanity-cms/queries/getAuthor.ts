@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 import type { AuthorSchemaType } from '../schemas/author';
 
@@ -8,7 +8,7 @@ const QUERY_GET_AUTHORS_WITH_ID = groq`*[_type == 'author' && _id == $id]`;
 
 export async function getAuthorById({ client, id }: { client: SessionSanityClient; id: string }) {
   if (!id || id.length === 0) {
-    logger.warn(`No id provided, returning null`);
+    logger.warn('No id provided, returning null');
     return null;
   }
 

@@ -1,9 +1,9 @@
-import { defineField, defineType } from 'sanity';
-import type { DocumentFields } from '@session/sanity-types';
-import type { SchemaFieldsType } from './types';
-import { specialFields, specialSchema } from './special';
 import { DocumentPdfIcon, EarthGlobeIcon } from '@sanity/icons';
+import type { DocumentFields } from '@session/sanity-types';
+import { defineField, defineType } from 'sanity';
 import { routeFields } from './fields/groups/route';
+import type { specialFields, specialSchema } from './special';
+import type { SchemaFieldsType } from './types';
 
 export const fileFields = [
   ...routeFields,

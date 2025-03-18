@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { cn } from '@session/ui/lib/utils';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -24,12 +24,16 @@ function isExternalLink(href: string): boolean {
   return href.startsWith('https://');
 }
 
-export function NavLink({ href, label, children, ariaLabel }: NavLinkProps) {
+export function NavLink({ href, label, children, ariaLabel, className }: NavLinkProps) {
   const pathname = usePathname();
   return (
     <Link
       href={href}
-      className={cn('hover:text-session-green', pathname.startsWith(href) && 'text-session-green')}
+      className={cn(
+        'hover:text-session-green',
+        pathname.startsWith(href) && 'text-session-green',
+        className
+      )}
       aria-label={ariaLabel}
       {...(isExternalLink(href)
         ? {

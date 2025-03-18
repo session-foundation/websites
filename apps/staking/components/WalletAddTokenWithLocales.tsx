@@ -1,5 +1,5 @@
 import WalletAddTokenButton, {
-  WalletAddTokenButtonProps,
+  type WalletAddTokenButtonProps,
 } from '@session/wallet/components/WalletAddTokenButton';
 import { useTranslations } from 'next-intl';
 

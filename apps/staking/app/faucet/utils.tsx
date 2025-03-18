@@ -1,7 +1,8 @@
-import Database, * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
-import { Address } from 'viem';
 import { isProduction } from '@/lib/env';
+import Database from 'better-sqlite3-multiple-ciphers';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import type { Address } from 'viem';
 
 export enum TABLE {
   TRANSACTIONS = 'transactions',
@@ -362,9 +363,9 @@ export function hasRecentTransaction({
     : 0;
 
   const row = db
-    .prepare<
-      [IdTableParams['id'], TransactionsRow['timestamp']]
-    >(`SELECT count(${source}) FROM ${TABLE.TRANSACTIONS} WHERE ${source} = ? AND timestamp > ?`)
+    .prepare<[IdTableParams['id'], TransactionsRow['timestamp']]>(
+      `SELECT count(${source}) FROM ${TABLE.TRANSACTIONS} WHERE ${source} = ? AND timestamp > ?`
+    )
     .get(id, lastTransactionCutoff) as CountType<typeof source>;
 
   return hasCount(row, source);

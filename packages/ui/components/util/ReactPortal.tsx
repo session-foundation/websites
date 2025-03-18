@@ -1,7 +1,7 @@
 'use client';
 
-import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 export const portalChildClassName = 'pointer-events-auto z-[20000]';
 

@@ -1,9 +1,10 @@
-import fs from 'fs';
-import { generateXMLFromObject } from '@session/sanity-cms/lib/xml';
-import { getSiteSettings } from '@session/sanity-cms/queries/getSiteSettings';
-import { client } from '@/lib/sanity/sanity.client';
+// biome-ignore lint/correctness/noNodejsModules: server side
+import fs from 'node:fs';
 import { BASE_URL, SANITY_SCHEMA_URL } from '@/lib/constants';
+import { client } from '@/lib/sanity/sanity.client';
+import { generateXMLFromObject } from '@session/sanity-cms/lib/xml';
 import { getPostsWithMetadata } from '@session/sanity-cms/queries/getPosts';
+import { getSiteSettings } from '@session/sanity-cms/queries/getSiteSettings';
 
 export async function generateRssFeed() {
   const posts = await getPostsWithMetadata({ client });
@@ -39,7 +40,7 @@ export async function generateRssFeed() {
         link: BASE_URL,
         image: {
           url: `${BASE_URL}/images/logo.svg`,
-          title: `Session Technology Foundation updates`,
+          title: 'Session Technology Foundation updates',
           link: BASE_URL,
         },
         generator: 'mini-xml for Node.js',

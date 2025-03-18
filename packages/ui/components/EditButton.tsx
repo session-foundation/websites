@@ -1,7 +1,7 @@
+import { PencilIcon } from 'lucide-react';
 import { forwardRef } from 'react';
 import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './ui/button';
-import { PencilIcon } from 'lucide-react';
 
 const EditButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?: string }>(
   ({ className, iconClassName, ...props }, ref) => {
@@ -15,7 +15,7 @@ const EditButton = forwardRef<HTMLButtonElement, ButtonProps & { iconClassName?:
         {...props}
         data-testid={props['data-testid']}
       >
-        <PencilIcon className={cn('stroke-session-white h-5 w-5', iconClassName)} />
+        <PencilIcon className={cn('h-5 w-5 stroke-session-white', iconClassName)} />
       </Button>
     );
   }

@@ -1,5 +1,17 @@
+import { CollapsableButton } from '@/components/NodeCard';
+import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
+import useRequestNodeExit from '@/hooks/useRequestNodeExit';
+import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
+import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { useTranslations } from 'next-intl';
+import type { Stake } from '@session/staking-api-js/client';
+import { Social } from '@session/ui/components/SocialLinkList';
+import { Loading } from '@session/ui/components/loading';
+import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -8,26 +20,14 @@ import {
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
 import { Button } from '@session/ui/ui/button';
-import { type ReactNode, useState } from 'react';
-import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
-import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
-import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import { Loading } from '@session/ui/components/loading';
-import Link from 'next/link';
-import { Social } from '@session/ui/components/SocialLinkList';
-import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
-import useRequestNodeExit from '@/hooks/useRequestNodeExit';
-import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
-import { Stake } from '@session/staking-api-js/client';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { CollapsableButton } from '@/components/NodeCard';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { type ReactNode, useState } from 'react';
 
 enum EXIT_REQUEST_STATE {
-  ALERT,
-  PENDING,
+  ALERT = 0,
+  PENDING = 1,
 }
 
 export function NodeRequestExitButton({ node }: { node: Stake }) {
@@ -53,7 +53,7 @@ export function NodeRequestExitButton({ node }: { node: Stake }) {
           <>
             {exitRequestState !== EXIT_REQUEST_STATE.ALERT ? (
               <ChevronsDownIcon
-                className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+                className="absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
                 onClick={() => setExitRequestState(EXIT_REQUEST_STATE.ALERT)}
               />
             ) : null}
@@ -86,7 +86,7 @@ function RequestNodeExitDisabled() {
       {dictionary.rich('disabledInfo', {
         link: (children: ReactNode) => (
           <Link
-            className="text-session-green font-medium underline"
+            className="font-medium text-session-green underline"
             href={SOCIALS[Social.Discord].link}
             referrerPolicy="no-referrer"
             target="_blank"
@@ -106,7 +106,7 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
 
   return (
     <>
-      <div className="text-lg font-medium">{dictionary('description1')}</div>
+      <div className="font-medium text-lg">{dictionary('description1')}</div>
       <p>
         {dictionary('description2', {
           request_time: formatLocalizedTimeFromSeconds(

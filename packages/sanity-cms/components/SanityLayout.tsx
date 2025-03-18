@@ -1,6 +1,6 @@
+import { VisualEditing } from 'next-sanity';
 import { type ReactNode, Suspense } from 'react';
 import { isDraftModeEnabled } from '../lib/util';
-import { VisualEditing } from 'next-sanity';
 import SanityDisableDraftMode from './SanityDisableDraftMode';
 
 export default async function SanityLayout({

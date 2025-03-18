@@ -1,11 +1,11 @@
 import 'server-only';
 
+import logger from '@/lib/logger';
 import { client } from '@/lib/sanity/sanity.client';
 import {
   QUERY_GET_SITE_SETTINGS,
   type QUERY_GET_SITE_SETTINGS_RETURN_TYPE,
 } from '@session/sanity-cms/queries/getSiteSettings';
-import logger from '@/lib/logger';
 
 let siteData: SiteData | null = null;
 
@@ -28,8 +28,8 @@ export const getInitialSiteDataForSSR = async (): Promise<SiteData> => {
   const siteSettings = result[0];
 
   if (!siteSettings) {
-    logger.info(`Site settings not found`);
-    throw new Error(`Site settings not found`);
+    logger.info('Site settings not found');
+    throw new Error('Site settings not found');
   }
 
   siteData = { settings: siteSettings };

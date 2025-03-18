@@ -1,4 +1,4 @@
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { FLAGS_TABLE, type FlagsRow, TABLE } from '../db';
 
 export function getEnabledFeatureFlags({ db }: { db: BetterSql3.Database }): Array<FlagsRow> {

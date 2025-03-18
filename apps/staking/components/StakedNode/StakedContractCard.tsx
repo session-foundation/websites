@@ -1,35 +1,35 @@
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import { type ContributorContractInfo } from '@session/staking-api-js/client';
-import { Address } from 'viem';
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import { ActionModuleDivider } from '@/components/ActionModule';
 import {
   CollapsableContent,
-  getTotalStakedAmountForAddress,
   NodeContributorList,
   RowLabel,
+  getTotalStakedAmountForAddress,
 } from '@/components/NodeCard';
-import { SENT_DECIMALS } from '@session/contracts';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { parseStakeContractState, STAKE_CONTRACT_STATE } from '@/components/StakedNode/state';
+import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
+import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
+import { FEATURE_FLAG } from '@/lib/feature-flags';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { formatPercentage } from '@/lib/locale-client';
 import {
   ButtonDataTestId,
   NodeCardDataTestId,
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
-import { formatPercentage } from '@/lib/locale-client';
+import { SENT_DECIMALS } from '@session/contracts';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import type { ContributorContractInfo } from '@session/staking-api-js/client';
 import { PubKey } from '@session/ui/components/PubKey';
-import { ActionModuleDivider } from '@/components/ActionModule';
+import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { cn } from '@session/ui/lib/utils';
-import Link from 'next/link';
 import { Button } from '@session/ui/ui/button';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
-import { statusVariants } from '@session/ui/components/StatusIndicator';
-import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { type HTMLAttributes, forwardRef, useMemo } from 'react';
+import type { Address } from 'viem';
 
 function getContractStatusColor(
   state: STAKE_CONTRACT_STATE
@@ -214,7 +214,7 @@ function StakedContractCardButton({
   /** TODO: cleanup breakpoints */
   return (
     <CollapsableContent
-      className="bottom-4 end-6 flex w-max items-end min-[500px]:absolute"
+      className="end-6 bottom-4 flex w-max items-end min-[500px]:absolute"
       size="buttonMd"
     >
       <Link href={`/stake/${contract.address}`}>

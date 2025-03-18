@@ -3,7 +3,6 @@ import { REG_TAB } from '@/app/register/[nodeId]/types';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
-import React from 'react';
 
 export function RewardsAddressTab() {
   const { changeTab } = useRegistrationWizard();

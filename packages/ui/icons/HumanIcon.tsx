@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { SVGAttributes } from './types';
+import type { SVGAttributes } from './types';
 
 type HumanIconAttributes = SVGAttributes & {
   full?: boolean;

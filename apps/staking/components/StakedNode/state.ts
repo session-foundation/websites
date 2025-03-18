@@ -17,10 +17,10 @@ enum EVENT {
 }
 
 export enum STAKE_EVENT_STATE {
-  UNKNOWN,
-  ACTIVE,
-  EXIT_REQUESTED,
-  EXITED,
+  UNKNOWN = 0,
+  ACTIVE = 1,
+  EXIT_REQUESTED = 2,
+  EXITED = 3,
 }
 
 export function parseStakeEventState(stake: Stake) {

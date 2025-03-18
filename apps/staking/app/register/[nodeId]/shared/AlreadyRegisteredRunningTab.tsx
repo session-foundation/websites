@@ -8,7 +8,7 @@ import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 export function AlreadyRegisteredRunningTab() {
   const { props } = useRegistrationWizard();
@@ -17,11 +17,12 @@ export function AlreadyRegisteredRunningTab() {
   const dictShared = useTranslations('actionModules.registration.shared');
 
   const { stakes, blockHeight, networkTime, refetch } = useStakes();
-  
+
   const stake = stakes.find((stake) =>
     areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     if (!stake) void refetch();
   }, []);

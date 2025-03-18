@@ -1,7 +1,7 @@
-import type { SchemaFieldsType } from './types';
+import { UserIcon } from '@sanity/icons';
 import type { DocumentFields } from '@session/sanity-types';
 import { defineField } from 'sanity';
-import { UserIcon } from '@sanity/icons';
+import type { SchemaFieldsType } from './types';
 
 export const authorFields = [
   defineField({

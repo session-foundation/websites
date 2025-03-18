@@ -1,10 +1,10 @@
 import { ActionModuleAccordionRow, ActionModuleTooltip } from '@/components/ActionModule';
-import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { FuelIcon } from '@session/ui/icons/FuelIcon';
-import { LoadingText } from '@session/ui/components/loading-text';
-import type { ReactNode } from 'react';
 import { TICKER } from '@/lib/constants';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { FuelIcon } from '@session/ui/icons/FuelIcon';
 import { cn } from '@session/ui/lib/utils';
+import { AlertTooltip } from '@session/ui/ui/tooltip';
+import type { ReactNode } from 'react';
 
 export function ActionModuleFeeAccordionRow({
   label,

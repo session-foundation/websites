@@ -8,10 +8,13 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write"
   },
   "devDependencies": {
-    "@session/eslint-config": "workspace:*",
     "@session/testing": "workspace:*",
     "@session/typescript-config": "workspace:*"
   },

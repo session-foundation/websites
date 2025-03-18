@@ -1,20 +1,9 @@
-import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import React, { useEffect, useRef, useState } from 'react';
-import { isAddress } from 'viem';
-import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import {
   type MultiRegistrationFormSchema,
   REGISTRATION_QUERY_PARAM,
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
-import { useTranslations } from 'next-intl';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
-import { Form, FormField, useForm } from '@session/ui/ui/form';
-import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
-import { Button } from '@session/ui/ui/button';
-import { PlusIcon } from '@session/ui/icons/PlusIcon';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import EthereumAddressField, {
   getEthereumAddressFormFieldSchema,
 } from '@/components/Form/EthereumAddressField';
@@ -22,15 +11,27 @@ import StakeAmountField, {
   getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
 } from '@/components/Form/StakeAmountField';
+import { ReservedStakesTable } from '@/components/ReservedStakesTable';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import { SESSION_NODE, SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+import logger from '@/lib/logger';
 import { getContributionRangeFromContributors } from '@/lib/maths';
-import { cn } from '@session/ui/lib/utils';
-import { safeTrySync } from '@session/util-js/try';
-import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { TOKEN } from '@session/contracts';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import { PlusIcon } from '@session/ui/icons/PlusIcon';
+import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
+import { Form, FormField, useForm } from '@session/ui/ui/form';
+import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { safeTrySync } from '@session/util-js/try';
+import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import { isAddress } from 'viem';
+import { z } from 'zod';
 
 export const getContributionRangeFromReservedContributorStructs = (
   contributors: Array<ReservedContributorStruct> = []
@@ -40,7 +41,7 @@ export const getContributionRangeFromReservedContributorStructs = (
       .map((slot) => {
         const [err, amount] = safeTrySync(() => Number(slot.amount));
         if (err) {
-          console.log(err);
+          logger.error(err);
           return null;
         }
         return {
@@ -261,6 +262,7 @@ export function ReserveSlotsInputTab() {
     setIsNewSlotFormVisible(true);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
@@ -286,7 +288,7 @@ export function ReserveSlotsInputTab() {
               disabled={reservedStakes.length === SESSION_NODE.MAX_CONTRIBUTORS}
               data-testid={ButtonDataTestId.Registration_Reserved_Stakes_Add_Slot}
             >
-              <PlusIcon className="fill-session-text h-4 w-4" />
+              <PlusIcon className="h-4 w-4 fill-session-text" />
             </Button>
           ) : null
         }

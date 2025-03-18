@@ -21,7 +21,7 @@ import {
 
 export const internalLink = (href: string, prefetch?: boolean) => {
   return (children: ReactNode) => (
-    <Link href={href} prefetch={prefetch} className="text-session-green cursor-pointer underline">
+    <Link href={href} prefetch={prefetch} className="cursor-pointer text-session-green underline">
       {children}
     </Link>
   );
@@ -33,7 +33,7 @@ export const externalLink = (href: string, className?: string) => {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={className ?? 'text-session-green cursor-pointer'}
+      className={className ?? 'cursor-pointer text-session-green'}
     >
       {children}
     </a>
@@ -42,7 +42,12 @@ export const externalLink = (href: string, className?: string) => {
 
 export const clickableText = (onClick: () => void, role: AriaRole = 'button') => {
   return (children: ReactNode) => (
-    <span className="text-session-green cursor-pointer underline" onClick={onClick} role={role}>
+    <span
+      className="cursor-pointer text-session-green underline"
+      onClick={onClick}
+      onKeyDown={onClick}
+      role={role}
+    >
       {children}
     </span>
   );
@@ -74,7 +79,7 @@ export const defaultTranslationElements = {
   'text-bold': text('font-bold'),
   'text-extrabold': text('font-extrabold'),
   'text-black': text('font-black'),
-  br: (children: ReactNode) => <br />,
+  br: () => <br />,
   'discord-server-link': defaultExternalLink(
     SOCIALS[Social.Discord].link,
     "Session Token's Discord server"

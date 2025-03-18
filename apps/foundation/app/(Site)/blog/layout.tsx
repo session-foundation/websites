@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react';
 import { Footer } from '@/components/Footer';
-import { getInitialSiteDataForSSR } from '@/lib/sanity/sanity-server';
-import type { Metadata, ResolvingMetadata } from 'next';
-import { generateSanityMetadata } from '@session/sanity-cms/lib/metadata';
-import { client } from '@/lib/sanity/sanity.client';
 import { generateRssFeed } from '@/lib/rss';
+import { getInitialSiteDataForSSR } from '@/lib/sanity/sanity-server';
+import { client } from '@/lib/sanity/sanity.client';
+import { generateSanityMetadata } from '@session/sanity-cms/lib/metadata';
+import type { Metadata, ResolvingMetadata } from 'next';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata(_: object, parent: ResolvingMetadata): Promise<Metadata> {
   const { settings } = await getInitialSiteDataForSSR();

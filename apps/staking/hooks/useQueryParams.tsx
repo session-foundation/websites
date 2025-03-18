@@ -29,6 +29,7 @@ export default function useQueryParams<K = string>(): UseQueryParamsReturn<K> {
     [getQueryParams]
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: router.push here causes an infinite loop
   const pushQueryParam = useCallback(
     (name: K, value: QueryParamValue) => {
       const str = `${pathname}?${encodeURI(createQueryString(name, value))}`;

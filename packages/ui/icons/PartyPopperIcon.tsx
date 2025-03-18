@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { SVGAttributes } from './types';
+import type { SVGAttributes } from './types';
 
 export const PartyPopperIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, ref) => (
   <svg viewBox="0 0 138 138" fill="none" xmlns="http://www.w3.org/2000/svg" {...props} ref={ref}>

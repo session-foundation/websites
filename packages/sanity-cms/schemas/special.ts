@@ -1,8 +1,8 @@
+import { EarthGlobeIcon, IceCreamIcon } from '@sanity/icons';
+import type { DocumentFields } from '@session/sanity-types';
 import { defineType } from 'sanity';
 import { routeFields } from './fields/groups/route';
-import type { DocumentFields } from '@session/sanity-types';
 import type { SchemaFieldsType } from './types';
-import { EarthGlobeIcon, IceCreamIcon } from '@sanity/icons';
 
 export const specialFields = routeFields;
 

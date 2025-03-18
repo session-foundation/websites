@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { getNodesBlsKeys } from '@/lib/queries/getNodesBlsKeys';
 import { useStakingBackendQuery } from '@/lib/staking-api-client';
+import { useMemo } from 'react';
 
 /**
  * Hook to get the added BLS keys.

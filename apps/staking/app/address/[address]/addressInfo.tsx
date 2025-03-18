@@ -1,10 +1,10 @@
-import { isAddress } from 'viem';
-import { ModuleGrid } from '@session/ui/components/ModuleGrid';
 import StakedBalanceModule from '@/app/mystakes/modules/StakedBalanceModule';
+import { StakedNodesWithAddress } from '@/app/mystakes/modules/StakedNodesModule';
 import TotalRewardsModule from '@/app/mystakes/modules/TotalRewardsModule';
 import UnclaimedTokensModule from '@/app/mystakes/modules/UnclaimedTokensModule';
-import { StakedNodesWithAddress } from '@/app/mystakes/modules/StakedNodesModule';
+import { ModuleGrid } from '@session/ui/components/ModuleGrid';
 import { notFound } from 'next/navigation';
+import { isAddress } from 'viem';
 
 export function AddressInfo({ address }: { address: string }) {
   return isAddress(address) ? (
