@@ -1,19 +1,19 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { useTranslations } from 'next-intl';
 import { NodeCard, NodeCardText, NodeCardTitle } from '@/components/NodeCard';
-import { cn } from '@session/ui/lib/utils';
+import type { ButtonDataTestId } from '@/testing/data-test-ids';
+import { PubKey } from '@session/ui/components/PubKey';
+import { TextSeparator } from '@session/ui/components/Separator';
 import {
   StatusIndicator,
   type StatusIndicatorVariants,
 } from '@session/ui/components/StatusIndicator';
-import { PubKey } from '@session/ui/components/PubKey';
-import Link from 'next/link';
+import { cn } from '@session/ui/lib/utils';
 import { Button, ButtonSkeleton } from '@session/ui/ui/button';
 import { Skeleton } from '@session/ui/ui/skeleton';
-import { TextSeparator } from '@session/ui/components/Separator';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 
 export type InfoNodeCardProps = HTMLAttributes<HTMLDivElement> & {
   pubKey: string;
@@ -53,7 +53,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         ref={ref}
         {...props}
         className={cn(
-          'reduced-motion:transition-none flex flex-row flex-wrap items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out',
+          'flex flex-row flex-wrap items-center justify-between gap-2 border border-transparent align-middle reduced-motion:transition-none transition-all duration-500 ease-in-out',
           forceSmall ? '' : 'md:gap-10',
           isActive && 'border-session-green',
           className
@@ -116,7 +116,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
 
 export function InfoNodeCardSkeleton() {
   return (
-    <div className="border-muted flex w-full flex-row items-center justify-between gap-3 rounded-xl border-2 p-6">
+    <div className="flex w-full flex-row items-center justify-between gap-3 rounded-xl border-2 border-muted p-6">
       <div className="-bottom-1/2 flex w-full flex-col gap-3">
         <div className="flex w-full items-center gap-3 align-middle">
           <div className="-mr-2 scale-75 p-0 sm:mr-0 md:scale-100 md:p-0.5">

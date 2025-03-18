@@ -1,8 +1,10 @@
 'use client';
-import { useQuery } from '@tanstack/react-query';
-import { toast } from '@session/ui/lib/toast';
-import { PubKey } from '@session/ui/components/PubKey';
 import { formatNumber, formatPercentage } from '@/lib/locale-client';
+import { PubKey } from '@session/ui/components/PubKey';
+import Typography from '@session/ui/components/Typography';
+import { Loading } from '@session/ui/components/loading';
+import { toast } from '@session/ui/lib/toast';
+import { cn } from '@session/ui/lib/utils';
 import {
   Table,
   TableBody,
@@ -11,12 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from '@session/ui/ui/table';
-import Typography from '@session/ui/components/Typography';
 import { areHexesEqual } from '@session/util-crypto/string';
-import Link from 'next/link';
-import { Loading } from '@session/ui/components/loading';
-import { cn } from '@session/ui/lib/utils';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 
 // TODO: Delete route after testnet incentive program is over
 

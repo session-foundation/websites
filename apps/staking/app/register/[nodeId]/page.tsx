@@ -1,8 +1,8 @@
+import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
 import ActionModule from '@/components/ActionModule';
+import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
 import { Suspense, use } from 'react';
 import NodeRegistration from './NodeRegistration';
-import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
-import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
 
 interface NodePageParams {
   params: Promise<{

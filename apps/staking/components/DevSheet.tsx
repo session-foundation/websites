@@ -1,21 +1,6 @@
 'use client';
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@session/ui/ui/sheet';
-import { Switch } from '@session/ui/ui/switch';
-import { Tooltip } from '@session/ui/ui/tooltip';
-import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { SOCIALS } from '@/lib/constants';
-import { Social } from '@session/ui/components/SocialLinkList';
-import type { BuildInfo } from '@session/util-js/build';
-import { getEnvironment } from '@session/util-js/env';
 import { isProduction } from '@/lib/env';
 import {
   type FEATURE_FLAG,
@@ -29,27 +14,43 @@ import {
   useRemoteFeatureFlagsQuery,
   useSetFeatureFlag,
 } from '@/lib/feature-flags-client';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { Button } from '@session/ui/ui/button';
-import { Input } from '@session/ui/ui/input';
-import { nonceManager, privateKeyToAccount } from 'viem/accounts';
-import { Address, createWalletClient, http } from 'viem';
-import { TestnetServiceNodeRewardsAbi } from '@session/contracts/abis';
+import logger from '@/lib/logger';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
-import { SessionStakingClient } from '@session/staking-api-js/client';
-import { Loading } from '@session/ui/components/loading';
-import { Checkbox } from '@session/ui/ui/checkbox';
-import { PubKey } from '@session/ui/components/PubKey';
-import { toast } from '@session/ui/lib/toast';
-import { arbitrumSepolia } from 'viem/chains';
-import { addresses, SENT_DECIMALS } from '@session/contracts';
+import { SENT_DECIMALS, addresses } from '@session/contracts';
+import { TestnetServiceNodeRewardsAbi } from '@session/contracts/abis';
 import {
   formatSENTBigInt,
   useAllowanceQuery,
   useProxyApproval,
 } from '@session/contracts/hooks/Token';
-import { LoadingText } from '@session/ui/components/loading-text';
 import { useContractReadQuery } from '@session/contracts/hooks/useContractReadQuery';
+import type { SessionStakingClient } from '@session/staking-api-js/client';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { PubKey } from '@session/ui/components/PubKey';
+import { Social } from '@session/ui/components/SocialLinkList';
+import { Loading } from '@session/ui/components/loading';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { toast } from '@session/ui/lib/toast';
+import { Button } from '@session/ui/ui/button';
+import { Checkbox } from '@session/ui/ui/checkbox';
+import { Input } from '@session/ui/ui/input';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@session/ui/ui/sheet';
+import { Switch } from '@session/ui/ui/switch';
+import { Tooltip } from '@session/ui/ui/tooltip';
+import type { BuildInfo } from '@session/util-js/build';
+import { getEnvironment } from '@session/util-js/env';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { http, type Address, createWalletClient } from 'viem';
+import { nonceManager, privateKeyToAccount } from 'viem/accounts';
+import { arbitrumSepolia } from 'viem/chains';
 
 export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +94,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
       `User Agent: ${navigator.userAgent}`,
     ];
     return sections.join('\n');
-  }, [data, featureFlags, remoteFeatureFlagArray, navigator.userAgent]);
+  }, [data, featureFlags, remoteFeatureFlagArray, COMMIT_HASH]);
 
   return (
     <Sheet open={isOpen}>
@@ -131,7 +132,7 @@ export function DevSheet({ buildInfo }: { buildInfo: BuildInfo }) {
             {'Is Production:'}
             <span className="text-session-green">{isProduction ? 'True' : 'False'}</span>
           </span>
-          <SheetTitle>Remote Feature Flags 🧑‍💻</SheetTitle>
+          <SheetTitle>Remote Feature Flags 🧑</SheetTitle>
           <SheetDescription className="flex flex-col gap-2">
             {remoteFeatureFlagArray.length > 0
               ? remoteFeatureFlagArray.map((flag) => (
@@ -236,8 +237,9 @@ function ContractActions() {
     approveWrite();
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't need to worry about refetch changing
   useEffect(() => {
-    if (status === 'success') refetch();
+    if (status === 'success') void refetch();
   }, [status]);
 
   return (
@@ -289,6 +291,7 @@ function ExitNodes() {
     }
   );
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complexity is fine here
   const nodes = useMemo(() => {
     if (
       status === 'success' &&
@@ -316,10 +319,10 @@ function ExitNodes() {
 
         // Convert x and y to 64-char hex strings and concatenate
         const key = `${X.toString(16).padStart(64, '0')}${Y.toString(16).padStart(64, '0')}`;
-        result[key] = parseInt(contractId.toString());
+        result[key] = Number.parseInt(contractId.toString());
       }
 
-      const nodeList = [];
+      const nodeList: Array<{ contractId: number; pubKey: string }> = [];
 
       for (const node of data.result) {
         const contractId = result[node.info.bls_public_key];
@@ -338,7 +341,7 @@ function ExitNodes() {
   const handleEjectNodes = async () => {
     if (selectedContractIds.length === 0) return;
     try {
-      if (!value.startsWith('0x')) setValue((v) => '0x' + v);
+      if (!value.startsWith('0x')) setValue((v) => `0x${v}`);
       const wallet = createWallet({ privateKey: value as Address });
       await ejectNodes({
         wallet,
@@ -447,14 +450,14 @@ async function ejectNodes({
       functionName: 'exitNodeBySNID',
       args: [arrBigInted],
     });
-    console.log(`Hash: ${hash}`);
-    console.log(`Batch ${batchIndex} exited: ${array}`);
+    logger.info(`Hash: ${hash}`);
+    logger.info(`Batch ${batchIndex} exited: ${array}`);
     toast.success(`Batch ${batchIndex} exited: ${array}`);
     batchIndex++;
   }
 
-  console.log(`Total: ${total}`);
-  console.log(`Actual: ${idsToBoot.length}`);
+  logger.info(`Total: ${total}`);
+  logger.info(`Actual: ${idsToBoot.length}`);
 }
 
 const toastWorkshopFallbackText = 'Toast Workshop 🍞';

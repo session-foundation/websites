@@ -1,8 +1,8 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
+import { OpenNodeCard } from '@/components/OpenNodeCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
 import { Loading } from '@session/ui/components/loading';
 import { useTranslations } from 'next-intl';
-import { OpenNodeCard } from '@/components/OpenNodeCard';
 
 export function AlreadyRegisteredMultiTab() {
   const dict = useTranslations('actionModules.registration.alreadyRegisteredMulti');

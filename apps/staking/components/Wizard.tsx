@@ -25,7 +25,7 @@ export function WizardTitle({
   return (
     <Typography
       variant="h2"
-      className="text-session-text relative mb-8 w-full text-lg font-medium md:text-xl"
+      className="relative mb-8 w-full font-medium text-lg text-session-text md:text-xl"
     >
       {backButton && !backButton.hide ? (
         <Button
@@ -35,9 +35,9 @@ export function WizardTitle({
           disabled={backButton.disabled ?? false}
           data-testid={backButton.dataTestId}
           aria-label={backButton.aria}
-          className="absolute left-0 top-1/2 h-7 -translate-y-1/2 gap-1 px-1"
+          className="-translate-y-1/2 absolute top-1/2 left-0 h-7 gap-1 px-1"
         >
-          <ArrowDownIcon className="fill-session-text h-3 w-3 rotate-90" />
+          <ArrowDownIcon className="h-3 w-3 rotate-90 fill-session-text" />
           <span className="hidden text-sm sm:inline-block">{backButton.text}</span>
         </Button>
       ) : null}
@@ -50,7 +50,7 @@ export function WizardSectionTitle({ title }: { title: ReactNode }) {
   return (
     <Typography
       variant="h3"
-      className="text-session-text relative w-full text-xl font-medium md:text-2xl"
+      className="relative w-full font-medium text-session-text text-xl md:text-2xl"
     >
       {title}
     </Typography>
@@ -89,7 +89,7 @@ export function WizardSectionDescription({
         <span className="ms-1 inline-flex gap-1.5 whitespace-nowrap">
           {hrefLinkedWord}
           <Link href={href} target="_blank" rel="noreferrer" className="group self-center">
-            <LinkOutIcon className="stroke-session-green group-hover:stroke-session-green-dark h-3.5 w-3.5" />
+            <LinkOutIcon className="h-3.5 w-3.5 stroke-session-green group-hover:stroke-session-green-dark" />
           </Link>
         </span>
       </>

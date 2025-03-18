@@ -1,10 +1,10 @@
 'use client';
 
-import { formatPercentage } from '@/lib/locale-client';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { type ContributorContractInfo } from '@session/staking-api-js/client';
-import { useTranslations } from 'next-intl';
-import { forwardRef, type HTMLAttributes } from 'react';
+import {
+  getContributedContributor,
+  getContributionRangeForWallet,
+  getReservedContributorNonContributed,
+} from '@/app/stake/[address]/StakeInfo';
 import {
   InfoNodeCard,
   NodeItem,
@@ -12,22 +12,22 @@ import {
   NodeItemSeparator,
   NodeItemValue,
 } from '@/components/InfoNodeCard';
-import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
-import { usePathname } from 'next/navigation';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
-import { cn } from '@session/ui/lib/utils';
-import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
-import { numberToBigInt } from '@session/util-crypto/maths';
-import { parseStakeContractState, STAKE_CONTRACT_STATE } from '@/components/StakedNode/state';
+import { formatPercentage } from '@/lib/locale-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
+import type { ContributorContractInfo } from '@session/staking-api-js/client';
 import { ContactIcon } from '@session/ui/icons/ContactIcon';
-import {
-  getContributedContributor,
-  getContributionRangeForWallet,
-  getReservedContributorNonContributed,
-} from '@/app/stake/[address]/StakeInfo';
+import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
+import { cn } from '@session/ui/lib/utils';
+import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { numberToBigInt } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { type HTMLAttributes, forwardRef } from 'react';
 
 export const StakedToIndicator = forwardRef<
   HTMLDivElement,
@@ -48,12 +48,12 @@ export const StakedToIndicator = forwardRef<
         <div
           ref={ref}
           className={cn(
-            'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
+            'flex flex-row items-center gap-1 align-middle font-normal text-session-green text-sm md:text-base',
             className
           )}
           {...props}
         >
-          <SessionTokenIcon className="fill-session-green h-3.5 w-3.5" />
+          <SessionTokenIcon className="h-3.5 w-3.5 fill-session-green" />
           {hideTextOnMobile ? (
             <span className="hidden md:block">{dictionary('stakedTo')}</span>
           ) : (
@@ -138,7 +138,7 @@ const OpenNodeCard = forwardRef<
                 tokenAmount: formatSENTNumber(connectedWalletNonContributedReservedStakeAmount),
               })}
             >
-              <ContactIcon className="stroke-session-green h-10 w-10" />
+              <ContactIcon className="h-10 w-10 stroke-session-green" />
             </Tooltip>
           ) : null}
         </>

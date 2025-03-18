@@ -1,23 +1,23 @@
 'use client';
 
-import { OpenNodeCard } from '@/components/OpenNodeCard';
-import { URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
-import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
-import { useTranslations } from 'next-intl';
-import { NodesListSkeleton } from '@/components/NodesListModule';
-import { useEffect, useMemo } from 'react';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { ErrorMessage } from '@/components/ErrorMessage';
-import { useNetworkStatus } from '@/components/StatusBar';
-import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
-import { useStakes } from '@/hooks/useStakes';
-import { getContributionRangeFromContributors } from '@/lib/maths';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import {
   getContributedContributor,
   getReservedContributorNonContributed,
 } from '@/app/stake/[address]/StakeInfo';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { NodesListSkeleton } from '@/components/NodesListModule';
+import { OpenNodeCard } from '@/components/OpenNodeCard';
+import { useNetworkStatus } from '@/components/StatusBar';
+import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
+import { useStakes } from '@/hooks/useStakes';
+import { URL } from '@/lib/constants';
+import { externalLink } from '@/lib/locale-defaults';
+import { getContributionRangeFromContributors } from '@/lib/maths';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo } from 'react';
 
 export default function OpenNodes() {
   const dictionary = useTranslations('modules.openNodes');
@@ -31,6 +31,7 @@ export default function OpenNodes() {
     return new Set(contracts.map(({ pubkey_bls }) => pubkey_bls));
   }, [contracts]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setNetworkStatusVisible(true);
     return () => {

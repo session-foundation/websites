@@ -7,15 +7,15 @@ import {
 } from '@session/ui/components/ModuleGrid';
 import { QuestionIcon } from '@session/ui/icons/QuestionIcon';
 import { cn } from '@session/ui/lib/utils';
-import { Skeleton } from '@session/ui/ui/skeleton';
-import { Tooltip } from '@session/ui/ui/tooltip';
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@session/ui/ui/accordion';
+import { Skeleton } from '@session/ui/ui/skeleton';
+import { Tooltip } from '@session/ui/ui/tooltip';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 
 type ActionModuleProps = {
   title?: ReactNode;
@@ -61,7 +61,7 @@ export default function ActionModule({
       </ModuleGridContent>
       <div
         className={cn(
-          'absolute -z-10 h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg xl:opacity-100 xl:blur-0'
+          '-z-10 absolute h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg xl:opacity-100 xl:blur-0'
         )}
         style={background ? actionModuleBackground[background] : undefined}
       />
@@ -97,12 +97,12 @@ export const ActionModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTM
   ({ className, children, ...props }, ref) => (
     <Tooltip ref={ref} tooltipContent={children}>
       <div className={cn('cursor-pointer', className)} {...props}>
-        <QuestionIcon className="fill-session-text h-3.5 w-3.5" />
+        <QuestionIcon className="h-3.5 w-3.5 fill-session-text" />
       </div>
     </Tooltip>
   )
 );
-ActionModuleTooltip.displayName = 'ModuleTooltip';
+ActionModuleTooltip.displayName = 'ActionModuleTooltip';
 
 type ActionModuleRowContentProps = {
   label: string;
@@ -197,7 +197,7 @@ export const ActionModuleRowSkeleton = () => (
 );
 
 export const ActionModuleDivider = ({ className }: { className?: string }) => (
-  <div className={cn('bg-gray-dark h-px w-full', className)} />
+  <div className={cn('h-px w-full bg-gray-dark', className)} />
 );
 
 export const ActionModulePage = ({ children, ...props }: ActionModuleProps) => (

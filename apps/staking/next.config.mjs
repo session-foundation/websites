@@ -12,7 +12,7 @@ const getSENTStakingApiUrl = () => {
     url = url.substring(0, url.length - 1);
   }
 
-  console.log('SENT Staking API URL:', url);
+  console.log('Staking Backend API URL:', url);
 
   return url;
 };

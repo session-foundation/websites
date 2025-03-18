@@ -1,17 +1,15 @@
 'use client';
 
-import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
-import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
-import { Button } from '@session/ui/ui/button';
-import { Input } from '@session/ui/ui/input';
-import { useTranslations } from 'next-intl';
 import ActionModule from '@/components/ActionModule';
 import { WalletAddTokenWithLocales } from '@/components/WalletAddTokenWithLocales';
+import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
 import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { toast } from '@session/ui/lib/toast';
+import { Button } from '@session/ui/ui/button';
 import {
   Form,
   FormControl,
@@ -22,24 +20,26 @@ import {
   FormMessage,
   FormSubmitButton,
 } from '@session/ui/ui/form';
+import { Input } from '@session/ui/ui/input';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { collapseString } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
+import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Address, isAddress } from 'viem';
+import { type Address, isAddress } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 import { z } from 'zod';
 import { FaucetTransactions } from './FaucetTransactions';
 import { transferTestTokens } from './actions';
-import { TransactionHistory } from './utils';
-import { arbitrumSepolia } from 'viem/chains';
-import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
+import type { TransactionHistory } from './utils';
 
 enum FORM_STATE {
-  LANDING,
-  CONFIRM,
-  PENDING,
-  SUCCESS,
+  LANDING = 0,
+  CONFIRM = 1,
+  PENDING = 2,
+  SUCCESS = 3,
 }
 
 const FaucetTextTooltip = ({ children, tooltip }: { children: ReactNode; tooltip: ReactNode }) => (
@@ -96,7 +96,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
   const referralCode = form.watch('code');
 
   const successMessage = (hash: Address) => (
-    <div className="flex flex-col text-sm font-normal">
+    <div className="flex flex-col font-normal text-sm">
       <span>{dictionary('submit.transactionSuccess')}</span>
       <span>{dictionary('submit.transactionSuccessDescription')}</span>
       <span>{dictionary('transactionHash', { hash })}</span>
@@ -120,6 +120,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
     // }
 
     const promise: Promise<Address> = new Promise((resolve, reject) =>
+      //biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complexity is fine here
       transferTestTokens(data).then((res) => {
         if (!res) {
           return reject(dictionary('submit.transactionError'));
@@ -203,8 +204,9 @@ export const AuthModule = ({ code }: { code?: string }) => {
     if (code) {
       toast.info(dictionary('referralCodeAdded'));
     }
-  }, [code]);
+  }, [code, dictionary]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't need to worry about the other functions changing
   useEffect(() => {
     if (isConnectedWallet && address) {
       form.clearErrors();
@@ -237,10 +239,11 @@ export const AuthModule = ({ code }: { code?: string }) => {
     <ActionModule contentClassName="gap-4" contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
       {formState !== FORM_STATE.LANDING && formState !== FORM_STATE.SUCCESS ? (
         <span
-          className="text-session-text absolute left-6 top-4 inline-flex w-min gap-1 text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
+          className="absolute top-4 left-6 inline-flex w-min gap-1 text-session-text text-sm hover:cursor-pointer hover:underline hover:brightness-125 md:top-6"
           onClick={() => setFormState(FORM_STATE.LANDING)}
+          onKeyDown={() => setFormState(FORM_STATE.LANDING)}
         >
-          <ArrowDownIcon className="fill-session-text mt-0.5 h-3 w-3 rotate-90" />
+          <ArrowDownIcon className="mt-0.5 h-3 w-3 rotate-90 fill-session-text" />
           {dictionary('back')}
         </span>
       ) : null}
@@ -358,7 +361,7 @@ export const AuthModule = ({ code }: { code?: string }) => {
           data-testid={ButtonDataTestId.Faucet_Submit}
           rounded="md"
           size="lg"
-          className="hover:bg-session-green hover:text-session-black opacity-50"
+          className="opacity-50 hover:bg-session-green hover:text-session-black"
           onClick={() => {
             if (transactionHash) {
               if (submitAttemptCounter > 5) {
@@ -415,15 +418,15 @@ export const AuthModule = ({ code }: { code?: string }) => {
       ) : null}
 
       {faucetError === FAUCET_ERROR.FAUCET_OUT_OF_TOKENS ? (
-        <p className="text-destructive text-base">{dictionary.rich('error.faucetOutOfTokens')}</p>
+        <p className="text-base text-destructive">{dictionary.rich('error.faucetOutOfTokens')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INCORRECT_CHAIN ? (
-        <p className="text-destructive text-base">{dictionary.rich('error.incorrectChain')}</p>
+        <p className="text-base text-destructive">{dictionary.rich('error.incorrectChain')}</p>
       ) : null}
 
       {faucetError === FAUCET_ERROR.INVALID_ADDRESS ? (
-        <p className="text-destructive text-base">{dictionary.rich('error.invalidAddress')}</p>
+        <p className="text-base text-destructive">{dictionary.rich('error.invalidAddress')}</p>
       ) : null}
 
       {/** NOTE: The eth requirement is removed for now, keep this here in case we need it again in the future */}

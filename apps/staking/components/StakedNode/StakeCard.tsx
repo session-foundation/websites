@@ -1,10 +1,3 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@session/ui/lib/utils';
-import { StakedNodeDataTestId } from '@/testing/data-test-ids';
-import {
-  StatusIndicator,
-  type StatusIndicatorVariants,
-} from '@session/ui/components/StatusIndicator';
 import {
   NodeCard,
   NodeCardText,
@@ -12,9 +5,16 @@ import {
   RowLabel,
   ToggleCardExpansionButton,
 } from '@/components/NodeCard';
-import { PubKey } from '@session/ui/components/PubKey';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
+import { StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { PubKey } from '@session/ui/components/PubKey';
+import {
+  StatusIndicator,
+  type StatusIndicatorVariants,
+} from '@session/ui/components/StatusIndicator';
+import { cn } from '@session/ui/lib/utils';
 import { useTranslations } from 'next-intl';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 
 type StakeCardProps = HTMLAttributes<HTMLDivElement> & {
   id: string;

@@ -126,6 +126,7 @@ export function getDateFnsLocale(locale: Locale) {
       return dateFnsLocale;
     }
   } catch (error) {
+    console.error(error);
     console.error(`Failed to find date-fns locale for ${locale}`);
   }
 

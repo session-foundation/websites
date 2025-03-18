@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { siteMetadata } from '@/lib/metadata';
+import type { ReactNode } from 'react';
 
 export function generateMetadata() {
   return siteMetadata({
@@ -9,6 +9,6 @@ export function generateMetadata() {
   });
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return children;
 }

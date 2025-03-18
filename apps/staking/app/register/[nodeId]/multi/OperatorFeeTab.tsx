@@ -10,10 +10,10 @@ import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function OperatorFeeTab() {
-  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
+  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam, isVestingMode } =
     useRegistrationWizard();
 
   const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
@@ -36,6 +36,7 @@ export function OperatorFeeTab() {
     );
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);

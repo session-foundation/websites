@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import { getRemoteFeatureFlag } from '@/lib/feature-flags-server';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import Maintenance from '@/components/Maintenance';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { getRemoteFeatureFlag } from '@/lib/feature-flags-server';
+import type { ReactNode } from 'react';
 
 export default async function ScreenContainer({ children }: { children: ReactNode }) {
   const { enabled: isAppMaintenanceModeEnabled } = await getRemoteFeatureFlag(
@@ -12,5 +12,5 @@ export default async function ScreenContainer({ children }: { children: ReactNod
     return <Maintenance />;
   }
 
-  return <div className="-mt-header-displacement pt-header-displacement h-dvh">{children}</div>;
+  return <div className="-mt-header-displacement h-dvh pt-header-displacement">{children}</div>;
 }

@@ -2,15 +2,14 @@ import {
   type SoloRegistrationFormSchema,
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
-import {
-  type ErrorBoxProps,
-  ErrorTabRegistration,
-  recoverableErrors,
-} from '@/app/register/[nodeId]/shared/ErrorTab';
+import { type ErrorBoxProps, ErrorTabRegistration } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { RegistrationEditButton } from '@/app/register/[nodeId]/shared/RegistrationEditButton';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
 import { ActionModuleRow } from '@/components/ActionModule';
-import useRegisterNode, { type UseRegisterNodeParams } from '@/hooks/useRegisterNode';
+import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import {
   HANDRAIL_THRESHOLD_DYNAMIC,
@@ -20,8 +19,14 @@ import {
   URL,
 } from '@/lib/constants';
 import { formatDate, formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { addresses, getContractErrorName, isValidChainId } from '@session/contracts';
+import { addresses, isValidChainId } from '@session/contracts';
+import {
+  type RegisterNodeContributor,
+  type UseAddBlsPubKeyParams,
+  useAddBlsPubKeyFeeEstimate,
+} from '@session/contracts/hooks/ServiceNodeRewards';
 import {
   formatSENTBigInt,
   useAllowanceQuery,
@@ -38,15 +43,12 @@ import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
 import { type Address, isAddress } from 'viem';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
-import { externalLink } from '@/lib/locale-defaults';
-import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 
 export function SubmitSoloTab() {
   const [params, setParams] = useState<UseRegisterNodeParams | null>(null);

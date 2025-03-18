@@ -1,29 +1,29 @@
+import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
+import { type StakeFormSchema, getStakeFormSchema } from '@/app/stake/[address]/NewStake';
+import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
+import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
+import { ActionModuleRow } from '@/components/ActionModule';
+import EthereumAddressField from '@/components/Form/EthereumAddressField';
+import StakeAmountField from '@/components/Form/StakeAmountField';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+import { getContributionRangeFromContributors } from '@/lib/maths';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import { EditButton } from '@session/ui/components/EditButton';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
-import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { getContributionRangeFromContributors } from '@/lib/maths';
-import { getStakeFormSchema, type StakeFormSchema } from '@/app/stake/[address]/NewStake';
 import { isAddress } from 'viem';
-import StakeAmountField from '@/components/Form/StakeAmountField';
-import EthereumAddressField from '@/components/Form/EthereumAddressField';
-import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
-import { ActionModuleRow } from '@/components/ActionModule';
-import { EditButton } from '@session/ui/components/EditButton';
-import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
-import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 
 export function ManageStakeContribution({
   contract,

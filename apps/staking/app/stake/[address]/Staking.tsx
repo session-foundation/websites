@@ -1,18 +1,18 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useMemo } from 'react';
-import { ActionModuleRowSkeleton } from '@/components/ActionModule';
-import { ButtonSkeleton } from '@session/ui/ui/button';
-import { type Address } from 'viem';
-import { Loading } from '@session/ui/components/loading';
-import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
-import { areHexesEqual } from '@session/util-crypto/string';
 import { ManageStake } from '@/app/stake/[address]/ManageStake';
 import { NewStake } from '@/app/stake/[address]/NewStake';
 import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
+import { ActionModuleRowSkeleton } from '@/components/ActionModule';
+import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { Loading } from '@session/ui/components/loading';
+import { ButtonSkeleton } from '@session/ui/ui/button';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
+import type { Address } from 'viem';
 
 export function getContractAndContributor({
   data,

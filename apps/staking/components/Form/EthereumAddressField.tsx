@@ -52,7 +52,7 @@ export default function EthereumAddressField({
       <FormControl>
         <Input
           disabled={disabled}
-          className="w-full rounded-lg border-[2px] border-[#668C83] border-opacity-80 px-2 py-3 text-lg shadow-md"
+          className="w-full rounded-lg border-[#668C83] border-[2px] border-opacity-80 px-2 py-3 text-lg shadow-md"
           // @ts-expect-error -- TODO: type this
           {...field}
           data-testid={dataTestId}

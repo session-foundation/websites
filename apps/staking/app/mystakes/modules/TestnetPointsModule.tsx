@@ -1,18 +1,18 @@
 'use client';
 
-import { URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
-import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/useWallet';
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
+import { URL } from '@/lib/constants';
+import { formatNumber, formatPercentage } from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
 import type { QUERY_STATUS } from '@/lib/query';
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { toast } from '@session/ui/lib/toast';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatNumber, formatPercentage } from '@/lib/locale-client';
-import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 const noPointsObject = {
   score: 0,

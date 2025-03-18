@@ -1,8 +1,17 @@
 'use client';
 
-import { PubKey } from '@session/ui/components/PubKey';
+import { ActionModuleTooltip } from '@/components/ActionModule';
+import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
+import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import { EditButton } from '@session/ui/components/EditButton';
+import { PubKey } from '@session/ui/components/PubKey';
+import { RemoveButton } from '@session/ui/components/RemoveButton';
+import { cn } from '@session/ui/lib/utils';
 import {
   Table,
   TableBody,
@@ -13,19 +22,10 @@ import {
   TableRow,
 } from '@session/ui/ui/table';
 import { bigIntToNumber } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useMemo } from 'react';
-import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
-import { cn } from '@session/ui/lib/utils';
-import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import { ActionModuleTooltip } from '@/components/ActionModule';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { EditButton } from '@session/ui/components/EditButton';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { RemoveButton } from '@session/ui/components/RemoveButton';
 
 type ReservedStakeRow = ReservedContributorStruct & { percentage: number };
 
@@ -54,7 +54,7 @@ export function ReservedStakesTable({
     const rows: Array<ReservedStakeRow> = [];
     let remaining = SESSION_NODE_FULL_STAKE_AMOUNT;
 
-    reservedStakes.forEach(({ amount, addr }) => {
+    for (const { amount, addr } of reservedStakes) {
       remaining -= amount;
       rows.push({
         addr,
@@ -63,7 +63,7 @@ export function ReservedStakesTable({
           bigIntToNumber(amount, TOKEN.DECIMALS) /
           bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, TOKEN.DECIMALS),
       });
-    });
+    }
 
     return [rows, remaining];
   }, [reservedStakes]);
@@ -77,7 +77,7 @@ export function ReservedStakesTable({
 
   return (
     <div className={cn('relative', className)}>
-      <div className="border-session-text relative overflow-hidden rounded-xl border">
+      <div className="relative overflow-hidden rounded-xl border border-session-text">
         <Table size="compact">
           <TableHeader>
             <TableRow className="border-b-transparent bg-transparent hover:bg-transparent">
@@ -168,7 +168,7 @@ export function ReservedStakesTable({
               {unreservedStake ? (
                 <TableCell className="px-2.5 text-end">{remainingStakePercent}</TableCell>
               ) : null}
-              {isEditable ? <TableCell></TableCell> : null}
+              {isEditable ? <TableCell /> : null}
             </TableRow>
             <TableRow className="hover:bg-session-black">
               <TableCell colSpan={isEditable ? 5 : 4} className="px-2.5">
@@ -178,7 +178,7 @@ export function ReservedStakesTable({
           </TableFooter>
         </Table>
       </div>
-      {actionButton ? <div className="absolute -bottom-3 -right-3">{actionButton}</div> : null}
+      {actionButton ? <div className="-bottom-3 -right-3 absolute">{actionButton}</div> : null}
     </div>
   );
 }

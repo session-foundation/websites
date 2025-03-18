@@ -10,7 +10,11 @@
     "start": "next start",
     "check-types": "tsc --noEmit",
     "check-telemetry": "next telemetry",
-    "lint": "eslint .",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write",
     "test": "jest"
   },
   "dependencies": {
@@ -47,8 +51,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "15.0.3",
-    "@session/eslint-config": "workspace:*",
     "@session/typescript-config": "workspace:*",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",

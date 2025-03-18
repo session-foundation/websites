@@ -1,17 +1,20 @@
 'use client';
 
-import { createSessionStakingClient, SessionStakingClient } from '@session/staking-api-js/client';
+import { PREFERENCE, prefDetails } from '@/lib/constants';
+import { isProduction } from '@/lib/env';
 import {
+  type StakingBackendQuery,
+  type StakingBackendQueryWithParams,
   getStakingBackendQueryArgs,
   getStakingBackendQueryWithParamsArgs,
-  StakingBackendQuery,
-  StakingBackendQueryWithParams,
 } from '@/lib/staking-api';
-import { isProduction } from '@/lib/env';
-import { useMemo } from 'react';
+import {
+  type SessionStakingClient,
+  createSessionStakingClient,
+} from '@session/staking-api-js/client';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
-import { prefDetails, PREFERENCE } from '@/lib/constants';
 
 export type QueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
   Parameters<typeof useQuery<Awaited<ReturnType<Q>>['data']>>[0],

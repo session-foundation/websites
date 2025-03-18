@@ -1,14 +1,14 @@
+import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
 import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
 } from '@/hooks/useContributeStakeToOpenNode';
-import { useTranslations } from 'next-intl';
-import { getContractErrorName } from '@session/contracts';
-import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
-import Typography from '@session/ui/components/Typography';
-import { Button } from '@session/ui/ui/button';
-import { cn } from '@session/ui/lib/utils';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { getContractErrorName } from '@session/contracts';
+import Typography from '@session/ui/components/Typography';
+import { cn } from '@session/ui/lib/utils';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
+import { Button } from '@session/ui/ui/button';
+import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useEffect } from 'react';
 
 export function SubmitContributeFunds({
@@ -78,12 +78,14 @@ export function SubmitContributeFunds({
     resetContributeStake();
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On simulate status change
   useEffect(() => {
     if (!isContributeStakeEnabled) {
       contributeStake();
     }
   }, [isContributeStakeEnabled]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
   useEffect(() => {
     if (isError) {
       handleError();

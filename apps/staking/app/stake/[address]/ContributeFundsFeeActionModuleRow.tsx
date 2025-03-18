@@ -1,16 +1,16 @@
-import { externalLink } from '@/lib/locale-defaults';
-import { useTranslations } from 'next-intl';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import { externalLink } from '@/lib/locale-defaults';
+import { useContributeFundsFeeEstimate } from '@session/contracts/hooks/ServiceNodeContribution';
 import {
   formatSENTBigInt,
   useAllowanceQuery,
   useProxyApprovalFeeEstimate,
 } from '@session/contracts/hooks/Token';
-import { useContributeFundsFeeEstimate } from '@session/contracts/hooks/ServiceNodeContribution';
-import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
 import type { Address } from 'viem';
 
 export function ContributeFundsFeeActionModuleRow({

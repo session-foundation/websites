@@ -1,6 +1,6 @@
 'use client';
 
-import { Input, InputProps } from '@session/ui/ui/input';
+import { Input, type InputProps } from '@session/ui/ui/input';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
 import { forwardRef } from 'react';
 

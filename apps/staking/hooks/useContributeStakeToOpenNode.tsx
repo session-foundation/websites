@@ -4,8 +4,8 @@ import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
-import { useProxyApproval } from '@session/contracts/hooks/Token';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import type { Address } from 'viem';
@@ -77,7 +77,7 @@ export default function useContributeStakeToOpenNode({
         writeError: approveWriteError,
         transactionError: approveTransactionError,
       }),
-    [approveSimulateError, approveWriteError, approveTransactionError]
+    [approveSimulateError, approveWriteError, approveTransactionError, dict, dictGeneral]
   );
 
   const contributeFundsErrorMessage = useMemo(
@@ -90,7 +90,13 @@ export default function useContributeStakeToOpenNode({
         writeError: contributeFundsWriteError,
         transactionError: contributeFundsTransactionError,
       }),
-    [contributeFundsSimulateError, contributeFundsWriteError, contributeFundsTransactionError]
+    [
+      contributeFundsSimulateError,
+      contributeFundsWriteError,
+      contributeFundsTransactionError,
+      dict,
+      dictGeneral,
+    ]
   );
 
   const allowanceReadStatus = useMemo(
@@ -109,6 +115,7 @@ export default function useContributeStakeToOpenNode({
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger success or address change
   useEffect(() => {
     if (enabled && approveWriteStatusRaw === 'success' && contractAddress) {
       contributeFunds(contractAddress);

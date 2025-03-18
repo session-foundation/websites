@@ -1,18 +1,18 @@
-import { useTranslations } from 'next-intl';
-import { getContractErrorName } from '@session/contracts';
 import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
-import Typography from '@session/ui/components/Typography';
-import { Button } from '@session/ui/ui/button';
-import { cn } from '@session/ui/lib/utils';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { type Dispatch, type SetStateAction, useEffect, useMemo } from 'react';
-import { useWithdrawContribution } from '@session/contracts/hooks/ServiceNodeContribution';
-import type { Address } from 'viem';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { getContractErrorName } from '@session/contracts';
+import { useWithdrawContribution } from '@session/contracts/hooks/ServiceNodeContribution';
+import Typography from '@session/ui/components/Typography';
+import { cn } from '@session/ui/lib/utils';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
+import { Button } from '@session/ui/ui/button';
+import { useTranslations } from 'next-intl';
+import { type Dispatch, type SetStateAction, useEffect, useMemo } from 'react';
+import type { Address } from 'viem';
 
 export function SubmitRemoveFunds({
   setIsSubmitting,
@@ -73,7 +73,7 @@ export function SubmitRemoveFunds({
         writeError: writeError,
         transactionError: transactionError,
       }),
-    [simulateError, writeError, transactionError]
+    [simulateError, writeError, transactionError, dict, dictGeneral]
   );
 
   const handleRetry = () => {
@@ -81,12 +81,14 @@ export function SubmitRemoveFunds({
     resetContract();
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On simulate status change
   useEffect(() => {
     if (!simulateEnabled) {
       withdrawContribution();
     }
   }, [simulateEnabled]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
   useEffect(() => {
     if (isError) {
       handleError();

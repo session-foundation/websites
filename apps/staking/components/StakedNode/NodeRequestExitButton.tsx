@@ -26,8 +26,8 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { CollapsableButton } from '@/components/NodeCard';
 
 enum EXIT_REQUEST_STATE {
-  ALERT,
-  PENDING,
+  ALERT = 0,
+  PENDING = 1,
 }
 
 export function NodeRequestExitButton({ node }: { node: Stake }) {
@@ -53,7 +53,7 @@ export function NodeRequestExitButton({ node }: { node: Stake }) {
           <>
             {exitRequestState !== EXIT_REQUEST_STATE.ALERT ? (
               <ChevronsDownIcon
-                className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+                className="absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
                 onClick={() => setExitRequestState(EXIT_REQUEST_STATE.ALERT)}
               />
             ) : null}
@@ -86,7 +86,7 @@ function RequestNodeExitDisabled() {
       {dictionary.rich('disabledInfo', {
         link: (children: ReactNode) => (
           <Link
-            className="text-session-green font-medium underline"
+            className="font-medium text-session-green underline"
             href={SOCIALS[Social.Discord].link}
             referrerPolicy="no-referrer"
             target="_blank"
@@ -106,7 +106,7 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
 
   return (
     <>
-      <div className="text-lg font-medium">{dictionary('description1')}</div>
+      <div className="font-medium text-lg">{dictionary('description1')}</div>
       <p>
         {dictionary('description2', {
           request_time: formatLocalizedTimeFromSeconds(

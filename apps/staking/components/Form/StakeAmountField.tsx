@@ -195,7 +195,7 @@ export default function StakeAmountField({
           <Input
             placeholder={bigIntToString(maxStake, SENT_DECIMALS)}
             disabled={!isConnected || disabled}
-            className="w-full rounded-lg border-[2px] border-[#668C83] border-opacity-80 px-4 py-8 text-3xl shadow-md"
+            className="w-full rounded-lg border-[#668C83] border-[2px] border-opacity-80 px-4 py-8 text-3xl shadow-md"
             {...field}
             value={value}
             onChange={(e) => onChange(formatInputText(e.target.value))}

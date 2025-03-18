@@ -15,7 +15,7 @@ export const BlockExplorerLink = ({ address }: { address: string }) => {
 export const BlockExplorerLinkText = () => {
   const generalDictionary = useTranslations('general');
   return (
-    <span className="text-session-green fill-session-green inline-flex items-center gap-1 align-middle">
+    <span className="inline-flex items-center gap-1 fill-session-green align-middle text-session-green">
       <span className="hidden sm:inline-flex xl:hidden 2xl:inline-flex">
         {generalDictionary('viewOnExplorer')}
       </span>

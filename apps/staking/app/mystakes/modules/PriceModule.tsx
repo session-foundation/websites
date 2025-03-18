@@ -1,5 +1,6 @@
 'use client';
 
+import ReferralModule from '@/app/mystakes/modules/ReferralModule';
 import {
   Module,
   ModuleContent,
@@ -7,10 +8,9 @@ import {
   ModuleText,
   ModuleTitle,
 } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
 import { arbitrumSepolia } from 'viem/chains';
-import ReferralModule from '@/app/mystakes/modules/ReferralModule';
 
 export default function PriceModule() {
   const { chainId } = useWallet();
@@ -30,7 +30,7 @@ export default function PriceModule() {
         <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
         <ModuleText>{generalDictionary('comingSoon')}</ModuleText>
       </ModuleHeader>
-      <ModuleContent className="h-full min-h-12"></ModuleContent>
+      <ModuleContent className="h-full min-h-12" />
     </Module>
   );
 }

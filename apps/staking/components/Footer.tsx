@@ -1,4 +1,4 @@
-import { EXTERNAL_ROUTES, ROUTES, SOCIALS } from '@/lib/constants';
+import { EXTERNAL_ROUTES, SOCIALS, SSR_LINKS } from '@/lib/constants';
 import { Footer as FooterComp } from '@session/ui/components/Footer';
 import { cn } from '@session/ui/lib/utils';
 
@@ -7,17 +7,17 @@ import { useTranslations } from 'next-intl';
 export function Footer() {
   const dictionary = useTranslations('navigation');
 
-  const routes: typeof ROUTES = [];
-  ROUTES.forEach(({ dictionaryKey, href }) => {
+  const routes: typeof SSR_LINKS = [];
+  for (const { dictionaryKey, href } of SSR_LINKS) {
     if (
-      process.env.NEXT_PUBLIC_HIDE_FAUCET?.toLowerCase() === 'true' &&
-      dictionaryKey === 'faucet'
+      dictionaryKey === 'faucet' &&
+      !(process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true')
     ) {
       return;
     }
     routes.push({ dictionaryKey, href });
-  });
-  
+  }
+
   const menuItems = [...routes, ...EXTERNAL_ROUTES].map(
     ({ dictionaryKey, href, linkType = 'internal' }) => ({
       title: dictionary(dictionaryKey),
@@ -34,7 +34,7 @@ export function Footer() {
       menuItems={menuItems}
       socialLinks={socialLinks}
       footerManagedBy={dictionary('managedBy')}
-      className={cn('max-w-screen-3xl my-16 w-full px-8')}
+      className={cn('my-16 w-full max-w-screen-3xl px-8')}
     />
   );
 }

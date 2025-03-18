@@ -85,6 +85,7 @@ export default function NodeRegistrations() {
       });
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     if (isConnected) {
       setNetworkStatusVisible(true);
@@ -94,6 +95,7 @@ export default function NodeRegistrations() {
     };
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On connected state change
   useEffect(() => {
     setNetworkStatusVisible(isConnected);
     return () => {

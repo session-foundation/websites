@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
-import { REG_MODE, REG_TAB, type UserSelectableRegistrationMode } from '@/app/register/[nodeId]/types';
+import {
+  REG_MODE,
+  REG_TAB,
+  type UserSelectableRegistrationMode,
+} from '@/app/register/[nodeId]/types';
 import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
-import type { LocaleKey } from './locale-util';
 import type { WalletSheetSettingDetails } from '@session/wallet/components/WalletUserSheet';
+import { arbitrumSepolia, sepolia } from 'viem/chains';
+import type { LocaleKey } from './locale-util';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -87,7 +92,7 @@ type LinkItem = {
   linkType?: 'internal' | 'external';
 };
 
-export const ROUTES: LinkItem[] = [
+export const SSR_LINKS: LinkItem[] = [
   { dictionaryKey: 'stake', href: '/stake' },
   { dictionaryKey: 'register', href: '/register' },
   { dictionaryKey: 'myStakes', href: '/mystakes' },
@@ -180,8 +185,6 @@ export const SESSION_NODE_TIME = (chainId?: number) => {
       return SESSION_NODE_TIME_TESTNET;
 
     default:
-    case arbitrum.id:
-    case mainnet.id:
       return SESSION_NODE_TIME_MAINNET;
   }
 };

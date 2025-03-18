@@ -74,7 +74,7 @@ export default function useCreateOpenNodeRegistration({
         writeError: writeError,
         transactionError: transactionError,
       }),
-    [simulateError, writeError, transactionError]
+    [simulateError, writeError, transactionError, dict, dictGeneral]
   );
 
   const createNodeContractStatus = useMemo(
@@ -83,6 +83,7 @@ export default function useCreateOpenNodeRegistration({
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on enabled
   useEffect(() => {
     if (enabled) {
       createOpenNode();

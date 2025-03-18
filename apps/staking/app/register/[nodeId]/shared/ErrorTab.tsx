@@ -34,6 +34,7 @@ export type ErrorTabProps = ErrorBoxProps & {
 export function ErrorTabRegistration({ error, dict }: ErrorTabProps) {
   const { setIsError, setIsSubmitting, isSubmitting } = useRegistrationWizard();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We don't care about the setters changing
   useEffect(() => {
     setIsError(true);
     if (isSubmitting) {
@@ -70,7 +71,7 @@ function ErrorBox({ error }: ErrorBoxProps) {
   return (
     <div className="flex h-full w-full flex-col items-center gap-2 pb-12">
       <div className="flex w-max flex-row items-center gap-1 self-start">
-        <Typography variant="h4" className="text-destructive text-start">
+        <Typography variant="h4" className="text-start text-destructive">
           {dictionary('errorMessage')}
         </Typography>
         <CopyToClipboardButton
@@ -81,7 +82,7 @@ function ErrorBox({ error }: ErrorBoxProps) {
       </div>
       <Typography
         variant="p"
-        className="text-destructive bg-session-black h-full w-full whitespace-break-spaces break-words rounded-md border-2 border-[#668C83] p-4 text-start text-xs font-medium md:text-sm"
+        className="h-full w-full whitespace-break-spaces break-words rounded-md border-2 border-[#668C83] bg-session-black p-4 text-start font-medium text-destructive text-xs md:text-sm"
       >
         {text}
       </Typography>

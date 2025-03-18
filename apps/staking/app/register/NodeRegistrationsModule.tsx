@@ -1,7 +1,7 @@
+import NodeRegistrations from '@/app/register/NodeRegistrations';
+import NodesListModule, { NodesListSkeleton } from '@/components/NodesListModule';
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
-import NodesListModule, { NodesListSkeleton } from '@/components/NodesListModule';
-import NodeRegistrations from '@/app/register/NodeRegistrations';
 
 export default async function NodeRegistrationsModule() {
   const dictionary = await getTranslations('modules.nodeRegistrations');

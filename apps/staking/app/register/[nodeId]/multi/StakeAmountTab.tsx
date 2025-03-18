@@ -8,14 +8,14 @@ import {
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
 } from '@/lib/constants';
+import { useDecimalDelimiter } from '@/lib/locale-client';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
+import { TOKEN } from '@session/contracts';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
-import { useTranslations } from 'next-intl';
-import React, { useEffect, useRef } from 'react';
 import { stringToBigInt } from '@session/util-crypto/maths';
-import { TOKEN } from '@session/contracts';
-import { useDecimalDelimiter } from '@/lib/locale-client';
+import { useTranslations } from 'next-intl';
+import { useEffect, useRef } from 'react';
 
 const FIELD_NAME = 'stakeAmount';
 
@@ -63,6 +63,7 @@ export function StakeAmountTab() {
     changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.OPERATOR_FEE);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);

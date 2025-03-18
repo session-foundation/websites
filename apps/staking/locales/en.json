@@ -24,6 +24,24 @@
     "reserved": "Reserved",
     "staked": "Staked"
   },
+  "metadata": {
+    "root": {
+      "title": "Session Staking Portal",
+      "description": "Stake and get rewarded for securing the Session Network."
+    },
+    "stake": {
+      "title": "Stake Now",
+      "description": "Browse open Session Nodes to stake to."
+    },
+    "register": {
+      "title": "Register Session Node",
+      "description": "Register a Session Node and stake to it."
+    },
+    "myStakes": {
+      "title": "My Stakes",
+      "description": "View your Session stakes and claim rewards."
+    }
+  },
   "maintenance": {
     "title": "Maintenance Notice",
     "description": "Sorry! The staking portal is under maintenance. Please check back later."

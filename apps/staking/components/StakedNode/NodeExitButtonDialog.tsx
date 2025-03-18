@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@/components/ErrorMessage';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
 import useExitNode from '@/hooks/useExitNode';
@@ -10,7 +11,7 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/client';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -21,7 +22,6 @@ import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type ReactNode, useMemo } from 'react';
-import { ErrorMessage } from '@/components/ErrorMessage';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
@@ -54,7 +54,7 @@ function NodeExitDisabled() {
       {dictionary.rich('disabledInfo', {
         link: (children: ReactNode) => (
           <Link
-            className="text-session-green font-medium underline"
+            className="font-medium text-session-green underline"
             href={SOCIALS[Social.Discord].link}
             referrerPolicy="no-referrer"
             target="_blank"

@@ -1,6 +1,11 @@
 'use client';
 
-import { EXPERIMENTAL_FEATURE_FLAG, FEATURE_FLAG, REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { QUERY } from '@/lib/constants';
+import type {
+  EXPERIMENTAL_FEATURE_FLAG,
+  FEATURE_FLAG,
+  REMOTE_FEATURE_FLAG,
+} from '@/lib/feature-flags';
 import {
   FeatureFlagProviderGeneric,
   useExperimentalFeatureFlagGeneric,
@@ -9,9 +14,8 @@ import {
   useSetExperimentalFeatureFlagGeneric,
   useSetFeatureFlagGeneric,
 } from '@session/feature-flags/providers/feature-flag-provider';
-import { useQuery } from '@tanstack/react-query';
 import { getRemoteFeatureFlagsGeneric } from '@session/feature-flags/remote';
-import { QUERY } from '@/lib/constants';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 export const useFeatureFlag = useFeatureFlagGeneric<FEATURE_FLAG>;
@@ -42,7 +46,7 @@ export const useRemoteFeatureFlagsQuery = () => {
 export const useRemoteFeatureFlagQuery = (flag: REMOTE_FEATURE_FLAG) => {
   const { data: flags, isLoading } = useRemoteFeatureFlagsQuery();
 
-  const enabled = useMemo(() => flags && flags.has(flag), [flags]);
+  const enabled = useMemo(() => (flags ? flags.has(flag) : false), [flags, flag]);
 
   return { enabled, isLoading };
 };

@@ -1,11 +1,18 @@
 import { getContractErrorName } from '@session/contracts';
 import { formatSENTNumber } from '@session/contracts/hooks/Token';
-import type { GenericContractStatus, WriteContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
+import type {
+  GenericContractStatus,
+  WriteContractStatus,
+} from '@session/contracts/hooks/useContractWriteQuery';
 import type { StakeContributor } from '@session/staking-api-js/client';
 import { toast } from '@session/ui/lib/toast';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import type { useTranslations } from 'next-intl';
-import type { SimulateContractErrorType, TransactionExecutionErrorType, WriteContractErrorType } from 'viem';
+import type {
+  SimulateContractErrorType,
+  TransactionExecutionErrorType,
+  WriteContractErrorType,
+} from 'viem';
 
 /**
  * Formats a localized contract error message based on the error type and the dictionary.

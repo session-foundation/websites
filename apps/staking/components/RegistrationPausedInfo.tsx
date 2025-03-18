@@ -1,18 +1,27 @@
 'use client';
 
-import Link from 'next/link';
 import { SOCIALS } from '@/lib/constants';
 import { Social } from '@session/ui/components/SocialLinkList';
-import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 export function RegistrationPausedInfo() {
-  const dictionary =  useTranslations('banner')
+  const dictionary = useTranslations('banner');
   return (
     <span>
-      {dictionary.rich('registrationPaused', {link: (children:ReactNode) => <Link className='underline font-medium' href={SOCIALS[Social.Discord].link} referrerPolicy="no-referrer" target="_blank">
-          {children}
-        </Link>})}
+      {dictionary.rich('registrationPaused', {
+        link: (children: ReactNode) => (
+          <Link
+            className="font-medium underline"
+            href={SOCIALS[Social.Discord].link}
+            referrerPolicy="no-referrer"
+            target="_blank"
+          >
+            {children}
+          </Link>
+        ),
+      })}
     </span>
   );
 }

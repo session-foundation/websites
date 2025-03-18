@@ -1,12 +1,12 @@
 'use client';
 
-import { ModuleText, type ModuleTextProps } from '@session/ui/components/Module';
-import { LoadingText } from '@session/ui/components/loading-text';
-import { forwardRef, type ReactNode, useId } from 'react';
-import { toastErrorRefetch, type ToastErrorRefetchProps } from './Toast';
 import { QUERY_STATUS } from '@/lib/query';
 import type { GenericContractStatus } from '@session/contracts/hooks/useContractWriteQuery';
+import { ModuleText, type ModuleTextProps } from '@session/ui/components/Module';
+import { LoadingText } from '@session/ui/components/loading-text';
 import { RetryIcon } from '@session/ui/icons/RetryIcon';
+import { type ReactNode, forwardRef, useId } from 'react';
+import { type ToastErrorRefetchProps, toastErrorRefetch } from './Toast';
 
 type GenericQueryProps = {
   fallback: ReactNode;
@@ -35,13 +35,14 @@ const ModuleDynamicContractReadText = forwardRef<HTMLSpanElement, ModuleContract
     return (
       <ModuleText ref={ref} className={className} {...props}>
         {status === 'success' ? (
-          children ?? fallback
+          (children ?? fallback)
         ) : status === 'error' ? (
           <div
-            className="hover:text-session-green group flex cursor-pointer items-center gap-1"
+            className="group flex cursor-pointer items-center gap-1 hover:text-session-green"
             onClick={errorToast.refetch}
+            onKeyDown={errorToast.refetch}
           >
-            <RetryIcon className="stroke-session-text group-hover:stroke-session-green h-8 w-8" />
+            <RetryIcon className="h-8 w-8 stroke-session-text group-hover:stroke-session-green" />
             {errorFallback ?? fallback}
           </div>
         ) : !enabled ? (
@@ -75,13 +76,14 @@ const ModuleDynamicQueryText = forwardRef<HTMLSpanElement, ModuleQueryTextProps>
     return (
       <ModuleText ref={ref} className={className} {...props}>
         {status === QUERY_STATUS.SUCCESS ? (
-          children ?? fallback
+          (children ?? fallback)
         ) : status === QUERY_STATUS.ERROR ? (
           <div
-            className="hover:text-session-green group flex cursor-pointer items-center gap-1"
+            className="group flex cursor-pointer items-center gap-1 hover:text-session-green"
             onClick={errorToast.refetch}
+            onKeyDown={errorToast.refetch}
           >
-            <RetryIcon className="stroke-session-text group-hover:stroke-session-green h-8 w-8" />
+            <RetryIcon className="h-8 w-8 stroke-session-text group-hover:stroke-session-green" />
             {errorFallback ?? fallback}
           </div>
         ) : !enabled ? (

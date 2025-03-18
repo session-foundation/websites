@@ -1,13 +1,13 @@
-import { safeTrySync } from '@session/util-js/try';
-import { bigIntToNumber } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
-import { formatNumber } from '@/lib/locale-client';
 import { TICKER } from '@/lib/constants';
-import { XIcon } from '@session/ui/icons/XIcon';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { type ReactNode, useMemo } from 'react';
+import { formatNumber } from '@/lib/locale-client';
 import { defaultTranslationVariables } from '@/lib/locale-defaults';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { XIcon } from '@session/ui/icons/XIcon';
+import { bigIntToNumber } from '@session/util-crypto/maths';
+import { safeTrySync } from '@session/util-js/try';
+import { ETH_DECIMALS } from '@session/wallet/lib/eth';
+import { type ReactNode, useMemo } from 'react';
 
 type UseNetworkFeeFormulaParams = {
   fee: bigint | null;

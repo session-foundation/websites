@@ -9,7 +9,7 @@ import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 export function SuccessSoloTab() {
   const { props } = useRegistrationWizard();
@@ -24,7 +24,7 @@ export function SuccessSoloTab() {
 
   useEffect(() => {
     if (!stake) void refetch();
-  }, []);
+  }, [stake, refetch]);
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
