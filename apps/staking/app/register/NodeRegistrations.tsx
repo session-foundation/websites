@@ -51,7 +51,7 @@ export default function NodeRegistrations() {
     [data]
   );
 
-  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
+  const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
 
   const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
@@ -86,11 +86,20 @@ export default function NodeRegistrations() {
   }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
 
   useEffect(() => {
-    setNetworkStatusVisible(true);
+    if (isConnected) {
+      setNetworkStatusVisible(true);
+    }
     return () => {
       setNetworkStatusVisible(false);
     };
   }, []);
+
+  useEffect(() => {
+    setNetworkStatusVisible(isConnected);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  }, [isConnected]);
 
   return isError ? (
     <ErrorMessage

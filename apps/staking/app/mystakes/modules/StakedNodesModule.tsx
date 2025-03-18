@@ -38,7 +38,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     refetch,
     isError,
   } = useStakes(address);
-  const { setNetworkStatusVisible } = useNetworkStatus(network, isFetching, refetch);
+  const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
 
   useEffect(() => {
     setNetworkStatusVisible(true);
