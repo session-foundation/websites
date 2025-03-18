@@ -1,4 +1,4 @@
-import { DataTestIdTag, GenericDataTestId } from './ids';
+import type { DataTestIdTag, GenericDataTestId } from './ids';
 
 /**
  * The generic testing props for a React component.

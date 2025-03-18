@@ -26,8 +26,5 @@ export function genericIsDataTestId<BaseDataTestId extends string>(
   dataTestId: string
 ): dataTestId is GenericDataTestId<BaseDataTestId> {
   const splitId = dataTestId.split(':');
-  if (splitId.length !== 2 || splitId[0]?.length === 0 || splitId[1]?.length === 0) {
-    return false;
-  }
-  return true;
+  return !(splitId.length !== 2 || splitId[0]?.length === 0 || splitId[1]?.length === 0);
 }

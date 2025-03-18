@@ -6,7 +6,7 @@
 export async function getThrownError(
   func: (...args: Array<unknown>) => Promise<unknown> | unknown
 ) {
-  let caughtError = null;
+  let caughtError: unknown = null;
   try {
     await func();
   } catch (err) {
@@ -26,5 +26,6 @@ export async function expectFunctionToCatchErrors(
   func: (...args: Array<unknown>) => Promise<unknown> | unknown
 ) {
   const caughtError = await getThrownError(func);
+  // biome-ignore lint/suspicious/noMisplacedAssertion lint/correctness/noUndeclaredVariables: used in tests
   expect(caughtError).toBeNull();
 }
