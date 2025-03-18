@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+// biome-ignore lint/correctness/noNodejsModules: Fine to use here
+import { execSync } from 'node:child_process';
 
 export type BuildInfo = {
   env: {
@@ -13,7 +14,7 @@ export type BuildInfo = {
  * @returns An object containing the build information.
  */
 export function getBuildInfo(): BuildInfo {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires -- Used to get package.json in the scope of where this is run
+  // Used to get package.json in the scope of where this is run
   const pkg = require('./package.json');
   const commitHash = execSync('git rev-parse HEAD').toString().trim();
 

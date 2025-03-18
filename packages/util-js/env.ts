@@ -15,6 +15,7 @@ let env: null | Environment = null;
 const environments = [Environment.PRD, Environment.STG, Environment.QA, Environment.DEV];
 
 /** Clears the environment variable and resets it to null. */
+// biome-ignore lint/suspicious/noAssignInExpressions: we want to clear the environment variable
 export const clearEnvironment = () => (env = null);
 
 /**
@@ -37,6 +38,7 @@ export const setEnvironment = (environment: Environment) => {
   } else {
     env = environment;
   }
+  // biome-ignore lint/suspicious/noConsoleLog: we want to log the environment
   if (env !== Environment.PRD) console.log(`Environment: ${env}`);
   return env;
 };
