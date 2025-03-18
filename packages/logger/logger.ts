@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TimedLog, type InitialLog } from './timedLog';
+import { type InitialLog, TimedLog } from './timedLog';
 
 export enum LOG_LEVEL {
   DEBUG = 'debug',
@@ -246,7 +246,7 @@ export class SessionLogger {
    *
    * @param label Unique identifier for the {@link TimedLog}
    */
-  public time(label: string = 'default'): void {
+  public time(label = 'default'): void {
     if (
       this.timedLogOptions?.cleanupStaleTimedLogs ||
       this.globalOptions?.debugOptions?.warnAboutStaleTimedLogs
@@ -279,7 +279,7 @@ export class SessionLogger {
    *
    * @param label Unique identifier for the timed log
    */
-  public timeEnd(label: string = 'default'): void {
+  public timeEnd(label = 'default'): void {
     if (
       this.timedLogOptions?.cleanupStaleTimedLogs ||
       this.globalOptions?.debugOptions?.warnAboutStaleTimedLogs
@@ -304,7 +304,7 @@ export class SessionLogger {
    * @param timedLog The {@link TimedLog} instance
    */
   private isTimedLogStale(timedLog: TimedLog) {
-    const staleTime = this.timedLogOptions?.timeUntilLogIsStale ?? Infinity;
+    const staleTime = this.timedLogOptions?.timeUntilLogIsStale ?? Number.POSITIVE_INFINITY;
     const logTime = timedLog.elapsedTime;
 
     return logTime > staleTime;
