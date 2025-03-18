@@ -2,9 +2,9 @@
 
 import { getContractErrorName } from '@session/contracts';
 import {
+  type UseUpdateRewardsBalanceQueryParams,
   useClaimRewardsQuery,
   useUpdateRewardsBalanceQuery,
-  type UseUpdateRewardsBalanceQueryParams,
 } from '@session/contracts/hooks/ServiceNodeRewards';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';

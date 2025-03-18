@@ -1,13 +1,13 @@
 'use client';
 
 import { Registration } from '@/app/register/[nodeId]/Registration';
+import { useStakes } from '@/hooks/useStakes';
 import { QUERY } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useStakes } from '@/hooks/useStakes';
 import { useMemo } from 'react';
 
 import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';

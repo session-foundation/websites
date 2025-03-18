@@ -50,7 +50,7 @@ export function useTotalStaked(addressOverride?: Address) {
       totalStakedBigInt: total,
       totalStakedFormatted: formatSENTBigInt(total),
     };
-  }, [stakes, contracts, address]);
+  }, [stakes, contracts, address, currentContractIds]);
 
   return { totalStakedFormatted, totalStakedBigInt, status, refetch, enabled };
 }

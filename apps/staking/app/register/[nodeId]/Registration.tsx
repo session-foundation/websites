@@ -1,40 +1,50 @@
 'use client';
 
+import { AlreadyRegisteredMultiTab } from '@/app/register/[nodeId]/multi/AlreadyRegisteredMultiTab';
 import { AutoActivateTab } from '@/app/register/[nodeId]/multi/AutoActivateTab';
 import { OperatorFeeTab } from '@/app/register/[nodeId]/multi/OperatorFeeTab';
+import {
+  ReserveSlotsInputTab,
+  isValidReservedSlots,
+} from '@/app/register/[nodeId]/multi/ReserveSlotsInputTab';
+import { ReserveSlotsTab } from '@/app/register/[nodeId]/multi/ReserveSlotsTab';
 import { RewardsAddressInputMultiTab } from '@/app/register/[nodeId]/multi/RewardsAddressInputMultiTab';
 import { RewardsAddressTab } from '@/app/register/[nodeId]/multi/RewardsAddressTab';
 import { StakeAmountTab } from '@/app/register/[nodeId]/multi/StakeAmountTab';
 import { SubmitMultiTab } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
+import { SuccessMultiTab } from '@/app/register/[nodeId]/multi/SuccessMultiTab';
+import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
 import { type RegistrationStartFormSchema, StartTab } from '@/app/register/[nodeId]/shared/Start';
 import { RewardsAddressInputSoloTab } from '@/app/register/[nodeId]/solo/RewardsAddressInputSoloTab';
 import { SubmitSoloTab } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
-import { SuccessMultiTab } from '@/app/register/[nodeId]/multi/SuccessMultiTab';
 import { SuccessSoloTab } from '@/app/register/[nodeId]/solo/SuccessSoloTab';
 import {
-  isUserSelectableRegistrationMode,
   NODE_TYPE,
-  parseTab,
   REG_MODE,
   REG_TAB,
+  isUserSelectableRegistrationMode,
+  parseTab,
 } from '@/app/register/[nodeId]/types';
 import { getEthereumAddressFormFieldSchema } from '@/components/Form/EthereumAddressField';
 import {
-  getOperatorFeeFormFieldSchema,
   type GetOperatorFeeFormFieldSchemaArgs,
+  getOperatorFeeFormFieldSchema,
 } from '@/components/Form/OperatorFeeField';
 import {
-  getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
+  getStakeAmountFormFieldSchema,
 } from '@/components/Form/StakeAmountField';
 import { WizardContent } from '@/components/Wizard';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import useQueryParams, { type UseQueryParamsReturn } from '@/hooks/useQueryParams';
+import { useStakes } from '@/hooks/useStakes';
 import {
-  prefDetails,
   PREFERENCE,
   REGISTRATION_LINKS,
   SESSION_NODE,
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+  prefDetails,
 } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -45,17 +55,20 @@ import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,
 } from '@session/staking-api-js/client';
+import { toast } from '@session/ui/lib/toast';
 import { useForm } from '@session/ui/ui/form';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { safeTrySync } from '@session/util-js/try';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
 import { useTranslations } from 'next-intl';
-import React, {
-  createContext,
+import {
   type Dispatch,
   type ReactNode,
   type SetStateAction,
+  createContext,
   useContext,
   useEffect,
   useMemo,
@@ -64,19 +77,6 @@ import React, {
 import { usePreferences } from 'usepref';
 import { type Address, isAddress } from 'viem';
 import { z } from 'zod';
-import useQueryParams, { type UseQueryParamsReturn } from '@/hooks/useQueryParams';
-import { toast } from '@session/ui/lib/toast';
-import { useStakes } from '@/hooks/useStakes';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { AlreadyRegisteredMultiTab } from '@/app/register/[nodeId]/multi/AlreadyRegisteredMultiTab';
-import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
-import { safeTrySync } from '@session/util-js/try';
-import {
-  isValidReservedSlots,
-  ReserveSlotsInputTab,
-} from '@/app/register/[nodeId]/multi/ReserveSlotsInputTab';
-import { ReserveSlotsTab } from '@/app/register/[nodeId]/multi/ReserveSlotsTab';
-import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 
 type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   address: Address;
@@ -169,6 +169,7 @@ function RegistrationProvider({
       : prefDetails[PREFERENCE.PREF_REGISTRATION_MODE].defaultValue;
 
   const { queryParamFields, queryParamMode, queryParamNodeType, queryParamStartTab } =
+    // biome-ignore lint/correctness/useExhaustiveDependencies lint/complexity/noExcessiveCognitiveComplexity: On mount
     useMemo(() => {
       const queryParams = getQueryParams();
 
@@ -211,7 +212,7 @@ function RegistrationProvider({
         isExpress = false;
       }
 
-      let queryParamStartTab = null;
+      let queryParamStartTab: REG_TAB | null = null;
 
       if (qpNodeType === NODE_TYPE.SOLO) {
         queryParamStartTab = REG_TAB.SUBMIT_SOLO;
@@ -255,10 +256,10 @@ function RegistrationProvider({
       ? REG_TAB.ALREADY_REGISTERED_RUNNING
       : alreadyRegisteredMulti
         ? REG_TAB.ALREADY_REGISTERED_MULTI
-        : queryParamStartTab ?? REG_TAB.START
+        : (queryParamStartTab ?? REG_TAB.START)
   );
   const [nodeType, setNodeType] = useState<NODE_TYPE>(
-    alreadyRegisteredMulti ? NODE_TYPE.MULTI : queryParamNodeType ?? NODE_TYPE.SOLO
+    alreadyRegisteredMulti ? NODE_TYPE.MULTI : (queryParamNodeType ?? NODE_TYPE.SOLO)
   );
   const [mode, setMode] = useState<REG_MODE>(queryParamMode ?? userPrefMode);
 
@@ -581,7 +582,7 @@ function parseRegistrationQueryParams(
     console.error(parseErr);
   }
 
-  let reservedContributors: Array<ReservedContributorStruct> | undefined = undefined;
+  let reservedContributors: Array<ReservedContributorStruct> | undefined;
 
   if (Array.isArray(reservedContributorsParsed)) {
     const res = reservedContributorsParsed

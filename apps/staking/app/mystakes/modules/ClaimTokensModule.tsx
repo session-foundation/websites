@@ -1,34 +1,34 @@
 'use client';
 
-import { ButtonModule, ModuleContent, ModuleText } from '@session/ui/components/Module';
-import { PresentIcon } from '@session/ui/icons/PresentIcon';
-import { cn } from '@session/ui/lib/utils';
+import { ActionModuleRow } from '@/components/ActionModule';
+import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import useClaimRewards from '@/hooks/useClaimRewards';
+import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
+import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
+import { HANDRAIL_THRESHOLD_DYNAMIC, QUERY, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
+import { externalLink } from '@/lib/locale-defaults';
+import { getRewardsClaimSignature } from '@/lib/queries/getRewardsClaimSignature';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { ButtonModule, ModuleContent, ModuleText } from '@session/ui/components/Module';
+import { Loading } from '@session/ui/components/loading';
+import { PROGRESS_STATUS, Progress } from '@session/ui/components/motion/progress';
+import { PresentIcon } from '@session/ui/icons/PresentIcon';
+import { toast } from '@session/ui/lib/toast';
+import { cn } from '@session/ui/lib/utils';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
-import { useTranslations } from 'next-intl';
-import { ActionModuleRow } from '@/components/ActionModule';
 import { Button } from '@session/ui/ui/button';
-import { HANDRAIL_THRESHOLD_DYNAMIC, QUERY, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import useClaimRewards from '@/hooks/useClaimRewards';
-import { useEffect, useMemo } from 'react';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { getRewardsClaimSignature } from '@/lib/queries/getRewardsClaimSignature';
-import { Loading } from '@session/ui/components/loading';
-import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import { toast } from '@session/ui/lib/toast';
-import { Progress, PROGRESS_STATUS } from '@session/ui/components/motion/progress';
-import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
-import { ErrorMessage } from '@/components/ErrorMessage';
-import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
-import { externalLink } from '@/lib/locale-defaults';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo } from 'react';
 
 export default function ClaimTokensModule() {
   const { address } = useWallet();
@@ -54,7 +54,7 @@ export default function ClaimTokensModule() {
                 'inline-flex items-center gap-1.5 align-middle text-3xl transition-all duration-300 motion-reduce:transition-none',
                 isDisabled
                   ? 'opacity-50'
-                  : 'text-session-green group-hover:text-session-black transition-all duration-300 motion-reduce:transition-none'
+                  : 'text-session-green transition-all duration-300 group-hover:text-session-black motion-reduce:transition-none'
               )}
             >
               <PresentIcon
@@ -77,6 +77,7 @@ export default function ClaimTokensModule() {
   );
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify this component
 function ClaimTokensDialog() {
   const dictionary = useTranslations('modules.claim');
   const dictionaryFee = useTranslations('fee');
@@ -178,6 +179,7 @@ function ClaimTokensDialog() {
       : updateRewardsBalanceStatus === PROGRESS_STATUS.SUCCESS ||
         updateRewardsBalanceStatus === PROGRESS_STATUS.PENDING);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
     if (claimRewardsStatus === PROGRESS_STATUS.SUCCESS) {
       toast.success(
