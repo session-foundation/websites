@@ -7,7 +7,6 @@ import {
 } from '@/app/register/[nodeId]/types';
 import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
-import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 import type { WalletSheetSettingDetails } from '@session/wallet/components/WalletUserSheet';
 import { arbitrumSepolia, sepolia } from 'viem/chains';
 import type { LocaleKey } from './locale-util';
