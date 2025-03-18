@@ -1,4 +1,4 @@
-import NextAuth, { AuthOptions } from 'next-auth';
+import NextAuth, { type AuthOptions } from 'next-auth';
 
 export const createAuthHandler = (options: AuthOptions) => {
   const authHandler = NextAuth(options);
