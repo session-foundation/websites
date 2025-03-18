@@ -29,8 +29,8 @@ import {
 } from '@/components/Form/StakeAmountField';
 import { WizardContent } from '@/components/Wizard';
 import {
+  prefDetails,
   PREFERENCE,
-  preferenceStorageDefaultItems,
   REGISTRATION_LINKS,
   SESSION_NODE,
   SESSION_NODE_FULL_STAKE_AMOUNT,
@@ -166,7 +166,7 @@ function RegistrationProvider({
   const userPrefMode =
     preferredRegistrationMode && isUserSelectableRegistrationMode(preferredRegistrationMode)
       ? preferredRegistrationMode
-      : preferenceStorageDefaultItems[PREFERENCE.PREF_REGISTRATION_MODE];
+      : prefDetails[PREFERENCE.PREF_REGISTRATION_MODE].defaultValue;
 
   const { queryParamFields, queryParamMode, queryParamNodeType, queryParamStartTab } =
     useMemo(() => {
