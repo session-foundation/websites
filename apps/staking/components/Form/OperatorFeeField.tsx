@@ -41,7 +41,7 @@ export const getOperatorFeeFormFieldSchema = ({
 export type OperatorFeeFieldProps = {
   dataTestId: InputDataTestId;
   disabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- This is fine for now TODO: resolve properly
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: resolve properly
   field: any;
   maxFee: number;
   // TODO: investigate adding a min fee if needed

@@ -59,7 +59,7 @@ export type StakeAmountFieldProps = {
     sliderMax: ButtonDataTestId;
   };
   disabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- This is fine for now TODO: resolve properly
+  // biome-ignore lint/suspicious/noExplicitAny: This is fine for now TODO: resolve properly
   field: any;
   maxStake: bigint;
   minStake: bigint;
