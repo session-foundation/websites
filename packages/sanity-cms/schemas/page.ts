@@ -1,10 +1,10 @@
+import { DocumentIcon, EarthGlobeIcon, EditIcon, RobotIcon } from '@sanity/icons';
+import type { DocumentFields } from '@session/sanity-types';
 import { defineField, defineType } from 'sanity';
 import { seoField } from './fields/basic/seo';
+import { type CopyFieldOfType, copyFieldOf } from './fields/generated/copy';
 import { routeFields } from './fields/groups/route';
-import { copyFieldOf, type CopyFieldOfType } from './fields/generated/copy';
-import type { DocumentFields } from '@session/sanity-types';
 import type { SchemaFieldsType } from './types';
-import { DocumentIcon, EarthGlobeIcon, EditIcon, RobotIcon } from '@sanity/icons';
 
 export const pageFields = [
   ...routeFields,

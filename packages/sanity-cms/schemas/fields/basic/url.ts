@@ -17,6 +17,7 @@ export const urlField = defineField({
         if (cachedResult !== undefined) return cachedResult;
 
         if (url.startsWith('mailto:')) {
+          // biome-ignore lint/performance/useTopLevelRegex: TODO: investigate regex warning
           const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.exec(url.replace('mailto:', ''));
           checkedUrlResults.set(url, validEmail ? true : 'Invalid email');
           return validEmail ? true : 'Invalid email';

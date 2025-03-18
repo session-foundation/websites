@@ -1,7 +1,7 @@
-import { createClient, SanityClient } from 'next-sanity';
-import { sanityFetchGeneric, type SanityFetchOptions } from './fetch';
-import logger from './logger';
 import { isProduction } from '@session/util-js/env';
+import { type SanityClient, createClient } from 'next-sanity';
+import { type SanityFetchOptions, sanityFetchGeneric } from './fetch';
+import logger from './logger';
 
 export type CreateSanityClientOptions = {
   projectId: string;

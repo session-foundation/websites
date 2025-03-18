@@ -1,10 +1,10 @@
 import type { GenericSchemaType, SchemaFields } from '@session/sanity-types';
-import type { SeoType } from './fields/basic/seo';
+import type { PortableTextBlock } from 'sanity';
 import type {
   ImageFieldsSchemaType,
   ImageFieldsSchemaTypeWithoutAltText,
 } from './fields/basic/image';
-import type { PortableTextBlock } from 'sanity';
+import type { SeoType } from './fields/basic/seo';
 
 type CustomFieldTypeMap = {
   seoMetaFields: SeoType;

@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import logger from '../lib/logger';
 import { safeTry, safeTrySync } from '@session/util-js/try';
-import { getSiteSettings } from '../queries/getSiteSettings';
+import { type NextRequest, NextResponse } from 'next/server';
 import type { SessionSanityClient } from '../lib/client';
+import logger from '../lib/logger';
+import { getSiteSettings } from '../queries/getSiteSettings';
 
 type CreateValidateLinkHandlerOptions = {
   draftToken: string;
@@ -52,16 +52,8 @@ export const createValidateLinkHandler = ({
 
     const links = new Set<string>();
 
-    if (settings?.headerLinks) {
-      settings.headerLinks.forEach((link) => {
-        if (link._type === 'externalLink') links.add(link.url);
-      });
-    }
-
-    if (settings?.footerLinks) {
-      settings.footerLinks.forEach((link) => {
-        if (link._type === 'externalLink') links.add(link.url);
-      });
+    for (const link of [...(settings?.headerLinks ?? []), ...(settings?.footerLinks ?? [])]) {
+      if (link._type === 'externalLink') links.add(link.url);
     }
 
     const linksArray = Array.from(links).filter((link) => !link.startsWith('mailto:'));

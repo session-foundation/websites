@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 
 const QUERY_GET_CONTENTS_WITH_ID = groq`*[_id == $id]`;
@@ -12,7 +12,7 @@ export async function getContentById<R>({
   id: string;
 }) {
   if (!id || id.length === 0) {
-    logger.warn(`No id provided, returning null`);
+    logger.warn('No id provided, returning null');
     return null;
   }
 

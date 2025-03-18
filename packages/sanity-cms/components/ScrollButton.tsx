@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@session/ui/ui/button';
 import { LongArrowIcon } from '@session/ui/icons/LongArrowIcon';
 import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
 import { useState } from 'react';
 
 export function ScrollButton({
@@ -43,9 +43,9 @@ export function ScrollButton({
     }
   };
   return (
-    <div className="sticky left-2 top-0 mb-7">
+    <div className="sticky top-0 left-2 mb-7">
       <Button
-        className={cn('text-session-text-black-secondary gap-2 fill-current px-1', className)}
+        className={cn('gap-2 fill-current px-1 text-session-text-black-secondary', className)}
         size="xs"
         rounded="md"
         variant="ghost"

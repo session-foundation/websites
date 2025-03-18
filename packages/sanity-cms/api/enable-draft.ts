@@ -1,8 +1,8 @@
 import { validatePreviewUrl } from '@sanity/preview-url-secret';
+import type { SanityClient } from 'next-sanity';
 import { draftMode } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { SessionSanityClient } from '../lib/client';
-import { SanityClient } from 'next-sanity';
+import { type NextRequest, NextResponse } from 'next/server';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 
 type CreateEnableDraftHandlerOptions = {

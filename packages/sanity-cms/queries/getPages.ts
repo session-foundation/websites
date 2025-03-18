@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 import type { PageSchemaType } from '../schemas/page';
 

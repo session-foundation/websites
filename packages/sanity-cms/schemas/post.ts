@@ -1,12 +1,12 @@
-import { defineField, defineType } from 'sanity';
-import { copyFieldOf, type CopyFieldOfType } from './fields/generated/copy';
-import type { DocumentFields } from '@session/sanity-types';
-import type { SchemaFieldsType } from './types';
 import { BinaryDocumentIcon, EarthGlobeIcon, EditIcon, RobotIcon } from '@sanity/icons';
-import { seoField } from './fields/basic/seo';
-import { imageFieldDefinition } from './fields/basic/image';
+import type { DocumentFields } from '@session/sanity-types';
+import { defineField, defineType } from 'sanity';
 import { altField } from './fields/basic/alt';
+import { imageFieldDefinition } from './fields/basic/image';
+import { seoField } from './fields/basic/seo';
 import { slugFieldDefinition } from './fields/basic/slug';
+import { type CopyFieldOfType, copyFieldOf } from './fields/generated/copy';
+import type { SchemaFieldsType } from './types';
 
 export const postFields = [
   defineField({
