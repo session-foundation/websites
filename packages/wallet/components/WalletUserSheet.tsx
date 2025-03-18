@@ -2,17 +2,17 @@
 
 import '@web3sheet/ui/styles';
 
-import {
-  networksTab,
-  type NonPrimaryTabProps,
-  settingsTab,
-  type TabDetails,
-  UserSheet,
-  walletTab,
-} from '@web3sheet/wallet';
-import { useUiLibrary } from '@web3sheet/core';
 import { ReactPortal } from '@session/ui/components/util/ReactPortal';
 import { cn } from '@session/ui/lib/utils';
+import { useUiLibrary } from '@web3sheet/core';
+import {
+  type NonPrimaryTabProps,
+  type TabDetails,
+  UserSheet,
+  networksTab,
+  settingsTab,
+  walletTab,
+} from '@web3sheet/wallet';
 
 export default function WalletUserSheet({
   customTabs,
@@ -26,7 +26,7 @@ export default function WalletUserSheet({
   return (
     <ReactPortal>
       <UserSheet
-        className={cn('bg-session-black border-session-green z-[99999999] rounded-md')}
+        className={cn('z-[99999999] rounded-md border-session-green bg-session-black')}
         config={{
           mainTabConfig,
           customTabs: customTabs ?? [],

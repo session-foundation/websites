@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
+import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Button, type ButtonProps } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '../testing/data-test-ids';
-import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
+import { useERC20Balance } from '@web3sheet/core';
 import { ConnectedWalletAvatar } from '@web3sheet/wallet';
+import { useMemo } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { useWalletButton } from '../providers/wallet-button-provider';
-import { useERC20Balance } from '@web3sheet/core';
+import { ButtonDataTestId } from '../testing/data-test-ids';
 
 export type WalletButtonProps = Omit<ButtonProps, 'data-testid'> & {
   disconnectedLabel: string;
@@ -70,7 +70,7 @@ export function WalletButton({
         'group',
         'select-none justify-end overflow-x-hidden text-xs',
         isConnected
-          ? 'bg-session-green hover:bg-session-green hover:text-session-black h-full w-full max-w-28 border-2 px-0 py-0 transition-all duration-1000 ease-in-out hover:brightness-110 motion-reduce:transition-none sm:max-w-36 lg:hover:max-w-full lg:focus:max-w-full lg:active:max-w-full'
+          ? 'h-full w-full max-w-28 border-2 bg-session-green px-0 py-0 transition-all duration-1000 ease-in-out hover:bg-session-green hover:text-session-black hover:brightness-110 motion-reduce:transition-none sm:max-w-36 lg:active:max-w-full lg:focus:max-w-full lg:hover:max-w-full'
           : 'px-3 py-2',
         isBalanceVisible && 'lg:max-w-full',
         className
@@ -84,8 +84,8 @@ export function WalletButton({
           {!hideBalance ? (
             <div
               className={cn(
-                'text-session-white -mr-4 inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-s-md py-2.5 pe-6 ps-3 text-xs md:text-sm',
-                'group-hover:bg-session-black group-active:bg-session-black group-focus:bg-session-black transition-colors delay-1000 duration-0 ease-in-out group-hover:delay-0 group-focus:delay-0 group-active:delay-0 motion-reduce:transition-none',
+                '-mr-4 inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-s-md py-2.5 ps-3 pe-6 text-session-white text-xs md:text-sm',
+                'transition-colors delay-1000 duration-0 ease-in-out group-hover:bg-session-black group-hover:delay-0 group-focus:bg-session-black group-focus:delay-0 group-active:bg-session-black group-active:delay-0 motion-reduce:transition-none',
                 isBalanceVisible && 'bg-session-black delay-0'
               )}
             >
@@ -96,7 +96,7 @@ export function WalletButton({
           <div
             className={cn(
               'inline-flex h-full items-center justify-evenly gap-1 whitespace-nowrap px-2 py-2 text-xs md:text-sm',
-              !hideBalance && 'bg-session-green w-full sm:w-36 sm:min-w-36'
+              !hideBalance && 'w-full bg-session-green sm:w-36 sm:min-w-36'
             )}
           >
             <ConnectedWalletAvatar size="md" />

@@ -1,5 +1,5 @@
 /** TODO - Look into improving the eth window type */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- eth provider is not typed but this matches what it should be
+// biome-ignore lint: eth provider is not typed but this matches what it should be
 export type EthereumWindowProvider = { request(...args: any): Promise<any> };
 
 /**
@@ -22,7 +22,7 @@ export function getEthereumWindowProvider(): EthereumWindowProvider | undefined 
     return undefined;
   }
 
-  if (!('ethereum' in window) || !isEthereumWindowProvider(window.ethereum)) {
+  if (!('ethereum' in window && isEthereumWindowProvider(window.ethereum))) {
     return undefined;
   }
 

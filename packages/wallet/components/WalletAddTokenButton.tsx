@@ -1,4 +1,4 @@
-import { type ButtonVariantProps } from '@session/ui/components/ui/button';
+import type { ButtonVariantProps } from '@session/ui/components/ui/button';
 
 export type WalletAddTokenButtonProps = ButtonVariantProps & {
   tokenIcon: string;
@@ -17,7 +17,7 @@ export type WalletAddTokenButtonProps = ButtonVariantProps & {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO: reimplement this component
+// biome-ignore lint: correctness noUnusedVariables: TODO: reimplement this component
 export default function WalletAddTokenButton(props: WalletAddTokenButtonProps) {
   return null;
   //   const { addToken, error, isPending } = useAddSessionTokenToWallet(props.tokenIcon);

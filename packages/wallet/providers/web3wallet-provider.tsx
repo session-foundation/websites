@@ -1,20 +1,11 @@
 'use client';
 
-import { forwardRef, type ReactNode, useState } from 'react';
-import {
-  createWeb3WalletConfig,
-  QueryProvider,
-  WalletProvider,
-  type WalletProviderProps,
-} from '@web3sheet/core';
-import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
-import { Button, type ButtonProps } from '@session/ui/ui/button';
+import { PubKey } from '@session/ui/components/PubKey';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
-import { Avatar, AvatarFallback, AvatarImage } from '@session/ui/ui/avatar';
 import { cn } from '@session/ui/lib/utils';
-import type { DynamicTokenRowProps } from '@web3sheet/core/hooks/useWallet';
-import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
-import { Switch } from '@session/ui/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@session/ui/ui/avatar';
+import { Button, type ButtonProps } from '@session/ui/ui/button';
+import { Input } from '@session/ui/ui/input';
 import {
   Sheet,
   SheetContent,
@@ -23,9 +14,17 @@ import {
   SheetOverlay,
   SheetTitle,
 } from '@session/ui/ui/sheet';
-import { Input } from '@session/ui/ui/input';
-import { PubKey } from '@session/ui/components/PubKey';
+import { Switch } from '@session/ui/ui/switch';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import {
+  QueryProvider,
+  WalletProvider,
+  type WalletProviderProps,
+  createWeb3WalletConfig,
+} from '@web3sheet/core';
+import type { DynamicTokenRowProps } from '@web3sheet/core/hooks/useWallet';
+import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
+import { type ReactNode, forwardRef, useState } from 'react';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => (
@@ -62,7 +61,7 @@ const ButtonWithIconReactNode = forwardRef<HTMLButtonElement, ButtonProps & { ic
 
 const BackButton = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => (
   <Button {...props} ref={ref} variant="ghost" size="icon">
-    <ArrowDownIcon className="fill-session-text mt-0.5 h-3 w-3 rotate-90" />
+    <ArrowDownIcon className="mt-0.5 h-3 w-3 rotate-90 fill-session-text" />
   </Button>
 ));
 

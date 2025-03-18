@@ -7,11 +7,11 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@session/ui/ui/dropdown-menu';
-import { useEffect } from 'react';
-import { ButtonDataTestId } from '../testing/data-test-ids';
-import { useWallet } from '../hooks/useWallet';
 import { ConnectedNetworkAvatar, NetworkAvatar } from '@web3sheet/wallet';
+import { useEffect } from 'react';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import { useWallet } from '../hooks/useWallet';
+import { ButtonDataTestId } from '../testing/data-test-ids';
 
 export type WalletNetworkButtonProps = ButtonVariantProps & {
   className?: string;
@@ -36,8 +36,8 @@ export default function WalletNetworkDropdown({
 }: WalletNetworkButtonProps) {
   const { chain, switchChain, switchChainError } = useWallet();
 
-  const handleValueChange = async (selectedChain: string) => {
-    const chainId = parseInt(selectedChain);
+  const handleValueChange = (selectedChain: string) => {
+    const chainId = Number.parseInt(selectedChain);
     if (chainId === chain?.id) {
       return;
     }
@@ -49,7 +49,7 @@ export default function WalletNetworkDropdown({
     if (switchChainError) {
       handleError(switchChainError);
     }
-  }, [switchChainError]);
+  }, [switchChainError, handleError]);
 
   return (
     <DropdownMenu>
