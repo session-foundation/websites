@@ -1,6 +1,6 @@
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { type Chain, createPublicClient, http } from 'viem';
 import { useMemo } from 'react';
+import { http, type Chain, createPublicClient } from 'viem';
 
 const initPublicClient = (chain: Chain) =>
   createPublicClient({

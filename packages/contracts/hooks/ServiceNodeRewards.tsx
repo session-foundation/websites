@@ -1,19 +1,19 @@
 'use client';
 
-import type { ReadContractData } from 'wagmi/query';
-import { ServiceNodeRewardsAbi } from '../abis';
-import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
-import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import type { Address } from 'viem';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import type { ReadContractData } from 'wagmi/query';
+import type { ServiceNodeRewardsAbi } from '../abis';
 import {
   encodeBlsPubKey,
   encodeBlsSignature,
   encodeED25519PubKey,
   encodeED25519Signature,
 } from '../util';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
+import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useEstimateContractFee } from './useEstimateContractFee';
 
 export type ClaimRewardsQuery = ContractWriteQueryProps & {

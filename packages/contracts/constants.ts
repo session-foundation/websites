@@ -1,6 +1,6 @@
 import type { Address } from 'viem';
-import type { ContractWithAbiName } from './abis';
 import { arbitrum, arbitrumSepolia, mainnet } from 'viem/chains';
+import type { ContractWithAbiName } from './abis';
 
 const contracts = [
   'RewardRatePool',

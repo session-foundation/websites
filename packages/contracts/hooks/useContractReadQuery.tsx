@@ -1,12 +1,12 @@
-import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import type { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import type { Abi, ContractFunctionArgs, ContractFunctionName, ReadContractErrorType } from 'viem';
 import { useReadContract } from 'wagmi';
-import { ReadContractData } from 'wagmi/query';
-import { ContractAbis, Contracts } from '../abis';
-import { addresses, type ChainId, type ContractName, isValidChainId } from '../constants';
+import type { ReadContractData } from 'wagmi/query';
+import { type ContractAbis, Contracts } from '../abis';
+import { type ChainId, type ContractName, addresses, isValidChainId } from '../constants';
 import type { GenericContractStatus } from './useContractWriteQuery';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 
 export type ContractReadQueryProps = {
   /** The status of the read contract */

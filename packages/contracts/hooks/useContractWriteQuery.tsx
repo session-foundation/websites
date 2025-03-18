@@ -1,18 +1,18 @@
-import {
-  type Abi,
-  type Address,
-  type ContractFunctionArgs,
-  type ContractFunctionName,
-  type SimulateContractErrorType,
-  type TransactionExecutionErrorType,
-} from 'viem';
-import type { WriteContractErrorType } from 'wagmi/actions';
-import { addresses, type ContractName, isValidChainId } from '../constants';
-import { ContractAbis, Contracts } from '../abis';
-import { useEffect, useMemo, useState } from 'react';
-import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import { useEstimateContractFee } from './useEstimateContractFee';
 import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useEffect, useMemo, useState } from 'react';
+import type {
+  Abi,
+  Address,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  SimulateContractErrorType,
+  TransactionExecutionErrorType,
+} from 'viem';
+import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import type { WriteContractErrorType } from 'wagmi/actions';
+import { type ContractAbis, Contracts } from '../abis';
+import { type ContractName, addresses, isValidChainId } from '../constants';
+import { useEstimateContractFee } from './useEstimateContractFee';
 
 export type GenericContractStatus = 'error' | 'pending' | 'success';
 
@@ -202,6 +202,7 @@ export function useContractWriteQuery<
     return 'pending';
   }, [simulateEnabled, simulateStatus, writeStatus, transactionStatus]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only want to trigger on success
   useEffect(() => {
     if (simulateStatus === 'success' && data?.request) {
       writeContract(data.request);

@@ -1,11 +1,11 @@
-import type { Abi, Address, ContractFunctionArgs, ContractFunctionName } from 'viem';
-import { useMemo, useState } from 'react';
-import { addresses, type ContractName, isValidChainId } from '../constants';
-import { type ContractAbis, Contracts } from '../abis';
-import type { WriteContractFunction } from './useContractWriteQuery';
 import { useWallet } from '@session/wallet/hooks/useWallet';
-import { usePublicWeb3Client } from './usePublicWeb3Client';
 import { skipToken, useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import type { Abi, Address, ContractFunctionArgs, ContractFunctionName } from 'viem';
+import { type ContractAbis, Contracts } from '../abis';
+import { type ContractName, addresses, isValidChainId } from '../constants';
+import type { WriteContractFunction } from './useContractWriteQuery';
+import { usePublicWeb3Client } from './usePublicWeb3Client';
 
 export function useContractWriteGasQuery<
   T extends ContractName,
@@ -81,7 +81,7 @@ export function useContractWriteGasQuery<
       : skipToken,
   });
 
-  const getGasAmount: WriteContractFunction<Args> = async (argsOverride) => {
+  const getGasAmount: WriteContractFunction<Args> = (argsOverride) => {
     setCustomError(null);
     if (argsOverride) setOverrideContractArgs(argsOverride);
     try {

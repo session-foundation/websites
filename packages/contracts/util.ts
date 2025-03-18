@@ -1,6 +1,11 @@
-import { formatUnits, parseUnits, type SimulateContractErrorType, type TransactionExecutionErrorType } from 'viem';
-import { SENT_DECIMALS } from './constants';
+import {
+  type SimulateContractErrorType,
+  type TransactionExecutionErrorType,
+  formatUnits,
+  parseUnits,
+} from 'viem';
 import type { WriteContractErrorType } from 'wagmi/actions';
+import { SENT_DECIMALS } from './constants';
 
 /**
  * Formats a value of type `bigint` as a string, using the {@link formatUnits} function and the {@link SENT_DECIMALS} constant.
@@ -26,6 +31,7 @@ export function parseSENT(value: string): bigint {
  * @param error - The error to get the name from.
  * @returns The error name.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: good luck reducing the complexity
 export function getContractErrorName(
   error: Error | SimulateContractErrorType | WriteContractErrorType | TransactionExecutionErrorType
 ) {
@@ -107,8 +113,7 @@ export function encodeHexToBigIntChunks(hex: string, hexBytes: number): Array<bi
 
   const numberOfChunks = hexBytes / bytes64;
 
-  const chunks = [];
-
+  const chunks: Array<string> = [];
   for (let i = 0; i < numberOfChunks; i++) {
     chunks.push(hex.slice(i * bytes64, (i + 1) * bytes64));
   }
