@@ -1,7 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps, cva } from 'class-variance-authority';
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
-import { BaseDataTestId, TestingProps } from '../../data-test-ids';
+import { BaseDataTestId, type TestingProps } from '../../data-test-ids';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
 
@@ -11,14 +11,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-session-green text-session-black hover:bg-session-black hover:text-session-green border border-session-green',
+          'border border-session-green bg-session-green text-session-black hover:bg-session-black hover:text-session-green',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
-          'border border-session-green text-session-green bg-background hover:bg-session-green hover:text-session-black disabled:border-gray-lightest disabled:text-gray-lightest disabled:opacity-100',
+          'border border-session-green bg-background text-session-green hover:bg-session-green hover:text-session-black disabled:border-gray-lightest disabled:text-gray-lightest disabled:opacity-100',
         'destructive-outline':
-          'border border-destructive text-destructive bg-background hover:bg-destructive hover:text-destructive-foreground',
+          'border border-destructive bg-background text-destructive hover:bg-destructive hover:text-destructive-foreground',
         secondary:
-          'bg-session-black text-session-white hover:bg-session-white border-2 border-session-black hover:text-session-black',
+          'border-2 border-session-black bg-session-black text-session-white hover:bg-session-white hover:text-session-black',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         'destructive-ghost':
           'text-destructive hover:bg-destructive hover:text-destructive-foreground',

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": ["../../biome.jsonc"],
+  "linter": {
+    // TODO: work though linting rules
+    "ignore": ["components/", "icons/"]
+  },
+  "formatter": {
+    // TODO: work though formatting rules
+    "ignore": ["*.css", "components/"]
+  }
+}

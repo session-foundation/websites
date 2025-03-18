@@ -1,13 +1,13 @@
-import { forwardRef, type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Circle } from './shapes/circle';
+import { type HTMLAttributes, type ReactNode, forwardRef, useMemo } from 'react';
 import { cn } from '../../lib/utils';
+import { Circle } from './shapes/circle';
 
 export enum PROGRESS_STATUS {
-  ERROR,
-  IDLE,
-  PENDING,
-  SUCCESS,
+  ERROR = 0,
+  IDLE = 1,
+  PENDING = 2,
+  SUCCESS = 3,
 }
 
 type Step = {
@@ -77,7 +77,7 @@ function ProgressStep({
   const x1 = width / 2;
 
   return (
-    <div className={cn('relative -ml-4 w-full')} style={{ height }}>
+    <div className={cn('-ml-4 relative w-full')} style={{ height }}>
       <svg
         /** The +1 ensures the lines overlap and prevents rendering gaps */
         height={height + 1}

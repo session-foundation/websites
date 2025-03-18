@@ -1,5 +1,9 @@
-import { genericCreateDataTestId, type GenericDataTestId, genericIsDataTestId } from '@session/testing/ids';
-import { GenericTestingProps } from '@session/testing/react';
+import {
+  type GenericDataTestId,
+  genericCreateDataTestId,
+  genericIsDataTestId,
+} from '@session/testing/ids';
+import type { GenericTestingProps } from '@session/testing/react';
 
 /** The base data test IDs for UI components. */
 export enum BaseDataTestId {

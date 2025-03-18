@@ -1,23 +1,23 @@
 'use client';
 
+import { XCircleIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Toaster as Sonner, type ToastT, useSonner } from 'sonner';
-import { cn } from '../../lib/utils';
 import {
   type ComponentProps,
-  createContext,
   type Dispatch,
   Fragment,
   type ReactNode,
   type SetStateAction,
+  createContext,
   useContext,
   useEffect,
   useState,
 } from 'react';
-import { XCircleIcon } from 'lucide-react';
-import { Button } from './button';
+import { Toaster as Sonner, type ToastT, useSonner } from 'sonner';
 import { ButtonDataTestId } from '../../data-test-ids';
-import { portalChildClassName, ReactPortal } from '../util/ReactPortal';
+import { cn } from '../../lib/utils';
+import { ReactPortal, portalChildClassName } from '../util/ReactPortal';
+import { Button } from './button';
 
 function renderToastNode(node: ToastT['description']) {
   return typeof node === 'function' ? node() : node;
@@ -90,12 +90,12 @@ export const Toaster = ({ ...props }: ToasterProps) => {
       {/* Note: Has to be z-index higher than Sonner, the sonner is 999999999 */}
       <div className="absolute bottom-10 z-[9999999999] mx-6 flex w-[90vw] flex-col items-end gap-2 md:right-14 md:w-auto">
         {showHistory && toastHistory.length ? (
-          <div className="bg-session-black border-session-white max-h-96 overflow-y-auto rounded-md border md:w-[40vh]">
+          <div className='max-h-96 overflow-y-auto rounded-md border border-session-white bg-session-black md:w-[40vh]'>
             {toastHistory.map((toast, index) => (
               <Fragment key={toast.id}>
                 <div
                   className={cn(
-                    'text-session-text flex flex-row gap-1.5 py-4 pe-4 ps-2 text-sm font-normal',
+                    'flex flex-row gap-1.5 py-4 ps-2 pe-4 font-normal text-session-text text-sm',
                     toast.type === 'success' && 'text-session-green',
                     toast.type === 'error' && 'text-destructive',
                     toast.type === 'warning' && 'text-warning',
@@ -107,7 +107,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
                     size="xs"
                     rounded="full"
                     variant="ghost"
-                    className="text-destructive h-5 w-5 px-0.5"
+                    className='h-5 w-5 px-0.5 text-destructive'
                     onClick={() => {
                       setToastHistory((prev) => prev.filter((t) => t.id !== toast.id));
                       toastIds.delete(toast.id);
@@ -121,7 +121,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
                 </div>
                 <div
                   className={cn(
-                    'border-session-text w-full border-b',
+                    'w-full border-session-text border-b',
                     index === toastHistory.length - 1 && 'hidden'
                   )}
                 />

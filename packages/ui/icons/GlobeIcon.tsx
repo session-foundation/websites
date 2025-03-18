@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { SVGAttributes } from './types';
+import type { SVGAttributes } from './types';
 
 export const GlobeIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, ref) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" {...props} ref={ref}>

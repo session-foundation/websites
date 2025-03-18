@@ -1,14 +1,14 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes } from 'react';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { type HTMLAttributes, forwardRef } from 'react';
 import { QuestionIcon } from '../icons/QuestionIcon';
 import { cn } from '../lib/utils';
 import { Loading } from './loading';
-import { Tooltip } from './ui/tooltip';
 import { Button, type ButtonProps } from './ui/button';
+import { Tooltip } from './ui/tooltip';
 import './Module.css';
 
 export const outerModuleVariants = cva(
-  'rounded-2xl transition-all overflow-hidden ease-in-out bg-blend-lighten shadow-md p-px',
+  'overflow-hidden rounded-2xl p-px bg-blend-lighten shadow-md transition-all ease-in-out',
   {
     variants: {
       variant: {
@@ -34,21 +34,21 @@ export const outerModuleVariants = cva(
 
 const innerModuleVariants = cva(
   cn(
-    'rounded-[15px] w-full h-full flex align-middle flex-col bg-module',
-    '[&>span]:font-medium [&>*>span]:font-medium'
+    'flex h-full w-full flex-col rounded-[15px] bg-module align-middle',
+    '[&>*>span]:font-medium [&>span]:font-medium'
   ),
   {
     variants: {
       variant: {
         default: cn(
-          'bg-blend-lighten shadow-md gap-1',
-          '[&>h3]:text-lg [&>*>h3]:text-lg',
-          '[&>span]:text-3xl [&>*>span]:text-3xl [&>h3]:font-normal [&>*>h3]:font-normal'
+          'gap-1 bg-blend-lighten shadow-md',
+          '[&>*>h3]:text-lg [&>h3]:text-lg',
+          '[&>*>h3]:font-normal [&>*>span]:text-3xl [&>h3]:font-normal [&>span]:text-3xl'
         ),
         hero: cn(
-          'gap-3 sm:gap-4 hover:brightness-125',
-          '[&>h3]:text-3xl [&>h3]:font-normal [&>*>h3]:text-2xl [&>*>h3]:font-normal [&>h3]:text-session-white',
-          '[&>span]:text-8xl [&>*>span]:text-8xl [&>span]:text-session-white [&>*>span]:text-session-white'
+          'gap-3 hover:brightness-125 sm:gap-4',
+          '[&>*>h3]:font-normal [&>*>h3]:text-2xl [&>h3]:font-normal [&>h3]:text-3xl [&>h3]:text-session-white',
+          '[&>*>span]:text-8xl [&>*>span]:text-session-white [&>span]:text-8xl [&>span]:text-session-white'
         ),
       },
       size: {
@@ -79,7 +79,7 @@ const Module = forwardRef<HTMLDivElement, ModuleProps>(
             'relative',
             innerModuleVariants({ size, variant, className }),
             noPadding && 'p-0 sm:p-0',
-            props.onClick && 'hover:bg-session-green hover:text-session-black hover:cursor-pointer'
+            props.onClick && 'hover:cursor-pointer hover:bg-session-green hover:text-session-black'
           )}
           ref={ref}
           {...props}
@@ -119,7 +119,7 @@ const ButtonModule = forwardRef<HTMLButtonElement, ButtonModuleProps>(
           outerModuleVariants({ size, variant, outline: disabled, className }),
           'relative h-full transition-all duration-300 disabled:opacity-100 group-hover:shadow-none motion-reduce:transition-none',
           !disabled &&
-            'border-session-green group-hover:bg-session-green hover:bg-session-green border-2',
+            'border-2 border-session-green hover:bg-session-green group-hover:bg-session-green',
           noPadding && 'p-0'
         )}
         variant="ghost"
@@ -222,7 +222,7 @@ const ModuleText = forwardRef<HTMLSpanElement, ModuleTextProps>(
   ({ className, isLarge, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn('text-gradient-white overflow-hidden', className)}
+      className={cn('overflow-hidden text-gradient-white', className)}
       {...props}
       style={{ fontSize: isLarge ? 'clamp(24px, 12cqi, 48px)' : 'clamp(18px, 12cqi, 30px)' }}
     />
@@ -238,12 +238,12 @@ const ModuleDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPa
 ModuleDescription.displayName = 'ModuleDescription';
 
 const moduleContentVariants = cva(
-  'flex flex-col align-middle justify-center w-full h-full text-center items-center',
+  'flex h-full w-full flex-col items-center justify-center text-center align-middle',
   {
     variants: {
       variant: {
         default: '',
-        underlay: 'absolute inset-0 -z-1',
+        underlay: '-z-1 absolute inset-0',
       },
     },
     defaultVariants: {
@@ -272,8 +272,8 @@ const ModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
   ({ className, children, ...props }, ref) => {
     return (
       <Tooltip ref={ref} tooltipContent={children} putContentInPortal>
-        <div className={cn('absolute right-5 top-4 cursor-pointer', className)} {...props}>
-          <QuestionIcon className="fill-session-text h-4 w-4" />
+        <div className={cn('absolute top-4 right-5 cursor-pointer', className)} {...props}>
+          <QuestionIcon className='h-4 w-4 fill-session-text' />
         </div>
       </Tooltip>
     );

@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '../lib/utils';
-import SocialLinkList, { SocialLink } from './SocialLinkList';
-import { Button, ButtonProps } from './ui/button';
+import SocialLinkList, { type SocialLink } from './SocialLinkList';
+import { Button, type ButtonProps } from './ui/button';
 
 const BottomJsx = ({
   footerCopyright,
@@ -52,7 +52,7 @@ export function Footer(props: FooterProps) {
       <div
         className={cn(
           'grid w-full grid-cols-2 pt-10',
-          'border-x-0 border-b-0 border-t-2 border-solid border-[#676767]',
+          'border-[#676767] border-x-0 border-t-2 border-b-0 border-solid',
           'lg:flex lg:flex-row lg:justify-between lg:pt-16'
         )}
       >
@@ -71,10 +71,10 @@ export function Footer(props: FooterProps) {
             </div>
             <span
               className={cn(
-                'my-6 text-xs font-medium uppercase',
+                'my-6 font-medium text-xs uppercase',
                 'sm:text-sm',
                 'md:mt-16',
-                'lg:mb-24 lg:mt-8'
+                'lg:mt-8 lg:mb-24'
               )}
             >
               {footerManagedBy}
@@ -87,7 +87,7 @@ export function Footer(props: FooterProps) {
             className={cn(
               '-mt-1 ml-12 grid grid-cols-1 gap-5',
               'md:grid-cols-2',
-              'lg:ml-0 lg:mt-0 lg:w-full lg:gap-x-12 lg:gap-y-0'
+              'lg:mt-0 lg:ml-0 lg:w-full lg:gap-x-12 lg:gap-y-0'
             )}
           >
             {menuItems.map((item, index) => {

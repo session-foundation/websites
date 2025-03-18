@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { SVGAttributes } from './types';
+import type { SVGAttributes } from './types';
 
 export const LongArrowIcon = forwardRef<SVGSVGElement, SVGAttributes>((props, ref) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 37 4" {...props} ref={ref}>

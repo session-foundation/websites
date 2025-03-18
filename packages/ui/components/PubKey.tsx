@@ -1,11 +1,11 @@
 'use client';
 
-import { CopyToClipboardButton } from './CopyToClipboardButton';
-import { cn } from '../lib/utils';
-import { Tooltip } from './ui/tooltip';
 import { collapseString } from '@session/util-crypto/string';
-import { forwardRef, HTMLAttributes, useCallback, useEffect, useMemo, useState } from 'react';
+import { type HTMLAttributes, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { ButtonDataTestId } from '../data-test-ids';
+import { cn } from '../lib/utils';
+import { CopyToClipboardButton } from './CopyToClipboardButton';
+import { Tooltip } from './ui/tooltip';
 
 type CollapseStringsParams = Parameters<typeof collapseString>;
 
@@ -90,7 +90,7 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
       </div>
       <CopyToClipboardButton
         className={cn(
-          'group-hover:bg-session-green group-hover:text-session-black *:group-hover:fill-session-black mx-1 p-0.5 duration-0 group-hover:opacity-100',
+          'mx-1 p-0.5 duration-0 group-hover:bg-session-green group-hover:text-session-black group-hover:opacity-100 *:group-hover:fill-session-black',
           alwaysShowCopyButton || isExpanded ? 'opacity-100' : 'opacity-0'
         )}
         textToCopy={pubKey}

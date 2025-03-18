@@ -1,3 +1,3 @@
-import { RefAttributes, SVGProps } from 'react';
+import type { RefAttributes, SVGProps } from 'react';
 
 export type SVGAttributes = RefAttributes<SVGSVGElement> & Partial<SVGProps<SVGSVGElement>>;
