@@ -1,10 +1,10 @@
-name: Type Checks
+name: Linting
 on:
   - push
   - pull_request
 
 jobs:
-  type-checks:
+  linting:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Run linter & formatter
+        run: pnpm check
 
       - name: Run type checks
         run: pnpm check-types
