@@ -29,6 +29,10 @@
       "title": "Session Staking Portal",
       "description": "Stake and get rewarded for securing the Session Network."
     },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "Sorry! We couldn't find the page you were looking for."
+    },
     "stake": {
       "title": "Stake Now",
       "description": "Browse open Session Nodes to stake to."

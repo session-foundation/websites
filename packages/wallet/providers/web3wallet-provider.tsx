@@ -25,6 +25,7 @@ import {
 import type { DynamicTokenRowProps } from '@web3sheet/core/hooks/useWallet';
 import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
 import { type ReactNode, forwardRef, useState } from 'react';
+import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => (

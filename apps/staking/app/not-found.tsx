@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 export async function generateMetadata() {
-  const dictionary = await getTranslations('notFound');
+  const dictionary = await getTranslations('metadata.notFound');
   return siteMetadata({
     title: dictionary('title'),
     description: dictionary('description'),

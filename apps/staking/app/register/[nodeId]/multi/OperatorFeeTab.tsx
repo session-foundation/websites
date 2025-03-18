@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
 export function OperatorFeeTab() {
-  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam, isVestingMode } =
+  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
     useRegistrationWizard();
 
   const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');

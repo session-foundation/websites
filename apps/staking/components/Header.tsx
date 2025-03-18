@@ -24,17 +24,16 @@ export default async function Header() {
 
   return (
     <nav className="z-30 flex items-center justify-between p-6">
-      <HeaderClient>
-        <Link href="/" className="relative">
-          <Image src="/images/logo.png" alt="Session Token Logo" width={144} height={50} />
-          {isCanary ? <span className="-top-4 absolute left-1 h-max w-max text-sm">🐤</span> : null}
-        </Link>
-        <div className="hidden flex-row gap-10 lg:flex">
-          {routes.map(({ dictionaryKey, href }) => (
-            <NavLink key={href} href={href} label={dict(dictionaryKey)} />
-          ))}
-        </div>
-      </HeaderClient>
+      <Link href="/" className="relative">
+        <Image src="/images/logo.png" alt="Session Token Logo" width={144} height={50} />
+        {isCanary ? <span className="-top-4 absolute left-1 h-max w-max text-sm">🐤</span> : null}
+      </Link>
+      <div className="hidden flex-row gap-10 lg:flex">
+        {routes.map(({ dictionaryKey, href }) => (
+          <NavLink key={href} href={href} label={dict(dictionaryKey)} />
+        ))}
+      </div>
+      <HeaderClient />
     </nav>
   );
 }
