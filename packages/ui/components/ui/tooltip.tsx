@@ -6,14 +6,14 @@ import {
   type ComponentPropsWithoutRef,
   type ElementRef,
   forwardRef,
+  Fragment,
   type ReactNode,
   useState,
 } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-/** @ts-ignore TS doesnt know what its talking about */
-import { useDebounce } from '@uidotdev/usehooks';
 import { cn } from '../../lib/utils';
 import { TriangleAlertIcon } from '../../icons/TriangleAlertIcon';
+import { useDebounce } from '../../hooks/useDebounce';
+import { ReactPortal } from '../util/ReactPortal';
 
 const TooltipRoot = PopoverPrimitive.Root;
 
@@ -46,10 +46,22 @@ type TooltipProps = ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & 
   tooltipContent: ReactNode;
   triggerProps?: Omit<ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>, 'children'>;
   contentProps?: Omit<ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>, 'children'>;
+  putContentInPortal?: boolean;
 };
 
 const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipProps>(
-  ({ tooltipContent, children, contentProps, triggerProps, disableOnHover, ...props }, ref) => {
+  (
+    {
+      tooltipContent,
+      children,
+      contentProps,
+      triggerProps,
+      disableOnHover,
+      putContentInPortal,
+      ...props
+    },
+    ref
+  ) => {
     const [hovered, setHovered] = useState(false);
     const [clicked, setClicked] = useState(false);
     const debouncedHover = useDebounce(hovered, 150);
@@ -70,6 +82,8 @@ const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipP
       setClicked((prev) => !prev);
     };
 
+    const Container = putContentInPortal ? ReactPortal : Fragment;
+
     return (
       <TooltipRoot open={debouncedHover || clicked} onOpenChange={setHovered} {...props}>
         <TooltipTrigger
@@ -81,14 +95,16 @@ const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipP
         >
           {children}
         </TooltipTrigger>
-        <TooltipContent
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          ref={ref}
-          {...contentProps}
-        >
-          {tooltipContent}
-        </TooltipContent>
+        <Container>
+          <TooltipContent
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            ref={ref}
+            {...contentProps}
+          >
+            {tooltipContent}
+          </TooltipContent>
+        </Container>
       </TooltipRoot>
     );
   }

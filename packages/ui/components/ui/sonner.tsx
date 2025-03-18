@@ -17,6 +17,7 @@ import {
 import { XCircleIcon } from 'lucide-react';
 import { Button } from './button';
 import { ButtonDataTestId } from '../../data-test-ids';
+import { portalChildClassName, ReactPortal } from '../util/ReactPortal';
 
 function renderToastNode(node: ToastT['description']) {
   return typeof node === 'function' ? node() : node;
@@ -45,10 +46,11 @@ export const Toaster = ({ ...props }: ToasterProps) => {
   }, [toasts]);
 
   return (
-    <>
+    <ReactPortal>
       <Sonner
         theme={theme as ToasterProps['theme']}
         className={cn(
+          portalChildClassName,
           'toaster group mb-4 lg:me-8 lg:flex lg:items-center lg:justify-end',
           props.className
         )}
@@ -128,7 +130,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
           </div>
         ) : null}
       </div>
-    </>
+    </ReactPortal>
   );
 };
 

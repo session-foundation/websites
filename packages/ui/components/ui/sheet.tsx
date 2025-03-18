@@ -71,11 +71,11 @@ const SheetContent = React.forwardRef<
     >
       <div
         className={cn(
-          'w-full cursor-pointer rounded-lg bg-[rgba(255,255,255,0.1)] px-4 py-6 opacity-75 transition-all duration-200 hover:bg-[rgba(255,255,255,0.2)] md:fixed md:h-full md:w-24 md:-translate-x-16 md:hover:-translate-x-14'
+          'w-full cursor-pointer opacity-55 transition-all duration-200 hover:translate-y-6 md:fixed md:h-full md:w-24 md:-translate-x-16 md:pb-4 md:hover:-translate-x-14 md:hover:-translate-y-0'
         )}
         onClick={closeSheet}
       >
-        <div className="flex h-full flex-row justify-between md:flex-col">
+        <div className="flex h-full flex-row justify-between rounded-lg bg-[rgba(255,255,255,0.1)] px-4 py-6 transition-all duration-200 hover:bg-[rgba(255,255,255,0.2)] md:flex-col">
           <SheetPrimitive.Close
             className="rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
             onClick={closeSheet}
