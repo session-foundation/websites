@@ -1,11 +1,11 @@
-import { client } from '@/lib/sanity/sanity.client';
-import { notFound } from 'next/navigation';
-import { getPostsSlugs } from '@session/sanity-cms/queries/getPosts';
-import { getPostBySlug } from '@session/sanity-cms/queries/getPost';
-import logger from '@/lib/logger';
 import BlogPost from '@/app/(Site)/blog/[slug]/BlogPost';
-import type { Metadata, ResolvingMetadata } from 'next';
+import logger from '@/lib/logger';
+import { client } from '@/lib/sanity/sanity.client';
 import { generateSanityMetadata } from '@session/sanity-cms/lib/metadata';
+import { getPostBySlug } from '@session/sanity-cms/queries/getPost';
+import { getPostsSlugs } from '@session/sanity-cms/queries/getPosts';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { notFound } from 'next/navigation';
 
 /**
  * Force static rendering and cache the data of a layout or page by forcing `cookies()`, `headers()`
@@ -25,7 +25,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const slug = params.slug;
   if (!slug) {
-    logger.warn(`No slug provided for metadata generation`);
+    logger.warn('No slug provided for metadata generation');
     return {};
   }
 

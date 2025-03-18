@@ -1,16 +1,16 @@
-import PortableText from '@/components/PortableText';
-import { getLocale, getTranslations } from 'next-intl/server';
-import { Button } from '@session/ui/ui/button';
-import { cn } from '@session/ui/lib/utils';
-import { getLangDir } from 'rtl-detect';
-import Link from 'next/link';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { SANITY_SCHEMA_URL } from '@/lib/constants';
-import type { FormattedPostType } from '@session/sanity-cms/queries/getPost';
-import { notFound } from 'next/navigation';
-import logger from '@/lib/logger';
-import PostInfoBlock from '@/app/(Site)/blog/[slug]/PostInfoBlock';
 import HeadingOutline from '@/app/(Site)/blog/[slug]/HeadingOutline';
+import PostInfoBlock from '@/app/(Site)/blog/[slug]/PostInfoBlock';
+import PortableText from '@/components/PortableText';
+import { SANITY_SCHEMA_URL } from '@/lib/constants';
+import logger from '@/lib/logger';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { FormattedPostType } from '@session/sanity-cms/queries/getPost';
+import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
+import { getLocale, getTranslations } from 'next-intl/server';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { getLangDir } from 'rtl-detect';
 
 export type PostProps = {
   post: FormattedPostType;
@@ -37,11 +37,11 @@ export default async function BlogPost({ post }: PostProps) {
     .filter(Boolean);
 
   return (
-    <article className="mb-32 mt-4 flex max-w-screen-xl flex-col items-start">
+    <article className="mt-4 mb-32 flex max-w-screen-xl flex-col items-start">
       <Link href={SANITY_SCHEMA_URL.POST} prefetch>
         <Button
           data-testid={ButtonDataTestId.Back_To_Blog}
-          className={cn('text-session-text-black-secondary my-2 gap-2 fill-current px-1')}
+          className={cn('my-2 gap-2 fill-current px-1 text-session-text-black-secondary')}
           size="sm"
           rounded="md"
           variant="ghost"

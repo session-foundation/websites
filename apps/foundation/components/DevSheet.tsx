@@ -1,15 +1,21 @@
 'use client';
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@session/ui/ui/sheet';
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { SANITY_UTIL_PATH, SOCIALS } from '@/lib/constants';
+import type { getPagesInfo } from '@session/sanity-cms/queries/getPages';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { Social } from '@session/ui/components/SocialLinkList';
+import { Button } from '@session/ui/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@session/ui/ui/sheet';
 import type { BuildInfo } from '@session/util-js/build';
 import { getEnvironment, isProduction } from '@session/util-js/env';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { getPagesInfo } from '@session/sanity-cms/queries/getPages';
-import { Button } from '@session/ui/ui/button';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
 /** TODO: This was copied from the staking portal, investigate if we can turn it into a shared library */
 
@@ -54,7 +60,7 @@ export function DevSheet({
       `User Agent: ${navigator.userAgent}`,
     ];
     return sections.join('\n');
-  }, [navigator.userAgent]);
+  }, [COMMIT_HASH]);
 
   return (
     <Sheet open={isOpen}>
@@ -143,7 +149,7 @@ function DevSheetCMSNavigator({
           <Link
             key={slug.current}
             href={`/${slug.current}`}
-            className="text-session-text-black-secondary inline-flex items-center gap-1 align-middle"
+            className="inline-flex items-center gap-1 align-middle text-session-text-black-secondary"
           >
             {label}
             <span className="text-session-text-black-secondary text-xs">{` (/${slug.current})`}</span>

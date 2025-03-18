@@ -1,13 +1,13 @@
 import PostInfoBlock from '@/app/(Site)/blog/[slug]/PostInfoBlock';
+import { BLOG, SANITY_SCHEMA_URL } from '@/lib/constants';
+import logger from '@/lib/logger';
 import { client } from '@/lib/sanity/sanity.client';
 import { getPostsWithMetadata } from '@session/sanity-cms/queries/getPosts';
-import logger from '@/lib/logger';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { BLOG, SANITY_SCHEMA_URL } from '@/lib/constants';
+import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { getTranslations } from 'next-intl/server';
-import Typography from '@session/ui/components/Typography';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 /**
  * Force static rendering and cache the data of a layout or page by forcing `cookies()`, `headers()`
@@ -19,7 +19,7 @@ export const dynamic = 'force-static';
 async function ReadMoreText() {
   const blogDictionary = await getTranslations('blog');
   return (
-    <span className="group-hover:decoration-session-green hover:decoration-session-green decoration-session-black mt-1 w-max text-sm underline">
+    <span className="mt-1 w-max text-sm underline decoration-session-black hover:decoration-session-green group-hover:decoration-session-green">
       {blogDictionary('readMore')}
     </span>
   );
@@ -39,7 +39,7 @@ export default async function BlogGridPage() {
     'group',
     'transition-all duration-300 ease-in-out motion-reduce:transition-none',
     '[&_*]:transition-all [&_*]:duration-300 [&_*]:ease-in-out [&_*]:motion-reduce:transition-none',
-    '[&_img]:hover:brightness-125 [&_img]:hover:saturate-150 [&_h1]:hover:text-session-green-dark [&_h2]:hover:text-session-green-dark'
+    '[&_h1]:hover:text-session-green-dark [&_h2]:hover:text-session-green-dark [&_img]:hover:brightness-125 [&_img]:hover:saturate-150'
   );
 
   return (

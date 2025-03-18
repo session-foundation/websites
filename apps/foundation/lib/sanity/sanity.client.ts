@@ -1,11 +1,11 @@
-import { createSanityClient } from '@session/sanity-cms/lib/client';
+import { SANITY_UTIL_PATH } from '@/lib/constants';
 import {
   NEXT_PUBLIC_SANITY_API_VERSION,
   NEXT_PUBLIC_SANITY_DATASET,
   NEXT_PUBLIC_SANITY_PROJECT_ID,
 } from '@/lib/env';
+import { createSanityClient } from '@session/sanity-cms/lib/client';
 import { Environment, getEnvironment } from '@session/util-js/env';
-import { SANITY_UTIL_PATH } from '@/lib/constants';
 
 const token = process.env.SANITY_API_READ_TOKEN;
 if (!token) {

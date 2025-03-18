@@ -1,8 +1,8 @@
-import type { MetadataRoute } from 'next';
-import { getPostsWithMetadata } from '@session/sanity-cms/queries/getPosts';
+import { BASE_URL, SANITY_SCHEMA_URL } from '@/lib/constants';
 import { client } from '@/lib/sanity/sanity.client';
 import { getPagesInfo } from '@session/sanity-cms/queries/getPages';
-import { BASE_URL, SANITY_SCHEMA_URL } from '@/lib/constants';
+import { getPostsWithMetadata } from '@session/sanity-cms/queries/getPosts';
+import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, pages] = await Promise.all([

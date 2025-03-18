@@ -1,19 +1,19 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { NavLink, type NavLinkProps } from '@session/ui/components/NavLink';
+import RouterResetInput from '@/components/RouterResetInput';
+import { SANITY_SCHEMA_URL } from '@/lib/constants';
+import logger from '@/lib/logger';
+import { client } from '@/lib/sanity/sanity.client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { forwardRef, type HTMLAttributes } from 'react';
-import { cn } from '@session/ui/lib/utils';
+import { resolveAmbiguousLink } from '@session/sanity-cms/schemas/fields/basic/links';
+import type { SiteSchemaType } from '@session/sanity-cms/schemas/site';
+import { NavLink, type NavLinkProps } from '@session/ui/components/NavLink';
 import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
 import { XIcon } from '@session/ui/icons/XIcon';
-import type { SiteSchemaType } from '@session/sanity-cms/schemas/site';
-import { resolveAmbiguousLink } from '@session/sanity-cms/schemas/fields/basic/links';
-import { SANITY_SCHEMA_URL } from '@/lib/constants';
-import { client } from '@/lib/sanity/sanity.client';
+import { cn } from '@session/ui/lib/utils';
 import { safeTry } from '@session/util-js/try';
-import logger from '@/lib/logger';
 import { getTranslations } from 'next-intl/server';
-import RouterResetInput from '@/components/RouterResetInput';
+import Image from 'next/image';
+import Link from 'next/link';
+import { type HTMLAttributes, forwardRef } from 'react';
 
 type HeaderProps = {
   headerLinks?: SiteSchemaType['headerLinks'];
@@ -33,23 +33,23 @@ export default async function Header({ headerLinks }: HeaderProps) {
     if (err) {
       logger.error(err);
     } else {
-      resolvedLinks.forEach(({ href, label }) => {
+      for (const { href, label } of resolvedLinks) {
         if (href && label) {
           routes.push({ href, label });
         } else {
           logger.warn(`Header link is missing href (${href}) or label (${label})`);
         }
-      });
+      }
     }
   }
 
   return (
-    <nav className="z-30 flex touch-none flex-wrap items-center justify-between pb-2 pt-6 md:touch-auto md:pb-6">
-      <div className="flex flex-row items-center gap-10 pe-4 ps-6">
+    <nav className="z-30 flex touch-none flex-wrap items-center justify-between pt-6 pb-2 md:touch-auto md:pb-6">
+      <div className="flex flex-row items-center gap-10 ps-6 pe-4">
         <Link href="/" prefetch>
           <Image src="/images/logo.svg" alt="Session Foundation Logo" width={100} height={40} />
         </Link>
-        <div className="text-session-text-black-secondary hidden h-max flex-row gap-10 md:flex">
+        <div className="hidden h-max flex-row gap-10 text-session-text-black-secondary md:flex">
           {routes.map(({ href, label }) => (
             <NavLink key={`header-desktop-${href}`} href={href} label={label} />
           ))}
@@ -66,7 +66,7 @@ export default async function Header({ headerLinks }: HeaderProps) {
       <ToggleMobileMenuButton
         htmlFor="mobile-menu-toggle"
         ariaLabel={dictionary('mobileMenuButtonClose')}
-        className="animate-out me-4 hidden justify-end p-2 transition-all duration-300 ease-in-out peer-checked:block peer-checked:rotate-90 motion-reduce:animate-none md:hidden peer-checked:md:hidden"
+        className="me-4 hidden animate-out justify-end p-2 transition-all duration-300 ease-in-out peer-checked:block peer-checked:rotate-90 motion-reduce:animate-none md:hidden peer-checked:md:hidden"
       >
         <XIcon className="h-full w-full" />
       </ToggleMobileMenuButton>
@@ -92,9 +92,9 @@ type ToggleMobileMenuButtonProps = HTMLAttributes<HTMLLabelElement> & {
 const ToggleMobileMenuButton = forwardRef<HTMLLabelElement, ToggleMobileMenuButtonProps>(
   ({ ariaLabel, className, ...props }, ref) => {
     return (
+      // biome-ignore lint/a11y/noLabelWithoutControl: This is a toggle button
       <label
         ref={ref}
-        role="button"
         data-testid={ButtonDataTestId.Dropdown_Hamburger_Menu}
         aria-label={ariaLabel}
         className={cn(
