@@ -34,18 +34,18 @@ describe('roundNumber', () => {
   });
 
   test('should round infinity', () => {
-    expect(roundNumber(Infinity, 2)).toBe(Infinity);
-    expect(roundNumber(Infinity, 4)).toBe(Infinity);
+    expect(roundNumber(Number.POSITIVE_INFINITY, 2)).toBe(Number.POSITIVE_INFINITY);
+    expect(roundNumber(Number.POSITIVE_INFINITY, 4)).toBe(Number.POSITIVE_INFINITY);
   });
 
   test('should round negative infinity', () => {
-    expect(roundNumber(-Infinity, 2)).toBe(-Infinity);
-    expect(roundNumber(-Infinity, 4)).toBe(-Infinity);
+    expect(roundNumber(Number.NEGATIVE_INFINITY, 2)).toBe(Number.NEGATIVE_INFINITY);
+    expect(roundNumber(Number.NEGATIVE_INFINITY, 4)).toBe(Number.NEGATIVE_INFINITY);
   });
 
   test('should round NaN', () => {
-    expect(roundNumber(NaN, 2)).toBe(NaN);
-    expect(roundNumber(NaN, 4)).toBe(NaN);
+    expect(roundNumber(Number.NaN, 2)).toBe(Number.NaN);
+    expect(roundNumber(Number.NaN, 4)).toBe(Number.NaN);
   });
 
   test('should format values as expected', () => {
@@ -94,18 +94,18 @@ describe('formatNumber', () => {
   });
 
   test('should format infinity', () => {
-    expect(formatNumber(Infinity, 2)).toBe('Infinity');
-    expect(formatNumber(Infinity, 4)).toBe('Infinity');
+    expect(formatNumber(Number.POSITIVE_INFINITY, 2)).toBe('Infinity');
+    expect(formatNumber(Number.POSITIVE_INFINITY, 4)).toBe('Infinity');
   });
 
   test('should format negative infinity', () => {
-    expect(formatNumber(-Infinity, 2)).toBe('-Infinity');
-    expect(formatNumber(-Infinity, 4)).toBe('-Infinity');
+    expect(formatNumber(Number.NEGATIVE_INFINITY, 2)).toBe('-Infinity');
+    expect(formatNumber(Number.NEGATIVE_INFINITY, 4)).toBe('-Infinity');
   });
 
   test('should format NaN', () => {
-    expect(formatNumber(NaN, 2)).toBe('NaN');
-    expect(formatNumber(NaN, 4)).toBe('NaN');
+    expect(formatNumber(Number.NaN, 2)).toBe('NaN');
+    expect(formatNumber(Number.NaN, 4)).toBe('NaN');
   });
 
   test('should format values as expected', () => {

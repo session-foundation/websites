@@ -4,14 +4,6 @@
     "baseUrl": ".",
     "outDir": "dist"
   },
-  "include": [
-    "src/**/**.ts",
-    "tests/**/**.ts",
-    "jest.config.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "turbo",
-    "dist"
-  ]
+  "include": ["src/**/**.ts", "tests/**/**.ts", "jest.config.js"],
+  "exclude": ["node_modules", "turbo", "dist"]
 }
