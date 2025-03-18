@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { type InitialLog, TimedLog } from './timedLog';
 
 export enum LOG_LEVEL {

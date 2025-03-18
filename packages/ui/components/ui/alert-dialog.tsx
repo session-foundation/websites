@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import * as React from 'react';
 
 import { X } from 'lucide-react';
-import { ArrowDownIcon } from '../../icons/ArrowDownIcon';
 import { cn } from '../../lib/utils';
 import { Module } from '../Module';
 import { MODULE_GRID_ALIGNMENT, ModuleGridContent, ModuleGridHeader } from '../ModuleGrid';
