@@ -22,7 +22,7 @@
     "@session/util-js": "workspace:*",
     "@session/util-logger": "workspace:*",
     "class-variance-authority": "^0.7.0",
-    "next": "15.0.4",
+    "next": "15.2.3",
     "next-intl": "^3.14.1",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",
@@ -45,7 +45,7 @@
   },
   "engines": {
     "node": ">=22",
-    "pnpm": ">=9",
+    "pnpm": ">=10",
     "yarn": "use pnpm",
     "npm": "use pnpm"
   }

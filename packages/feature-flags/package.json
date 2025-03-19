@@ -26,11 +26,11 @@
     "@session/testing": "workspace:*",
     "@session/util-js": "workspace:*",
     "better-sqlite3-multiple-ciphers": "11.1.2",
-    "next": "15.0.4"
+    "next": "15.2.3"
   },
   "engines": {
     "node": ">=22",
-    "pnpm": ">=9",
+    "pnpm": ">=10",
     "yarn": "use pnpm",
     "npm": "use pnpm"
   }
