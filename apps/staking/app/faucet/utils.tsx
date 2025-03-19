@@ -668,7 +668,7 @@ export function createWalletReferralCodes({ params }: CreateWalletReferralCodesP
 //     codes: new Set([
 //       encodeAddressToHashId(
 //         address,
-//         process.env.NEXT_PUBLIC_SALT && !Number.isNaN(process.env.NEXT_PUBLIC_SALT)
+//         process.env.NEXT_PUBLIC_SALT && !Number.isInteger(process.env.NEXT_PUBLIC_SALT)
 //           ? Number.parseInt(process.env.NEXT_PUBLIC_SALT)
 //           : undefined,
 //         process.env.NEXT_PUBLIC_PEPPER
