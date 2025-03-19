@@ -11,8 +11,7 @@ import { isProduction } from '@/lib/env';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Registration } from '@session/staking-api-js/client';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
@@ -21,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 
 export default function NodeRegistrations() {
+  useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.nodeRegistrations');
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
 

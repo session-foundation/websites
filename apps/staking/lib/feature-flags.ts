@@ -116,6 +116,8 @@ export enum FEATURE_FLAG {
   CLEAR_ACCEPT_EXPERIMENTAL = 'clearAcceptExperimental',
   SHOW_ALL_TIMERS = 'showAllTimers',
   SHOW_NODE_RAW_DATA = 'showNodeRawData',
+  THROW_TESTING_ERROR = 'throwTestingError',
+  THROW_TESTING_ERROR_LONG = 'throwTestingErrorLong',
 }
 
 export const FEATURE_FLAG_DESCRIPTION = {
@@ -133,6 +135,8 @@ export const FEATURE_FLAG_DESCRIPTION = {
   [FEATURE_FLAG.CLEAR_ACCEPT_EXPERIMENTAL]: 'Clear the accepted experimental features conditions',
   [FEATURE_FLAG.SHOW_ALL_TIMERS]: 'Show all staked node timers',
   [FEATURE_FLAG.SHOW_NODE_RAW_DATA]: 'Show raw data for staked nodes',
+  [FEATURE_FLAG.THROW_TESTING_ERROR]: 'Throw a testing error',
+  [FEATURE_FLAG.THROW_TESTING_ERROR_LONG]: 'Throw a long testing error',
 };
 
 export const validFeatureFlags = Object.values(FEATURE_FLAG);
@@ -165,6 +169,8 @@ export const pageFeatureFlags: Record<string, Array<FEATURE_FLAG>> = {
 export const globalFeatureFlags = [
   FEATURE_FLAG.CLEAR_ACCEPT_BUG_BOUNTY,
   FEATURE_FLAG.CLEAR_ACCEPT_EXPERIMENTAL,
+  FEATURE_FLAG.THROW_TESTING_ERROR,
+  FEATURE_FLAG.THROW_TESTING_ERROR_LONG,
 ];
 
 export type FeatureFlags = Record<FEATURE_FLAG | EXPERIMENTAL_FEATURE_FLAG, boolean>;

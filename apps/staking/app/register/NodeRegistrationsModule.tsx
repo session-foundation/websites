@@ -1,6 +1,8 @@
 import NodeRegistrations from '@/app/register/NodeRegistrations';
+import { ErrorBox } from '@/components/Error/ErrorBox';
 import NodesListModule, { NodesListSkeleton } from '@/components/NodesListModule';
 import { getTranslations } from 'next-intl/server';
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { Suspense } from 'react';
 
 export default async function NodeRegistrationsModule() {
@@ -9,7 +11,9 @@ export default async function NodeRegistrationsModule() {
   return (
     <NodesListModule title={dictionary('title')}>
       <Suspense fallback={<NodesListSkeleton />}>
-        <NodeRegistrations />
+        <ErrorBoundary errorComponent={ErrorBox}>
+          <NodeRegistrations />
+        </ErrorBoundary>
       </Suspense>
     </NodesListModule>
   );
