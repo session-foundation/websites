@@ -3,18 +3,10 @@ import { type Address, checksumAddress } from 'viem';
 
 const sqids = new Sqids();
 
-function ethereumAddressToNumberArray(address: string) {
-  const parsedAddress = address.toLowerCase().startsWith('0x') ? address.slice(2) : address;
-
-  // Step 2: Validate the address length (should be 40 characters for 20 bytes)
-  if (parsedAddress.length !== 40) {
-    throw new Error('Invalid Ethereum address length');
-  }
-
-  // Step 3 and 4: Split into byte pairs and convert to numbers
+function createNumberArrayFromHex(hex: string) {
   const numberArray: Array<number> = [];
-  for (let i = 0; i < parsedAddress.length; i += 2) {
-    const byteString = parsedAddress.slice(i, i + 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    const byteString = hex.slice(i, i + 2);
     // Parse each hex byte to an integer
     const byteValue = Number.parseInt(byteString, 16);
     if (Number.isNaN(byteValue)) {
@@ -22,12 +14,29 @@ function ethereumAddressToNumberArray(address: string) {
     }
     numberArray.push(byteValue);
   }
-
   return numberArray;
 }
 
-export const encodeAddressToHashId = (address: Address) => {
+function ethereumAddressToNumberArray(address: string) {
+  const parsedAddress = address.toLowerCase().startsWith('0x') ? address.slice(2) : address;
+
+  if (parsedAddress.length !== 40) {
+    throw new Error('Invalid Ethereum address length');
+  }
+
+  return createNumberArrayFromHex(parsedAddress);
+}
+
+/**
+ * Encode an Ethereum address to a hash ID.
+ * @param address The Ethereum address to encode.
+ * @param salt The salt to use for the hash ID. The salt is added to every odd byte of the address.
+ * @param pepper The pepper to use for the hash ID. The pepper is added to the end of the address. Before it is salted
+ */
+export const encodeAddressToHashId = (address: Address, salt = 0, pepper?: string) => {
   const formattedAddress = checksumAddress(address);
-  const int = ethereumAddressToNumberArray(formattedAddress);
-  return sqids.encode(int);
+  const addressArray = ethereumAddressToNumberArray(formattedAddress);
+  const pepperArray = pepper ? createNumberArrayFromHex(pepper) : [];
+
+  return sqids.encode(addressArray.concat(pepperArray).map((n, i) => (i % 2 ? n : n + salt)));
 };
