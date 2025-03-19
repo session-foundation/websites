@@ -27,7 +27,15 @@ export default function ReferralModule() {
 
   const { address } = useWallet();
 
-  const hashId = address ? encodeAddressToHashId(address) : '';
+  const hashId = address
+    ? encodeAddressToHashId(
+        address,
+        process.env.NEXT_PUBLIC_SALT && !Number.isNaN(process.env.NEXT_PUBLIC_SALT)
+          ? Number.parseInt(process.env.NEXT_PUBLIC_SALT)
+          : undefined,
+        process.env.NEXT_PUBLIC_PEPPER
+      )
+    : '';
   const referralLink = address ? `${BASE_URL}/faucet/${hashId}` : `${BASE_URL}/faucet`;
 
   const { data, status } = useQuery({

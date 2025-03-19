@@ -1,7 +1,7 @@
 import path from 'path';
 import { isProduction } from '@/lib/env';
-import Database from 'better-sqlite3-multiple-ciphers';
 import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import type { Address } from 'viem';
 
 export enum TABLE {
@@ -661,15 +661,22 @@ export function createWalletReferralCodes({ params }: CreateWalletReferralCodesP
   }
 }
 
-//
 // const test: Array<{ address: Address; uses: number; creatorWallet: Address }> = [];
 //
 // export function createWalletCodes() {
 //   const params: Array<AddReferralCodesParams> = test.map(({ address, uses, creatorWallet }) => ({
-//     codes: new Set([encodeAddressToHashId(address)]),
+//     codes: new Set([
+//       encodeAddressToHashId(
+//         address,
+//         process.env.NEXT_PUBLIC_SALT && !Number.isNaN(process.env.NEXT_PUBLIC_SALT)
+//           ? Number.parseInt(process.env.NEXT_PUBLIC_SALT)
+//           : undefined,
+//         process.env.NEXT_PUBLIC_PEPPER
+//       ),
+//     ]),
 //     creatorWallet: creatorWallet ?? address,
 //     maxUses: uses,
-//     drip: 1000_000000000n,
+//     drip: 2000_000000000n,
 //   }));
 //   createWalletReferralCodes({ params });
 // }
