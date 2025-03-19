@@ -30,8 +30,8 @@ function ethereumAddressToNumberArray(address: string) {
 /**
  * Encode an Ethereum address to a hash ID.
  * @param address The Ethereum address to encode.
- * @param salt The salt to use for the hash ID. The salt is added to each byte of the address.
- * @param pepper The pepper to use for the hash ID. The pepper is added to the end of the address.
+ * @param salt The salt to use for the hash ID. The salt is added to every odd byte of the address.
+ * @param pepper The pepper to use for the hash ID. The pepper is added to the end of the address. Before it is salted
  */
 export const encodeAddressToHashId = (address: Address, salt = 0, pepper?: string) => {
   const formattedAddress = checksumAddress(address);
