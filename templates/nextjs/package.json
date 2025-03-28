@@ -1,0 +1,46 @@
+{
+  "name": "nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check-types": "tsc --noEmit",
+    "check-telemetry": "next telemetry",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@session/logger": "workspace:*",
+    "@session/ui": "workspace:*",
+    "@session/util-js": "workspace:*",
+    "@session/util-logger": "workspace:*",
+    "class-variance-authority": "^0.7.0",
+    "next": "15.0.4",
+    "next-intl": "^3.14.1",
+    "pino": "^9.2.0",
+    "pino-pretty": "^11.2.1",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "rtl-detect": "^1.1.2",
+    "server-only": "^0.0.1",
+    "sharp": "0.32.6"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^14.1.1",
+    "@session/eslint-config": "workspace:*",
+    "@session/typescript-config": "workspace:*",
+    "@types/react": "^18.2.61",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/rtl-detect": "^1.0.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9",
+    "yarn": "use pnpm",
+    "npm": "use pnpm"
+  }
+}
