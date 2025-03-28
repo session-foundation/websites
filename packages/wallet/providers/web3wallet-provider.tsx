@@ -106,7 +106,8 @@ function TokenActionButton({ href, children }: { href: string; children: ReactNo
 const tokenDetailsArbitrum: DynamicTokenRowProps = {
   tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   name: 'Session Token',
-  iconSrc: '/images/token_logo.svg',
+  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
+  showAddTokenButton: true,
   network: {
     id: arbitrum.id,
     name: 'Arbitrum One',
@@ -118,8 +119,9 @@ const tokenDetailsArbitrum: DynamicTokenRowProps = {
 const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
   tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   name: 'Session Token',
-  iconSrc: '/images/token_logo.svg',
+  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
   symbolPrefix: 't',
+  showAddTokenButton: true,
   network: {
     id: arbitrumSepolia.id,
     name: 'Arbitrum Sepolia',
@@ -131,7 +133,8 @@ const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
 const tokenDetailsEthereum: DynamicTokenRowProps = {
   tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
   name: 'Session Token',
-  iconSrc: '/images/token_logo.svg',
+  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
+  showAddTokenButton: true,
   network: {
     id: mainnet.id,
     name: 'Ethereum',
@@ -144,8 +147,9 @@ const tokenDetailsEthereum: DynamicTokenRowProps = {
 const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
   tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
   name: 'Session Token',
-  iconSrc: '/images/token_logo.svg',
+  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
   symbolPrefix: 't',
+  showAddTokenButton: true,
   network: {
     id: sepolia.id,
     name: 'Ethereum Sepolia',
@@ -158,7 +162,7 @@ const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
 const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
   tokenAddress: '0xd1e2d5085b39B80C9948AeB1b9aA83AF6756bcc5',
   name: 'Wrapped OXEN',
-  iconSrc: '/images/woxen.svg',
+  iconSrc: 'https://stake.getsession.org/images/woxen.svg',
   network: {
     id: mainnet.id,
     name: 'Ethereum',
