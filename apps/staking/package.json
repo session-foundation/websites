@@ -29,6 +29,7 @@
     "@session/util-js": "workspace:*",
     "@session/util-logger": "workspace:*",
     "@session/wallet": "workspace:*",
+    "@session/testing": "workspace:*",
     "@tanstack/react-query": "5.61.5",
     "better-sqlite3-multiple-ciphers": "11.1.2",
     "bufferutil": "^4.0.8",

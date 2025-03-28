@@ -157,6 +157,9 @@ importers:
       '@session/staking-api-js':
         specifier: workspace:*
         version: link:../../packages/staking-api-js
+      '@session/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       '@session/ui':
         specifier: workspace:*
         version: link:../../packages/ui

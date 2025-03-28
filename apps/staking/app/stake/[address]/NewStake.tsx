@@ -1,8 +1,9 @@
-import { type ErrorBoxProps, ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
+import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 import { StakeInfo, getContributionRangeForWallet } from '@/app/stake/[address]/StakeInfo';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
 import { ActionModuleRow } from '@/components/ActionModule';
+import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import EthereumAddressField, {
   getEthereumAddressFormFieldSchema,
   type GetEthereumAddressFormFieldSchemaArgs,

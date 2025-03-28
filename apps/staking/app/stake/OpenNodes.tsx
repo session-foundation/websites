@@ -13,6 +13,7 @@ import { useStakes } from '@/hooks/useStakes';
 import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { getContributionRangeFromContributors } from '@/lib/maths';
+import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useWallet } from '@session/wallet/hooks/useWallet';
@@ -20,6 +21,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 
 export default function OpenNodes() {
+  useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.openNodes');
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts();
