@@ -1,6 +1,7 @@
-import { type ErrorBoxProps, ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
+import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
+import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import {
   CONTRIBUTION_CONTRACT_STATUS,
   type ContributorContractInfo,

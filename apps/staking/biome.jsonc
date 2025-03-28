@@ -4,9 +4,6 @@
   "linter": {
     "ignore": ["app/faucet/"],
     "rules": {
-      "suspicious": {
-        "noExplicitAny": "off"
-      },
       "performance": {
         "useTopLevelRegex": "off"
       },

@@ -1,9 +1,11 @@
 import ComingSoonModule from '@/app/mystakes/modules/ComingSoon';
 import PriceModule from '@/app/mystakes/modules/PriceModule';
 import TestnetPointsModule from '@/app/mystakes/modules/TestnetPointsModule';
+import { ErrorBox } from '@/components/Error/ErrorBox';
 import { siteMetadata } from '@/lib/metadata';
 import { ModuleGrid } from '@session/ui/components/ModuleGrid';
 import { getTranslations } from 'next-intl/server';
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import ClaimTokensModule from './modules/ClaimTokensModule';
 import DailyNodeReward from './modules/DailyNodeReward';
 import StakedBalanceModule from './modules/StakedBalanceModule';
@@ -36,7 +38,9 @@ export default function Page() {
       </div>
       <div className="col-span-2 mt-6 h-full pb-8 md:mt-0 md:max-h-screen-without-header">
         <ModuleGrid variant="section" colSpan={2} className="h-full">
-          <StakedNodesModule />
+          <ErrorBoundary errorComponent={ErrorBox}>
+            <StakedNodesModule />
+          </ErrorBoundary>
         </ModuleGrid>
       </div>
     </ModuleGrid>
