@@ -3,16 +3,13 @@ import {
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { isValidReservedSlots } from '@/app/register/[nodeId]/multi/ReserveSlotsInputTab';
-import {
-  type ErrorBoxProps,
-  ErrorTabRegistration,
-  recoverableErrors,
-} from '@/app/register/[nodeId]/shared/ErrorTab';
+import { ErrorTabRegistration, recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { RegistrationEditButton } from '@/app/register/[nodeId]/shared/RegistrationEditButton';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
 import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import { useNetworkStatus } from '@/components/StatusBar';
 import useContributeStakeToOpenNode, {
