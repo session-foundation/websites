@@ -1,297 +1,21 @@
-export type NetworkInfo = {
-  block_height: number;
-  block_timestamp: number;
-  block_top_hash: string;
-  l2_height: number;
-  l2_height_timestamp: number;
-  hard_fork: number;
-  max_stakers: number;
-  min_operator_stake: number;
-  nettype: string;
-  staking_requirement: number;
-  version: string;
-};
-
-/** /info */
-interface NetworkInfoResponse {
-  network: NetworkInfo;
-  t: number;
-}
-
-export interface LockedContribution {
-  amount: number;
-  key_image: string;
-  key_image_pub_key: string;
-}
-
-export interface Contributor {
-  address: string;
-  beneficiary: string;
-  amount: number;
-  reserved: number;
-  locked_contributions: LockedContribution[];
-}
-
-export interface GetContributionContractsResponse {
-  network: NetworkInfo;
-  contracts: Array<ContributorContractInfo>;
-  added_bls_keys: Record<number, string>;
-}
-
-/** GET /contract/contribution/<sn key> */
-export interface GetContributionContractForNodePubkeyResponse {
-  network: NetworkInfo;
-  contracts: Array<ContributorContractInfo>;
-}
-
-/** GET /stakes/<32 byte address> */
-export type StakeContributor = {
-  address: string;
-  beneficiary?: string;
-  amount: number;
-  reserved: number;
-};
-
-export enum EXIT_TYPE {
-  /** The node is deregistered by consensus */
-  DEREGISTER = 'deregister',
-}
-
-export type NodeInfo = {
-  active: boolean;
-  contract_id: number;
-  decommission_count: number;
-  deregistration_height: number | null;
-  earned_downtime_blocks: number;
-  exit_type: EXIT_TYPE | null;
-  fetched_block_height: number;
-  funded: boolean;
-  is_liquidatable: boolean;
-  is_removable: boolean;
-  last_reward_block_height: number;
-  last_uptime_proof: number;
-  liquidation_height: number | null;
-  lokinet_version: [number, number, number] | null;
-  operator_address: string;
-  operator_fee: number;
-  payable: boolean;
-  pubkey_bls: string;
-  pubkey_ed25519: string;
-  public_ip: string | null;
-  pulse_votes: unknown | null;
-  quorumnet_port: number | null;
-  registration_height: number;
-  registration_hf_version: string;
-  requested_unlock_height: number;
-  service_node_pubkey: string;
-  service_node_version: [number, number, number] | null;
-  staking_requirement: number;
-  state_height: number;
-  storage_lmq_port: number | null;
-  storage_port: number | null;
-  storage_server_version: [number, number, number] | null;
-  swarm: string;
-  swarm_id: string;
-  total_contributed: number;
-  contributors: Array<StakeContributor>;
-};
-
-// NOTE: This is a duplicate of the same enum in the ServiceNodeContribution.sol contract
-// Definitions
-// Track the status of the multi-contribution contract. At any point in the
-// contract's lifetime, `reset` can be invoked to set the contract back to
-// `WaitForOperatorContrib`.
-export enum CONTRIBUTION_CONTRACT_STATUS {
-  // Contract is initialised w/ no contributions. Call `contributeFunds`
-  // to transition into `OpenForPublicContrib`
-  WaitForOperatorContrib = 0,
-
-  // Contract has been initially funded by operator. Public and reserved
-  // contributors can now call `contributeFunds`. When the contract is
-  // collaterialised with exactly the staking requirement, the contract
-  // transitions into `WaitForFinalized` state.
-  OpenForPublicContrib = 1,
-
-  // Operator must invoke `finalizeNode` to transfer the tokens and the
-  // node registration details to the `stakingRewardsContract` to
-  // transition to `Finalized` state.
-  WaitForFinalized = 2,
-
-  // Contract interactions are blocked until `reset` is called.
-  Finalized = 3,
-}
-
-export type ContributorContractInfo = {
-  address: `0x${string}`;
-  contributors: Array<StakeContributor>;
-  created_timestamp: number;
-  fee: number;
-  last_added_timestamp: number | null;
-  manual_finalize: boolean;
-  node_add_timestamp: number | null;
-  operator_address: string;
-  pubkey_bls: string;
-  service_node_pubkey: string;
-  service_node_signature: string;
-  status: CONTRIBUTION_CONTRACT_STATUS;
-};
-
-export type ArbitrumEvent = {
-  args: unknown;
-  block: number;
-  main_arg: string | null;
-  name: string;
-  timestamp: number | null;
-  tx: string;
-};
-
-export type VestingContract = {
-  address: `0x${string}`;
-  beneficiary: string;
-  initial_amount: number;
-  initial_beneficiary: string;
-  revoker: string;
-  time_end: number;
-  time_start: number;
-  transferable_beneficiary: boolean;
-};
-
-export type Stake = NodeInfo & {
-  events: Array<ArbitrumEvent>;
-};
-
-export interface GetStakesResponse {
-  network: NetworkInfo;
-  contracts: Array<ContributorContractInfo>;
-  stakes: Array<Stake>;
-  vesting: Array<VestingContract>;
-  added_bls_keys: Record<string, number>;
-}
-
-/** /store */
-interface StoreRegistrationResponse {
-  success: boolean;
-  registration: {
-    type: 'solo' | 'contract';
-    operator: string;
-    contract?: string;
-    pubkey_ed25519: string;
-    pubkey_bls: string;
-    sig_ed25519: string;
-    sig_bls: string;
-  };
-}
-
-/** GET /nodes */
-export interface GetNodesResponse {
-  network: NetworkInfo;
-  nodes: Stake[];
-}
-
-/** /registrations */
-export interface Registration {
-  type: 'solo' | 'contract';
-  operator: string;
-  contract?: string;
-  pubkey_ed25519: string;
-  pubkey_bls: string;
-  sig_ed25519: string;
-  sig_bls: string;
-  timestamp: number;
-}
-
-export interface LoadRegistrationsResponse {
-  network: NetworkInfo;
-  registrations: Registration[];
-}
-
-/** /validation */
-interface ValidationError {
-  code: string;
-  error: string;
-  detail?: string;
-}
-
-interface ValidateRegistrationResponse {
-  success?: boolean;
-  error?: ValidationError;
-  remaining_contribution?: number;
-  remaining_spots?: number;
-  remaining_min_contribution?: number;
-}
-
-/** GET /exit/<32 byte pubkey> */
-export interface GetNodeExitSignaturesResponse {
-  network: NetworkInfo;
-  result: BlsExitResponse;
-}
-
-/** GET /liquidation/<32 byte pubkey> */
-export interface GetNodeLiquidationResponse {
-  network: NetworkInfo;
-  result: BlsLiquidationResponse;
-}
-
-type ExitLiquidationListItem = {
-  info: {
-    bls_public_key: string;
-  };
-  height: number;
-  liquidation_height: number;
-  service_node_pubkey: string;
-  type: string;
-  version: string;
-};
-
-/** GET /exit_liquidation_list */
-export interface GetExitLiquidationListResponse {
-  network: NetworkInfo;
-  result: Array<ExitLiquidationListItem>;
-}
-
-/** GET /nodes/bls */
-export interface GetNodesBlsKeysResponse {
-  network: NetworkInfo;
-  bls_keys: Record<number, string>;
-}
-
-/** GET /rewards/<32 byte address> */
-export interface GetRewardsInfoResponse {
-  network: NetworkInfo;
-  rewards: number;
-}
-
-/** POST /rewards */
-
-export interface GetRewardsClaimSignatureResponse {
-  network: NetworkInfo;
-  rewards: BlsRewardsResponse;
-}
-
-export type BlsRewardsResponse = {
-  amount: number;
-  height: number;
-  msg_to_sign: string;
-  non_signer_indices: Array<number>;
-  signature: string;
-};
-
-export type BlsExitResponse = {
-  bls_pubkey: string;
-  msg_to_sign: string;
-  non_signer_indices: Array<number>;
-  signature: string;
-  timestamp: number;
-};
-
-export type BlsLiquidationResponse = BlsExitResponse;
-
-/** Client types */
-type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+import type { Address } from 'viem';
+import type { Ed25519PublicKey } from './refine';
+import type {
+  BlsExitSignatureResponse,
+  BlsRewardsResponse,
+  BlsRewardsSignatureResponse,
+  ContributionContractByKeyResponse,
+  ContributionContractResponse,
+  ExitLiquidationListResponse,
+  NetworkInfoResponse,
+  NodesBlsKeysResponse,
+  RegistrationsResponse,
+  StakesResponse,
+} from './schema';
 
 export interface RequestOptions {
   endpoint: string;
-  method: HTTPMethod;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: BodyInit;
 }
 
@@ -388,25 +112,25 @@ export class SessionStakingClient {
   }
 
   public async getContributionContracts(): Promise<
-    StakingBackendResponse<GetContributionContractsResponse>
+    StakingBackendResponse<ContributionContractResponse>
   > {
     const options: RequestOptions = {
       endpoint: '/contract/contribution',
       method: 'GET',
     };
-    return await this.request<GetContributionContractsResponse>(options);
+    return await this.request<ContributionContractResponse>(options);
   }
 
   public async getContributionContractForNodePubkey({
     nodePubKey,
   }: {
     nodePubKey: string;
-  }): Promise<StakingBackendResponse<GetContributionContractForNodePubkeyResponse>> {
+  }): Promise<StakingBackendResponse<ContributionContractByKeyResponse>> {
     const options: RequestOptions = {
       endpoint: `/contract/contribution/${nodePubKey}`,
       method: 'GET',
     };
-    return await this.request<GetContributionContractForNodePubkeyResponse>(options);
+    return await this.request<ContributionContractByKeyResponse>(options);
   }
 
   /**
@@ -418,68 +142,68 @@ export class SessionStakingClient {
     address,
   }: {
     address: string;
-  }): Promise<StakingBackendResponse<GetStakesResponse>> {
+  }): Promise<StakingBackendResponse<StakesResponse>> {
     const options: RequestOptions = {
       endpoint: `/stakes/${address}`,
       method: 'GET',
     };
-    return await this.request<GetStakesResponse>(options);
+    return await this.request<StakesResponse>(options);
   }
 
-  public async getNodesBlsKeys(): Promise<StakingBackendResponse<GetNodesBlsKeysResponse>> {
+  public async getNodesBlsKeys(): Promise<StakingBackendResponse<NodesBlsKeysResponse>> {
     const options: RequestOptions = {
       endpoint: '/nodes/bls',
       method: 'GET',
     };
-    return await this.request<GetNodesBlsKeysResponse>(options);
+    return await this.request<NodesBlsKeysResponse>(options);
   }
 
   public async getRewardsInfo({
     address,
   }: {
     address: string;
-  }): Promise<StakingBackendResponse<GetRewardsInfoResponse>> {
+  }): Promise<StakingBackendResponse<BlsRewardsResponse>> {
     const options: RequestOptions = {
       endpoint: `/rewards/${address}`,
       method: 'GET',
     };
-    return await this.request<GetRewardsInfoResponse>(options);
+    return await this.request<BlsRewardsResponse>(options);
   }
 
   public async getRewardsClaimSignature({
     address,
   }: {
     address: string;
-  }): Promise<StakingBackendResponse<GetRewardsClaimSignatureResponse>> {
+  }): Promise<StakingBackendResponse<BlsRewardsSignatureResponse>> {
     const options: RequestOptions = {
       endpoint: `/rewards/${address}`,
       method: 'POST',
     };
-    return await this.request<GetRewardsClaimSignatureResponse>(options);
+    return await this.request<BlsRewardsSignatureResponse>(options);
   }
 
   public async getNodeExitSignatures({
     nodePubKey,
   }: {
     nodePubKey: string;
-  }): Promise<StakingBackendResponse<GetNodeExitSignaturesResponse>> {
+  }): Promise<StakingBackendResponse<BlsExitSignatureResponse>> {
     const options: RequestOptions = {
       endpoint: `/exit/${nodePubKey}`,
       method: 'GET',
     };
-    return await this.request<GetNodeExitSignaturesResponse>(options);
+    return await this.request<BlsExitSignatureResponse>(options);
   }
 
   public async getNodeLiquidation({
     nodePubKey,
   }: {
     nodePubKey: string;
-  }): Promise<StakingBackendResponse<GetNodeLiquidationResponse>> {
+  }): Promise<StakingBackendResponse<BlsExitSignatureResponse>> {
     const options: RequestOptions = {
       endpoint: `/liquidation/${nodePubKey}`,
       method: 'GET',
     };
-    return await this.request<GetNodeLiquidationResponse>(options);
+    return await this.request<BlsExitSignatureResponse>(options);
   }
 
   public async exitLiquidationList() {
@@ -487,53 +211,15 @@ export class SessionStakingClient {
       endpoint: '/exit_liquidation_list',
       method: 'GET',
     };
-    return await this.request<GetExitLiquidationListResponse>(options);
+    return await this.request<ExitLiquidationListResponse>(options);
   }
 
-  public async getNodes(): Promise<StakingBackendResponse<GetNodesResponse>> {
+  public async getNodes(): Promise<StakingBackendResponse<StakesResponse>> {
     const options: RequestOptions = {
       endpoint: '/nodes',
       method: 'GET',
     };
-    return await this.request<GetNodesResponse>(options);
-  }
-
-  /**
-   * Stores or replaces the registration details for a service node.
-   * @param snPubkey Service node public key (hex).
-   * @param queryParams Registration details.
-   * @returns Registration response.
-   */
-  public async storeRegistration({
-    snPubkey,
-    queryParams,
-  }: {
-    snPubkey: string;
-    queryParams: BodyInit;
-  }): Promise<StakingBackendResponse<StoreRegistrationResponse>> {
-    const options: RequestOptions = {
-      endpoint: `/store/${snPubkey}`,
-      method: 'GET',
-      body: queryParams,
-    };
-    return await this.request<StoreRegistrationResponse>(options);
-  }
-
-  /**
-   * Retrieves stored registrations for the given service node public key.
-   * @param snPubkey Service node public key (hex).
-   * @returns Registrations.
-   */
-  public async loadRegistrations({
-    snPubkey,
-  }: {
-    snPubkey: string;
-  }): Promise<StakingBackendResponse<LoadRegistrationsResponse>> {
-    const options: RequestOptions = {
-      endpoint: `/registrations/${snPubkey}`,
-      method: 'GET',
-    };
-    return await this.request<LoadRegistrationsResponse>(options);
+    return await this.request<StakesResponse>(options);
   }
 
   /**
@@ -544,31 +230,13 @@ export class SessionStakingClient {
   public async getOperatorRegistrations({
     operator,
   }: {
-    operator: string;
-  }): Promise<StakingBackendResponse<LoadRegistrationsResponse>> {
+    operator: Address | Ed25519PublicKey;
+  }): Promise<StakingBackendResponse<RegistrationsResponse>> {
     const options: RequestOptions = {
       endpoint: `/registrations/${operator}`,
       method: 'GET',
     };
-    return await this.request<LoadRegistrationsResponse>(options);
-  }
-
-  /**
-   * Validates a registration including fee, stakes, and reserved spot requirements.
-   * @param queryParams Registration details.
-   * @returns Validation response.
-   */
-  public async validateRegistration({
-    queryParams,
-  }: {
-    queryParams: BodyInit;
-  }): Promise<StakingBackendResponse<ValidateRegistrationResponse>> {
-    const options: RequestOptions = {
-      endpoint: '/validate',
-      method: 'GET',
-      body: queryParams,
-    };
-    return await this.request<ValidateRegistrationResponse>(options);
+    return await this.request<RegistrationsResponse>(options);
   }
 }
 
