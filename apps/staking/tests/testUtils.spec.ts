@@ -1,4 +1,4 @@
-import { CONTRACT_ADDRESS, ED25519_ADDRESS, WALLET_ADDRESS } from '@/tests/testUtils';
+import { CONTRACT_ADDRESS, ED25519_ADDRESS, WALLET_ADDRESS } from '../tests/testUtils';
 import { isEd25519PublicKey } from '@session/staking-api-js/refine';
 import { isAddress } from 'viem';
 
