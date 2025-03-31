@@ -24,8 +24,12 @@ export function sortContracts(a: ContributionContract, b: ContributionContract, 
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  const priorityA = operatorA ? (contractStateSortOrderIfOperator[a.status] ?? 999) : 999;
-  const priorityB = operatorB ? (contractStateSortOrderIfOperator[b.status] ?? 999) : 999;
+  const priorityA = operatorA
+    ? (contractStateSortOrderIfOperator[a.status] ?? Number.POSITIVE_INFINITY)
+    : Number.POSITIVE_INFINITY;
+  const priorityB = operatorB
+    ? (contractStateSortOrderIfOperator[b.status] ?? Number.POSITIVE_INFINITY)
+    : Number.POSITIVE_INFINITY;
 
   if (priorityA !== priorityB) {
     // Priority ascending
