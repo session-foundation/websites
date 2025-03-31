@@ -524,6 +524,7 @@
           "errorMessage": "Error Message",
           "copyToClipboardButtonAria": "Copy error message to clipboard"
         }
+        "nodeNotFound": "This node registration could not be found. Please check to make sure you're connected to the right wallet.",
       },
       "loading": {
         "title": "Checking for existing registrations",
