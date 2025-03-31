@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { ContractFunctionArgs, ContractFunctionName } from 'viem';
+import type { Address, ContractFunctionArgs, ContractFunctionName } from 'viem';
 import type { ContractAbis } from '../abis';
 import type { ContractName } from '../constants';
 import { useContractWriteGasQuery } from './useContractWriteGasQuery';
@@ -15,10 +15,12 @@ export const useEstimateContractFee = <
   contract,
   args,
   functionName,
+  addressOverride,
 }: {
   contract: T;
   args?: Args;
   functionName: FName;
+  addressOverride?: Address | null;
 }) => {
   const { gasPrice, error: gasPriceError, status: gasPriceStatus } = useGasPrice();
 
@@ -31,6 +33,7 @@ export const useEstimateContractFee = <
     contract,
     functionName,
     args,
+    addressOverride,
   });
 
   const fee = useMemo(
