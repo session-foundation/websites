@@ -263,7 +263,7 @@ describe('parseContracts', () => {
       blockHeight: 1000,
     });
 
-    // Since the Finalized event's block (50) is less than the lifespan threshold (nodeMinLifespanArbBlocks), it should be added to joiningContracts.
+    // Since the Finalized event's block (50) is less than the lifespan limit (nodeMinLifespanArbBlocks), it should be added to joiningContracts.
     expect(result.joiningContracts).toHaveLength(1);
     expect(result.joiningContracts[0]?.pubkey_bls).toBe('key5');
     // It should not be in visibleContracts.
