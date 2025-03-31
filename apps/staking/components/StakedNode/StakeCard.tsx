@@ -70,7 +70,9 @@ const StakeCard = forwardRef<HTMLDivElement, StakeCardProps>(
         {collapsableFirstChildren}
         {/** NOTE - ensure any changes here still work with the pubkey component */}
         <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {isOperator ? <NodeOperatorIndicator className="me-0.5" /> : null}
+          {isOperator ? (
+            <NodeOperatorIndicator className="me-0.5" isOperatorConnectedWallet />
+          ) : null}
           {publicKey ? (
             <span className="inline-flex flex-nowrap gap-1">
               <RowLabel>

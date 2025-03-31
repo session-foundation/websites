@@ -55,8 +55,17 @@ export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions
 };
 
 export const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions, locale?: Locale) => {
-  const deviceLocale = useLocale();
-  return new Intl.DateTimeFormat(locale ?? deviceLocale, options).format(date);
+  return new Intl.DateTimeFormat(locale, options).format(date);
+};
+
+export const useFormatDate = (
+  date?: Date | null,
+  options?: Intl.DateTimeFormatOptions,
+  fallback?: string | null
+) => {
+  const locale = useLocale();
+  if (!date) return fallback ?? null;
+  return formatDate(date, options, locale);
 };
 
 export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions) => {

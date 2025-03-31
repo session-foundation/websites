@@ -7,7 +7,7 @@ import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import type { Stake } from '@session/staking-api-js/client';
+import type { Stake } from '@session/staking-api-js/schema';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
 import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';

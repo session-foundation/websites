@@ -2,17 +2,21 @@ import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/Contrib
 import { type StakeFormSchema, getStakeFormSchema } from '@/app/stake/[address]/NewStake';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
 import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
+// import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import EthereumAddressField from '@/components/Form/EthereumAddressField';
 import StakeAmountField from '@/components/Form/StakeAmountField';
+import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useDecimalDelimiter } from '@/lib/locale-client';
 import { getContributionRangeFromContributors } from '@/lib/maths';
+// import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
@@ -24,13 +28,14 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
+// import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
 
 export function ManageStakeContribution({
   contract,
   isSubmitting,
   setIsSubmitting,
 }: {
-  contract: ContributorContractInfo;
+  contract: ContributionContract;
   isSubmitting: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
 }) {
@@ -39,7 +44,11 @@ export function ManageStakeContribution({
   );
   const [isRemoveStake, setIsRemoveStake] = useState<boolean>(false);
 
-  const { address } = useWallet();
+  const address = useCurrentActor();
+  const { address: connectedAddress } = useWallet();
+  // TODO: uncomment when we have vesting contracts
+  const vestingContract = null; //useActiveVestingContract();
+  const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const dictionary = useTranslations('actionModules.staking.manage');
   const dictionaryShared = useTranslations('actionModules.shared');
@@ -95,14 +104,15 @@ export function ManageStakeContribution({
       }),
     },
     rewardsAddress: {
-      required: false,
+      required: !!vestingContract,
+      bannedAddresses: bannedRewardsAddresses,
     },
   });
 
   const form = useForm<StakeFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rewardsAddress: contributor?.beneficiary ?? address,
+      rewardsAddress: contributor?.beneficiary_address ?? connectedAddress,
       stakeAmount: bigIntToString(contributorStakeAmount, SENT_DECIMALS, decimalDelimiter),
     },
     reValidateMode: 'onChange',
@@ -245,10 +255,28 @@ export function ManageStakeContribution({
         </form>
       </Form>
       {stakingParams ? (
-        <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
+        vestingContract ? (
+          // TODO: uncomment when we have vesting contracts
+          null
+          // <SubmitContributeFundsVesting
+          //   stakingParams={stakingParams}
+          //   setIsSubmitting={setIsSubmitting}
+          // />
+        ) : (
+          <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
+        )
       ) : null}
       {isRemoveStake ? (
-        <SubmitRemoveFunds setIsSubmitting={setIsSubmitting} contractAddress={contract.address} />
+        vestingContract ? (
+          // TODO: uncomment when we have vesting contracts
+          null
+          // <SubmitRemoveFundsVesting
+          //   setIsSubmitting={setIsSubmitting}
+          //   contractAddress={contract.address}
+          // />
+        ) : (
+          <SubmitRemoveFunds setIsSubmitting={setIsSubmitting} contractAddress={contract.address} />
+        )
       ) : null}
     </>
   );

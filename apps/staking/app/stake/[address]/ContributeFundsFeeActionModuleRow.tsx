@@ -8,7 +8,7 @@ import {
   useAllowanceQuery,
   useProxyApprovalFeeEstimate,
 } from '@session/contracts/hooks/Token';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import type { ContributionContract } from '@session/staking-api-js/schema';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import type { Address } from 'viem';
@@ -19,7 +19,7 @@ export function ContributeFundsFeeActionModuleRow({
   minStake,
   maxStake,
 }: {
-  contract: ContributorContractInfo;
+  contract: ContributionContract;
   stakeAmount: bigint;
   minStake: bigint;
   maxStake: bigint;

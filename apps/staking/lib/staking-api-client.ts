@@ -2,6 +2,7 @@
 
 import { PREFERENCE, prefDetails } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
+import logger from '@/lib/logger';
 import {
   type StakingBackendQuery,
   type StakingBackendQueryWithParams,
@@ -22,6 +23,11 @@ export type QueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
 >;
 
 let client: SessionStakingClient | undefined;
+
+function debugLogRequest(response: Awaited<ReturnType<StakingBackendQueryWithParams>>) {
+  logger.debug(`SSB Response: ${response.status} ${response.statusText}`);
+  logger.debug(response.data);
+}
 
 export function useStakingBackendBrowserClient() {
   const { getItem, setItem } = usePreferences();
@@ -46,12 +52,17 @@ export function useStakingBackendBrowserClient() {
   }, [baseUrl]);
 }
 
-export function useStakingBackendSuspenseQuery<Q extends StakingBackendQuery>(query: Q) {
+export function useStakingBackendSuspenseQuery<Q extends StakingBackendQuery>(
+  query: Q,
+  queryOptions?: QueryOptions<Q>
+) {
   const stakingBackendClient = useStakingBackendBrowserClient();
   return useSuspenseQuery<Awaited<ReturnType<Q>>['data']>({
     ...getStakingBackendQueryArgs(query),
+    ...queryOptions,
     queryFn: async () => {
       const res = await query(stakingBackendClient);
+      debugLogRequest(res);
       return res.data;
     },
   });
@@ -67,6 +78,7 @@ export function useStakingBackendQuery<Q extends StakingBackendQuery>(
     ...queryOptions,
     queryFn: async () => {
       const res = await query(stakingBackendClient);
+      debugLogRequest(res);
       return res.data;
     },
   });
@@ -81,6 +93,7 @@ export function useStakingBackendSuspenseQueryWithParams<Q extends StakingBacken
     ...getStakingBackendQueryWithParamsArgs(query, params),
     queryFn: async () => {
       const res = await query(stakingBackendClient, params);
+      debugLogRequest(res);
       return res.data;
     },
   });
@@ -97,6 +110,7 @@ export function useStakingBackendQueryWithParams<Q extends StakingBackendQueryWi
     ...queryOptions,
     queryFn: async () => {
       const res = await query(stakingBackendClient, params);
+      debugLogRequest(res);
       return res.data;
     },
   });

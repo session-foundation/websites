@@ -4,22 +4,21 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useNetworkStatus } from '@/components/StatusBar';
-import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
+import { useRegistrationsForCurrentActor } from '@/hooks/useRegistrationsForCurrentActor';
 import { useStakes } from '@/hooks/useStakes';
-import { QUERY, URL } from '@/lib/constants';
-import { isProduction } from '@/lib/env';
+import { URL } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
+import logger from '@/lib/logger';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import type { Registration } from '@session/staking-api-js/client';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
+import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 
 export default function NodeRegistrations() {
   useAllowTestingErrorToThrow();
@@ -35,18 +34,8 @@ export default function NodeRegistrations() {
 
    const [showHidden, setShowHidden] = useState<boolean>(false); */
 
-  const { address, isConnected } = useWallet();
-
-  const { data, isLoading, isError, refetch, isFetching } = useStakingBackendQueryWithParams(
-    getNodeRegistrations,
-    { address: address! },
-    {
-      enabled: isConnected,
-      staleTime: isProduction
-        ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-        : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-    }
-  );
+  const { isConnected } = useWallet();
+  const { data, isLoading, isError, refetch, isFetching } = useRegistrationsForCurrentActor();
 
   const network = useMemo(
     () => (data && 'network' in data && data.network ? data.network : null),
@@ -55,7 +44,7 @@ export default function NodeRegistrations() {
 
   const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
 
-  const { addedBlsKeys, isLoading: isLoadingStakes } = useStakes();
+  const { networkBlsKeys, isLoading: isLoadingStakes } = useStakes();
 
   /**
    * - Sorted in descending order by the `timestamp` of the registration.
@@ -63,29 +52,25 @@ export default function NodeRegistrations() {
    * - Remove duplicate registrations, keeping only the most recent.
    */
   const registrations = useMemo(() => {
-    if (
-      showNoNodes ||
-      !data ||
-      !('registrations' in data) ||
-      !Array.isArray(data.registrations) ||
-      isLoadingStakes ||
-      !addedBlsKeys
-    ) {
+    if (showNoNodes || !data || isLoadingStakes || !networkBlsKeys) {
       return [];
     }
 
     const addedRegistrationBlsKeys = new Set();
 
-    return (data.registrations as Array<Registration>)
+    const [error, registrations] = safeTrySyncWithFallback(() => data.registrations, []);
+    if (error) logger.error(error);
+
+    return registrations
       .sort(({ timestamp: tA }, { timestamp: tB }) => tB - tA)
       .filter(({ pubkey_bls }) => {
-        if (!addedBlsKeys.has(pubkey_bls) && !addedRegistrationBlsKeys.has(pubkey_bls)) {
+        if (!networkBlsKeys.has(pubkey_bls) && !addedRegistrationBlsKeys.has(pubkey_bls)) {
           addedRegistrationBlsKeys.add(pubkey_bls);
           return true;
         }
         return false;
       });
-  }, [addedBlsKeys, data, showNoNodes, isLoadingStakes]);
+  }, [networkBlsKeys, data, showNoNodes, isLoadingStakes]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
   useEffect(() => {
@@ -112,7 +97,7 @@ export default function NodeRegistrations() {
       buttonText={dictionary('errorButton')}
       buttonDataTestId={ButtonDataTestId.Open_Nodes_Error_Retry}
     />
-  ) : address ? (
+  ) : isConnected ? (
     isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
     ) : registrations?.length ? (

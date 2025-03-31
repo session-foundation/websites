@@ -25,7 +25,10 @@ import {
   isUserSelectableRegistrationMode,
   parseTab,
 } from '@/app/register/[nodeId]/types';
-import { getEthereumAddressFormFieldSchema } from '@/components/Form/EthereumAddressField';
+import {
+  type BannedAddress,
+  getEthereumAddressFormFieldSchema,
+} from '@/components/Form/EthereumAddressField';
 import {
   type GetOperatorFeeFormFieldSchemaArgs,
   getOperatorFeeFormFieldSchema,
@@ -35,6 +38,7 @@ import {
   getStakeAmountFormFieldSchema,
 } from '@/components/Form/StakeAmountField';
 import { WizardContent } from '@/components/Wizard';
+import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import useQueryParams, { type UseQueryParamsReturn } from '@/hooks/useQueryParams';
 import { useStakes } from '@/hooks/useStakes';
@@ -51,10 +55,8 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import {
-  CONTRIBUTION_CONTRACT_STATUS,
-  type ContributorContractInfo,
-} from '@session/staking-api-js/client';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import type { ContributionContract, VestingContract } from '@session/staking-api-js/schema';
 import { toast } from '@session/ui/lib/toast';
 import { useForm } from '@session/ui/ui/form';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
@@ -81,7 +83,7 @@ import { z } from 'zod';
 type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   address: Address;
   changeTab: (tab: REG_TAB) => void;
-  contract: ContributorContractInfo | null;
+  contract: ContributionContract | null;
   dict: ReturnType<typeof useTranslations<`actionModules.registration`>>;
   formMulti: ReturnType<typeof useForm<MultiRegistrationFormSchema>>;
   formSolo: ReturnType<typeof useForm<SoloRegistrationFormSchema>>;
@@ -93,7 +95,7 @@ type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   nodeType: NODE_TYPE;
   props: RegistrationProps;
   setBackButtonClickCallback: Dispatch<SetStateAction<null | (() => void)>>;
-  setContract: (contract: ContributorContractInfo | null) => void;
+  setContract: (contract: ContributionContract | null) => void;
   setIsError: Dispatch<SetStateAction<boolean>>;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
   setIsSuccess: Dispatch<SetStateAction<boolean>>;
@@ -113,15 +115,18 @@ function RegistrationProvider({
   ed25519Signature,
   preparedAt,
 }: RegistrationProps & { children: ReactNode }) {
-  const { contracts, addedBlsKeys } = useStakes();
+  const { visibleContracts, networkBlsKeys } = useStakes();
+  const { activeContract: vestingContract } = useVesting();
+  // TODO: uncomment when we have vesting contracts
+  const isVestingMode = false; //!!vestingContract;
 
   const [backButtonClickCallback, setBackButtonClickCallback] = useState<null | (() => void)>(null);
   const [isError, setIsError] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [tabHistory, setTabHistory] = useState<Array<REG_TAB>>([]);
-  const [contract, setContract] = useState<ContributorContractInfo | null>(
-    contracts.find(({ pubkey_bls }) => areHexesEqual(pubkey_bls, blsKey)) ?? null
+  const [contract, setContract] = useState<ContributionContract | null>(
+    visibleContracts.find(({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)) ?? null
   );
 
   const { address } = useWallet();
@@ -251,13 +256,21 @@ function RegistrationProvider({
     (contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib ||
       contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib);
 
-  const [tab, setTab] = useState<REG_TAB>(
-    addedBlsKeys?.has(blsKey)
+  const [_tab, setTab] = useState<REG_TAB>(
+    networkBlsKeys?.has(blsKey)
       ? REG_TAB.ALREADY_REGISTERED_RUNNING
       : alreadyRegisteredMulti
         ? REG_TAB.ALREADY_REGISTERED_MULTI
         : (queryParamStartTab ?? REG_TAB.START)
   );
+
+  const tab = useMemo(() => {
+    if (isVestingMode && !allowedVestingRegistrationTabs.includes(_tab)) {
+      return REG_TAB.REWARDS_ADDRESS_INPUT_SOLO;
+    }
+    return _tab;
+  }, [_tab, isVestingMode]);
+
   const [nodeType, setNodeType] = useState<NODE_TYPE>(
     alreadyRegisteredMulti ? NODE_TYPE.MULTI : (queryParamNodeType ?? NODE_TYPE.SOLO)
   );
@@ -290,8 +303,10 @@ function RegistrationProvider({
 
   if (!address) throw new Error('Address is required to create a registration');
 
+  const bannedRewardsAddresses = useBannedRewardsAddresses();
+
   const formSolo = useForm<SoloRegistrationFormSchema>({
-    resolver: zodResolver(getRegistrationSoloFormSchema()),
+    resolver: zodResolver(getRegistrationSoloFormSchema({ bannedRewardsAddresses })),
     defaultValues: {
       rewardsAddress: queryParamFields?.rewardsAddress ?? address,
     },
@@ -353,6 +368,9 @@ function RegistrationProvider({
         tabHistory,
         getQueryParams,
         pushQueryParam,
+        clearQueryParams,
+        isVestingMode,
+        vestingContract,
       }}
     >
       {children}
@@ -433,9 +451,14 @@ type RegistrationProps = {
   preparedAt: Date;
 };
 
-export const getRegistrationSoloFormSchema = () =>
+export const getRegistrationSoloFormSchema = ({
+  bannedRewardsAddresses,
+}: { bannedRewardsAddresses?: Array<BannedAddress> } = {}) =>
   z.object({
-    rewardsAddress: getEthereumAddressFormFieldSchema({ required: true }),
+    rewardsAddress: getEthereumAddressFormFieldSchema({
+      required: true,
+      bannedAddresses: bannedRewardsAddresses,
+    }),
   });
 
 type GetMultiRegistrationFormSchemaArgs = {

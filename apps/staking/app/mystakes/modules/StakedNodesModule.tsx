@@ -1,16 +1,19 @@
 'use client';
 
 import Loading from '@/app/loading';
+import { ErrorBox } from '@/components/Error/ErrorBox';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeListModuleContent } from '@/components/NodesListModule';
 import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useNetworkStatus } from '@/components/StatusBar';
-import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { useStakes } from '@/hooks/useStakes';
 import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { internalLink } from '@/lib/locale-defaults';
+import { useAllowTestingErrorToThrow } from '@/lib/testing';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import {
   ModuleGridHeader,
@@ -21,15 +24,18 @@ import { Button } from '@session/ui/ui/button';
 import { Switch } from '@session/ui/ui/switch';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import type { Address } from 'viem';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
+  useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');
   const {
     stakes,
-    contracts,
+    hiddenContractsWithStakes,
+    visibleContracts,
     network,
     blockHeight,
     networkTime,
@@ -59,9 +65,19 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         />
       ) : isLoading ? (
         <Loading />
-      ) : (stakes?.length || contracts?.length) && blockHeight && networkTime ? (
+      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) && blockHeight && networkTime ? (
         <>
-          {contracts.map((contract) => {
+          {hiddenContractsWithStakes.map((contract) => {
+            return (
+              <StakedContractCard
+                key={contract.address}
+                id={contract.address}
+                contract={contract}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+          {visibleContracts.map((contract) => {
             return (
               <StakedContractCard
                 key={contract.address}
@@ -111,7 +127,9 @@ export default function StakedNodesModule() {
           ) : null}
         </div>
       </ModuleGridHeader>
-      {address ? <StakedNodesWithAddress address={address} /> : <NoWallet />}
+      <ErrorBoundary errorComponent={ErrorBox}>
+        {address ? <StakedNodesWithAddress address={address} /> : <NoWallet />}
+      </ErrorBoundary>
     </>
   );
 }
@@ -128,7 +146,9 @@ function NoWallet() {
 }
 
 function NoNodes() {
-  const dictionary = useTranslations('modules.stakedNodes');
+  const dictionary = useTranslations(
+    useActiveVestingContract() ? 'vesting.modules.stakes' : 'modules.stakedNodes'
+  );
   return (
     <ModuleGridInfoContent>
       <p>{dictionary('noNodesP1')}</p>

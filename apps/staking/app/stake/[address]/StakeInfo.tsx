@@ -2,69 +2,69 @@ import { ActionModuleRow } from '@/components/ActionModule';
 import { NodeContributorList } from '@/components/NodeCard';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
 import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
-import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/Token';
-import {
-  CONTRIBUTION_CONTRACT_STATUS,
-  type ContributorContractInfo,
-} from '@session/staking-api-js/client';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { numberToBigInt } from '@session/util-crypto/maths';
+import { bigIntMax } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { type Address, isAddress } from 'viem';
 
-export function getReservedSlots(
-  contract: ContributorContractInfo
-): Array<ReservedContributorStruct> {
+export function getReservedSlots(contract: ContributionContract): Array<ReservedContributorStruct> {
   return contract.contributors
     .filter(({ address, reserved }) => reserved && isAddress(address))
     .map(({ address, reserved }) => {
       return {
-        /** Casting to Address here is fine as we filter using {@link isAddress} */
-        addr: address as Address,
-        amount: BigInt(reserved),
+        addr: address,
+        amount: reserved,
       };
+    })
+    .sort((a, b) => {
+      const isAOperator = areHexesEqual(a.addr, contract.operator_address);
+      const isBOperator = areHexesEqual(b.addr, contract.operator_address);
+      return isAOperator ? -1 : isBOperator ? 1 : 0;
     });
 }
 
-export function getContributedContributor(contract: ContributorContractInfo, address?: Address) {
+export function getContributedContributor(contract: ContributionContract, address?: Address) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, amount }) =>
-      areHexesEqual(contributorAddress, address) && amount > 0
+      areHexesEqual(contributorAddress, address) && amount > 0n
   );
 }
 
-export function getReservedContributor(contract: ContributorContractInfo, address?: Address) {
+export function getReservedContributor(contract: ContributionContract, address?: Address) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, reserved }) =>
-      areHexesEqual(contributorAddress, address) && reserved > 0
+      areHexesEqual(contributorAddress, address) && reserved > 0n
   );
 }
 
 export function getReservedContributorNonContributed(
-  contract: ContributorContractInfo,
+  contract: ContributionContract,
   address?: Address
 ) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, reserved, amount }) =>
-      areHexesEqual(contributorAddress, address) && reserved > 0 && amount === 0
+      areHexesEqual(contributorAddress, address) && reserved > 0n && amount === 0n
   );
 }
 
 export const getContributionRangeForWallet = (
-  contract: ContributorContractInfo,
+  contract: ContributionContract,
   address?: Address
 ) => {
   const reservedContributor = getReservedContributor(contract, address);
@@ -72,9 +72,7 @@ export const getContributionRangeForWallet = (
   const { minStake: minStakeCalculated, maxStake } =
     getContributionRangeFromContributorsIgnoreAddress(contract.contributors, address);
 
-  const minStake = reservedContributor?.reserved
-    ? numberToBigInt(reservedContributor?.reserved)
-    : minStakeCalculated;
+  const minStake = bigIntMax(reservedContributor?.reserved, minStakeCalculated);
 
   return {
     minStake,
@@ -91,7 +89,7 @@ type FieldProps = {
 };
 
 export type StakeInfoProps = {
-  contract: ContributorContractInfo;
+  contract: ContributionContract;
   totalStaked?: bigint;
   isSubmitting: boolean;
   editableFields?: Partial<Record<EditableField, FieldProps>>;
@@ -105,7 +103,7 @@ export function StakeInfo({
   isSubmitting,
   children,
 }: StakeInfoProps) {
-  const { address } = useWallet();
+  const address = useCurrentActor();
 
   const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
   const dictShared = useTranslations('actionModules.shared');
@@ -116,7 +114,7 @@ export function StakeInfo({
   const isOperator = areHexesEqual(contract.operator_address, address);
   const contributor = contract.contributors.find(
     ({ address: contributorAddress, amount }) =>
-      areHexesEqual(contributorAddress, address) && amount > 0
+      areHexesEqual(contributorAddress, address) && amount > 0n
   );
   const haveOtherContributorsContributed = contract.contributors.length > 1;
   const isFinalized = contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized;
@@ -139,7 +137,7 @@ export function StakeInfo({
           label={dictShared('yourStake')}
           tooltip={dictShared('yourStakeDescription')}
         >
-          {formatSENTNumber(contributor.amount)}
+          {formatSENTBigInt(contributor.amount)}
           <EditButton
             aria-label={dictShared('buttonEditField.aria', { field: dictShared('yourStake') })}
             data-testid={ButtonDataTestId.Stake_Edit_Stake_Amount}
@@ -176,7 +174,7 @@ export function StakeInfo({
         tooltip={sessionNodeDictionary('blsKeyDescription')}
       >
         <PubKey
-          pubKey={contract.pubkey_bls}
+          pubKey={contract.pubkey_bls ?? dictGeneral('notFound')}
           force="collapse"
           alwaysShowCopyButton
           leadingChars={8}
@@ -225,7 +223,9 @@ export function StakeInfo({
         label={dictShared('operatorFee')}
         tooltip={dictShared('operatorFeeDescription')}
       >
-        <span className="font-semibold">{formatPercentage(contract.fee / 10000)}</span>
+        <span className="font-semibold">
+          {contract.fee !== null ? formatPercentage(contract.fee / 10000) : dictGeneral('notFound')}
+        </span>
         {isOperator ? (
           <Tooltip tooltipContent="Editing this field is not yet supported">
             <EditButton
@@ -251,11 +251,7 @@ export function StakeInfo({
           tooltip={dictShared('rewardsAddressDescription')}
         >
           <PubKey
-            pubKey={
-              contributor.beneficiary && isAddress(contributor.beneficiary)
-                ? contributor.beneficiary
-                : (address ?? dictGeneral('none'))
-            }
+            pubKey={contributor.beneficiary_address ?? contributor.address ?? dictGeneral('none')}
             force="collapse"
             alwaysShowCopyButton
             leadingChars={8}

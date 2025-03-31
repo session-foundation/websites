@@ -1,65 +1,72 @@
+import { parseOpenContracts } from '@/hooks/parseOpenContracts';
 import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
-import { sortContracts, useStakes } from '@/hooks/useStakes';
+import { getReadyContracts } from '@/hooks/useContributeStakeToOpenNode';
+import { useStakes } from '@/hooks/useStakes';
+import { BACKEND, PREFERENCE } from '@/lib/constants';
+import logger from '@/lib/logger';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
-import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
+import { usePreferences } from 'usepref';
 import type { Address } from 'viem';
 
+/**
+ * Hook to get the current open contributor contracts.
+ * @param overrideAddress - The address to override the connected address.
+ * @returns The open contributor contracts.
+ */
 export function useOpenContributorContracts(overrideAddress?: Address) {
+  const { getItem } = usePreferences();
+  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+  const { address: connectedAddress } = useWallet();
+  const address = overrideAddress ?? connectedAddress;
+
+  const refetchInterval = autoRefresh
+    ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000
+    : undefined;
+
   const {
     data,
     isLoading: isLoadingContracts,
     refetch,
     isFetching: isFetchingContracts,
     isError,
-  } = useStakingBackendSuspenseQuery(getContributionContracts);
+  } = useStakingBackendSuspenseQuery(getContributionContracts, {
+    refetchInterval,
+  });
 
   const {
-    addedBlsKeys: addedBlsKeysFromStakes,
+    networkBlsKeys,
     isFetching: isFetchingStakes,
     isLoading: isLoadingStakes,
-  } = useStakes();
-
-  const { address: connectedAddress } = useWallet();
-  const address = overrideAddress ?? connectedAddress;
+  } = useStakes(address, refetchInterval);
 
   const enabledPublicBlsKeysQuery = !address;
   const {
     addedBlsKeys: addedBlsKeysPublic,
     isLoading: isLoadingPublicBlsKeys,
     isFetching: isFetchingPublicBlsKeys,
-  } = useAddedBlsKeysPublic({ enabled: enabledPublicBlsKeysQuery });
+  } = useAddedBlsKeysPublic({ enabled: enabledPublicBlsKeysQuery, refetchInterval });
 
-  const [contracts, network] = useMemo(() => {
-    if (!data || (!addedBlsKeysFromStakes && !addedBlsKeysPublic)) return [[], null];
-    const contractsArr = 'contracts' in data && Array.isArray(data.contracts) ? data.contracts : [];
+  const { contracts, network } = useMemo(() => {
+    if (!data || (isLoadingStakes && isLoadingPublicBlsKeys))
+      return { contracts: [], network: null };
 
-    const net = 'network' in data && data.network ? data.network : null;
+    const [networkErr, network] = safeTrySyncWithFallback(() => data.network ?? null, null);
+    if (networkErr) logger.error(networkErr);
 
-    if (address) {
-      contractsArr.sort((a, b) => sortContracts(a, b, address));
-    }
+    const [contractsErr, _contracts] = safeTrySyncWithFallback(
+      () => getReadyContracts(data.contracts ?? []),
+      []
+    );
+    if (contractsErr) logger.error(contractsErr);
 
-    const stakesBlsKeys = addedBlsKeysFromStakes ?? new Set<string>();
-    const publicBlsKeys = addedBlsKeysPublic ?? new Set<string>();
+    const contracts = parseOpenContracts(_contracts, address, networkBlsKeys, addedBlsKeysPublic);
 
-    const contractsFiltered = contractsArr
-      .filter(
-        ({ status, operator_address }) =>
-          status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib ||
-          (areHexesEqual(operator_address, address) &&
-            status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib)
-      )
-      .filter(({ pubkey_bls }) => {
-        const key = pubkey_bls.slice(2);
-        return !stakesBlsKeys.has(key) && !publicBlsKeys.has(key);
-      });
-
-    return [contractsFiltered, net];
-  }, [data, address, addedBlsKeysFromStakes, addedBlsKeysPublic]);
+    return { contracts, network };
+  }, [data, address, networkBlsKeys, addedBlsKeysPublic, isLoadingStakes, isLoadingPublicBlsKeys]);
 
   const isLoading =
     isLoadingContracts || isLoadingStakes || (enabledPublicBlsKeysQuery && isLoadingPublicBlsKeys);
