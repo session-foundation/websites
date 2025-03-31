@@ -18,10 +18,10 @@ import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import {
-  formatDate,
   formatLocalizedTimeFromSeconds,
   formatNumber,
   formatPercentage,
+  useFormatDate,
 } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
 import {
@@ -29,7 +29,7 @@ import {
   NodeCardDataTestId,
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
-import type { Stake } from '@session/staking-api-js/client';
+import type { Stake } from '@session/staking-api-js/schema';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
@@ -43,12 +43,9 @@ import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
 import type { Address } from 'viem';
-import {
-  CollapsableContent,
-  NodeContributorList,
-  RowLabel,
-  getTotalStakedAmountForAddressFormatted,
-} from './NodeCard';
+import { CollapsableContent, NodeContributorList, RowLabel } from './NodeCard';
+import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -227,6 +224,7 @@ const ExitUnlockTimerNotification = ({
   const dictionaryGeneral = useTranslations('general');
   const notFoundString = dictionaryGeneral('notFound');
   const soonString = dictionaryGeneral('soon');
+  const formattedDate = useFormatDate(date, { dateStyle: 'full', timeStyle: 'short' });
 
   const [isExitableSoon, isPastTime] = useMemo(
     () => [isDateSoonOrPast(date), date && Date.now() > date.getTime()],
@@ -248,7 +246,7 @@ const ExitUnlockTimerNotification = ({
         isDeregistered ? 'deregisteredTimerDescription' : 'exitUnlockTimerDescription',
         {
           relativeTime,
-          date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
+          date: formattedDate ?? notFoundString,
         }
       )}
     >
@@ -278,6 +276,7 @@ const DeregisteringNotification = ({
   const generalDictionary = useTranslations('general');
   const notFoundString = generalDictionary('notFound');
   const soonString = generalDictionary('soon');
+  const formattedDate = useFormatDate(date, { dateStyle: 'full', timeStyle: 'short' });
 
   const isDeregistrationSoon = isDateSoonOrPast(date);
   const relativeTime = useMemo(
@@ -293,7 +292,7 @@ const DeregisteringNotification = ({
           { unit: 'day' }
         ),
         relativeTime,
-        date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
+        date: formattedDate ?? notFoundString,
       })}
     >
       <NodeNotification level="error">
@@ -462,7 +461,6 @@ const StakedNodeCard = forwardRef<
     networkTime: number;
     hideButton?: boolean;
   }
-  //biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: consider simplifying this component
 >(({ stake, blockHeight, networkTime, hideButton, targetWalletAddress, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.staked');
   const generalDictionary = useTranslations('general');
@@ -475,8 +473,8 @@ const StakedNodeCard = forwardRef<
 
   const address = targetWalletAddress ?? connectedAddress;
 
-  const { currentContractIds } = useStakes(address);
-  const isInContractIdList = currentContractIds?.has(stake.contract_id);
+  const { networkContractIds } = useStakes(address);
+  const isInContractIdList = networkContractIds?.has(stake.contract_id);
 
   const {
     operator_fee: fee,
@@ -510,6 +508,15 @@ const StakedNodeCard = forwardRef<
     deregistrationUnlockDate,
     liquidationDate,
   } = useNodeDates(stake, blockHeight, networkTime);
+
+  const formattedLastRewardDate = useFormatDate(lastRewardDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
+  const formattedLastUptimeDate = useFormatDate(lastUptimeDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
 
   const lastRewardTime = useRelativeTime(lastRewardDate, { addSuffix: true });
   const deregistrationTime = useRelativeTime(deregistrationDate, { addSuffix: true });
@@ -563,9 +570,7 @@ const StakedNodeCard = forwardRef<
               <Tooltip
                 tooltipContent={dictionary('lastRewardDescription', {
                   blockNumber: lastRewardBlock ? formatNumber(lastRewardBlock) : notFoundString,
-                  date: lastRewardDate
-                    ? formatDate(lastRewardDate, { dateStyle: 'full', timeStyle: 'short' })
-                    : notFoundString,
+                  date: formattedLastRewardDate ?? notFoundString,
                 })}
               >
                 <span className="font-normal text-gray-lightest">
@@ -585,9 +590,7 @@ const StakedNodeCard = forwardRef<
                         blockHeight - msInBlocks(Date.now() - lastUptimeProofSeconds * 1000)
                       )
                     : notFoundString,
-                  date: lastUptimeDate
-                    ? formatDate(lastUptimeDate, { dateStyle: 'full', timeStyle: 'short' })
-                    : notFoundString,
+                  date: formattedLastUptimeDate ?? notFoundString,
                 })}
               >
                 <span className="font-normal text-gray-lightest">
@@ -643,7 +646,7 @@ const StakedNodeCard = forwardRef<
                 <ActionModuleDivider className="h-0.5" />
               </CollapsableContent>
               {Object.entries(stake).map(([key, value]) => {
-                const valueToDisplay = JSON.stringify(value);
+                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
                 return (
                   <CollapsableContent
                     size="xs"
@@ -693,6 +696,10 @@ function StakeNodeCardButton({
   notFoundString?: string;
 }) {
   const dictionary = useTranslations('nodeCard.staked');
+  const formattedReqUnlockDate = useFormatDate(requestedUnlockDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
 
   const eventState = parseStakeEventState(stake);
 
@@ -714,9 +721,7 @@ function StakeNodeCardButton({
         <Tooltip
           tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
             relativeTime: requestedUnlockTime ?? notFoundString,
-            date: requestedUnlockDate
-              ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-              : notFoundString,
+            date: formattedReqUnlockDate ?? notFoundString,
           })}
         >
           <NodeExitButton disabled />

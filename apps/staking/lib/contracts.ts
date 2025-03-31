@@ -1,10 +1,8 @@
 import { getContractErrorName } from '@session/contracts';
-import { formatSENTNumber } from '@session/contracts/hooks/Token';
 import type {
   GenericContractStatus,
   WriteContractStatus,
 } from '@session/contracts/hooks/useContractWriteQuery';
-import type { StakeContributor } from '@session/staking-api-js/client';
 import { toast } from '@session/ui/lib/toast';
 import { PROGRESS_STATUS } from '@session/ui/motion/progress';
 import type { useTranslations } from 'next-intl';
@@ -131,12 +129,4 @@ export const parseContractStatusToProgressStatus = (
     default:
       return PROGRESS_STATUS.IDLE;
   }
-};
-
-export const formattedTotalStakedInContract = (contributors: Array<StakeContributor>) => {
-  return formatSENTNumber(
-    contributors.reduce((acc, { amount }) => {
-      return acc + amount;
-    }, 0)
-  );
 };

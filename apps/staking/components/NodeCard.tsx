@@ -1,23 +1,22 @@
 import { type ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
-import { SENT_DECIMALS } from '@session/contracts';
-import { formatSENTNumber } from '@session/contracts/hooks/Token';
-import type { StakeContributor } from '@session/staking-api-js/client';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import {
+  type ContributionContractContributor,
+  type StakeContributor,
+  isContributionContractContributor,
+} from '@session/staking-api-js/schema';
 import { Loading } from '@session/ui/components/loading';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import { bigIntSortDesc } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
-
-export interface Contributor {
-  address: string;
-  amount: number;
-}
 
 export const outerNodeCardVariants = cva(
   'rounded-xl bg-module-outline p-px bg-blend-lighten shadow-md transition-all ease-in-out',
@@ -123,7 +122,7 @@ const ContributorIcon = ({
   isUser,
 }: {
   className?: string;
-  contributor?: StakeContributor;
+  contributor?: StakeContributor | ContributionContractContributor;
   isUser?: boolean;
 }) => {
   const dictionary = useTranslations('general');
@@ -134,9 +133,9 @@ const ContributorIcon = ({
           <div className="flex flex-col gap-1">
             <span>{isUser ? dictionary('you') : contributor.address}</span>
             <span>
-              {`${formatSENTNumber(contributor.amount)} ${dictionary('staked')}`}
-              {contributor.reserved
-                ? ` (${formatSENTNumber(contributor.reserved)} ${dictionary('reserved')})`
+              {`${formatSENTBigInt(contributor.amount)} ${dictionary('staked')}`}
+              {isContributionContractContributor(contributor) && contributor.reserved
+                ? ` (${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')})`
                 : ''}
             </span>
           </div>
@@ -153,33 +152,8 @@ const ContributorIcon = ({
   );
 };
 
-/**
- * Returns the total staked amount for a given address.
- * @param contributors - The list of contributors.
- * @param address - The address to check.
- * @returns The total staked amount for the given address.
- */
-export const getTotalStakedAmountForAddress = (
-  contributors: Contributor[],
-  address: string
-): number => {
-  return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address) ? acc + amount : acc;
-  }, 0);
-};
-
-export const getTotalStakedAmountForAddressFormatted = (
-  contributors: StakeContributor[],
-  address?: string
-): string => {
-  return formatSENTNumber(
-    address ? getTotalStakedAmountForAddress(contributors, address) : 0,
-    SENT_DECIMALS
-  );
-};
-
 type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
-  contributors: StakeContributor[];
+  contributors: Array<StakeContributor | ContributionContractContributor>;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
 };
@@ -196,7 +170,11 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
       );
       const otherContributors = contributors
         .filter(({ address }) => !areHexesEqual(address, userAddress))
-        .sort((a, b) => (b.amount || b.reserved) - (a.amount || a.reserved));
+        .sort((a, b) => {
+          const aAmount = isContributionContractContributor(a) ? a.amount || a.reserved : a.amount;
+          const bAmount = isContributionContractContributor(b) ? b.amount || b.reserved : b.amount;
+          return bigIntSortDesc(bAmount, aAmount);
+        });
 
       return userContributor ? [userContributor, ...otherContributors] : otherContributors;
     }, [contributors, userAddress]);
@@ -240,7 +218,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
                 'h-4',
                 contributor.amount
                   ? 'fill-text-primary'
-                  : contributor.reserved
+                  : isContributionContractContributor(contributor) && contributor.reserved
                     ? 'fill-warning'
                     : ''
               )}

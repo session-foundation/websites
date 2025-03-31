@@ -4,7 +4,7 @@ import useRelativeTime from '@/hooks/useRelativeTime';
 import { LAST_UPDATED_BEHIND_TRIGGER, PREFERENCE } from '@/lib/constants';
 import { clickableText } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import type { NetworkInfo } from '@session/staking-api-js/client';
+import type { NetworkInfo } from '@session/staking-api-js/schema';
 import { StatusIndicator } from '@session/ui/components/StatusIndicator';
 import { ReactPortal, portalChildClassName } from '@session/ui/components/util/ReactPortal';
 import { ListChecksIcon } from '@session/ui/icons/ListChecks';

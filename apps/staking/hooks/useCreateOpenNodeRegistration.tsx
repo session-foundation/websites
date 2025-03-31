@@ -5,6 +5,7 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { useCreateOpenNode } from '@session/contracts/hooks/ServiceNodeContributionFactory';
+import type { UseAddBlsPubKeyParams } from '@session/contracts/hooks/ServiceNodeRewards';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import type { Address } from 'viem';
@@ -14,16 +15,23 @@ export type ReservedContributorStruct = {
   amount: bigint;
 };
 
-export type UseCreateOpenNodeContractParams = {
-  blsPubKey: string;
-  blsSignature: string;
-  nodePubKey: string;
-  userSignature: string;
+export type UseCreateOpenNodeContractParams = Required<
+  Omit<UseAddBlsPubKeyParams, 'contributors'>
+> & {
   reservedContributors: Array<ReservedContributorStruct>;
-  fee: number;
   autoStart: boolean;
 };
 
+/**
+ * Hook to create a new open node registration.
+ * @param blsPubKey - The BLS public key of the node.
+ * @param blsSignature - The BLS signature of the node.
+ * @param nodePubKey - The node public key.
+ * @param reservedContributors - The reserved contributors.
+ * @param userSignature - The user signature.
+ * @param fee - The operator fee.
+ * @param autoStart - Whether the node should be automatically started.
+ */
 export default function useCreateOpenNodeRegistration({
   blsPubKey,
   blsSignature,

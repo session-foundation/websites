@@ -2,30 +2,19 @@
 
 import { Registration } from '@/app/register/[nodeId]/Registration';
 import { useStakes } from '@/hooks/useStakes';
-import { QUERY } from '@/lib/constants';
-import { isProduction } from '@/lib/env';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
+import { useRegistrationsForCurrentActor } from '@/hooks/useRegistrationsForCurrentActor';
+import { useStakingBackendBrowserClient } from '@/lib/staking-api-client';
+import { useTranslations } from 'next-intl';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
-  const { address } = useWallet();
 
   const { data: registrationsData, isLoading: isLoadingRegistrations } =
-    useStakingBackendQueryWithParams(
-      getNodeRegistrations,
-      { address: address! },
-      {
-        enabled: !!address,
-        staleTime: isProduction
-          ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-          : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-      }
-    );
+    useRegistrationsForCurrentActor();
+  const dict = useTranslations('actionModules.registration.shared');
 
   const { isLoading: isLoadingStakes } = useStakes();
 
@@ -50,6 +39,6 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       preparedAt={new Date(registration.timestamp * 1000)}
     />
   ) : (
-    <span>Not Found</span>
+    <span>{dict('nodeNotFound')}</span>
   );
 }

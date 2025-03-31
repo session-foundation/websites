@@ -1,5 +1,9 @@
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import type { StakeContributor } from '@session/staking-api-js/client';
+import {
+  type ContributionContractContributor,
+  type StakeContributor,
+  isContributionContractContributor,
+} from '@session/staking-api-js/schema';
 import { areHexesEqual } from '@session/util-crypto/string';
 import type { Address } from 'viem';
 
@@ -74,15 +78,22 @@ function calcMinimumContribution(
   return result;
 }
 
-export const getContributionRangeFromContributors = (contributors: Array<StakeContributor> = []) =>
+export const getContributionRangeFromContributors = (
+  contributors: Array<StakeContributor | ContributionContractContributor> = []
+) =>
   parseContributorDetails(
-    contributors.map(({ amount, reserved, address }) => {
-      return { amount: BigInt(amount || reserved), addr: address as Address };
+    contributors.map((contributor) => {
+      return {
+        amount:
+          contributor.amount ||
+          (isContributionContractContributor(contributor) ? contributor.reserved : 0n),
+        addr: contributor.address,
+      };
     })
   );
 
 export const getContributionRangeFromContributorsIgnoreAddress = (
-  contributors: Array<StakeContributor> = [],
+  contributors: Array<StakeContributor | ContributionContractContributor> = [],
   address?: Address
 ) =>
   getContributionRangeFromContributors(
@@ -91,5 +102,6 @@ export const getContributionRangeFromContributorsIgnoreAddress = (
     )
   );
 
-export const getTotalStaked = (contributors: Array<StakeContributor> = []) =>
-  contributors.reduce((acc, { amount }) => acc + BigInt(amount), 0n);
+export const getTotalStaked = (
+  contributors: Array<StakeContributor | ContributionContractContributor> = []
+) => contributors.reduce((acc, { amount }) => acc + amount, 0n);

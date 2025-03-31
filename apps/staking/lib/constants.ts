@@ -107,16 +107,16 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
 ] as const;
 
 export enum QUERY {
-  /** 60 seconds */
-  STALE_TIME_DEFAULT = 60 * 1000,
+  /** 5 seconds */
+  STALE_TIME_DEFAULT = 5 * 1000,
   /** 1 second */
   STALE_TIME_DEFAULT_DEV = 1000,
   /** 1 second */
   STALE_TIME_REGISTRATIONS_PAGE = 1000,
   /** 1 second */
   STALE_TIME_REGISTRATIONS_LIST_DEV = 1000,
-  /** 60 seconds */
-  STALE_TIME_REGISTRATIONS_LIST = 60 * 1000,
+  /** 10 seconds */
+  STALE_TIME_REGISTRATIONS_LIST = 10 * 1000,
   /** 2 minutes */
   STALE_TIME_CLAIM_REWARDS = 2 * 60 * 1000,
   /** 60 seconds */
@@ -134,6 +134,11 @@ export const SIGNIFICANT_FIGURES = {
   GAS_FEE_TOTAL: 3,
   GAS_FEE_BREAKDOWN: 4,
 };
+
+export enum BLOCK_TIME_MS {
+  ARBITRUM = 250,
+  APPCHAIN = 1000 * 120,
+}
 
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
@@ -319,8 +324,12 @@ export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
 export enum BACKEND {
   /** 10 seconds */
   L2_TARGET_UPDATE_INTERVAL_SECONDS = 10,
+  /** 30 seconds */
+  L2_BACKGROUND_UPDATE_INTERVAL_SECONDS = 30,
   /** 2 minutes */
   NODE_TARGET_UPDATE_INTERVAL_SECONDS = 2 * 60,
+  /** 2 seconds */
+  MULTI_REGISTRATION_SN_POLL_INTERVAL_MS = 2 * 1000,
 }
 
 export enum LAST_UPDATED_BEHIND_TRIGGER {

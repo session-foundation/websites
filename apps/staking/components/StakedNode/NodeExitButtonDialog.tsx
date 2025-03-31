@@ -8,7 +8,7 @@ import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { getNodeExitSignatures } from '@/lib/queries/getNodeExitSignatures';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import type { Stake } from '@session/staking-api-js/client';
+import type { Stake } from '@session/staking-api-js/schema';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
@@ -74,23 +74,15 @@ function NodeExitDialog({ node }: { node: Stake }) {
     { nodePubKey: node.service_node_pubkey }
   );
 
-  const [blsPubKey, timestamp, blsSignature, excludedSigners] = useMemo(() => {
-    if (!data || !('result' in data) || !data.result)
-      return [undefined, undefined, undefined, undefined];
-    const { bls_pubkey, timestamp, signature, non_signer_indices } = data.result;
-
-    return [bls_pubkey, timestamp, signature, non_signer_indices.map(BigInt)];
-  }, [data]);
-
   return (
     <>
-      {isSuccess && blsPubKey && timestamp && blsSignature && excludedSigners ? (
+      {isSuccess && data ? (
         <NodeExitContractWriteDialog
           node={node}
-          blsPubKey={blsPubKey}
-          timestamp={timestamp}
-          blsSignature={blsSignature}
-          excludedSigners={excludedSigners}
+          blsPubKey={data.result.bls_pubkey}
+          timestamp={data.result.timestamp}
+          blsSignature={data.result.signature}
+          excludedSigners={data.result.non_signer_indices}
         />
       ) : isLoading ? (
         <Loading />
