@@ -1,7 +1,7 @@
 // parseContracts.spec.ts
 
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
-import type { ContributionContractContributor } from '@session/staking-api-js/schema';
+import type {ContributionContract, ContributionContractContributor} from '@session/staking-api-js/schema';
 import type { Address } from 'viem';
 // In these tests we assume that these helper functions/constants are imported in parseContracts.
 // We mock them to control behavior.
@@ -337,6 +337,37 @@ describe('parseContracts', () => {
   it('should handle an empty contracts array', () => {
     const result = parseContracts({
       contracts: [],
+      address: walletAddress,
+      addedBlsKeys: {},
+      runningStakesBlsKeysSet: new Set(),
+      nodeMinLifespanArbBlocks,
+      blockHeight: 1000,
+    });
+
+    expect(result.visibleContracts).toHaveLength(0);
+    expect(result.joiningContracts).toHaveLength(0);
+    expect(result.hiddenContractsWithStakes).toHaveLength(0);
+  });
+
+  it('should not show contracts that are finalized', () => {
+   const contract = {
+      address: CONTRACT_ADDRESS[6],
+      contributors: [{
+        address: WALLET_ADDRESS[4],
+        beneficiary_address: null,
+        amount: 5000000000000n,
+        reserved: 5000000000000n,
+      }],
+      events: [DEPLOY_ARB_EVENT(70), FINALIZED_ARB_EVENT(1000)],
+      operator_address: WALLET_ADDRESS[6],
+      service_node_pubkey: ED25519_ADDRESS[6],
+      status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
+      fee: 70,
+      manual_finalize: false,
+      pubkey_bls: 'key7',
+    };
+    const result = parseContracts({
+      contracts: [contract],
       address: walletAddress,
       addedBlsKeys: {},
       runningStakesBlsKeysSet: new Set(),

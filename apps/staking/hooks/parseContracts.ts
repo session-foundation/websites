@@ -126,7 +126,11 @@ export function parseContracts({
       added.has(pubkey_bls) ||
       runningStakesBlsKeysSet.has(pubkey_bls)
     ) {
-      if (address && getTotalStakedAmountForAddress(contributors, address) > 0n) {
+      if (
+        status !== CONTRIBUTION_CONTRACT_STATUS.Finalized &&
+        address &&
+        getTotalStakedAmountForAddress(contributors, address) > 0n
+      ) {
         logger.debug(
           `Contract has duplicate pubkey, but has stakes, showing with warning: ${pubkey_bls}`
         );
