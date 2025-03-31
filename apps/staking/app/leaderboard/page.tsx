@@ -17,11 +17,12 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { type Address, checksumAddress } from 'viem';
 
 // TODO: Delete route after testnet incentive program is over
 
 function smartFormatPercentage(decimalPercent: number) {
-  const maximumFractionDigits = decimalPercent > 0.01 ? 2 : decimalPercent > 0.0001 ? 4 : 6;
+  const maximumFractionDigits = decimalPercent > 0.01 ? 2 : 3;
   return formatPercentage(decimalPercent, { maximumFractionDigits });
 }
 
@@ -95,10 +96,16 @@ export default function PointsPage() {
               >
                 <TableCell className="hidden font-bold md:block">{i + 1}</TableCell>
                 <TableCell className="w-max">
-                  <PubKey pubKey={wallet} />
+                  <PubKey
+                    pubKey={checksumAddress(
+                      (wallet.startsWith('0x') ? wallet : `0x${wallet}`) as Address
+                    )}
+                  />
                 </TableCell>
-                <TableCell>{formatNumber(score)}</TableCell>
-                <TableCell className="p-0 py-4 pr-1 text-right md:pe-1">
+                <TableCell className="text-end">
+                  {formatNumber(score, { maximumFractionDigits: 0 })}
+                </TableCell>
+                <TableCell className="p-0 py-4 ps-2 text-start">
                   {smartFormatPercentage(percent / 100)}
                 </TableCell>
               </TableRow>
