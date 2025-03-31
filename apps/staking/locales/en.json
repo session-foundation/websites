@@ -44,6 +44,10 @@
     "myStakes": {
       "title": "My Stakes",
       "description": "View your Session stakes and claim rewards."
+    },
+    "vestedStakes": {
+      "title": "Vested Stakes",
+      "description": "View your Session vesting contract stakes."
     }
   },
   "maintenance": {
@@ -68,6 +72,7 @@
     "home": "Home",
     "stake": "Stake Now",
     "myStakes": "My Stakes",
+    "vestedStakes": "Vesting Stakes",
     "docs": "Docs",
     "tokenSite": "Session Token",
     "support": "Support",
@@ -118,6 +123,7 @@
     }
   },
   "notFound": {
+    "title": "Page Not Found",
     "description": "Sorry! We couldn't find the page you were looking for.",
     "homeButton": "Return Home"
   },
@@ -242,7 +248,8 @@
       "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
       "showHiddenPendingNodesText": "Show Pending Nodes",
       "error": "An error occurred while fetching available nodes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
-      "errorButton": "Retry"
+      "errorButton": "Retry",
+      "stakingDisabled": "Multicontributor node staking is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable multicontributor staking soon. For updates, visit the <link>Session Token discord</link>."
     },
     "nodeRegistrations": {
       "title": "Your Prepared Registrations",
@@ -450,7 +457,9 @@
     },
     "rewardsAddress": {
       "validation": {
-        "invalidAddress": "Invalid rewards address, please re-enter the value"
+        "invalidAddress": "Invalid rewards address, please re-enter the value",
+        "bannedSessionContract": "Invalid rewards address, this Session smart contract can't receive rewards",
+        "bannedVestingContract": "Invalid rewards address, vesting contracts can't receive rewards"
       }
     },
     "staking": {
@@ -458,6 +467,8 @@
       "titleManageStake": "Manage Stake",
       "rewardsAddress": "Add Separate Rewards Address (Optional)",
       "rewardsAddressDescription": "Rewards will be claimable to the wallet you are registering with, or you can specify a different wallet address",
+      "rewardsAddressVesting": "Rewards Address",
+      "rewardsAddressVestingDescription": "Rewards will be claimable to the wallet you you specify here",
       "manage": {
         "stakeAmountAdditional": "Additional Stake Amount",
         "stakeAmountAdditionalDescription": "Additional stake amount to add to the existing stake.",
@@ -523,8 +534,9 @@
         "error": {
           "errorMessage": "Error Message",
           "copyToClipboardButtonAria": "Copy error message to clipboard"
-        }
+        },
         "nodeNotFound": "This node registration could not be found. Please check to make sure you're connected to the right wallet.",
+        "registrationDisabled": "Registration is currently disabled. Please contact support for assistance."
       },
       "loading": {
         "title": "Checking for existing registrations",
@@ -536,6 +548,8 @@
         "title": "Do you want to stake by yourself or with others?",
         "description": "To stake by yourself, you need to stake {minStakeSolo}.",
         "description2": "To operate a node and stake with others, you need to stake at least {minStakeMulti}.",
+        "registrationDisabledSolo": "Solo registration is currently disabled. Please contact support for assistance.",
+        "registrationDisabledMulti": "Multicontributor registration is currently disabled. Please contact support for assistance.",
         "buttonSolo": {
           "text": "Stake by myself",
           "aria": "Continue the registration process by staking the full {minStakeSolo} yourself."
@@ -598,7 +612,8 @@
         },
         "buttonReserve": {
           "text": "Reserve",
-          "aria": "Reserve stakes for specific contributors"
+          "aria": "Reserve stakes for specific contributors",
+          "disabledTooltip": "Reserved slots is currently disabled. Please contact support for assistance."
         }
       },
       "reserveSlotsInput": {
@@ -767,6 +782,8 @@
     "open": {
       "min": "Min",
       "max": "Max",
+      "yourStake": "Your Stake",
+      "remainingStake": "Remaining",
       "minContribution": "Min Contribution",
       "viewButton": {
         "text": "View",
@@ -867,8 +884,8 @@
           "submitAria": "Request exit for the node {pubKey}",
           "description1": "Are you sure?",
           "description2": "Your node will be ready to exit the network {request_time}.",
-          "description3": "You'll need to confirm the exit after {request_time}. If you don't confirm within {exit_time}, you may be subject to a small penalty. <link>Learn more</link>",
-          "description4": "Once the node has exited the network, you can claim your stake on the staking portal.",
+          "description3": "After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. <link>Learn more</link>",
+          "description4": "Once the node has exited the network, you can reclaim your stake via the Staking Portal.",
           "buttons": {
             "submit": "Request Exit",
             "submitAria": "Request exit for {pubKey}",
@@ -930,6 +947,144 @@
       "warningTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
       "errorTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
       "unreachableTooltip": "Unable to reach Arbitrum. <clickable-text>Click to refresh</clickable-text>"
+    }
+  },
+  "vesting": {
+    "card": {
+      "balance": "Principal Balance:"
+    },
+    "switch": {
+      "label": "Vesting Mode",
+      "aria": "Toggle vesting mode"
+    },
+    "startDialog": {
+      "title": "Vesting Contract",
+      "description": "We noticed your wallet is connected to one or more vesting contracts. Select one to use otherwise skip this modal",
+      "descriptionSheet": "Select a vesting contract to use",
+      "continueButton": {
+        "label": "Continue",
+        "aria": "Use the selected vesting contract"
+      },
+      "skipButton": {
+        "label": "Skip",
+        "aria": "Skip vesting contract and continue using the connected wallet"
+      }
+    },
+    "infoDialog": {
+      "title": "Vesting Contract Info",
+      "address": "Contract Address",
+      "addressDescription": "Arbitrum Contract address for the vesting contract",
+      "initialBalance": "Initial Balance",
+      "initialBalanceDescription": "The initial amount of time-locked tokens in the contract",
+      "beneficiary": "Owner",
+      "beneficiaryDescription": "The wallet address that is the owner of the vesting contract",
+      "editBeneficiaryDisabledDescription": "The vesting contract does not allow changing the owner.",
+      "switchButton": {
+        "label": "Switch Contract",
+        "aria": "Switch to another vesting contract"
+      },
+      "disconnectButton": {
+        "label": "Disconnect",
+        "aria": "Disconnect from the vesting contract"
+      },
+      "endTimeEnded": "Unlocked"
+    },
+    "transferBeneficiaryDialog": {
+      "title": "Transfer Ownership",
+      "description": "Transfer the ownership of the vesting contract to another wallet.",
+      "disabledDescription": "The vesting contract does not allow transferring the owner.",
+      "currentBeneficiary": "Current Owner",
+      "currentBeneficiaryDescription": "The wallet address that is currently the owner of the vesting contract.",
+      "newBeneficiary": "New Owner",
+      "newBeneficiaryDescription": "The wallet address that will be the owner of the vesting contract.",
+      "errorCantBeSame": "The new owner cannot be the same as the current owner.",
+      "errorCantBeSelf": "The new owner cannot be the same as the contract address.",
+      "confirmHeading": "Are you sure?",
+      "confirmTextS1": "This will remove the current owner {ethAddress}",
+      "confirmTextS2": "and transfer ownership and control of this vesting contract to the new owner {ethAddress}",
+      "confirmTextS3": "<br></br>All funds will belong to the new address. This action is irreversible and cannot be undone.",
+      "transferButton": {
+        "label": "Transfer Owner",
+        "aria": "Transfer the owner of the vesting contract to another wallet."
+      },
+      "confirmButton": {
+        "label": "Confirm",
+        "aria": "Confirm transferring the owner of the vesting contract to another wallet."
+      },
+      "contractCall": {
+        "idle": "Transferring ownership of vesting contract to {newBeneficiary}",
+        "pending": "Transferring ownership of vesting contract to {newBeneficiary}",
+        "success": "Transferred ownership of vesting contract to {newBeneficiary}",
+        "errorTemplate": "Ownership transfer failed, {reason}, please try again",
+        "errors": {}
+      },
+      "successToast": "Ownership of vesting contract transfered! Exiting vesting mode!"
+    },
+    "headerSwitch": {
+      "label": "Vesting Mode",
+      "aria": "Disable vesting mode and disconnect from the vesting contract"
+    },
+    "modules": {
+      "stakedBalance": {
+        "title": "Staked Balance",
+        "description": "The portion of your time-locked tokens that are currently staked"
+      },
+      "unstakedBalance": {
+        "title": "Unstaked Balance",
+        "description": "The portion of your time-locked tokens that are currently unstaked"
+      },
+      "withdrawableBalance": {
+        "title": "Withdrawable Balance",
+        "description": "The portion of your time-locked tokens that are currently unstaked and withdrawable"
+      },
+      "endTime": {
+        "title": "Time to Unlock",
+        "description": "The remaining time until your time-locked tokens fully vest and become withdrawable. ({date})"
+      },
+      "unclaimedStakes": {
+        "title": "Unclaimed Stakes",
+        "description": "Tokens that were previously staked from your vesting contract, have been unstaked, and need to be claimed to return them to your vesting balance"
+      },
+      "returnStakes": {
+        "title": "Return Stakes",
+        "description": "Return Stakes"
+      },
+      "claimPrincipal": {
+        "title": "Withdraw Principal",
+        "description": "Withdraw Principal",
+        "claimablePrincipal": {
+          "title": "Withdrawable Principal",
+          "description": "Current unlocked and unstaked principal available to withdraw"
+        },
+        "warningSomeTokensStaked": "Some of your time-locked tokens are currently staked and unclaimed. You will only be able to claim your unstaked principal balance. Your staked principal balance will be withdrawable once those tokens are unstaked and returned to the vesting contract.",
+        "noPrincipalClaimableButtonTooltip": "All of this vesting contract's principal is currenty staked or locked by the network. These tokens need to be exited from their stakes, unlocked, and returned to the vesting contract.",
+        "confirmButton": {
+          "label": "Withdraw Principal",
+          "aria": "Withdraw the principal balance"
+        },
+        "contractCall": {
+          "idle": "Withdrawing {amount} of the principal balance",
+          "pending": "Withdrawing {amount} of the principal balance",
+          "success": "Withdrew {amount} of the principal balance",
+          "errorTemplate": "Failed to withdraw, {reason}",
+          "errors": {}
+        },
+        "successToast": "Successfully claimed {amount} of the principal balance"
+      },
+      "info": {
+        "title": "About Vesting Mode",
+        "description1": "Vesting Mode lets you stake your time-locked {tokenSymbol} to earn rewards while it's still vesting. Use Vesting Mode to stake your <underlined-tooltip>vesting {tokenSymbol}</underlined-tooltip> or unstake it and claim it back to your vesting contract.",
+        "vestingTokensTooltip": "{tokenSymbol} that was allocated to you that is held in a vesting contract",
+        "description2": "To view your rewards (from both vesting and regular {tokenSymbol}), exit Vesting Mode and check the <my-stakes-link>My Stakes</my-stakes-link> page.",
+        "description3": "Once your {tokenSymbol} completes its vesting period, a withdraw option will appear in Vesting Mode."
+      },
+      "stakes": {
+        "title": "Vesting Stakes",
+        "noNodesP1": "You have not staked any time-locked {tokenSymbol} from your vesting contract.",
+        "noNodesP2": "Click the <link>Stake Now</link> button to stake to an available node or register a new Session node.",
+        "stakeNowButtonText": "Stake Now",
+        "stakeNowButtonAria": "Navigate to the staking page to stake to an available node."
+      }
     }
   }
 }

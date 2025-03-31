@@ -1,6 +1,7 @@
 import { SENT_DECIMALS, SENT_SYMBOL, TOKEN } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
+import { UnderlinedTooltip } from '@session/ui/ui/tooltip';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 import type { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
@@ -50,6 +51,14 @@ export const clickableText = (onClick: () => void, role: AriaRole = 'button') =>
     >
       {children}
     </span>
+  );
+};
+
+export const underlinedTooltip = (tooltipContent: ReactNode) => {
+  return (children: ReactNode) => (
+    <UnderlinedTooltip tooltipContent={tooltipContent} putContentInPortal>
+      {children}
+    </UnderlinedTooltip>
   );
 };
 

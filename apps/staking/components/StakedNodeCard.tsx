@@ -12,6 +12,7 @@ import {
   parseStakeEventState,
   parseStakeState,
 } from '@/components/StakedNode/state';
+import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { useStakes } from '@/hooks/useStakes';
 import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
@@ -37,6 +38,7 @@ import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriv
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
@@ -44,8 +46,6 @@ import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
 import type { Address } from 'viem';
 import { CollapsableContent, NodeContributorList, RowLabel } from './NodeCard';
-import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
-import { jsonBigIntReplacer } from '@session/util-js/bigint';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.

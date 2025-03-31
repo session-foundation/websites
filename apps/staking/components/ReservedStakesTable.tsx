@@ -3,6 +3,7 @@
 import { ActionModuleTooltip } from '@/components/ActionModule';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -23,7 +24,6 @@ import {
 } from '@session/ui/ui/table';
 import { bigIntToNumber } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useMemo } from 'react';
 
@@ -48,7 +48,7 @@ export function ReservedStakesTable({
 }) {
   const dict = useTranslations('actionModules.registration.reserveSlotsInput');
   const dictGeneral = useTranslations('general');
-  const { address } = useWallet();
+  const address = useCurrentActor();
 
   const [slotRows, unreservedStake] = useMemo(() => {
     const rows: Array<ReservedStakeRow> = [];
