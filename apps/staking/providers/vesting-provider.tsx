@@ -59,12 +59,14 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     loadVestingContract()
   );
   const [showVestingSelectionDialog, setShowVestingSelectionDialog] = useState<boolean>(false);
+  const [skipped, setSkipped] = useState<boolean>(false);
 
   const { vesting, refetch, enabled, isLoading } = useStakes();
   const stakesLoaded = enabled && !isLoading;
 
   const disconnectFromVestingContract = useCallback(() => {
     logger.debug('Disconnecting from vesting contract');
+    setSkipped(true);
     setActiveContract(null);
     // setShowVestingSelectionDialog must be called after setActiveContract or the dialog will pop up for a moment
     setShowVestingSelectionDialog(false);
@@ -98,7 +100,9 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
         !getItem<boolean>(PREFERENCE.SKIP_VESTING_POPUP_ON_STARTUP) &&
         VESTING_PATHS.some((path) => pathname.startsWith(path))
       ) {
-        setShowVestingSelectionDialog(true);
+        if (!skipped) {
+          setShowVestingSelectionDialog(true);
+        }
         if (pathname.startsWith(DYNAMIC_LINKS.vestedStakes.href)) {
           router.push(DYNAMIC_LINKS.myStakes.href);
         }
@@ -114,6 +118,8 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         contracts: vesting,
+        skipped,
+        setSkipped,
         activeContract,
         showVestingSelectionDialog,
         setShowVestingSelectionDialog,
