@@ -118,8 +118,6 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         contracts: vesting,
-        skipped,
-        setSkipped,
         activeContract,
         showVestingSelectionDialog,
         setShowVestingSelectionDialog,
