@@ -1,6 +1,8 @@
+import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUnstakedBalanceModule';
 import { ActionModuleTooltip } from '@/components/ActionModule';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { type DecimalDelimiter, useDecimalDelimiter } from '@/lib/locale-client';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
 import type { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
@@ -66,6 +68,7 @@ export type StakeAmountFieldProps = {
   stickiness?: number;
   watchedStakeAmount: string;
   stakeAmountDescription?: string;
+  ignoreBalance?: boolean;
 };
 
 export default function StakeAmountField({
@@ -78,6 +81,7 @@ export default function StakeAmountField({
   stickiness = 400,
   watchedStakeAmount,
   stakeAmountDescription,
+  ignoreBalance,
 }: StakeAmountFieldProps) {
   const dictionary = useTranslations('general');
   const dictionaryStakeAmount = useTranslations('actionModules.registration.stakeAmount');
@@ -86,7 +90,13 @@ export default function StakeAmountField({
 
   const { value, onChange } = field;
   const decimalDelimiter = useDecimalDelimiter();
-  const { balance, value: balanceValue } = useWalletTokenBalance();
+  const { balance: balanceWallet, value: balanceWalletValue } = useWalletTokenBalance();
+  const { formattedAmount: balanceVesting, amount: balanceVestingValue } =
+    useVestingUnstakedBalance();
+  const activeVestingContract = useActiveVestingContract();
+
+  const balanceValue = activeVestingContract ? balanceVestingValue : balanceWalletValue;
+  const balance = activeVestingContract ? balanceVesting : balanceWallet;
 
   const fullStakeString = bigIntToString(
     SESSION_NODE_FULL_STAKE_AMOUNT,
@@ -139,7 +149,8 @@ export default function StakeAmountField({
               <ActionModuleTooltip>
                 {stakeAmountDescription ?? actionModuleSharedDictionary('stakeAmountDescription')}
               </ActionModuleTooltip>
-              {watchedStakeAmount &&
+              {!ignoreBalance &&
+              watchedStakeAmount &&
               balanceValue !== undefined &&
               balanceValue < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (
                 <AlertTooltip

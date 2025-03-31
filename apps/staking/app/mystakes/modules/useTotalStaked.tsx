@@ -11,8 +11,15 @@ export function useTotalStaked(addressOverride?: Address) {
   const connectedAddress = useCurrentActor();
   const address = addressOverride ?? connectedAddress;
 
-  const { stakes, hiddenContractsWithStakes, visibleContracts, refetch, status, enabled, networkContractIds } =
-    useStakes(addressOverride);
+  const {
+    stakes,
+    hiddenContractsWithStakes,
+    visibleContracts,
+    refetch,
+    status,
+    enabled,
+    networkContractIds,
+  } = useStakes(addressOverride);
 
   const { totalStakedBigInt, totalStakedFormatted } = useMemo(() => {
     if (!address) return { totalStakedBigInt: 0n, totalStakedFormatted: formatSENTBigInt(0n) };
@@ -47,7 +54,8 @@ export function useTotalStaked(addressOverride?: Address) {
         }, 0n)
       : 0n;
 
-    const total = totalStakedAmountContracts + totalStakedAmountStakes + totalStakedAmountHiddenContracts;
+    const total =
+      totalStakedAmountContracts + totalStakedAmountStakes + totalStakedAmountHiddenContracts;
 
     return {
       totalStakedBigInt: total,

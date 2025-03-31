@@ -1,8 +1,10 @@
 'use client';
 
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import ModuleButtonDialogTrigger from '@/components/ModuleButtonDialogTrigger';
 import useClaimRewards from '@/hooks/useClaimRewards';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
@@ -13,110 +15,117 @@ import { externalLink } from '@/lib/locale-defaults';
 import { getRewardsClaimSignature } from '@/lib/queries/getRewardsClaimSignature';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { ButtonModule, ModuleContent, ModuleText } from '@session/ui/components/Module';
+import type { BlsRewardsSignatureResponse } from '@session/staking-api-js/schema';
 import { Loading } from '@session/ui/components/loading';
 import { PROGRESS_STATUS, Progress } from '@session/ui/components/motion/progress';
-import { PresentIcon } from '@session/ui/icons/PresentIcon';
+import type { PresentIcon } from '@session/ui/icons/PresentIcon';
 import { toast } from '@session/ui/lib/toast';
-import { cn } from '@session/ui/lib/utils';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogTrigger,
-} from '@session/ui/ui/alert-dialog';
+import { AlertDialogFooter } from '@session/ui/ui/alert-dialog';
 import { Button } from '@session/ui/ui/button';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { Address } from 'viem';
 
-export default function ClaimTokensModule() {
-  const { address } = useWallet();
-  const dictionary = useTranslations('modules.claim');
-  const { canClaim, unclaimedRewards } = useUnclaimedTokens();
+export type ClaimTokensModuleProps = AddressModuleProps & {
+  dictionary?: ReturnType<typeof useTranslations<'modules.claim'>>;
+  textClassName?: string;
+  iconOverride?: typeof PresentIcon;
+  iconStrokeForFill?: boolean;
+};
+
+export default function ClaimTokensModule({
+  addressOverride,
+  dictionary,
+  iconOverride,
+  iconStrokeForFill,
+  textClassName,
+}: ClaimTokensModuleProps) {
+  const { address: connectedAddress } = useWallet();
+  const fallbackDict = useTranslations('modules.claim');
+  const dict = dictionary ?? fallbackDict;
+  const { canClaim, unclaimedRewards } = useUnclaimedTokens({ addressOverride });
   const { enabled: isClaimRewardsDisabled, isLoading: isRemoteFlagLoading } =
     useRemoteFeatureFlagQuery(REMOTE_FEATURE_FLAG.DISABLE_CLAIM_REWARDS);
 
-  const isDisabled =
-    !(address && canClaim && unclaimedRewards) || isRemoteFlagLoading || isClaimRewardsDisabled;
+  const address = addressOverride ?? connectedAddress;
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <ButtonModule
-          data-testid={ButtonDataTestId.Claim_Tokens_Open_Dialog}
-          className="group items-center transition-all duration-300 motion-reduce:transition-none"
-          disabled={isDisabled}
-        >
-          <ModuleContent className="flex h-full select-none flex-row items-center gap-2 p-0 py-3 align-middle font-bold">
-            <ModuleText
-              className={cn(
-                'inline-flex items-center gap-1.5 align-middle text-3xl transition-all duration-300 motion-reduce:transition-none',
-                isDisabled
-                  ? 'opacity-50'
-                  : 'text-session-green transition-all duration-300 group-hover:text-session-black motion-reduce:transition-none'
-              )}
-            >
-              <PresentIcon
-                className={cn(
-                  'mb-1 h-7 w-7 transition-all duration-300 motion-reduce:transition-none',
-                  isDisabled
-                    ? 'fill-session-text opacity-50'
-                    : 'fill-session-green group-hover:fill-session-black'
-                )}
-              />
-              {dictionary('title')}
-            </ModuleText>
-          </ModuleContent>
-        </ButtonModule>
-      </AlertDialogTrigger>
-      <AlertDialogContent dialogTitle={dictionary('title')}>
-        <ClaimTokensDialog />
-      </AlertDialogContent>
-    </AlertDialog>
+    <ModuleButtonDialogTrigger
+      dialogContent={address ? <ClaimTokensDialog address={address} /> : null}
+      dialogTitle={dict('title')}
+      label={dict('title')}
+      data-testid={ButtonDataTestId.Claim_Tokens_Open_Dialog}
+      disabled={
+        !(address && canClaim && unclaimedRewards) || isRemoteFlagLoading || isClaimRewardsDisabled
+      }
+      IconComp={iconOverride}
+      textClassName={textClassName}
+      iconStrokeForFill={iconStrokeForFill}
+    />
   );
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify this component
-function ClaimTokensDialog() {
+function ClaimTokensDialog({ address }: { address: Address }) {
   const dictionary = useTranslations('modules.claim');
-  const dictionaryFee = useTranslations('fee');
-  const dictionaryDialog = useTranslations('modules.claim.dialog');
-  const dictionaryStage = useTranslations('modules.claim.stage');
+  const { canClaim, refetch } = useUnclaimedTokens({ addressOverride: address });
 
-  const { address, chainId } = useWallet();
-  const { canClaim, refetch, formattedUnclaimedRewardsAmount } = useUnclaimedTokens();
-
-  const {
-    data: rewardsClaimData,
-    isError,
-    isSuccess,
-  } = useStakingBackendQueryWithParams(
+  const { data: claimData, isError } = useStakingBackendQueryWithParams(
     getRewardsClaimSignature,
-    { address: address! },
+    { address },
     {
       enabled: !!address && canClaim,
       staleTime: QUERY.STALE_TIME_CLAIM_REWARDS,
     }
   );
 
-  const [rewards, blsSignature, excludedSigners] = useMemo(() => {
-    if (!rewardsClaimData || !('rewards' in rewardsClaimData) || !rewardsClaimData.rewards) {
-      return [undefined, undefined, undefined];
-    }
-    const { amount, signature, non_signer_indices } = rewardsClaimData.rewards;
+  return (
+    <>
+      {isError ? (
+        <ErrorMessage
+          refetch={refetch}
+          message={dictionary.rich('error')}
+          buttonText={dictionary('errorButton')}
+          buttonDataTestId={ButtonDataTestId.Claim_Tokens_Error_Retry}
+        />
+      ) : claimData && address ? (
+        <ClaimTokens claimData={claimData} address={address} />
+      ) : (
+        <Loading />
+      )}
+    </>
+  );
+}
 
-    return [BigInt(amount), signature, non_signer_indices.map(BigInt)];
-  }, [rewardsClaimData]);
+function ClaimTokens({
+  address,
+  claimData,
+}: {
+  address: Address;
+  claimData: BlsRewardsSignatureResponse;
+}) {
+  const dictionaryFee = useTranslations('fee');
+  const dictionaryDialog = useTranslations('modules.claim.dialog');
+  const dictionaryStage = useTranslations('modules.claim.stage');
+  const [overrideUnclaimedRewardsAmount, setOverrideUnclaimedRewardsAmount] = useState<
+    string | null
+  >(null);
+
+  const { chainId } = useWallet();
+  const { refetch, formattedUnclaimedRewardsAmount } = useUnclaimedTokens({
+    addressOverride: address,
+  });
+
+  const unclaimedRewardsAmount = overrideUnclaimedRewardsAmount ?? formattedUnclaimedRewardsAmount;
 
   const claimRewardsArgs = useMemo(
     () => ({
       address,
-      rewards,
-      blsSignature,
-      excludedSigners,
+      rewards: claimData.rewards.amount,
+      blsSignature: claimData.rewards.signature,
+      excludedSigners: claimData.rewards.non_signer_indices,
     }),
-    [address, rewards, blsSignature, excludedSigners]
+    [address, claimData]
   );
 
   const {
@@ -166,122 +175,107 @@ function ClaimTokensDialog() {
   );
 
   const handleClick = () => {
-    updateBalanceAndClaimRewards();
+    setOverrideUnclaimedRewardsAmount(formattedUnclaimedRewardsAmount);
+    updateBalanceAndClaimRewards(claimRewardsArgs);
   };
 
-  const isDisabled = !(address && rewards && blsSignature);
+  const isButtonDisabled = skipUpdateBalance
+    ? claimRewardsStatus === PROGRESS_STATUS.SUCCESS ||
+      claimRewardsStatus === PROGRESS_STATUS.PENDING
+    : updateRewardsBalanceStatus === PROGRESS_STATUS.SUCCESS ||
+      updateRewardsBalanceStatus === PROGRESS_STATUS.PENDING;
 
-  const isButtonDisabled =
-    isDisabled ||
-    (skipUpdateBalance
-      ? claimRewardsStatus === PROGRESS_STATUS.SUCCESS ||
-        claimRewardsStatus === PROGRESS_STATUS.PENDING
-      : updateRewardsBalanceStatus === PROGRESS_STATUS.SUCCESS ||
-        updateRewardsBalanceStatus === PROGRESS_STATUS.PENDING);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on status changes
   useEffect(() => {
     if (claimRewardsStatus === PROGRESS_STATUS.SUCCESS) {
-      toast.success(
-        dictionaryDialog('successToast', { tokenAmount: formattedUnclaimedRewardsAmount })
-      );
+      toast.success(dictionaryDialog('successToast', { tokenAmount: unclaimedRewardsAmount }));
       void refetch();
+    } else if (claimRewardsStatus === PROGRESS_STATUS.ERROR) {
+      toast.error(claimRewardsErrorMessage);
+      setOverrideUnclaimedRewardsAmount(null);
     }
   }, [claimRewardsStatus]);
 
   return (
     <>
-      {isError ? (
-        <ErrorMessage
-          refetch={refetch}
-          message={dictionary.rich('error')}
-          buttonText={dictionary('errorButton')}
-          buttonDataTestId={ButtonDataTestId.Claim_Tokens_Error_Retry}
+      <div className="flex flex-col gap-4">
+        <ActionModuleRow
+          label={dictionaryDialog('amountClaimable')}
+          tooltip={dictionaryDialog('amountClaimableTooltip')}
+        >
+          {unclaimedRewardsAmount}
+        </ActionModuleRow>
+        <ActionModuleFeeAccordionRow
+          label={dictionaryFee('networkFee')}
+          tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+            link: externalLink(URL.GAS_INFO),
+            formula: () => feeFormula,
+          })}
+          fees={[
+            {
+              label: dictionaryDialog('updateBalanceCost'),
+              fee: feeEstimateUpdate,
+              tooltip: feeFormulaUpdate,
+            },
+            {
+              label: dictionaryDialog('claimRewardsCost'),
+              fee: feeEstimateClaim,
+              tooltip: feeFormulaClaim,
+            },
+          ]}
+          hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
+          gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+          gasHighShowTooltip={gasHighShowTooltip}
+          totalFee={feeEstimate}
         />
-      ) : isSuccess ? (
-        <>
-          <div className="flex flex-col gap-4">
-            <ActionModuleRow
-              label={dictionaryDialog('amountClaimable')}
-              tooltip={dictionaryDialog('amountClaimableTooltip')}
-            >
-              {formattedUnclaimedRewardsAmount}
-            </ActionModuleRow>
-            <ActionModuleFeeAccordionRow
-              label={dictionaryFee('networkFee')}
-              tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
-                link: externalLink(URL.GAS_INFO),
-                formula: () => feeFormula,
-              })}
-              fees={[
-                {
-                  label: dictionaryDialog('updateBalanceCost'),
-                  fee: feeEstimateUpdate,
-                  tooltip: feeFormulaUpdate,
+      </div>
+      <AlertDialogFooter className="mt-4 flex flex-col gap-6 sm:flex-col">
+        <Button
+          variant="outline"
+          rounded="md"
+          size="lg"
+          aria-label={dictionaryDialog('buttons.submitAria', {
+            tokenAmount: unclaimedRewardsAmount,
+            gasAmount: feeEstimate ?? 0,
+          })}
+          className="w-full"
+          data-testid={ButtonDataTestId.Claim_Tokens_Submit}
+          disabled={isButtonDisabled}
+          onClick={handleClick}
+        >
+          {dictionaryDialog('buttons.submit')}
+        </Button>
+        {enabled ? (
+          <Progress
+            steps={[
+              {
+                text: {
+                  [PROGRESS_STATUS.IDLE]: dictionaryStage('balance.idle'),
+                  [PROGRESS_STATUS.PENDING]: dictionaryStage('balance.pending'),
+                  [PROGRESS_STATUS.SUCCESS]: dictionaryStage('balance.success'),
+                  [PROGRESS_STATUS.ERROR]: updateRewardsBalanceErrorMessage,
                 },
-                {
-                  label: dictionaryDialog('claimRewardsCost'),
-                  fee: feeEstimateClaim,
-                  tooltip: feeFormulaClaim,
+                status: updateRewardsBalanceStatus,
+              },
+              {
+                text: {
+                  [PROGRESS_STATUS.IDLE]: dictionaryStage('claim.idle', {
+                    tokenAmount: unclaimedRewardsAmount,
+                  }),
+                  [PROGRESS_STATUS.PENDING]: dictionaryStage('claim.pending', {
+                    tokenAmount: unclaimedRewardsAmount,
+                  }),
+                  [PROGRESS_STATUS.SUCCESS]: dictionaryStage('claim.success', {
+                    tokenAmount: unclaimedRewardsAmount,
+                  }),
+                  [PROGRESS_STATUS.ERROR]: claimRewardsErrorMessage,
                 },
-              ]}
-              hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
-              gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
-              gasHighShowTooltip={gasHighShowTooltip}
-              totalFee={feeEstimate}
-            />
-          </div>
-          <AlertDialogFooter className="mt-4 flex flex-col gap-6 sm:flex-col">
-            <Button
-              variant="outline"
-              rounded="md"
-              size="lg"
-              aria-label={dictionaryDialog('buttons.submitAria', {
-                tokenAmount: formattedUnclaimedRewardsAmount,
-                gasAmount: feeEstimate ?? 0,
-              })}
-              className="w-full"
-              data-testid={ButtonDataTestId.Claim_Tokens_Submit}
-              disabled={isButtonDisabled}
-              onClick={handleClick}
-            >
-              {dictionaryDialog('buttons.submit')}
-            </Button>
-            {enabled ? (
-              <Progress
-                steps={[
-                  {
-                    text: {
-                      [PROGRESS_STATUS.IDLE]: dictionaryStage('balance.idle'),
-                      [PROGRESS_STATUS.PENDING]: dictionaryStage('balance.pending'),
-                      [PROGRESS_STATUS.SUCCESS]: dictionaryStage('balance.success'),
-                      [PROGRESS_STATUS.ERROR]: updateRewardsBalanceErrorMessage,
-                    },
-                    status: updateRewardsBalanceStatus,
-                  },
-                  {
-                    text: {
-                      [PROGRESS_STATUS.IDLE]: dictionaryStage('claim.idle', {
-                        tokenAmount: formattedUnclaimedRewardsAmount,
-                      }),
-                      [PROGRESS_STATUS.PENDING]: dictionaryStage('claim.pending', {
-                        tokenAmount: formattedUnclaimedRewardsAmount,
-                      }),
-                      [PROGRESS_STATUS.SUCCESS]: dictionaryStage('claim.success', {
-                        tokenAmount: formattedUnclaimedRewardsAmount,
-                      }),
-                      [PROGRESS_STATUS.ERROR]: claimRewardsErrorMessage,
-                    },
-                    status: claimRewardsStatus,
-                  },
-                ]}
-              />
-            ) : null}
-          </AlertDialogFooter>
-        </>
-      ) : (
-        <Loading />
-      )}
+                status: claimRewardsStatus,
+              },
+            ]}
+          />
+        ) : null}
+      </AlertDialogFooter>
     </>
   );
 }

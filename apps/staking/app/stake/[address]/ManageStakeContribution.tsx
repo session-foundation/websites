@@ -2,7 +2,7 @@ import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/Contrib
 import { type StakeFormSchema, getStakeFormSchema } from '@/app/stake/[address]/NewStake';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
 import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
-// import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
+import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import EthereumAddressField from '@/components/Form/EthereumAddressField';
 import StakeAmountField from '@/components/Form/StakeAmountField';
@@ -11,7 +11,7 @@ import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeSt
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useDecimalDelimiter } from '@/lib/locale-client';
 import { getContributionRangeFromContributors } from '@/lib/maths';
-// import { useActiveVestingContract } from '@/providers/vesting-provider';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
@@ -28,7 +28,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
-// import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
+import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
 
 export function ManageStakeContribution({
   contract,
@@ -46,8 +46,7 @@ export function ManageStakeContribution({
 
   const address = useCurrentActor();
   const { address: connectedAddress } = useWallet();
-  // TODO: uncomment when we have vesting contracts
-  const vestingContract = null; //useActiveVestingContract();
+  const vestingContract = useActiveVestingContract();
   const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const dictionary = useTranslations('actionModules.staking.manage');
@@ -256,24 +255,20 @@ export function ManageStakeContribution({
       </Form>
       {stakingParams ? (
         vestingContract ? (
-          // TODO: uncomment when we have vesting contracts
-          null
-          // <SubmitContributeFundsVesting
-          //   stakingParams={stakingParams}
-          //   setIsSubmitting={setIsSubmitting}
-          // />
+          <SubmitContributeFundsVesting
+            stakingParams={stakingParams}
+            setIsSubmitting={setIsSubmitting}
+          />
         ) : (
           <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
         )
       ) : null}
       {isRemoveStake ? (
         vestingContract ? (
-          // TODO: uncomment when we have vesting contracts
-          null
-          // <SubmitRemoveFundsVesting
-          //   setIsSubmitting={setIsSubmitting}
-          //   contractAddress={contract.address}
-          // />
+          <SubmitRemoveFundsVesting
+            setIsSubmitting={setIsSubmitting}
+            contractAddress={contract.address}
+          />
         ) : (
           <SubmitRemoveFunds setIsSubmitting={setIsSubmitting} contractAddress={contract.address} />
         )

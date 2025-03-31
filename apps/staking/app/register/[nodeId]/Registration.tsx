@@ -48,9 +48,11 @@ import {
   SESSION_NODE,
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+  allowedVestingRegistrationTabs,
   prefDetails,
 } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
@@ -103,6 +105,8 @@ type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   setStartData: (data: z.infer<typeof RegistrationStartFormSchema>) => void;
   tab: REG_TAB;
   tabHistory: Array<REG_TAB>;
+  isVestingMode: boolean;
+  vestingContract: VestingContract | null;
 };
 
 const RegistrationContext = createContext<RegistrationContext | undefined>(undefined);
@@ -117,8 +121,7 @@ function RegistrationProvider({
 }: RegistrationProps & { children: ReactNode }) {
   const { visibleContracts, networkBlsKeys } = useStakes();
   const { activeContract: vestingContract } = useVesting();
-  // TODO: uncomment when we have vesting contracts
-  const isVestingMode = false; //!!vestingContract;
+  const isVestingMode = !!vestingContract;
 
   const [backButtonClickCallback, setBackButtonClickCallback] = useState<null | (() => void)>(null);
   const [isError, setIsError] = useState<boolean>(false);
@@ -126,13 +129,14 @@ function RegistrationProvider({
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [tabHistory, setTabHistory] = useState<Array<REG_TAB>>([]);
   const [contract, setContract] = useState<ContributionContract | null>(
-    visibleContracts.find(({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)) ?? null
+    visibleContracts.find(({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)) ??
+      null
   );
 
   const { address } = useWallet();
   const { value: balanceValue } = useWalletTokenBalance();
   const { getItem } = usePreferences();
-  const { getQueryParams, pushQueryParam } = useQueryParams();
+  const { getQueryParams, pushQueryParam, clearQueryParams } = useQueryParams();
   const preferredRegistrationMode = getItem<REG_MODE>(PREFERENCE.PREF_REGISTRATION_MODE);
   const dict = useTranslations('actionModules.registration');
   const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
@@ -219,7 +223,9 @@ function RegistrationProvider({
 
       let queryParamStartTab: REG_TAB | null = null;
 
-      if (qpNodeType === NODE_TYPE.SOLO) {
+      if (isVestingMode) {
+        queryParamStartTab = REG_TAB.REWARDS_ADDRESS_INPUT_SOLO;
+      } else if (qpNodeType === NODE_TYPE.SOLO) {
         queryParamStartTab = REG_TAB.SUBMIT_SOLO;
       } else if (qpNodeType === NODE_TYPE.MULTI) {
         if (data?.stakeAmount === undefined) {
@@ -239,7 +245,7 @@ function RegistrationProvider({
         }
       }
 
-      if (queryParamStartTab !== null) {
+      if (queryParamStartTab !== null && !isVestingMode) {
         setTabHistory([REG_TAB.START]);
       }
 
@@ -283,7 +289,11 @@ function RegistrationProvider({
     setNodeType(data.nodeType);
     pushQueryParam(REGISTRATION_QUERY_PARAM.IS_MULTI, data.nodeType === NODE_TYPE.MULTI);
 
-    changeTab(data.nodeType === NODE_TYPE.SOLO ? REG_TAB.SUBMIT_SOLO : REG_TAB.STAKE_AMOUNT);
+    if (data.nodeType === NODE_TYPE.SOLO) {
+      changeTab(isVestingMode ? REG_TAB.REWARDS_ADDRESS_INPUT_SOLO : REG_TAB.SUBMIT_SOLO);
+    } else {
+      changeTab(REG_TAB.STAKE_AMOUNT);
+    }
   }
 
   const changeTab = (targetTab: REG_TAB) => {

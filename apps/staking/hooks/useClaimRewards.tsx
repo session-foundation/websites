@@ -2,7 +2,7 @@
 
 import { getContractErrorName } from '@session/contracts';
 import {
-  type UseUpdateRewardsBalanceQueryParams,
+  type UpdateRewardsBalanceArgs,
   useClaimRewardsQuery,
   useUpdateRewardsBalanceQuery,
 } from '@session/contracts/hooks/ServiceNodeRewards';
@@ -14,14 +14,14 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 
-type UseClaimRewardsParams = UseUpdateRewardsBalanceQueryParams;
-
-export default function useClaimRewards({
-  address,
-  rewards,
-  blsSignature,
-  excludedSigners,
-}: UseClaimRewardsParams) {
+/**
+ * Hook to claim rewards. This executes the claim rewards flow:
+ * 1. Updates the rewards balance
+ * 2. Claims the rewards
+ * @param defaultArgs - The default arguments for the hook. @see {@link UpdateRewardsBalanceArgs}
+ * @returns The claim rewards hook.
+ */
+export default function useClaimRewards(defaultArgs?: UpdateRewardsBalanceArgs) {
   const [enabled, setEnabled] = useState<boolean>(false);
   const [skipUpdateBalance, setSkipUpdateBalance] = useState<boolean>(false);
 
@@ -40,7 +40,7 @@ export default function useClaimRewards({
     simulateError: updateBalanceSimulateError,
     writeError: updateBalanceWriteError,
     transactionError: updateBalanceTransactionError,
-  } = useUpdateRewardsBalanceQuery({ address, rewards, blsSignature, excludedSigners });
+  } = useUpdateRewardsBalanceQuery(defaultArgs);
 
   const {
     claimRewards,
@@ -63,10 +63,10 @@ export default function useClaimRewards({
     [claimContractCallStatus]
   );
 
-  const updateBalanceAndClaimRewards = () => {
+  const updateBalanceAndClaimRewards = (args: UpdateRewardsBalanceArgs) => {
     setEnabled(true);
     if (!skipUpdateBalance) {
-      updateRewardsBalance();
+      updateRewardsBalance(args);
     }
   };
 

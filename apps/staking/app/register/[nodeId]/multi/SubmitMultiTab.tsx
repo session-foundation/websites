@@ -16,16 +16,17 @@ import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
 } from '@/hooks/useContributeStakeToOpenNode';
 import useCreateOpenNodeRegistration, {
-  type ReservedContributorStruct,
   type UseCreateOpenNodeContractParams,
 } from '@/hooks/useCreateOpenNodeRegistration';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import {
-  formatDate,
   formatLocalizedRelativeTimeToNowClient,
   formatPercentage,
   useDecimalDelimiter,
+  useFormatDate,
 } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
@@ -34,7 +35,11 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { SENT_DECIMALS, SENT_SYMBOL, getContractErrorName } from '@session/contracts';
 import { useCreateOpenNodeFeeEstimate } from '@session/contracts/hooks/ServiceNodeContributionFactory';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/client';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import {
+  type ContributionContract,
+  contributionContractSchema,
+} from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
@@ -43,7 +48,7 @@ import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { stringToBigInt } from '@session/util-crypto/maths';
-import { safeTrySync } from '@session/util-js/try';
+import { safeTrySync, safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
@@ -62,6 +67,10 @@ export function SubmitMultiTab() {
 
   const { props, setIsSubmitting, formMulti, address } = useRegistrationWizard();
 
+  const { enabled: isReservedSlotsDisabled } = useRemoteFeatureFlagQuery(
+    REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_RESERVED
+  );
+
   const { chainId } = useWallet();
   const { balance, value: balanceValue } = useWalletTokenBalance();
 
@@ -76,6 +85,7 @@ export function SubmitMultiTab() {
   const dictSessionNode = useTranslations('sessionNodes.general');
   const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
   const dictReservedSlots = useTranslations('actionModules.registration.reserveSlotsInput');
+  const dictReservedSlotsTab = useTranslations('actionModules.registration.reserveSlots');
   const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
 
   const reservedContributors = formMulti.watch('reservedContributors');
@@ -83,8 +93,9 @@ export function SubmitMultiTab() {
   const operatorFee = formMulti.watch('operatorFee');
 
   const createOpenNodeEstimateParams = useMemo(() => {
-    const [_, fee] = safeTrySync(() =>
-      operatorFee ? Math.trunc(Number.parseFloat(operatorFee.substring(0, 5)) * 100) : 0
+    const [_, fee] = safeTrySyncWithFallback(
+      () => (operatorFee ? Math.trunc(Number.parseFloat(operatorFee.substring(0, 5)) * 100) : 0),
+      0
     );
 
     return {
@@ -92,27 +103,29 @@ export function SubmitMultiTab() {
       blsSignature: props.blsSignature,
       nodePubKey: props.ed25519PubKey,
       userSignature: props.ed25519Signature,
-      /** Cast to array to avoid TS error -- this is fine, we're estimating the fee */
-      reservedContributors: reservedContributors as Array<ReservedContributorStruct>,
-      fee: fee ?? 0,
+      reservedContributors,
+      fee,
       autoStart,
     };
   }, [props, operatorFee, autoStart, reservedContributors]);
 
+  const formattedPreparedAtDate = useFormatDate(props.preparedAt, {
+    dateStyle: 'full',
+    timeStyle: 'full',
+  });
+
   const {
     fee: feeDeploy,
-    gasPrice: gasPriceDeploy,
+    gasPrice,
     gasAmount: gasAmountDeploy,
   } = useCreateOpenNodeFeeEstimate(createOpenNodeEstimateParams);
 
   const { feeFormatted: feeFormattedDeploy, formula: formulaDeploy } = useNetworkFeeFormula({
     fee: feeDeploy,
     gasAmount: gasAmountDeploy,
-    gasPrice: gasPriceDeploy,
+    gasPrice,
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
   });
-
-  const gasPrice = gasPriceDeploy;
 
   const gasHighShowTooltip = !!(
     gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
@@ -191,7 +204,6 @@ export function SubmitMultiTab() {
   };
 
   const watchedStakeAmount = formMulti.watch('stakeAmount');
-
   const hasReservedSlots = formMulti.watch('reservedContributors').length > 1;
 
   return (
@@ -221,12 +233,7 @@ export function SubmitMultiTab() {
         />
       </ActionModuleRow>
       <ActionModuleRow label={dict('preparedAt')} tooltip={dict('preparedAtDescription')}>
-        <Tooltip
-          tooltipContent={formatDate(props.preparedAt, {
-            dateStyle: 'full',
-            timeStyle: 'full',
-          })}
-        >
+        <Tooltip tooltipContent={formattedPreparedAtDate}>
           <div className="cursor-pointer">
             {formatLocalizedRelativeTimeToNowClient(props.preparedAt, { addSuffix: true })}
           </div>
@@ -336,6 +343,8 @@ export function SubmitMultiTab() {
               aria-label={dictRegistrationShared('buttonEditField.aria')}
               data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
               tab={REG_TAB.RESERVE_SLOTS_INPUT}
+              disabled={isReservedSlotsDisabled}
+              disabledReason={dictReservedSlotsTab('buttonReserve.disabledTooltip')}
               onClick={() => {
                 formMulti.setValue('reservedContributors', [
                   {
@@ -405,17 +414,15 @@ export function SubmitMultiTab() {
 
 export function getNonFinalizedLatestDeployedContributorContract(
   data?: Awaited<ReturnType<typeof getContributionContractBySnKey>>['data']
-) {
-  if (data && 'contracts' in data && Array.isArray(data.contracts) && data.contracts.length) {
-    const contract = data.contracts
-      .filter((contract) => contract.status !== CONTRIBUTION_CONTRACT_STATUS.Finalized)
-      .sort((a, b) => b.created_timestamp - a.created_timestamp)[0];
+): ContributionContract | null {
+  const [err, contract] = safeTrySync(() => data?.contract);
+  if (err || !contract) return null;
 
-    if (contract && 'address' in contract && isAddress(contract.address)) {
-      return contract;
-    }
-  }
-  return null;
+  if (contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized) return null;
+
+  return contributionContractSchema.safeParse(contract).success
+    ? (contract as ContributionContract)
+    : null;
 }
 
 /**
@@ -483,44 +490,30 @@ function SubmitMulti({
     {
       nodePubKey: creationParams.nodePubKey,
     },
-    /**
-     * Starts fetching after the contract is deployed.
-     *  Once data is returned by the query {@link networkInfo} is updated with the latest network
-     *  info from the fetch, this contains the last l2 height.
-     *
-     *  After this first fetch the `refetchInterval` computes the next l2 update timestamp and
-     *  schedules a refetch 5s after this timestamp.
-     *  (l2_height_timestamp + {@link BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS} )
-     *
-     *  This refetch interval computation continues after each fetch until the contract address is
-     *  available in the query state. Then the interval is disabled and no more refetches are made.
-     */
+    {
+      gcTime: Number.POSITIVE_INFINITY,
+      staleTime: Number.POSITIVE_INFINITY,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    }
+  );
+
+  const {
+    data: dataAfterDeploy,
+    isError: isErrorFetchContractDetailsAfterDeploy,
+    isFetching: isFetchingFetchContractDetailsAfterDeploy,
+    isLoading: isLoadingFetchContractDetailsAfterDeploy,
+  } = useStakingBackendQueryWithParams(
+    getContributionContractBySnKey,
+    {
+      nodePubKey: creationParams.nodePubKey,
+    },
     {
       enabled: isDeployed || !isCreateNodeEnabled,
+      /** Starts fetching after the contract is deployed. Refetches until a non-finalized contract is found. */
       refetchInterval: (query) => {
         if (getNonFinalizedLatestDeployedContributorContract(query.state.data)) return false;
-
-        const l2HeightTimestamp =
-          query.state.data &&
-          'network' in query.state.data &&
-          query.state.data.network &&
-          'l2_height_timestamp' in query.state.data.network
-            ? query.state.data.network.l2_height_timestamp
-            : null;
-
-        // TODO: investigate using trysafe
-        // const [_, l2HeightTimestamp] = safeTrySync(() => query.state.data?.network.l2_height_timestamp);
-
-        if (l2HeightTimestamp) {
-          /** {@link BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS} after the last l2 update */
-          const nextL2UpdateTimestampMs =
-            (l2HeightTimestamp + BACKEND.L2_TARGET_UPDATE_INTERVAL_SECONDS) * 1000;
-
-          const msUntilNextL2Update = nextL2UpdateTimestampMs - Date.now();
-
-          // Update at the next l2 update (no less than 1s from now)
-          return Math.max(msUntilNextL2Update, 1000);
-        }
+        return BACKEND.MULTI_REGISTRATION_SN_POLL_INTERVAL_MS;
       },
       gcTime: Number.POSITIVE_INFINITY,
       staleTime: Number.POSITIVE_INFINITY,
@@ -531,9 +524,9 @@ function SubmitMulti({
   );
 
   useNetworkStatus({
-    network: data?.network,
-    isLoading: isLoadingFetchContractDetails,
-    isFetching: isFetchingFetchContractDetails,
+    network: dataAfterDeploy?.network || data?.network,
+    isLoading: isLoadingFetchContractDetailsAfterDeploy || isLoadingFetchContractDetails,
+    isFetching: isFetchingFetchContractDetailsAfterDeploy || isFetchingFetchContractDetails,
   });
 
   const contract = useMemo(() => getNonFinalizedLatestDeployedContributorContract(data), [data]);
@@ -551,7 +544,7 @@ function SubmitMulti({
    * Contract address is null if the contract is finalized or if there is no contract yet.
    * In both cases we want to create a new contract.
    */
-  const contractAddress = contract?.address ?? null;
+  const contractAddress = contract?.address || null;
 
   const isContractStakedToByOperator = useMemo(() => {
     if (!contract) return false;
@@ -631,6 +624,7 @@ function SubmitMulti({
     createNodeContractStatus === PROGRESS_STATUS.ERROR ||
     allowanceReadStatus === PROGRESS_STATUS.ERROR ||
     approveWriteStatus === PROGRESS_STATUS.ERROR ||
+    isErrorFetchContractDetailsAfterDeploy ||
     isErrorFetchContractDetails;
 
   const handleRetry = () => {
@@ -718,7 +712,10 @@ function SubmitMulti({
               [PROGRESS_STATUS.SUCCESS]: dict('create.success'),
               [PROGRESS_STATUS.ERROR]: createNodeContractErrorMessage,
             },
-            status: Math.max(createNodeContractStatus, getAddressStatus, approveWriteStatus),
+            status:
+              createNodeContractStatus === PROGRESS_STATUS.ERROR
+                ? PROGRESS_STATUS.ERROR
+                : Math.max(createNodeContractStatus, getAddressStatus, approveWriteStatus),
           },
           {
             text: {

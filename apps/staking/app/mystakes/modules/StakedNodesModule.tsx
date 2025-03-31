@@ -65,7 +65,9 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         />
       ) : isLoading ? (
         <Loading />
-      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) && blockHeight && networkTime ? (
+      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) &&
+        blockHeight &&
+        networkTime ? (
         <>
           {hiddenContractsWithStakes.map((contract) => {
             return (

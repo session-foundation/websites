@@ -5,8 +5,10 @@ import { DevSheet } from '@/components/DevSheet';
 import Header from '@/components/Header';
 import Maintenance from '@/components/Maintenance';
 import RemoteBanner from '@/components/RemoteBanner';
+import RouterListener from '@/components/RouterListener';
 import { StatusBar } from '@/components/StatusBar';
 import { TOSHandler } from '@/components/TOSHandler';
+import { VestingDialog } from '@/components/Vesting/VestingDialog';
 import { WalletUserSheet } from '@/components/WalletUserSheet';
 import { isProduction } from '@/lib/env';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
@@ -54,8 +56,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <WalletUserSheet />
               {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
               <TOSHandler />
+              <VestingDialog />
               <Toaster />
               <StatusBar />
+              {!isProduction ? <RouterListener /> : null}
             </>
           )}
         </body>

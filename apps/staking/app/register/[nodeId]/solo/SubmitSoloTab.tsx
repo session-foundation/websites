@@ -2,12 +2,16 @@ import {
   type SoloRegistrationFormSchema,
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
-import { type ErrorBoxProps, ErrorTabRegistration } from '@/app/register/[nodeId]/shared/ErrorTab';
+import { ErrorTabRegistration } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { RegistrationEditButton } from '@/app/register/[nodeId]/shared/RegistrationEditButton';
-import { SubmitSolo } from '@/app/register/[nodeId]/solo/SubmitSolo';
+import { SubmitSoloVesting } from '@/app/register/[nodeId]/solo/SubmitSoloVesting';
+import { SubmitSoloWallet } from '@/app/register/[nodeId]/solo/SubmitSoloWallet';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
+import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUnstakedBalanceModule';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
+import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRelativeTime from '@/hooks/useRelativeTime';
@@ -18,12 +22,14 @@ import {
   SIGNIFICANT_FIGURES,
   URL,
 } from '@/lib/constants';
-import { formatDate, formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
+import { formatLocalizedRelativeTimeToNowClient, useFormatDate } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { addresses, isValidChainId } from '@session/contracts';
 import {
   type RegisterNodeContributor,
+  type UseAddBlsPubKeyParams,
   useAddBlsPubKeyFeeEstimate,
 } from '@session/contracts/hooks/ServiceNodeRewards';
 import {
@@ -31,6 +37,10 @@ import {
   useAllowanceQuery,
   useProxyApprovalFeeEstimate,
 } from '@session/contracts/hooks/Token';
+import {
+  type UseVestingAddBlsPubKeyParams,
+  useVestingAddBLSPubKeyFeeEstimate,
+} from '@session/contracts/hooks/TokenVestingStaking';
 import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
@@ -43,12 +53,20 @@ import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
 import { type Address, isAddress } from 'viem';
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a complex component
 export function SubmitSoloTab() {
   const [params, setParams] = useState<UseRegisterNodeParams | null>(null);
 
-  const { props, setIsSubmitting, formSolo, address } = useRegistrationWizard();
+  const { props, setIsSubmitting, formSolo, address, vestingContract, isVestingMode } =
+    useRegistrationWizard();
   const { chainId } = useWallet();
-  const { balance, value: balanceValue } = useWalletTokenBalance();
+  const { balance: balanceWallet, value: balanceWalletValue } = useWalletTokenBalance();
+  const { formattedAmount: balanceVesting, amount: balanceVestingValue } =
+    useVestingUnstakedBalance();
+  const activeVestingContract = useActiveVestingContract();
+
+  const balanceValue = activeVestingContract ? balanceVestingValue : balanceWalletValue;
+  const balance = activeVestingContract ? balanceVesting : balanceWallet;
 
   const dict = useTranslations('actionModules.registration.shared.submit');
   const dictSubmit = useTranslations('actionModules.registration.submitSolo');
@@ -80,8 +98,8 @@ export function SubmitSoloTab() {
     amount: SESSION_NODE_FULL_STAKE_AMOUNT,
   });
 
-  const addBlsFeeParams = useMemo(() => {
-    return {
+  const { addBlsFeeParams, addBlsVestingFeeParams } = useMemo(() => {
+    const addBlsFeeParams = {
       contributors: [
         {
           // This is fine, its to get the fee estimate
@@ -93,8 +111,28 @@ export function SubmitSoloTab() {
       blsSignature: props.blsSignature,
       nodePubKey: props.ed25519PubKey,
       userSignature: props.ed25519Signature,
+    } satisfies UseAddBlsPubKeyParams;
+
+    const addBlsVestingFeeParams = {
+      blsPubKey: props.blsKey,
+      blsSignature: props.blsSignature,
+      nodePubKey: props.ed25519PubKey,
+      userSignature: props.ed25519Signature,
+      fee: 0,
+      rewardsAddress: rewardsAddress as Address,
+      vestingContractAddress: vestingContract?.address as Address,
+    } satisfies UseVestingAddBlsPubKeyParams;
+
+    return {
+      addBlsFeeParams,
+      addBlsVestingFeeParams,
     };
-  }, [props, rewardsAddress, address]);
+  }, [props, rewardsAddress, address, vestingContract]);
+
+  const formattedPreparedAtDate = useFormatDate(props.preparedAt, {
+    dateStyle: 'full',
+    timeStyle: 'full',
+  });
 
   const {
     fee: feeAddBlsPubKey,
@@ -133,6 +171,12 @@ export function SubmitSoloTab() {
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
   });
 
+  const {
+    fee: feeVesting,
+    gasPrice: gasPriceVesting,
+    gasAmount: gasAmountVesting,
+  } = useVestingAddBLSPubKeyFeeEstimate(addBlsVestingFeeParams);
+
   const gasHighShowTooltip = !!(
     gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
   );
@@ -165,7 +209,7 @@ export function SubmitSoloTab() {
           },
           stakedAmount: SESSION_NODE_FULL_STAKE_AMOUNT,
         },
-      ] satisfies Array<RegisterNodeContributor>;
+      ] as const satisfies Array<RegisterNodeContributor>;
 
       setParams({
         contributors,
@@ -206,12 +250,7 @@ export function SubmitSoloTab() {
         />
       </ActionModuleRow>
       <ActionModuleRow label={dict('preparedAt')} tooltip={dict('preparedAtDescription')}>
-        <Tooltip
-          tooltipContent={formatDate(props.preparedAt, {
-            dateStyle: 'full',
-            timeStyle: 'full',
-          })}
-        >
+        <Tooltip tooltipContent={formattedPreparedAtDate}>
           <div className="cursor-pointer">
             {formatLocalizedRelativeTimeToNowClient(props.preparedAt, { addSuffix: true })}
           </div>
@@ -253,33 +292,42 @@ export function SubmitSoloTab() {
           </span>
         </span>
       </ActionModuleRow>
-      <ActionModuleFeeAccordionRow
-        label={dictFee('networkFee')}
-        tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
-          link: externalLink(URL.GAS_INFO),
-          formula: () => (needsApproval ? feeFormula : formulaAddBlsPubKey),
-        })}
-        fees={[
-          {
-            label: dictShared('proxyApprovalCost'),
-            fee: feeFormattedProxyApproval,
-            tooltip: formulaProxyApproval,
-            hasExemption: !needsApproval,
-            exemptionReason: dictShared('proxyApprovalNotNeededTooltip', {
-              amount: formatSENTBigInt(allowance, 0),
-            }),
-          },
-          {
-            label: dictSubmit('addBlsPubKeyCost'),
-            fee: feeFormattedAddBlsPubKey,
-            tooltip: formulaAddBlsPubKey,
-          },
-        ]}
-        totalFee={needsApproval ? feeEstimate : feeFormattedAddBlsPubKey}
-        hasMissingEstimatesTooltipContent={dictFee('missingFees')}
-        gasHighShowTooltip={gasHighShowTooltip}
-        gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
-      />
+      {isVestingMode ? (
+        <ActionModuleFeeRow
+          fee={feeVesting}
+          gasAmount={gasAmountVesting}
+          gasPrice={gasPriceVesting}
+          last
+        />
+      ) : (
+        <ActionModuleFeeAccordionRow
+          label={dictFee('networkFee')}
+          tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
+            link: externalLink(URL.GAS_INFO),
+            formula: () => (needsApproval ? feeFormula : formulaAddBlsPubKey),
+          })}
+          fees={[
+            {
+              label: dictShared('proxyApprovalCost'),
+              fee: feeFormattedProxyApproval,
+              tooltip: formulaProxyApproval,
+              hasExemption: !needsApproval,
+              exemptionReason: dictShared('proxyApprovalNotNeededTooltip', {
+                amount: formatSENTBigInt(allowance, 0),
+              }),
+            },
+            {
+              label: dictSubmit('addBlsPubKeyCost'),
+              fee: feeFormattedAddBlsPubKey,
+              tooltip: formulaAddBlsPubKey,
+            },
+          ]}
+          totalFee={needsApproval ? feeEstimate : feeFormattedAddBlsPubKey}
+          hasMissingEstimatesTooltipContent={dictFee('missingFees')}
+          gasHighShowTooltip={gasHighShowTooltip}
+          gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+        />
+      )}
       <Form {...formSolo}>
         <form onSubmit={formSolo.handleSubmit(onSubmit)} className={cn(params ? 'hidden' : '')}>
           <Button
@@ -294,7 +342,13 @@ export function SubmitSoloTab() {
         </form>
       </Form>
       <ErrorBoundary errorComponent={ErrorSolo}>
-        {params ? <SubmitSolo params={params} /> : null}
+        {params ? (
+          isVestingMode ? (
+            <SubmitSoloVesting params={params} />
+          ) : (
+            <SubmitSoloWallet params={params} />
+          )
+        ) : null}
       </ErrorBoundary>
     </div>
   );

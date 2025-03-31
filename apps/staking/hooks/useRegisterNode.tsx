@@ -7,7 +7,7 @@ import {
 } from '@/lib/contracts';
 import { addresses, isValidChainId } from '@session/contracts';
 import {
-  type RegisterNodeContributor,
+  type UseAddBlsPubKeyParams,
   useAddBLSPubKey,
 } from '@session/contracts/hooks/ServiceNodeRewards';
 import { useProxyApproval } from '@session/contracts/hooks/Token';
@@ -15,14 +15,23 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 
-export type UseRegisterNodeParams = {
+export type NodeRegistrationBasicParams = {
   blsPubKey: string;
   blsSignature: string;
   nodePubKey: string;
   userSignature: string;
-  contributors: Array<RegisterNodeContributor>;
 };
 
+export type UseRegisterNodeParams = Omit<UseAddBlsPubKeyParams, 'fee'>;
+
+/**
+ * Hook to register a node.
+ * @param blsPubKey - The BLS public key of the node.
+ * @param blsSignature - The BLS signature of the node.
+ * @param nodePubKey - The node public key.
+ * @param userSignature - The user signature.
+ * @param contributors - The contributors.
+ */
 export default function useRegisterNode({
   blsPubKey,
   blsSignature,
@@ -47,7 +56,7 @@ export default function useRegisterNode({
     transactionError: approveTransactionError,
   } = useProxyApproval({
     contractAddress: isValidChainId(chainId) ? addresses.ServiceNodeRewards[chainId] : null,
-    tokenAmount: contributors[0]?.stakedAmount ?? SESSION_NODE_FULL_STAKE_AMOUNT,
+    tokenAmount: contributors[0].stakedAmount ?? SESSION_NODE_FULL_STAKE_AMOUNT,
     gcTime: Number.POSITIVE_INFINITY,
   });
 

@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
 export function OperatorFeeTab() {
-  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam } =
+  const { formMulti, changeTab, mode, setBackButtonClickCallback, pushQueryParam, isVestingMode } =
     useRegistrationWizard();
 
   const dictConfirm = useTranslations('actionModules.registration.shared.buttonConfirm');
@@ -29,11 +29,14 @@ export function OperatorFeeTab() {
 
   const handleSubmit = (data: MultiRegistrationFormSchema) => {
     pushQueryParam(REGISTRATION_QUERY_PARAM.OPERATOR_FEE, data.operatorFee);
-    changeTab(
-      mode === REG_MODE.EDIT || mode === REG_MODE.EXPRESS
-        ? REG_TAB.SUBMIT_MULTI
-        : REG_TAB.REWARDS_ADDRESS
-    );
+
+    if (mode === REG_MODE.EDIT) {
+      changeTab(REG_TAB.SUBMIT_MULTI);
+    } else if (isVestingMode) {
+      changeTab(REG_TAB.REWARDS_ADDRESS_INPUT_MULTI);
+    } else {
+      changeTab(mode === REG_MODE.EXPRESS ? REG_TAB.SUBMIT_MULTI : REG_TAB.REWARDS_ADDRESS);
+    }
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
