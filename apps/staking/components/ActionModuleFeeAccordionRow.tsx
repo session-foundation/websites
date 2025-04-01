@@ -31,7 +31,7 @@ export function ActionModuleFeeAccordionRow({
   totalFee: string | null;
   showDivider?: boolean;
 }) {
-  const hasMissingEstimates = fees.some(({ fee }) => fee === null);
+  const hasMissingEstimates = fees.some(({ fee, hasExemption }) => fee === null && !hasExemption);
   const exemptFromAllFees = fees.every(({ hasExemption }) => hasExemption);
 
   return (

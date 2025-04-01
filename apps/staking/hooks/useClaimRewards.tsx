@@ -13,6 +13,7 @@ import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 
 /**
  * Hook to claim rewards. This executes the claim rewards flow:
@@ -28,6 +29,8 @@ export default function useClaimRewards(defaultArgs?: UpdateRewardsBalanceArgs) 
   const stageDictKey = 'modules.claim.stage' as const;
   const dict = useTranslations(stageDictKey);
   const dictGeneral = useTranslations('general');
+
+  const vestingContractAddress = useActiveVestingContractAddress();
 
   const {
     updateRewardsBalance,
@@ -51,7 +54,7 @@ export default function useClaimRewards(defaultArgs?: UpdateRewardsBalanceArgs) 
     simulateError: claimSimulateError,
     writeError: claimWriteError,
     transactionError: claimTransactionError,
-  } = useClaimRewardsQuery();
+  } = useClaimRewardsQuery({ vestingContractAddress });
 
   const updateRewardsBalanceStatus = useMemo(
     () => parseContractStatusToProgressStatus(updateBalanceContractCallStatus),

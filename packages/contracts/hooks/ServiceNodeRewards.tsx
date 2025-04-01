@@ -21,10 +21,15 @@ export type ClaimRewardsQuery = ContractWriteQueryProps & {
   claimRewards: () => void;
 };
 
-export function useClaimRewardsQuery(): ClaimRewardsQuery {
+export function useClaimRewardsQuery({
+  vestingContractAddress,
+}: {
+  vestingContractAddress?: Address;
+}): ClaimRewardsQuery {
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
-    contract: 'ServiceNodeRewards',
+    contract: vestingContractAddress ? 'TokenVestingStaking' : 'ServiceNodeRewards',
     functionName: 'claimRewards',
+    addressOverride: vestingContractAddress,
   });
 
   return {
