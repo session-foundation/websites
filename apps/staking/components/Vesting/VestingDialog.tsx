@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogContent } from '@session/ui/ui/alert-dialog';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-const VESTING_HANDLER_DELAY = 400;
+const VESTING_HANDLER_DELAY_MS = 400;
 
 export function VestingDialog() {
   const dict = useTranslations('vesting.startDialog');
@@ -64,7 +64,7 @@ export function VestingDialog() {
    *  before the dialog's closing transition is complete */
   const showVestingHandlerDebounced = useDebounce(
     forceShowVestingHandler || !activeContract,
-    forceShowVestingHandler ? 0 : VESTING_HANDLER_DELAY
+    forceShowVestingHandler ? 0 : VESTING_HANDLER_DELAY_MS
   );
 
   const showVestingHandler = !backButtonActive && showVestingHandlerDebounced;

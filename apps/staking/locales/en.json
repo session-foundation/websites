@@ -882,10 +882,10 @@
         "dialog": {
           "title": "Request Exit",
           "submitAria": "Request exit for the node {pubKey}",
-          "description1": "Are you sure?",
-          "description2": "Your node will be ready to exit the network {request_time}.",
-          "description3": "After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. <link>Learn more</link>",
-          "description4": "Once the node has exited the network, you can reclaim your stake via the Staking Portal.",
+          "description": {
+            "title": "Are you sure?",
+            "content": "Your node will be ready to exit the network {request_time}.<br></br><br></br>After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. <link>Learn more</link><br></br><br></br>Once the node has exited the network, you can reclaim your stake via the Staking Portal."
+          },
           "buttons": {
             "submit": "Request Exit",
             "submitAria": "Request exit for {pubKey}",

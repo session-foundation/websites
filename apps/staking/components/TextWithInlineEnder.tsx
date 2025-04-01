@@ -1,6 +1,13 @@
 import { cn } from '@session/ui/lib/utils';
 import { type ReactNode, useMemo } from 'react';
 
+/**
+ * Displays text with an optional ender. This `ender` is linked to the final word of
+ * the text. This can be used for adding a component to the end of a sentence.
+ * @param text - The text to display.
+ * @param ender - The ender to display.
+ * @param className - The class name to apply to the component.
+ */
 export function TextWithInlineEnder({
   text,
   ender,
@@ -14,7 +21,7 @@ export function TextWithInlineEnder({
     if (!ender) return text;
 
     let descriptionChild: ReactNode = text;
-    let hrefLinkedWord: null | string = null;
+    let linkedEnderWord: null | string = null;
     if (typeof text === 'string') {
       const wordsArray = text.trim().split(' ');
 
@@ -22,7 +29,7 @@ export function TextWithInlineEnder({
         const lastWord = wordsArray.pop();
         descriptionChild = wordsArray.join(' ');
         if (lastWord) {
-          hrefLinkedWord = lastWord;
+          linkedEnderWord = lastWord;
         }
       }
     }
@@ -31,7 +38,7 @@ export function TextWithInlineEnder({
       <>
         <span>{descriptionChild}</span>
         <span className="ms-1 inline-flex gap-1.5 whitespace-nowrap">
-          {hrefLinkedWord}
+          {linkedEnderWord}
           {ender}
         </span>
       </>

@@ -120,22 +120,14 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
 
   return (
     <>
-      <div className="font-medium text-lg">{dictionary('description1')}</div>
+      <div className="font-medium text-lg">{dictionary('description.title')}</div>
       <p>
-        {dictionary('description2', {
+        {dictionary.rich('description.content', {
           request_time: formatLocalizedTimeFromSeconds(
             SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
               addSuffix: true,
             }
-          ),
-        })}
-        <br />
-        <br />
-        {dictionary.rich('description3', {
-          request_time: formatEnglishTimeDistance(
-            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
-            '-'
           ),
           exit_time: formatEnglishTimeDistance(
             SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS,
@@ -143,9 +135,6 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
           ),
           link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
         })}
-        <br />
-        <br />
-        {dictionary('description4')}
       </p>
       <AlertDialogFooter className="mt-4 flex w-full flex-col font-medium sm:flex-row">
         <Button

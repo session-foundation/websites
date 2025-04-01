@@ -1,5 +1,5 @@
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
-import type {ContributionContract, ContributionContractContributor} from '@session/staking-api-js/schema';
+import type { ContributionContractContributor } from '@session/staking-api-js/schema';
 import type { Address } from 'viem';
 // In these tests we assume that these helper functions/constants are imported in parseContracts.
 // We mock them to control behavior.
