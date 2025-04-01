@@ -314,11 +314,12 @@
     "claim": {
       "title": "Claim",
       "dialog": {
-        "title": "Claim Rewards",
+        "title": "Claim Tokens",
         "updateBalanceCost": "Update Balance Cost:",
-        "claimRewardsCost": "Claim Rewards Cost:",
+        "updateBalanceCostExemptionReason": "You have already updated your rewards balance.",
+        "claimRewardsCost": "Claim Cost:",
         "amountClaimable": "Amount Claimable",
-        "amountClaimableTooltip": "Amount of {tokenSymbol} rewards able to be claimed.",
+        "amountClaimableTooltip": "Amount of unlocked {tokenSymbol} able to be claimed.",
         "buttons": {
           "submit": "Claim {tokenSymbol}",
           "submitAria": "Claim {tokenSymbol} with a claim gas fee of {gasAmount} {gasTokenSymbol}"
@@ -334,13 +335,13 @@
       "errorButton": "Retry",
       "stage": {
         "balance": {
-          "idle": "Updating rewards amount on Arbitrum",
-          "pending": "Updating rewards amount on Arbitrum",
-          "success": "Updated rewards amount on Arbitrum",
-          "errorTemplate": "Failed to update rewards amount on Arbitrum, {reason}",
+          "idle": "Updating claim amount on Arbitrum",
+          "pending": "Updating claim amount on Arbitrum",
+          "success": "Updated claim amount on Arbitrum",
+          "errorTemplate": "Failed to claim rewards amount on Arbitrum, {reason}",
           "errors": {
             "NullAddress": "recipient address is invalid",
-            "RecipientRewardsTooLow": "rewards balance already updated",
+            "RecipientRewardsTooLow": "claim amount already updated",
             "InvalidBLSSignature": "invalid BLS signature, try again later",
             "InsufficientBLSSignatures": "insufficient BLS signatures, try again later"
           }
@@ -349,7 +350,7 @@
           "idle": "Claiming {tokenAmount} on Arbitrum",
           "pending": "Claiming {tokenAmount} on Arbitrum",
           "success": "Claimed {tokenAmount} on Arbitrum",
-          "errorTemplate": "Failed to claim rewards on Arbitrum, {reason}",
+          "errorTemplate": "Failed to claim on Arbitrum, {reason}",
           "errors": {}
         }
       }
@@ -978,7 +979,7 @@
       "initialBalanceDescription": "The initial amount of time-locked tokens in the contract",
       "beneficiary": "Owner",
       "beneficiaryDescription": "The wallet address that is the owner of the vesting contract",
-      "editBeneficiaryDisabledDescription": "The vesting contract does not allow changing the owner.",
+      "editBeneficiaryDisabledDescription": "This vesting contract does not allow changing the owner.",
       "switchButton": {
         "label": "Switch Contract",
         "aria": "Switch to another vesting contract"
@@ -992,7 +993,7 @@
     "transferBeneficiaryDialog": {
       "title": "Transfer Ownership",
       "description": "Transfer the ownership of the vesting contract to another wallet.",
-      "disabledDescription": "The vesting contract does not allow transferring the owner.",
+      "disabledDescription": "This vesting contract does not allow transferring the owner.",
       "currentBeneficiary": "Current Owner",
       "currentBeneficiaryDescription": "The wallet address that is currently the owner of the vesting contract.",
       "newBeneficiary": "New Owner",
@@ -1009,16 +1010,16 @@
       },
       "confirmButton": {
         "label": "Confirm",
-        "aria": "Confirm transferring the owner of the vesting contract to another wallet."
+        "aria": "Confirm transferring ownership of this vesting contract to another wallet."
       },
       "contractCall": {
-        "idle": "Transferring ownership of vesting contract to {newBeneficiary}",
-        "pending": "Transferring ownership of vesting contract to {newBeneficiary}",
-        "success": "Transferred ownership of vesting contract to {newBeneficiary}",
-        "errorTemplate": "Ownership transfer failed, {reason}, please try again",
+        "idle": "Transferring ownership of the vesting contract to {newBeneficiary}",
+        "pending": "Transferring ownership of the vesting contract to {newBeneficiary}",
+        "success": "Transferred ownership of the vesting contract to {newBeneficiary}",
+        "errorTemplate": "Ownership transfer failed, {reason}, please try again.",
         "errors": {}
       },
-      "successToast": "Ownership of vesting contract transfered! Exiting vesting mode!"
+      "successToast": "Ownership of the vesting contract transfered! Exiting vesting mode!"
     },
     "headerSwitch": {
       "label": "Vesting Mode",
@@ -1047,7 +1048,48 @@
       },
       "returnStakes": {
         "title": "Return Stakes",
-        "description": "Return Stakes"
+        "description": "Return Stakes",
+        "dialog": {
+          "title": "Return Stakes",
+          "updateBalanceCost": "Update Balance Cost:",
+          "updateBalanceCostExemptionReason": "You have already updated your return stake amount.",
+          "claimRewardsCost": "Return Stake Cost:",
+          "amountClaimable": "Amount",
+          "amountClaimableTooltip": "Amount of unstaked {tokenSymbol} able to be returned to your vesting contract.",
+          "buttons": {
+            "submit": "Return {tokenSymbol}",
+            "submitAria": "Return {tokenSymbol} with a gas fee of {gasAmount} {gasTokenSymbol}"
+          },
+          "alert": {
+            "gasFetchFailedUpdateBalance": "Failed to fetch fee estimate for updating returned stakes amount. Fee estimate may be inaccurate.",
+            "gasFetchFailedClaimRewards": "Failed to fetch fee estimate for returning stakes. Fee estimate may be inaccurate.",
+            "highGas": "The price of Gas is higher than usual."
+          },
+          "successToast": "Returned {tokenAmount} to your vesting contract on Arbitrum"
+        },
+        "error": "An error occurred while fetching the signature for your unreturned stakes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+        "errorButton": "Retry",
+        "stage": {
+          "balance": {
+            "idle": "Updating return stake amount on Arbitrum",
+            "pending": "Updating return stake amount on Arbitrum",
+            "success": "Updated return stake amount on Arbitrum",
+            "errorTemplate": "Failed to return stake amount on Arbitrum, {reason}",
+            "errors": {
+              "NullAddress": "recipient address is invalid",
+              "RecipientRewardsTooLow": "returned stakes amount already updated",
+              "InvalidBLSSignature": "invalid BLS signature, try again later",
+              "InsufficientBLSSignatures": "insufficient BLS signatures, try again later"
+            }
+          },
+          "claim": {
+            "idle": "Returning {tokenAmount} to vesting contract on Arbitrum",
+            "pending": "Returning {tokenAmount} to vesting contract on Arbitrum",
+            "success": "Returned {tokenAmount} to vesting contract on Arbitrum",
+            "errorTemplate": "Failed to return to vesting contract on Arbitrum, {reason}",
+            "errors": {}
+          }
+        }
       },
       "claimPrincipal": {
         "title": "Withdraw Principal",
