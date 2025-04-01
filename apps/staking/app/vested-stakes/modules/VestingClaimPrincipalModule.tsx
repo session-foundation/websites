@@ -14,7 +14,7 @@ export default function VestingClaimPrincipalModule() {
     <ModuleButtonDialogTrigger
       dialogContent={<VestingClaimPrincipal />}
       disabled={!activeContract}
-      textClassName="text-2xl"
+      textClassName="text-lg md:text-2xl"
       dialogTitle={dict('title')}
       label={dict('title')}
       data-testid={ButtonDataTestId.Vesting_Claim_Principal_Open_Dialog}

@@ -92,7 +92,7 @@ export function VestingClaimPrincipal() {
 
   const button = (
     <Button
-      className="w-full uppercase"
+      className={cn('w-full uppercase', contractCallStatus !== 'idle' ? 'hidden' : '')}
       data-testid={ButtonDataTestId.Vesting_Claim_Principal_Confirm}
       aria-label={dict('confirmButton.aria')}
       onClick={() => {
