@@ -2,6 +2,7 @@ import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 import { StakeInfo, getContributionRangeForWallet } from '@/app/stake/[address]/StakeInfo';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
+// import { SubmitContributeFundsVesting } from '@/app/stake/[address]/SubmitContributeFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import EthereumAddressField, {
@@ -12,14 +13,17 @@ import StakeAmountField, {
   getStakeAmountFormFieldSchema,
   type GetStakeAmountFormFieldSchemaArgs,
 } from '@/components/Form/StakeAmountField';
+import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+// import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
@@ -49,13 +53,17 @@ export const getStakeFormSchema = ({ stakeAmount, rewardsAddress }: GetStakeForm
 
 export type StakeFormSchema = z.infer<ReturnType<typeof getStakeFormSchema>>;
 
-export function NewStake({ contract }: { contract: ContributorContractInfo }) {
+export function NewStake({ contract }: { contract: ContributionContract }) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [stakingParams, setStakingParams] = useState<UseContributeStakeToOpenNodeParams | null>(
     null
   );
 
-  const { address } = useWallet();
+  const address = useCurrentActor();
+  const { address: connectedAddress } = useWallet();
+  // TODO: uncomment when we have vesting contracts
+  const vestingContract = null; //useActiveVestingContract();
+  const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const dictionary = useTranslations('actionModules.staking');
   const dictGeneral = useTranslations('general');
@@ -93,14 +101,15 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
       }),
     },
     rewardsAddress: {
-      required: false,
+      required: !!vestingContract,
+      bannedAddresses: bannedRewardsAddresses,
     },
   });
 
   const form = useForm<StakeFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rewardsAddress: '',
+      rewardsAddress: vestingContract ? (connectedAddress ?? '') : '',
       stakeAmount: bigIntToString(
         balanceValue ? bigIntMin(minStake, balanceValue) : minStake,
         SENT_DECIMALS,
@@ -255,8 +264,12 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
                 <EthereumAddressField
                   // @ts-expect-error -- TODO: type this
                   field={field}
-                  label={dictionary('rewardsAddress')}
-                  tooltip={dictionary('rewardsAddressDescription')}
+                  label={dictionary(vestingContract ? 'rewardsAddressVesting' : 'rewardsAddress')}
+                  tooltip={dictionary(
+                    vestingContract
+                      ? 'rewardsAddressVestingDescription'
+                      : 'rewardsAddressDescription'
+                  )}
                   dataTestId={InputDataTestId.Stake_New_Stake_Rewards_Address}
                 />
               )}
@@ -275,7 +288,19 @@ export function NewStake({ contract }: { contract: ContributorContractInfo }) {
       </Form>
       <ErrorBoundary errorComponent={ErrorStake}>
         {stakingParams ? (
-          <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
+          vestingContract ? (
+            // TODO: uncomment when we have vesting contracts
+            null
+            // <SubmitContributeFundsVesting
+            //   stakingParams={stakingParams}
+            //   setIsSubmitting={setIsSubmitting}
+            // />
+          ) : (
+            <SubmitContributeFunds
+              stakingParams={stakingParams}
+              setIsSubmitting={setIsSubmitting}
+            />
+          )
         ) : null}
       </ErrorBoundary>
     </StakeInfo>

@@ -1,20 +1,15 @@
 import {
+  ARBITRUM_EVENT,
   CONTRIBUTION_CONTRACT_STATUS,
-  type ContributorContractInfo,
   EXIT_TYPE,
-  type Stake,
-} from '@session/staking-api-js/client';
+} from '@session/staking-api-js/enums';
+import type {
+  ContributionContract,
+  ContributionContractNotReady,
+  Stake,
+} from '@session/staking-api-js/schema';
 
-enum EVENT {
-  /** Emitted when a new service node is added to the network */
-  NewServiceNodeV2 = 'NewServiceNodeV2',
-  /** Emitted when a service node exit request is initiated */
-  ServiceNodeExitRequest = 'ServiceNodeExitRequest',
-  /** Emitted when a service node exits (by request or liquidation) */
-  ServiceNodeExit = 'ServiceNodeExit',
-  /** Emitted when a service node is liquidated NOTE: Always followed by ServiceNodeExit */
-  ServiceNodeLiquidated = 'ServiceNodeLiquidated',
-}
+import { sortEvents } from '../../hooks/parseEvents';
 
 export enum STAKE_EVENT_STATE {
   UNKNOWN = 0,
@@ -23,19 +18,29 @@ export enum STAKE_EVENT_STATE {
   EXITED = 3,
 }
 
-export function parseStakeEventState(stake: Stake) {
-  const latestEvent =
-    stake && 'events' in stake && Array.isArray(stake.events) ? stake?.events[0] : undefined;
+const STATE_EVENTS = new Set([
+  ARBITRUM_EVENT.NewSeededServiceNode,
+  ARBITRUM_EVENT.NewSeededServiceNode,
+  ARBITRUM_EVENT.NewServiceNodeV2,
+  ARBITRUM_EVENT.ServiceNodeExitRequest,
+  ARBITRUM_EVENT.ServiceNodeExit,
+  ARBITRUM_EVENT.ServiceNodeLiquidated,
+]);
 
+export function parseStakeEventState(stake: Stake) {
+  const stateEvents = stake.events.filter((event) => STATE_EVENTS.has(event.name));
+  stateEvents.sort(sortEvents);
+  const latestEvent = stateEvents[0];
   if (!latestEvent) return STAKE_EVENT_STATE.UNKNOWN;
 
   switch (latestEvent.name) {
-    case EVENT.NewServiceNodeV2:
+    case ARBITRUM_EVENT.NewSeededServiceNode:
+    case ARBITRUM_EVENT.NewServiceNodeV2:
       return STAKE_EVENT_STATE.ACTIVE;
-    case EVENT.ServiceNodeExitRequest:
+    case ARBITRUM_EVENT.ServiceNodeExitRequest:
       return STAKE_EVENT_STATE.EXIT_REQUESTED;
-    case EVENT.ServiceNodeExit:
-    case EVENT.ServiceNodeLiquidated:
+    case ARBITRUM_EVENT.ServiceNodeExit:
+    case ARBITRUM_EVENT.ServiceNodeLiquidated:
       return STAKE_EVENT_STATE.EXITED;
     default:
       return STAKE_EVENT_STATE.UNKNOWN;
@@ -49,7 +54,7 @@ export enum STAKE_STATE {
    * */
   EXITED = 'Exited',
   /** @see {STAKE_EVENT_STATE.EXIT_REQUESTED} */
-  AWAITING_EXIT = 'Awaiting Exit',
+  AWAITING_EXIT = 'Ready To Exit',
   /**
    * If a stake is in the `deregistered` state, it means that the node has been deregistered by the network. All states are mutually exclusive, so it can't also be {@link STAKE_STATE.EXITED}.
    */
@@ -117,7 +122,9 @@ export enum STAKE_CONTRACT_STATE {
   UNKNOWN = 'Unknown',
 }
 
-export function parseStakeContractState(contract: ContributorContractInfo) {
+export function parseStakeContractState(
+  contract: ContributionContract | ContributionContractNotReady
+) {
   switch (contract.status) {
     case CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib:
       return STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION;

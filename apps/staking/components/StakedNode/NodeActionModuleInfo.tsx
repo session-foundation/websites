@@ -1,15 +1,11 @@
 import { ActionModuleRow } from '@/components/ActionModule';
+import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import { NodeContributorList } from '@/components/NodeCard';
-import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { formattedTotalStakedInContract } from '@/lib/contracts';
-import { externalLink } from '@/lib/locale-defaults';
-import type { Stake } from '@session/staking-api-js/client';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import type { Stake } from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
-import { LoadingText } from '@session/ui/components/loading-text';
-import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 export default function NodeActionModuleInfo({
   node,
@@ -23,21 +19,12 @@ export default function NodeActionModuleInfo({
   gasPrice: bigint | null;
 }) {
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog.write');
-  const dictionaryFee = useTranslations('fee');
   const dictionaryActionModulesNode = useTranslations('actionModules.node');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
 
-  const { chainId } = useWallet();
-
-  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
-    fee,
-    gasAmount,
-    gasPrice,
-    maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
-  });
-
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
+  const formattedTotalStaked = useMemo(
+    () => formatSENTBigInt(node.contributors.reduce((acc, { amount }) => acc + amount, 0n)),
+    [node.contributors]
   );
 
   return (
@@ -66,26 +53,9 @@ export default function NodeActionModuleInfo({
         label={dictionary('amountStaked')}
         tooltip={dictionary('amountStakedTooltip')}
       >
-        {formattedTotalStakedInContract(node.contributors)}
+        {formattedTotalStaked}
       </ActionModuleRow>
-      {typeof feeEstimate !== 'undefined' ? (
-        <ActionModuleRow
-          label={dictionaryFee('networkFee')}
-          tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
-            link: externalLink(URL.GAS_INFO),
-            formula: () => feeFormula,
-          })}
-        >
-          <span className="inline-flex flex-row items-center gap-1.5 align-middle">
-            {gasHighShowTooltip ? (
-              <AlertTooltip
-                tooltipContent={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
-              />
-            ) : null}
-            {feeEstimate ? feeEstimate : <LoadingText className="mr-8 scale-x-75 scale-y-50" />}
-          </span>
-        </ActionModuleRow>
-      ) : null}
+      <ActionModuleFeeRow fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
     </div>
   );
 }

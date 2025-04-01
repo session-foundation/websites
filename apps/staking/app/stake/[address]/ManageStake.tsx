@@ -2,12 +2,10 @@ import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
-import {
-  CONTRIBUTION_CONTRACT_STATUS,
-  type ContributorContractInfo,
-} from '@session/staking-api-js/client';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import type { ContributionContract } from '@session/staking-api-js/schema';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useMemo, useState } from 'react';
@@ -18,11 +16,11 @@ enum EditableStakeGroup {
   OperatorFee = 'operatorFee',
 }
 
-export function ManageStake({ contract }: { contract: ContributorContractInfo }) {
+export function ManageStake({ contract }: { contract: ContributionContract }) {
   const [editableStakeGroup, setEditableStakeGroup] = useState<EditableStakeGroup | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const { address } = useWallet();
+  const address = useCurrentActor();
 
   const dictionary = useTranslations('actionModules.staking');
 

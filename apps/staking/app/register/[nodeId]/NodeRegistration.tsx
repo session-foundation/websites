@@ -2,30 +2,39 @@
 
 import { Registration } from '@/app/register/[nodeId]/Registration';
 import { useStakes } from '@/hooks/useStakes';
-import { QUERY } from '@/lib/constants';
-import { isProduction } from '@/lib/env';
-import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
-import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
+import { useRegistrationsForCurrentActor } from '@/hooks/useRegistrationsForCurrentActor';
+import logger from '@/lib/logger';
+import { getNodeRegistrationsForSnKey } from '@/lib/queries/getNodeRegistrationsForSnKey';
+import { useStakingBackendBrowserClient } from '@/lib/staking-api-client';
+import { useVesting } from '@/providers/vesting-provider';
+import { isEd25519PublicKey } from '@session/staking-api-js/refine';
+import { safeTrySync, safeTrySyncWithFallback } from '@session/util-js/try';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 
 export default function NodeRegistration({ nodeId }: { nodeId: string }) {
-  const { address } = useWallet();
+  const pathname = usePathname();
+  const stakingBackendClient = useStakingBackendBrowserClient();
+
+  const { address: walletAddress } = useWallet();
 
   const { data: registrationsData, isLoading: isLoadingRegistrations } =
-    useStakingBackendQueryWithParams(
-      getNodeRegistrations,
-      { address: address! },
-      {
-        enabled: !!address,
-        staleTime: isProduction
-          ? QUERY.STALE_TIME_REGISTRATIONS_LIST
-          : QUERY.STALE_TIME_REGISTRATIONS_LIST_DEV,
-      }
-    );
+    useRegistrationsForCurrentActor();
+
+  const {
+    connectToVestingContract,
+    disconnectFromVestingContract,
+    activeContract,
+    contracts,
+    setShowVestingSelectionDialog,
+  } = useVesting();
+
+  const dict = useTranslations('actionModules.registration.shared');
 
   const { isLoading: isLoadingStakes } = useStakes();
 
@@ -50,6 +59,6 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       preparedAt={new Date(registration.timestamp * 1000)}
     />
   ) : (
-    <span>Not Found</span>
+    <span>{dict('nodeNotFound')}</span>
   );
 }

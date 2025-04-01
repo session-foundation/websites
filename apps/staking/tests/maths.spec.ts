@@ -1,7 +1,7 @@
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
-import { parseContributorDetails } from '../lib/maths';
-import { type Address, createPublicClient, http } from 'viem';
+import { http, type Address, createPublicClient } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
+import { parseContributorDetails } from '../lib/maths';
 
 type Contributor = {
   addr: Address;

@@ -1,13 +1,9 @@
 import { ActionModuleDivider } from '@/components/ActionModule';
-import {
-  CollapsableContent,
-  NodeContributorList,
-  RowLabel,
-  getTotalStakedAmountForAddress,
-} from '@/components/NodeCard';
+import { CollapsableContent, NodeContributorList, RowLabel } from '@/components/NodeCard';
 import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
 import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
+import { getTotalStakedAmountForAddress } from '@/components/getTotalStakedAmountForAddress';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { formatPercentage } from '@/lib/locale-client';
@@ -17,8 +13,11 @@ import {
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
 import { SENT_DECIMALS } from '@session/contracts';
-import { formatSENTNumber } from '@session/contracts/hooks/Token';
-import type { ContributorContractInfo } from '@session/staking-api-js/client';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import type {
+  ContributionContract,
+  ContributionContractNotReady,
+} from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { cn } from '@session/ui/lib/utils';
@@ -47,7 +46,7 @@ function getContractStatusColor(
 }
 
 type ContractSummaryProps = {
-  contract: ContributorContractInfo;
+  contract: ContributionContract | ContributionContractNotReady;
   state: STAKE_CONTRACT_STATE;
   isOperator?: boolean;
 };
@@ -77,7 +76,7 @@ const StakedContractCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
     id: string;
-    contract: ContributorContractInfo;
+    contract: ContributionContract | ContributionContractNotReady;
     targetWalletAddress?: Address;
     hideButton?: boolean;
   }
@@ -94,8 +93,8 @@ const StakedContractCard = forwardRef<
 
   const { fee, operator_address: operatorAddress, contributors } = contract;
 
-  const formattedStakeBalance = formatSENTNumber(
-    address ? getTotalStakedAmountForAddress(contributors, address) : 0,
+  const formattedStakeBalance = formatSENTBigInt(
+    address ? getTotalStakedAmountForAddress(contributors, address) : 0n,
     SENT_DECIMALS
   );
   const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
@@ -106,10 +105,10 @@ const StakedContractCard = forwardRef<
     const contributor = contributors.find((contributor) =>
       areHexesEqual(contributor.address, address)
     );
-    if (!contributor || !contributor.beneficiary) return null;
+    if (!contributor || !contributor.beneficiary_address) return null;
 
-    return !areHexesEqual(contributor.beneficiary, contributor.address)
-      ? contributor.beneficiary
+    return !areHexesEqual(contributor.beneficiary_address, contributor.address)
+      ? contributor.beneficiary_address
       : null;
   }, [contributors, address]);
 
@@ -202,7 +201,7 @@ function StakedContractCardButton({
   contract,
   state,
 }: {
-  contract: ContributorContractInfo;
+  contract: ContributionContract | ContributionContractNotReady;
   state: STAKE_CONTRACT_STATE;
 }) {
   const dictionaryOpenNode = useTranslations('nodeCard.open');
