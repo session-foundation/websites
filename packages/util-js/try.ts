@@ -76,4 +76,29 @@ export function safeTrySync<T, E = Error>(fn: SyncFn<T>): [null, T] | [E, null] 
   }
 }
 
+type AllowedBasicFallback = string | number | boolean | bigint | object | null | undefined;
+type AllowedFallback =
+  | AllowedBasicFallback
+  | Array<AllowedBasicFallback>
+  | Record<string, AllowedBasicFallback>;
+
+/**
+ * Safely try to execute a synchronous function, returning a tuple of [error, result].
+ * @see {@link safeTrySync} for more information.
+ *
+ * @param fn - The function to try
+ * @param fallback - The fallback value to return if the function throws an error.
+ * @returns A tuple of [error, result].
+ */
+export function safeTrySyncWithFallback<T, F = AllowedFallback, E = Error>(
+  fn: SyncFn<T>,
+  fallback: F
+): [null, T] | [E, F extends T ? T : F] {
+  try {
+    return [null, fn()];
+  } catch (err) {
+    return [err as E, fallback as F extends T ? T : F];
+  }
+}
+
 export type Try<T, E = Error> = Awaited<ReturnType<typeof safeTry<T, E>>>;

@@ -8,6 +8,7 @@ import { NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
 import PreferencesProvider from '@/providers/preferences-provider';
 import QueryProvider from '@/providers/query-provider';
 import TOSProvider from '@/providers/tos-provider';
+import VestingProvider from '@/providers/vesting-provider';
 import Web3WalletProvider from '@/providers/web3wallet-provider';
 import ToasterProvider from '@session/ui/ui/sonner';
 import { WalletButtonProvider } from '@session/wallet/providers/wallet-button-provider';
@@ -31,9 +32,11 @@ export function GlobalProvider({ children, wagmiCookie, messages, locale }: Glob
                   wagmiCookie={wagmiCookie}
                   projectId={NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
                 >
-                  <StatusBarProvider>
-                    <TOSProvider>{children}</TOSProvider>
-                  </StatusBarProvider>
+                  <VestingProvider>
+                    <StatusBarProvider>
+                      <TOSProvider>{children}</TOSProvider>
+                    </StatusBarProvider>
+                  </VestingProvider>
                 </Web3WalletProvider>
               </WalletButtonProvider>
             </LocalizationProvider>

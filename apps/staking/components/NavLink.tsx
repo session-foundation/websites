@@ -11,6 +11,7 @@ export type NavLinkProps = {
   children?: ReactNode;
   ariaLabel?: string;
   className?: string;
+  suppressHydrationWarning?: boolean;
 };
 
 /**
@@ -24,7 +25,14 @@ function isExternalLink(href: string): boolean {
   return href.startsWith('https://');
 }
 
-export function NavLink({ href, label, children, ariaLabel, className }: NavLinkProps) {
+export function NavLink({
+  href,
+  label,
+  children,
+  ariaLabel,
+  className,
+  suppressHydrationWarning,
+}: NavLinkProps) {
   const pathname = usePathname();
   return (
     <Link
@@ -41,6 +49,8 @@ export function NavLink({ href, label, children, ariaLabel, className }: NavLink
             referrerPolicy: 'no-referrer',
           }
         : {})}
+      /* TODO: remove once we have proper skeletons and can dynamically import them */
+      suppressHydrationWarning={suppressHydrationWarning}
     >
       {children ?? label}
     </Link>

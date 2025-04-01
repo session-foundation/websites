@@ -83,7 +83,7 @@
     "gh": {
       "dependsOn": [
         "^check-types",
-        "^lint",
+        "^check",
         "^test",
         "^build"
       ]

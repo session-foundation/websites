@@ -149,7 +149,8 @@ const OpenNodeCard = forwardRef<
         <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center gap-1.5 align-middle">
           <NodeOperatorIndicator isOperatorConnectedWallet />
         </NodeItem>
-      ) : contributor ? (
+      ) : null}
+      {contributor ? (
         <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
           <StakedToIndicator className="me-1.5" hideTextOnMobile tokenAmount={contributor.amount} />
           <NodeItemValue>{formatSENTBigInt(contributor.amount, 1)}</NodeItemValue>

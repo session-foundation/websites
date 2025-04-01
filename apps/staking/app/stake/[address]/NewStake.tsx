@@ -2,7 +2,7 @@ import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 import { StakeInfo, getContributionRangeForWallet } from '@/app/stake/[address]/StakeInfo';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
-// import { SubmitContributeFundsVesting } from '@/app/stake/[address]/SubmitContributeFundsVesting';
+import { SubmitContributeFundsVesting } from '@/app/stake/[address]/SubmitContributeFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import EthereumAddressField, {
@@ -18,7 +18,7 @@ import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeSt
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
-// import { useActiveVestingContract } from '@/providers/vesting-provider';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
@@ -61,8 +61,7 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
 
   const address = useCurrentActor();
   const { address: connectedAddress } = useWallet();
-  // TODO: uncomment when we have vesting contracts
-  const vestingContract = null; //useActiveVestingContract();
+  const vestingContract = useActiveVestingContract();
   const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const dictionary = useTranslations('actionModules.staking');
@@ -289,12 +288,10 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
       <ErrorBoundary errorComponent={ErrorStake}>
         {stakingParams ? (
           vestingContract ? (
-            // TODO: uncomment when we have vesting contracts
-            null
-            // <SubmitContributeFundsVesting
-            //   stakingParams={stakingParams}
-            //   setIsSubmitting={setIsSubmitting}
-            // />
+            <SubmitContributeFundsVesting
+              stakingParams={stakingParams}
+              setIsSubmitting={setIsSubmitting}
+            />
           ) : (
             <SubmitContributeFunds
               stakingParams={stakingParams}

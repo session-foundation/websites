@@ -24,8 +24,12 @@ export function sortContracts(a: ContributionContract, b: ContributionContract, 
   const operatorA = areHexesEqual(a.operator_address, address);
   const operatorB = areHexesEqual(b.operator_address, address);
 
-  const priorityA = operatorA ? (contractStateSortOrderIfOperator[a.status] ?? 999) : 999;
-  const priorityB = operatorB ? (contractStateSortOrderIfOperator[b.status] ?? 999) : 999;
+  const priorityA = operatorA
+    ? (contractStateSortOrderIfOperator[a.status] ?? Number.POSITIVE_INFINITY)
+    : Number.POSITIVE_INFINITY;
+  const priorityB = operatorB
+    ? (contractStateSortOrderIfOperator[b.status] ?? Number.POSITIVE_INFINITY)
+    : Number.POSITIVE_INFINITY;
 
   if (priorityA !== priorityB) {
     // Priority ascending
@@ -126,7 +130,11 @@ export function parseContracts({
       added.has(pubkey_bls) ||
       runningStakesBlsKeysSet.has(pubkey_bls)
     ) {
-      if (address && getTotalStakedAmountForAddress(contributors, address) > 0n) {
+      if (
+        status !== CONTRIBUTION_CONTRACT_STATUS.Finalized &&
+        address &&
+        getTotalStakedAmountForAddress(contributors, address) > 0n
+      ) {
         logger.debug(
           `Contract has duplicate pubkey, but has stakes, showing with warning: ${pubkey_bls}`
         );

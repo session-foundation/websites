@@ -21,10 +21,15 @@ export type ClaimRewardsQuery = ContractWriteQueryProps & {
   claimRewards: () => void;
 };
 
-export function useClaimRewardsQuery(): ClaimRewardsQuery {
+export function useClaimRewardsQuery({
+  vestingContractAddress,
+}: {
+  vestingContractAddress?: Address;
+}): ClaimRewardsQuery {
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
-    contract: 'ServiceNodeRewards',
+    contract: vestingContractAddress ? 'TokenVestingStaking' : 'ServiceNodeRewards',
     functionName: 'claimRewards',
+    addressOverride: vestingContractAddress,
   });
 
   return {
@@ -33,40 +38,58 @@ export function useClaimRewardsQuery(): ClaimRewardsQuery {
   };
 }
 
+export type UpdateRewardsBalanceArgs = {
+  address: Address;
+  rewards: bigint;
+  blsSignature: string;
+  excludedSigners: Array<bigint>;
+};
+
 export type UpdateRewardsBalanceQuery = ContractWriteQueryProps & {
   /** Update rewards balance */
-  updateRewardsBalance: () => void;
+  updateRewardsBalance: (args?: UpdateRewardsBalanceArgs) => void;
 };
 
-export type UseUpdateRewardsBalanceQueryParams = {
-  address?: Address;
-  rewards?: bigint;
-  blsSignature?: string;
-  excludedSigners?: Array<bigint>;
-};
-
-export function useUpdateRewardsBalanceQuery({
-  address,
-  rewards,
-  blsSignature,
-  excludedSigners,
-}: UseUpdateRewardsBalanceQueryParams): UpdateRewardsBalanceQuery {
-  const defaultArgs = useMemo(() => {
-    const encodedBlsSignature = blsSignature ? encodeBlsSignature(blsSignature) : null;
-
-    return [address, rewards, encodedBlsSignature, excludedSigners] as const;
-  }, [address, rewards, blsSignature, excludedSigners]);
+export function useUpdateRewardsBalanceQuery(
+  // NOTE: default args are required to get the gas estimate
+  defaultArgs?: UpdateRewardsBalanceArgs
+): UpdateRewardsBalanceQuery {
+  const defaultBlsSignature = useMemo(
+    () => (defaultArgs?.blsSignature ? encodeBlsSignature(defaultArgs.blsSignature) : null),
+    [defaultArgs]
+  );
 
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
     contract: 'ServiceNodeRewards',
     functionName: 'updateRewardsBalance',
-    // TODO: update the types to better reflect optional args as default
-    // @ts-expect-error -- This is fine as the args change once the query is ready to execute.
-    args: defaultArgs,
+    ...(defaultArgs && defaultBlsSignature
+      ? {
+          args: [
+            defaultArgs.address,
+            defaultArgs.rewards,
+            defaultBlsSignature,
+            defaultArgs.excludedSigners,
+          ],
+        }
+      : {}),
   });
 
+  const updateRewardsBalance = (args?: UpdateRewardsBalanceArgs) => {
+    const _args = args ?? defaultArgs;
+    if (!_args) {
+      throw new Error('updateRewardsBalance called without args');
+    }
+
+    return simulateAndWriteContract([
+      _args.address,
+      _args.rewards,
+      encodeBlsSignature(_args.blsSignature),
+      _args.excludedSigners,
+    ] as const);
+  };
+
   return {
-    updateRewardsBalance: simulateAndWriteContract,
+    updateRewardsBalance,
     ...rest,
   };
 }
@@ -106,7 +129,8 @@ export type UseAddBlsPubKeyParams = {
   nodePubKey: string;
   userSignature: string;
   fee?: number;
-  contributors?: Array<RegisterNodeContributor>;
+  /** Contributors to the node, requires at least one contributor */
+  contributors: Array<RegisterNodeContributor> & { [0]: RegisterNodeContributor };
 };
 
 export function encodeAddBlsPubKeyArgs({
@@ -141,7 +165,7 @@ export function useAddBLSPubKey({
   nodePubKey,
   userSignature,
   fee = 0,
-  contributors = [],
+  contributors,
 }: UseAddBlsPubKeyParams): UseAddBLSPubKeyReturn {
   const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
     return encodeAddBlsPubKeyArgs({
@@ -171,7 +195,7 @@ export function useAddBlsPubKeyFeeEstimate({
   nodePubKey,
   userSignature,
   fee = 0,
-  contributors = [],
+  contributors,
 }: UseAddBlsPubKeyParams) {
   const { encodedBlsPubKey, encodedBlsSignature, encodedNodeParams } = useMemo(() => {
     return encodeAddBlsPubKeyArgs({
@@ -196,15 +220,18 @@ export type UseInitiateRemoveBLSPublicKeyReturn = ContractWriteQueryProps & {
 
 export function useInitiateRemoveBLSPublicKey({
   contractId,
+  vestingContractAddress,
 }: {
   contractId: number;
+  vestingContractAddress?: Address;
 }): UseInitiateRemoveBLSPublicKeyReturn {
   const defaultArgs = useMemo(() => [BigInt(contractId ?? 0)] as [bigint], [contractId]);
 
   const { simulateAndWriteContract, ...rest } = useContractWriteQuery({
-    contract: 'ServiceNodeRewards',
+    contract: vestingContractAddress ? 'TokenVestingStaking' : 'ServiceNodeRewards',
     functionName: 'initiateExitBLSPublicKey',
     args: defaultArgs,
+    addressOverride: vestingContractAddress,
   });
 
   return {

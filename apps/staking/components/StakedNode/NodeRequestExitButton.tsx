@@ -99,6 +99,20 @@ function RequestNodeExitDisabled() {
   );
 }
 
+function formatEnglishTimeDistance(seconds: number, delimiter = ' ', addPluralSuffix = false) {
+  const days = Math.floor(seconds / 86400);
+  if (days > 0) return `${days}${delimiter}day${days > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const hours = Math.floor((seconds % 86400) / 3600);
+  if (hours > 0) return `${hours}${delimiter}hour${hours > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (minutes > 0)
+    return `${minutes}${delimiter}minute${minutes > 1 && addPluralSuffix ? 's' : ''}`;
+
+  return `${Math.floor(seconds)}${delimiter}second${seconds > 1 && addPluralSuffix ? 's' : ''}`;
+}
+
 function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () => void }) {
   const { chainId } = useWallet();
 
@@ -106,30 +120,21 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
 
   return (
     <>
-      <div className="font-medium text-lg">{dictionary('description1')}</div>
+      <div className="font-medium text-lg">{dictionary('description.title')}</div>
       <p>
-        {dictionary('description2', {
+        {dictionary.rich('description.content', {
           request_time: formatLocalizedTimeFromSeconds(
             SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
               addSuffix: true,
             }
           ),
-        })}
-        <br />
-        <br />
-        {dictionary.rich('description3', {
-          request_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS
-          ),
-          exit_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS
+          exit_time: formatEnglishTimeDistance(
+            SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS,
+            '-'
           ),
           link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
         })}
-        <br />
-        <br />
-        {dictionary('description4')}
       </p>
       <AlertDialogFooter className="mt-4 flex w-full flex-col font-medium sm:flex-row">
         <Button

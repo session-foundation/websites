@@ -28,7 +28,11 @@ export function RewardsAddressInputMultiTab() {
 
   const handleSubmit = (data: MultiRegistrationFormSchema) => {
     pushQueryParam(REGISTRATION_QUERY_PARAM.REWARDS_ADDRESS, data.rewardsAddress);
-    changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.RESERVE_SLOTS);
+    changeTab(
+      mode === REG_MODE.EDIT || mode === REG_MODE.EXPRESS
+        ? REG_TAB.SUBMIT_MULTI
+        : REG_TAB.RESERVE_SLOTS
+    );
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: On mount

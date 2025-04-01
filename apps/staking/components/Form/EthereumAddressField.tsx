@@ -6,23 +6,41 @@ import { useTranslations } from 'next-intl';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
+export type BannedAddress = { address: string; errorMessage: string };
+
 export type GetEthereumAddressFormFieldSchemaArgs = {
   required?: boolean;
   invalidAddressMessage?: string;
+  bannedAddresses?: Array<BannedAddress>;
 };
 
 export const getEthereumAddressFormFieldSchema = ({
   required,
   invalidAddressMessage,
+  bannedAddresses,
 }: GetEthereumAddressFormFieldSchemaArgs) => {
   const dictionary = useTranslations('actionModules.ethAddress.validation');
-  return z.string().refine(
-    (value) => {
+  return z
+    .string()
+    .refine(
+      (value) => {
+        if (!value) return !required;
+        return isAddress(value);
+      },
+      { message: invalidAddressMessage ?? dictionary('invalidAddress') }
+    )
+    .superRefine((value, ctx) => {
       if (!value) return !required;
-      return isAddress(value);
-    },
-    { message: invalidAddressMessage ?? dictionary('invalidAddress') }
-  );
+      const bannedAddress = bannedAddresses?.find(({ address }) => address === value);
+      if (bannedAddress) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: bannedAddress.errorMessage,
+        });
+        return false;
+      }
+      return true;
+    });
 };
 
 export type EthereumAddressFieldProps = {

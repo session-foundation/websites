@@ -39,6 +39,7 @@ export const LANDING_BUTTON_URL = {
 };
 
 export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register', '/faucet'];
+export const VESTING_PATHS = ['/stake', '/mystakes', '/register'];
 
 export enum COMMUNITY_DATE {
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = '2024-06-12',
@@ -91,13 +92,19 @@ type LinkItem = {
   linkType?: 'internal' | 'external';
 };
 
-export const SSR_LINKS: LinkItem[] = [
-  { dictionaryKey: 'stake', href: '/stake' },
-  { dictionaryKey: 'register', href: '/register' },
-  { dictionaryKey: 'myStakes', href: '/mystakes' },
-  { dictionaryKey: 'leaderboard', href: '/leaderboard', linkType: 'internal' },
-  { dictionaryKey: 'faucet', href: '/faucet' },
-] as const;
+export const STATIC_LINKS = {
+  stake: { dictionaryKey: 'stake', href: '/stake' },
+  register: { dictionaryKey: 'register', href: '/register' },
+  leaderboard: { dictionaryKey: 'leaderboard', href: '/leaderboard' },
+  faucet: { dictionaryKey: 'faucet', href: '/faucet' },
+} as const;
+
+export const SSR_LINKS: LinkItem[] = Object.values(STATIC_LINKS);
+
+export const DYNAMIC_LINKS = {
+  myStakes: { dictionaryKey: 'myStakes', href: '/mystakes' },
+  vestedStakes: { dictionaryKey: 'vestedStakes', href: '/vested-stakes' },
+} as const;
 
 export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'tokenSite', href: 'https://token.getsession.org', linkType: 'external' },
@@ -112,8 +119,6 @@ export enum QUERY {
   /** 1 second */
   STALE_TIME_DEFAULT_DEV = 1000,
   /** 1 second */
-  STALE_TIME_REGISTRATIONS_PAGE = 1000,
-  /** 1 second */
   STALE_TIME_REGISTRATIONS_LIST_DEV = 1000,
   /** 10 seconds */
   STALE_TIME_REGISTRATIONS_LIST = 10 * 1000,
@@ -121,8 +126,6 @@ export enum QUERY {
   STALE_TIME_CLAIM_REWARDS = 2 * 60 * 1000,
   /** 60 seconds */
   STALE_TIME_REMOTE_FEATURE_FLAGS = 60 * 1000,
-  /** 5 seconds */
-  REFETCH_INTERVAL_REGISTRATION_GET_CONTRACT_ADDRESS = 5 * 1000,
 }
 
 /** 20,000 SENT  */
@@ -192,15 +195,6 @@ export const SESSION_NODE_TIME = (chainId?: number) => {
       return SESSION_NODE_TIME_MAINNET;
   }
 };
-
-export enum CONTRIBUTION_CONTRACT {
-  /** 25m -- the maximum age of a node that can be considered "joining" before its hidden, should be registered in ~20m */
-  MAX_AGE_JOINING_S = 25 * 60,
-}
-
-export enum TOAST {
-  ERROR_COLLAPSE_LENGTH = 128,
-}
 
 export enum DYNAMIC_MODULE {
   /** The number of decimal places to round SENT values to */
@@ -322,8 +316,6 @@ export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
 } as const;
 
 export enum BACKEND {
-  /** 10 seconds */
-  L2_TARGET_UPDATE_INTERVAL_SECONDS = 10,
   /** 30 seconds */
   L2_BACKGROUND_UPDATE_INTERVAL_SECONDS = 30,
   /** 2 minutes */
@@ -342,3 +334,9 @@ export enum LAST_UPDATED_BEHIND_TRIGGER {
   /** 3 minutes */
   BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
 }
+
+export const allowedVestingRegistrationTabs = [
+  REG_TAB.REWARDS_ADDRESS_INPUT_SOLO,
+  REG_TAB.SUBMIT_SOLO,
+  REG_TAB.SUCCESS_SOLO,
+];

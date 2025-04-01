@@ -15,6 +15,7 @@ import { internalLink } from '@/lib/locale-defaults';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import {
   ModuleGridHeader,
   ModuleGridInfoContent,
@@ -65,7 +66,9 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         />
       ) : isLoading ? (
         <Loading />
-      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) && blockHeight && networkTime ? (
+      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) &&
+        blockHeight &&
+        networkTime ? (
         <>
           {hiddenContractsWithStakes.map((contract) => {
             return (
@@ -77,16 +80,18 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
               />
             );
           })}
-          {visibleContracts.map((contract) => {
-            return (
-              <StakedContractCard
-                key={contract.address}
-                id={contract.address}
-                contract={contract}
-                targetWalletAddress={address}
-              />
-            );
-          })}
+          {visibleContracts
+            .filter(({ status }) => status !== CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib)
+            .map((contract) => {
+              return (
+                <StakedContractCard
+                  key={contract.address}
+                  id={contract.address}
+                  contract={contract}
+                  targetWalletAddress={address}
+                />
+              );
+            })}
           {stakes.map((stake) => {
             return (
               <StakedNodeCard

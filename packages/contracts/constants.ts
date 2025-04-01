@@ -8,6 +8,7 @@ const contracts = [
   'ServiceNodeRewards',
   'ServiceNodeContributionFactory',
   'ServiceNodeContribution',
+  'TokenVestingStaking',
 ] as const satisfies Array<ContractWithAbiName>;
 export type ContractName = (typeof contracts)[number];
 
@@ -51,6 +52,13 @@ export const addresses: Record<ContractName, Record<ChainId, Address>> = {
     [arbitrumSepoliaChainId]: '0x36Ee2Da54a7E727cC996A441826BBEdda6336B71',
   },
   ServiceNodeContribution: {
+    /** @deprecated - The Mainnet value is a mock value */
+    [arbitrumChainId]: '0x0000000000000000000000000000000000000000',
+    /** @deprecated - The Eth value is a mock value */
+    [ethChainId]: '0x0000000000000000000000000000000000000000',
+    [arbitrumSepoliaChainId]: '0x0000000000000000000000000000000000000000',
+  },
+  TokenVestingStaking: {
     /** @deprecated - The Mainnet value is a mock value */
     [arbitrumChainId]: '0x0000000000000000000000000000000000000000',
     /** @deprecated - The Eth value is a mock value */

@@ -1,4 +1,4 @@
-import { DYNAMIC_MODULE, HANDRAIL_THRESHOLD } from '@/lib/constants';
+import { BACKEND, DYNAMIC_MODULE, HANDRAIL_THRESHOLD, PREFERENCE } from '@/lib/constants';
 import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
@@ -7,6 +7,7 @@ import { bigIntMax } from '@session/util-crypto/maths';
 import { safeTrySync } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
+import { usePreferences } from 'usepref';
 import type { Address } from 'viem';
 
 /**
@@ -17,9 +18,11 @@ import type { Address } from 'viem';
  */
 export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const { address: connectedAddress } = useWallet();
+  const { getItem } = usePreferences();
   const address = params?.addressOverride ?? connectedAddress;
 
   const enabled = !!address;
+  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
   const {
     data,
@@ -30,7 +33,10 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
     {
       address: address!,
     },
-    { enabled }
+    {
+      enabled,
+      refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
+    }
   );
 
   const {
@@ -40,11 +46,8 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   } = useGetRecipients({ address: address! });
 
   const unclaimedRewards = useMemo(() => {
-    if (claimed === undefined || !data || !('rewards' in data) || data.rewards === undefined) {
-      return undefined;
-    }
-
-    const [err, rewards] = safeTrySync(() => BigInt(data.rewards));
+    if (!data || claimed === undefined) return undefined;
+    const [err, rewards] = safeTrySync(() => data.rewards);
     if (err) return undefined;
 
     // Don't show negative rewards

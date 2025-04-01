@@ -1,4 +1,4 @@
-// import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
+import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 
 /**
@@ -8,8 +8,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
  * @returns The current actor ethereum address.
  */
 export function useCurrentActor() {
-  // TODO: uncomment when we have vesting contracts
-  const vestingContractAddress = null; //useActiveVestingContractAddress();
+  const vestingContractAddress = useActiveVestingContractAddress();
   const { address: connectedAddress } = useWallet();
 
   return vestingContractAddress ?? connectedAddress;

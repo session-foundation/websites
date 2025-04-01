@@ -2,21 +2,24 @@ import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import { getNonFinalizedLatestDeployedContributorContract } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
+import { BACKEND } from '@/lib/constants';
 import { getContributionContractBySnKey } from '@/lib/queries/getContributionContractBySnKey';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
-import {
-  CONTRIBUTION_CONTRACT_STATUS,
-  type ContributorContractInfo,
-  type StakeContributor,
-} from '@session/staking-api-js/client';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import type {
+  ContributionContractContributor,
+  ContributionContractNotReady,
+} from '@session/staking-api-js/schema';
 import { Loading } from '@session/ui/components/loading';
 import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
 import { Button } from '@session/ui/ui/button';
+import { numberToBigInt } from '@session/util-crypto/maths';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import type { Address } from 'viem';
 
 export function SuccessMultiTab() {
   const { contract, props, formMulti, address } = useRegistrationWizard();
@@ -31,7 +34,9 @@ export function SuccessMultiTab() {
     },
     {
       refetchInterval: (query) =>
-        getNonFinalizedLatestDeployedContributorContract(query.state.data) ? false : 5000,
+        getNonFinalizedLatestDeployedContributorContract(query.state.data)
+          ? false
+          : BACKEND.MULTI_REGISTRATION_SN_POLL_INTERVAL_MS,
       gcTime: Number.POSITIVE_INFINITY,
       staleTime: Number.POSITIVE_INFINITY,
       refetchIntervalInBackground: true,
@@ -44,7 +49,7 @@ export function SuccessMultiTab() {
   const beneficiary = formMulti.watch('rewardsAddress');
 
   const deployedContract = useMemo(() => {
-    let contractDetails: ContributorContractInfo | null = null;
+    let contractDetails: ContributionContractNotReady | null = null;
     if (contract) {
       contractDetails = { ...contract };
     } else {
@@ -67,12 +72,12 @@ export function SuccessMultiTab() {
       contractDetails.status = CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib;
       contractDetails.contributors = [
         {
-          address: address!,
-          amount: Number.parseInt(amount) * 10 ** TOKEN.DECIMALS,
-          beneficiary,
-          reserved: 0,
+          address,
+          amount: numberToBigInt(Number.parseInt(amount) * 10 ** TOKEN.DECIMALS),
+          beneficiary_address: beneficiary as Address,
+          reserved: 0n,
         },
-      ] satisfies Array<StakeContributor>;
+      ] satisfies Array<ContributionContractContributor>;
     }
 
     return contractDetails;

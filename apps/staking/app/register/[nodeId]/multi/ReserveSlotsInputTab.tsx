@@ -15,7 +15,6 @@ import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import { SESSION_NODE, SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
-import logger from '@/lib/logger';
 import { getContributionRangeFromContributors } from '@/lib/maths';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,15 +38,11 @@ export const getContributionRangeFromReservedContributorStructs = (
   return getContributionRangeFromContributors(
     contributors
       .map((slot) => {
-        const [err, amount] = safeTrySync(() => Number(slot.amount));
-        if (err) {
-          logger.error(err);
-          return null;
-        }
         return {
           address: slot.addr,
-          amount: amount,
-          reserved: amount,
+          amount: slot.amount,
+          reserved: slot.amount,
+          beneficiary_address: slot.addr,
         };
       })
       .filter((v) => v !== null)
@@ -323,6 +318,7 @@ export function ReserveSlotsInputTab() {
                   stakeAmountDescription={dict('stakeAmountDescription')}
                   field={field}
                   dataTestId={InputDataTestId.Registration_Reserved_Stake_Amount}
+                  ignoreBalance
                   dataTestIds={{
                     buttonMin: ButtonDataTestId.Registration_Reserved_Stake_Amount_Min,
                     buttonMax: ButtonDataTestId.Registration_Reserved_Stake_Amount_Max,

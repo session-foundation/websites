@@ -130,6 +130,16 @@ export enum ButtonDataTestId {
   Stake_Manage_Stake_Edit_Stake_Amount = 'button:stake-manage-stake-edit-stake-amount',
   Stake_Manage_Stake_Edit_Rewards_Address = 'button:stake-manage-stake-edit-rewards-address',
   Stake_Manage_Remove_Stake = 'button:stake-manage-remove-stake',
+  Vesting_Start_Continue = 'button:vesting-start-continue',
+  Vesting_Start_Skip = 'button:vesting-start-skip',
+  Vesting_Info_Switch = 'button:vesting-info-switch',
+  Vesting_Disconnect = 'button:vesting-disconnect',
+  Vesting_Wallet_Button = 'button:vesting-wallet-button',
+  Vesting_Transfer_Beneficiary_Submit = 'button:vesting-transfer-beneficiary-submit',
+  Vesting_Transfer_Beneficiary_Confirm = 'button:vesting-transfer-beneficiary-confirm',
+  Vesting_Info_Edit_Beneficiary = 'button:vesting-info-edit-beneficiary',
+  Vesting_Claim_Principal_Open_Dialog = 'button:vesting-claim-principal-open-dialog',
+  Vesting_Claim_Principal_Confirm = 'button:vesting-claim-principal-confirm',
 }
 
 export enum InputDataTestId {
@@ -143,6 +153,11 @@ export enum InputDataTestId {
   Stake_New_Stake_Rewards_Address = 'input:stake-new-stake-rewards-address',
   Stake_Manage_Stake_Stake_Amount = 'input:stake-manage-stake-stake-amount',
   Stake_Manage_Stake_Rewards_Address = 'input:stake-manage-stake-rewards-address',
+  Beneficiary_Transfer_Beneficiary_Address = 'input:beneficiary-transfer-beneficiary-address',
+}
+
+export enum SwitchDataTestId {
+  Vesting_Switch = 'switch:vesting-switch',
 }
 
 export enum RadioDataTestId {

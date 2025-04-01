@@ -48,6 +48,81 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
     [registrationsData, nodeId]
   );
 
+  /**
+   * Handles if the /register page is visited with a specific SNKey. eg: /register/potato
+   * We want to be in the appropriate mode to show the registration if we can find who owns it.
+   * A. If the registration is in the wallets' registration list:
+   *   - If connected to a vesting contract, disconnect from it.
+   *   - Else do nothing. (we're acting as the wallet)
+   * B. If the registration is in one of the wallets' vesting contracts' registration list, we
+   * enter vesting mode for that contract if we aren't already connected to it.
+   *
+   * If a valid registration is found, we hide the vesting selection dialog (if its open).
+   */
+  const handleRegistration = useCallback(
+    async (snKey: string) => {
+      if (!isEd25519PublicKey(snKey)) {
+        logger.warn(`Invalid SNKey for registration: ${snKey}`);
+        return;
+      }
+
+      logger.debug(`Handling registration for ${snKey}`);
+      const res = await getNodeRegistrationsForSnKey(stakingBackendClient, { snKey });
+      const [regError, registrations] = safeTrySyncWithFallback(
+        () => res.data?.registrations ?? [],
+        []
+      );
+      if (regError) logger.error(regError);
+
+      const latestRegistration = registrations.sort((a, b) => b.timestamp - a.timestamp)[0];
+      if (!latestRegistration) {
+        logger.debug(`No registrations found for ${snKey}`);
+        return;
+      }
+
+      const [opError, operator] = safeTrySync(() => latestRegistration.operator);
+
+      if (opError) {
+        logger.error(opError);
+        return;
+      }
+
+      if (activeContract && areHexesEqual(operator, walletAddress)) {
+        logger.debug('Registration is for the wallet, disconnecting from vesting contract');
+        disconnectFromVestingContract();
+        return;
+      }
+
+      const contract = contracts.find((contract) => areHexesEqual(contract.address, operator));
+      if (contract) {
+        logger.debug(`Contract found! Connecting to vesting contract: ${contract.address}`);
+        connectToVestingContract(contract);
+        setShowVestingSelectionDialog(false);
+        return;
+      }
+    },
+    [
+      walletAddress,
+      activeContract,
+      contracts,
+      connectToVestingContract,
+      disconnectFromVestingContract,
+      stakingBackendClient,
+      setShowVestingSelectionDialog,
+    ]
+  );
+
+  /**
+   * Handle showing the vesting selection dialog if the user has not yet connected to a vesting contract this session.
+   * TODO (NTH): Handle all of this server-side
+   */
+  useEffect(() => {
+    const snKey = pathname.split('/')[2];
+    if (snKey) {
+      void handleRegistration(snKey);
+    }
+  }, [handleRegistration, pathname]);
+
   return isLoadingRegistrations || isLoadingStakes ? (
     <NodeRegistrationFormSkeleton />
   ) : registration ? (

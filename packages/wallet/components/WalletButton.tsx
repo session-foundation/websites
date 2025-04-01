@@ -27,7 +27,7 @@ export function useWalletTokenBalance() {
     [chainId, tokens]
   );
 
-  const { data: tokenData } = useERC20Balance({
+  const { data: tokenData, refetch } = useERC20Balance({
     chainId,
     tokenAddress: token && 'tokenAddress' in token ? token.tokenAddress : undefined,
   });
@@ -44,6 +44,7 @@ export function useWalletTokenBalance() {
     decimals: tokenData?.decimals,
     symbol: tokenData?.symbol,
     balance: tokenBalance,
+    refetch,
   };
 }
 

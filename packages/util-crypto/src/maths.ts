@@ -176,3 +176,25 @@ export const bigIntMax = (
 
   return v1 > v2 ? v1 : v2;
 };
+
+/**
+ * Sorts two BigInt values in ascending order.
+ * @param a first bigint value
+ * @param b second bigint value
+ */
+export const bigIntSortAsc = (a: bigint, b: bigint): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
+/**
+ * Sorts two BigInt values in descending order.
+ * @param a first bigint value
+ * @param b second bigint value
+ */
+export const bigIntSortDesc = (a: bigint, b: bigint): number => {
+  if (a < b) return 1;
+  if (a > b) return -1;
+  return 0;
+};

@@ -23,6 +23,7 @@ import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
@@ -172,7 +173,7 @@ const StakedContractCard = forwardRef<
                 <ActionModuleDivider className="h-0.5" />
               </CollapsableContent>
               {Object.entries(contract).map(([key, value]) => {
-                const valueToDisplay = JSON.stringify(value);
+                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
                 return (
                   <CollapsableContent
                     size="xs"

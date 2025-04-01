@@ -1,7 +1,7 @@
 'use client';
 
 import { getReferralCodeInfo } from '@/app/faucet/actions';
-import { WalletButtonWithLocales } from '@/components/WalletButtonWithLocales';
+import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
 import { encodeAddressToHashId } from '@/lib/hashid';
 import { externalLink } from '@/lib/locale-defaults';

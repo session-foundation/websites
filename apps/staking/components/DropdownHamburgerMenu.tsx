@@ -1,7 +1,7 @@
 'use client';
 
 import { NavLink, type NavLinkProps } from '@/components/NavLink';
-import { EXTERNAL_ROUTES, SSR_LINKS } from '@/lib/constants';
+import { DYNAMIC_LINKS, EXTERNAL_ROUTES, SSR_LINKS } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
 import { Button } from '@session/ui/ui/button';
@@ -26,7 +26,7 @@ export function DropdownHamburgerMenu() {
   const navDictionary = useTranslations('navigation');
 
   const routes: typeof SSR_LINKS = [];
-  for (const { dictionaryKey, href } of SSR_LINKS) {
+  for (const { dictionaryKey, href } of [DYNAMIC_LINKS.myStakes, ...SSR_LINKS]) {
     if (
       dictionaryKey === 'faucet' &&
       !(process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true')

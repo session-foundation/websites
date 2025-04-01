@@ -4,7 +4,7 @@ import { ManageStake } from '@/app/stake/[address]/ManageStake';
 import { NewStake } from '@/app/stake/[address]/NewStake';
 import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRowSkeleton } from '@/components/ActionModule';
-import { getReadyContracts } from "@/hooks/useContributeStakeToOpenNode";
+import { getReadyContracts } from '@/hooks/useContributeStakeToOpenNode';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
@@ -26,10 +26,7 @@ export function getContractAndContributor({
 }) {
   const readyContracts = getReadyContracts(data?.contracts ?? []);
 
-  const foundContract = readyContracts.find((contract) =>
-    areHexesEqual(contract.address, address)
-  );
-
+  const foundContract = readyContracts.find((contract) => areHexesEqual(contract.address, address));
   if (!foundContract) {
     return {
       contract: null,
