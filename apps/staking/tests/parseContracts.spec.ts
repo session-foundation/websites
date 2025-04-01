@@ -346,7 +346,7 @@ describe('parseContracts', () => {
     expect(result.joiningContracts).toHaveLength(0);
     expect(result.hiddenContractsWithStakes).toHaveLength(0);
   });
-
+  
   it('should not show contracts that are finalized', () => {
    const contract = {
       address: CONTRACT_ADDRESS[6],

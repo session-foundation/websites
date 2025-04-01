@@ -27,7 +27,6 @@ export function getContractAndContributor({
   const readyContracts = getReadyContracts(data?.contracts ?? []);
 
   const foundContract = readyContracts.find((contract) => areHexesEqual(contract.address, address));
-
   if (!foundContract) {
     return {
       contract: null,
