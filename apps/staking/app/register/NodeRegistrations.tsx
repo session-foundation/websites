@@ -18,6 +18,8 @@ import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
+import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 
 export default function NodeRegistrations() {
   useAllowTestingErrorToThrow();

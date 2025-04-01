@@ -4,7 +4,7 @@ import { Button, type ButtonProps } from '@session/ui/ui/button';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
 import { useERC20Balance } from '@web3sheet/core';
 import { ConnectedWalletAvatar } from '@web3sheet/wallet';
-import { useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { useWalletButton } from '../providers/wallet-button-provider';
 import { ButtonDataTestId } from '../testing/data-test-ids';
@@ -14,6 +14,9 @@ export type WalletButtonProps = Omit<ButtonProps, 'data-testid'> & {
   disconnectedAriaLabel: string;
   connectedAriaLabel: string;
   hideBalance?: boolean;
+  balanceOverride?: string;
+  avatarOverride?: ReactNode;
+  identifierOverride?: ReactNode;
 };
 
 export function useWalletTokenBalance() {
@@ -49,7 +52,11 @@ export function WalletButton({
   disconnectedAriaLabel,
   connectedAriaLabel,
   hideBalance,
+  avatarOverride,
+  balanceOverride,
+  identifierOverride,
   className,
+  onClick,
   ...props
 }: WalletButtonProps) {
   const { isConnected, userSheetOpen, setUserSheetOpen, resolvedIdentifierShort } = useWallet();
@@ -65,7 +72,7 @@ export function WalletButton({
 
   return (
     <Button
-      onClick={handleClick}
+      onClick={onClick ?? handleClick}
       className={cn(
         'group',
         'select-none justify-end overflow-x-hidden text-xs',
@@ -90,7 +97,7 @@ export function WalletButton({
               )}
             >
               <SessionTokenIcon className="h-4 w-4" />
-              {tokenBalance}
+              {balanceOverride ?? tokenBalance}
             </div>
           ) : null}
           <div
@@ -99,8 +106,8 @@ export function WalletButton({
               !hideBalance && 'w-full bg-session-green sm:w-36 sm:min-w-36'
             )}
           >
-            <ConnectedWalletAvatar size="md" />
-            {resolvedIdentifierShort}
+            {avatarOverride ?? <ConnectedWalletAvatar size="md" />}
+            {identifierOverride ?? resolvedIdentifierShort}
           </div>
         </>
       ) : (

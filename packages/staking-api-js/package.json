@@ -13,6 +13,10 @@
     "check": "biome check",
     "check:fix": "biome check --write"
   },
+  "dependencies": {
+    "zod": "^3.23.8",
+    "viem": "2.21.54"
+  },
   "devDependencies": {
     "@session/typescript-config": "workspace:*"
   },
