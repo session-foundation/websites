@@ -1,4 +1,4 @@
-// import { useStakes } from '@/hooks/useStakes';
+import { useStakes } from '@/hooks/useStakes';
 import { addresses, isValidChainId } from '@session/contracts';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 export function useBannedRewardsAddresses() {
   const dictRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
   const { chainId } = useWallet();
-  // const { vesting } = useStakes();
+  const { vesting } = useStakes();
 
   return useMemo(() => {
     if (!isValidChainId(chainId)) return [];
@@ -23,14 +23,11 @@ export function useBannedRewardsAddresses() {
       addresses.Token[chainId],
     ].map((address) => ({ address, errorMessage: dictRewardsAddress('bannedSessionContract') }));
 
-    /** TODO: uncomment when we have vesting contracts
     const vestingContracts = vesting.map(({ address }) => ({
       address,
       errorMessage: dictRewardsAddress('bannedVestingContract'),
     }));
 
     return contracts.concat(vestingContracts);
-      */
-    return contracts;
-  }, [chainId, dictRewardsAddress]);
+  }, [chainId, vesting, dictRewardsAddress]);
 }

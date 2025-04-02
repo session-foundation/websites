@@ -1,6 +1,6 @@
+import { getReadyContracts } from '@/hooks/parseContracts';
 import { parseOpenContracts } from '@/hooks/parseOpenContracts';
 import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
-import { getReadyContracts } from '@/hooks/useContributeStakeToOpenNode';
 import { useStakes } from '@/hooks/useStakes';
 import { BACKEND, PREFERENCE } from '@/lib/constants';
 import logger from '@/lib/logger';

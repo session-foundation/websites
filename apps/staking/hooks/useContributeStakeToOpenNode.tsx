@@ -6,29 +6,9 @@ import {
 } from '@/lib/contracts';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
 import { useProxyApproval } from '@session/contracts/hooks/Token';
-import {
-  type ContributionContract,
-  contributionContractSchema,
-} from '@session/staking-api-js/schema';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import type { Address } from 'viem';
-
-/**
- * Filters out the contracts that are not ready to be used.
- * @param contracts - The contracts to filter.
- * @returns The filtered contracts.
- */
-export function getReadyContracts(contracts: Array<object>) {
-  const readyContracts: Array<ContributionContract> = [];
-  for (const contract of contracts) {
-    if (contributionContractSchema.safeParse(contract).success) {
-      // the safeParse assets the type, so we can safely cast
-      readyContracts.push(contract as ContributionContract);
-    }
-  }
-  return readyContracts;
-}
 
 export type UseContributeStakeToOpenNodeParams = {
   stakeAmount: bigint;

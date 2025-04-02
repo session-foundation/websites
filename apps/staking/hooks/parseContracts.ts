@@ -1,5 +1,8 @@
 import { ARBITRUM_EVENT, CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
-import type { ContributionContract } from '@session/staking-api-js/schema';
+import {
+  type ContributionContract,
+  contributionContractSchema,
+} from '@session/staking-api-js/schema';
 import { areHexesEqual } from '@session/util-crypto/string';
 import type { Address } from 'viem';
 import { getTotalStakedAmountForAddress } from '../components/getTotalStakedAmountForAddress';
@@ -116,6 +119,7 @@ export function parseContracts({
   const hiddenContractsWithStakes: Array<ContributionContract> = [];
   const visibleContracts: Array<ContributionContract> = [];
   const joiningContracts: Array<ContributionContract> = [];
+  const awaitingOperatorContracts: Array<ContributionContract> = [];
 
   /**
    * The contract array is pre-sorted in descending order by the block number it was deployed at.
@@ -164,6 +168,12 @@ export function parseContracts({
       }
     }
 
+    if (contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib) {
+      awaitingOperatorContracts.push(contract);
+      added.add(pubkey_bls);
+      continue;
+    }
+
     visibleContracts.push(contract);
     added.add(pubkey_bls);
   }
@@ -175,7 +185,24 @@ export function parseContracts({
     visibleContracts,
     joiningContracts,
     hiddenContractsWithStakes,
+    awaitingOperatorContracts,
     networkBlsKeys,
     networkContractIds,
   };
+}
+
+/**
+ * Filters out the contracts that are not ready to be used.
+ * @param contracts - The contracts to filter.
+ * @returns The filtered contracts.
+ */
+export function getReadyContracts(contracts: Array<object>) {
+  const readyContracts: Array<ContributionContract> = [];
+  for (const contract of contracts) {
+    if (contributionContractSchema.safeParse(contract).success) {
+      // the safeParse assets the type, so we can safely cast
+      readyContracts.push(contract as ContributionContract);
+    }
+  }
+  return readyContracts;
 }

@@ -18,7 +18,7 @@ import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeSt
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
-import { useActiveVestingContract } from '@/providers/vesting-provider';
+import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
@@ -36,7 +36,7 @@ import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
@@ -61,7 +61,8 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
 
   const address = useCurrentActor();
   const { address: connectedAddress } = useWallet();
-  const vestingContract = useActiveVestingContract();
+  const { activeContract: vestingContract, isLoading } = useVesting();
+
   const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const dictionary = useTranslations('actionModules.staking');
@@ -70,6 +71,7 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
   const dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
+  const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
 
   const decimalDelimiter = useDecimalDelimiter();
 
@@ -105,16 +107,20 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
     },
   });
 
-  const form = useForm<StakeFormSchema>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+  const defaultValues = useMemo(() => {
+    return {
       rewardsAddress: vestingContract ? (connectedAddress ?? '') : '',
       stakeAmount: bigIntToString(
         balanceValue ? bigIntMin(minStake, balanceValue) : minStake,
         SENT_DECIMALS,
         decimalDelimiter
       ),
-    },
+    };
+  }, [vestingContract, connectedAddress, balanceValue, minStake, decimalDelimiter]);
+
+  const form = useForm<StakeFormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
     reValidateMode: 'onChange',
     mode: 'onChange',
   });
@@ -122,10 +128,30 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
   const onSubmit = (data: StakeFormSchema) => {
     setIsSubmitting(true);
 
-    if (data.rewardsAddress && !isAddress(data.rewardsAddress)) {
+    /** We want to re-check the banned list validations*/
+    if (data.rewardsAddress) {
+      if (!isAddress(data.rewardsAddress)) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('invalidAddress'),
+        });
+        return;
+      }
+
+      if (
+        bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, data.rewardsAddress))
+      ) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('bannedVestingContract'),
+        });
+        return;
+      }
+      // If there is a vesting contract the rewards address is required
+    } else if (vestingContract) {
       form.setError('root', {
         type: 'manual',
-        message: dictionaryEthAddress('invalidAddress'),
+        message: dictionaryRewardsAddress('invalidAddress'),
       });
       return;
     }
@@ -172,6 +198,12 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
   }, [watchedStakeAmount]);
 
   const watchedRewardsAddress = form.watch('rewardsAddress');
+
+  useEffect(() => {
+    if (!isLoading) {
+      form.reset(defaultValues);
+    }
+  }, [isLoading, defaultValues, form]);
 
   return (
     <StakeInfo contract={contract} isSubmitting={isSubmitting}>

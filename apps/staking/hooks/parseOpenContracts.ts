@@ -2,7 +2,6 @@ import { sortContractByDeployBlockDesc, sortContracts } from '@/hooks/parseContr
 import logger from '@/lib/logger';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
-import { areHexesEqual } from '@session/util-crypto/string';
 import type { Address } from 'viem';
 
 /**
@@ -50,11 +49,7 @@ export function parseOpenContracts(
       continue;
     }
 
-    if (
-      contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib ||
-      (areHexesEqual(contract.operator_address, address) &&
-        contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib)
-    ) {
+    if (contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib) {
       logger.debug(`Open contract is visible: ${contract.pubkey_bls}`);
       contractsFiltered.push(contract);
       added.add(contract.pubkey_bls);
