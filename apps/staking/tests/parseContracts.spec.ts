@@ -44,7 +44,7 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(50)],
       operator_address: WALLET_ADDRESS[1],
       service_node_pubkey: ED25519_ADDRESS[1],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
       pubkey_bls: BLS_KEY[1],
@@ -65,6 +65,35 @@ describe('parseContracts', () => {
     expect(result.hiddenContractsWithStakes).toHaveLength(0);
   });
 
+  it('should only add awaiting operator contribution contracts to their own list', () => {
+    const contract = {
+      address: CONTRACT_ADDRESS[1],
+      contributors: [],
+      events: [DEPLOY_ARB_EVENT(50)],
+      operator_address: WALLET_ADDRESS[1],
+      service_node_pubkey: ED25519_ADDRESS[1],
+      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      fee: 10,
+      manual_finalize: false,
+      pubkey_bls: BLS_KEY[1],
+    };
+
+    const result = parseContracts({
+      contracts: [contract],
+      address: walletAddress,
+      addedBlsKeys: {},
+      runningStakesBlsKeysSet: new Set(),
+      nodeMinLifespanArbBlocks,
+      blockHeight: 1000,
+    });
+
+    expect(result.visibleContracts).toHaveLength(0);
+    expect(result.joiningContracts).toHaveLength(0);
+    expect(result.awaitingOperatorContracts).toHaveLength(1);
+    expect(result.awaitingOperatorContracts[0]).toEqual(contract);
+    expect(result.hiddenContractsWithStakes).toHaveLength(0);
+  });
+
   it('should not add contract when its a a duplicate of a newer shown contract', () => {
     const contract1 = {
       address: CONTRACT_ADDRESS[1],
@@ -72,7 +101,7 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(60)],
       operator_address: WALLET_ADDRESS[1],
       service_node_pubkey: ED25519_ADDRESS[1],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
       pubkey_bls: BLS_KEY[1],
@@ -84,7 +113,7 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(70)],
       operator_address: WALLET_ADDRESS[2],
       service_node_pubkey: ED25519_ADDRESS[2],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
       pubkey_bls: BLS_KEY[1],
@@ -96,7 +125,7 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(65)],
       operator_address: WALLET_ADDRESS[3],
       service_node_pubkey: ED25519_ADDRESS[3],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
       pubkey_bls: BLS_KEY[1],
