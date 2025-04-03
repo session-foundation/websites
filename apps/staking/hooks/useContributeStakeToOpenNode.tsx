@@ -12,22 +12,19 @@ import type { Address } from 'viem';
 
 export type UseContributeStakeToOpenNodeParams = {
   stakeAmount: bigint;
-  userAddress: Address;
-  beneficiary?: Address;
+  beneficiary: Address;
   contractAddress: Address | null;
 };
 
 /**
  * Hook to contribute to a multicontributor contract.
  * @param stakeAmount - The amount of stake to contribute.
- * @param userAddress - The user address.
  * @param beneficiary - The rewards beneficiary address.
  * @param contractAddress - The contract address to contribute to.
  * @returns The contribute stake to open node hook.
  */
 export default function useContributeStakeToOpenNode({
   stakeAmount,
-  userAddress,
   beneficiary,
   contractAddress,
 }: UseContributeStakeToOpenNodeParams) {
@@ -60,7 +57,7 @@ export default function useContributeStakeToOpenNode({
     transactionError: contributeFundsTransactionError,
   } = useContributeFunds({
     amount: stakeAmount,
-    beneficiary: beneficiary || userAddress,
+    beneficiary,
   });
 
   const contributeStake = () => {
