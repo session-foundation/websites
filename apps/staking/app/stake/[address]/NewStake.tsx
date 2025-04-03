@@ -70,7 +70,6 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
   const dictionaryShared = useTranslations('actionModules.shared');
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-  const dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
   const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
 
   const decimalDelimiter = useDecimalDelimiter();
@@ -128,19 +127,9 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
   const onSubmit = (data: StakeFormSchema) => {
     setIsSubmitting(true);
 
-    /** We want to re-check the banned list validations*/
-    if (data.rewardsAddress) {
-      if (!isAddress(data.rewardsAddress)) {
-        form.setError('root', {
-          type: 'manual',
-          message: dictionaryRewardsAddress('invalidAddress'),
-        });
-        return;
-      }
-
-      if (
-        bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, data.rewardsAddress))
-      ) {
+    let rewardsAddress = data.rewardsAddress;
+    if (rewardsAddress) {
+      if (bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, rewardsAddress))) {
         form.setError('root', {
           type: 'manual',
           message: dictionaryRewardsAddress('bannedVestingContract'),
@@ -149,6 +138,23 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
       }
       // If there is a vesting contract the rewards address is required
     } else if (vestingContract) {
+      form.setError('root', {
+        type: 'manual',
+        message: dictionaryRewardsAddress('invalidAddress'),
+      });
+      return;
+    } else {
+      if (!connectedAddress) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('invalidAddress'),
+        });
+        return;
+      }
+      rewardsAddress = connectedAddress;
+    }
+
+    if (!isAddress(rewardsAddress)) {
       form.setError('root', {
         type: 'manual',
         message: dictionaryRewardsAddress('invalidAddress'),
@@ -168,19 +174,10 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
       return;
     }
 
-    if (!address || !isAddress(address)) {
-      form.setError('root', {
-        type: 'manual',
-        message: dictionaryEthAddress('invalidAddress'),
-      });
-      return;
-    }
-
     setStakingParams({
-      stakeAmount,
-      userAddress: address,
+      stakeAmount: stakeAmount,
       contractAddress: contract.address,
-      beneficiary: isAddress(data.rewardsAddress) ? data.rewardsAddress : undefined,
+      beneficiary: rewardsAddress,
     });
   };
 

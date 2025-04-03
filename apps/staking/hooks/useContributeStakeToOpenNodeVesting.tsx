@@ -6,6 +6,7 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { useVestingContributeFunds } from '@session/contracts/hooks/TokenVestingStaking';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
@@ -24,19 +25,26 @@ export type UseContributeStakeToOpenNodeVestingParams = Omit<
  * NOTE: the contribution contract address is passed in as an argument to the contract call function.
  *
  * @param stakeAmount - The amount of stake to contribute.
- * @param userAddress - The user address.
  * @param beneficiary - The rewards beneficiary address.
  * @param vestingContractAddress - The vesting contract address to stake from.
  * @returns The contribute stake to open node hook.
  */
 export default function useContributeStakeToOpenNodeVesting({
   stakeAmount,
-  userAddress,
   beneficiary,
   vestingContractAddress,
 }: UseContributeStakeToOpenNodeVestingParams) {
   const dict = useTranslations('actionModules.registration.submitMulti');
   const dictGeneral = useTranslations('general');
+
+  // These assertions are a final guard against accidentally passing in the vesting contract address as the beneficiary
+  if (!beneficiary) {
+    throw new Error('Beneficiary is required for vesting contracts');
+  }
+
+  if (areHexesEqual(beneficiary, vestingContractAddress)) {
+    throw new Error('Beneficiary cannot be the vesting contract address');
+  }
 
   const {
     contributeFunds,
@@ -47,7 +55,7 @@ export default function useContributeStakeToOpenNodeVesting({
     transactionError: contributeFundsTransactionError,
   } = useVestingContributeFunds({
     amount: stakeAmount,
-    beneficiary: beneficiary || userAddress,
+    beneficiary,
     vestingContractAddress,
   });
 

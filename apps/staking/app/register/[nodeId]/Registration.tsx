@@ -1,5 +1,6 @@
 'use client';
 
+import Loading from '@/app/loading';
 import { AlreadyRegisteredMultiTab } from '@/app/register/[nodeId]/multi/AlreadyRegisteredMultiTab';
 import { AutoActivateTab } from '@/app/register/[nodeId]/multi/AutoActivateTab';
 import { OperatorFeeTab } from '@/app/register/[nodeId]/multi/OperatorFeeTab';
@@ -145,6 +146,7 @@ function RegistrationProvider({
   const dictStakeAmount = useTranslations('actionModules.stakeAmount.validation');
   const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
   const decimalDelimiter = useDecimalDelimiter();
+  const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const formMultiSchema = getRegistrationMultiFormSchema({
     stakeAmount: {
@@ -173,6 +175,7 @@ function RegistrationProvider({
         max: SESSION_NODE.MAX_OPERATOR_FEE,
       }),
     },
+    bannedAddresses: bannedRewardsAddresses,
   });
 
   const userPrefMode =
@@ -315,8 +318,6 @@ function RegistrationProvider({
   };
 
   if (!address) throw new Error('Address is required to create a registration');
-
-  const bannedRewardsAddresses = useBannedRewardsAddresses();
 
   const formSolo = useForm<SoloRegistrationFormSchema>({
     resolver: zodResolver(getRegistrationSoloFormSchema({ bannedRewardsAddresses })),
@@ -477,15 +478,17 @@ export const getRegistrationSoloFormSchema = ({
 type GetMultiRegistrationFormSchemaArgs = {
   stakeAmount: GetStakeAmountFormFieldSchemaArgs;
   operatorFee: GetOperatorFeeFormFieldSchemaArgs;
+  bannedAddresses: Array<BannedAddress>;
 };
 
 export const getRegistrationMultiFormSchema = ({
   stakeAmount,
   operatorFee,
+  bannedAddresses,
 }: GetMultiRegistrationFormSchemaArgs) =>
   z.object({
     autoActivate: z.boolean().default(true),
-    rewardsAddress: getEthereumAddressFormFieldSchema({ required: true }),
+    rewardsAddress: getEthereumAddressFormFieldSchema({ required: true, bannedAddresses }),
     stakeAmount: getStakeAmountFormFieldSchema(stakeAmount),
     operatorFee: getOperatorFeeFormFieldSchema(operatorFee),
     reservedContributors: z.array(
@@ -505,7 +508,10 @@ export function Registration({
   ed25519Signature,
   preparedAt,
 }: RegistrationProps) {
-  return (
+  const { isLoading } = useVesting();
+  return isLoading ? (
+    <Loading />
+  ) : (
     <RegistrationProvider
       blsKey={blsKey}
       ed25519PubKey={ed25519PubKey}

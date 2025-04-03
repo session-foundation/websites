@@ -24,6 +24,7 @@ import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form'
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
@@ -44,6 +45,7 @@ export function ManageStakeContribution({
   const [isRemoveStake, setIsRemoveStake] = useState<boolean>(false);
 
   const address = useCurrentActor();
+  const { address: connectedAddress } = useWallet();
   const vestingContract = useActiveVestingContract();
   const bannedRewardsAddresses = useBannedRewardsAddresses();
 
@@ -52,7 +54,6 @@ export function ManageStakeContribution({
   const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-  const dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
   const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
   const decimalDelimiter = useDecimalDelimiter();
 
@@ -134,18 +135,9 @@ export function ManageStakeContribution({
   const onSubmit = (data: StakeFormSchema) => {
     setIsSubmitting(true);
 
-    if (data.rewardsAddress) {
-      if (!isAddress(data.rewardsAddress)) {
-        form.setError('root', {
-          type: 'manual',
-          message: dictionaryRewardsAddress('invalidAddress'),
-        });
-        return;
-      }
-
-      if (
-        bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, data.rewardsAddress))
-      ) {
+    let rewardsAddress = data.rewardsAddress;
+    if (rewardsAddress) {
+      if (bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, rewardsAddress))) {
         form.setError('root', {
           type: 'manual',
           message: dictionaryRewardsAddress('bannedVestingContract'),
@@ -159,21 +151,29 @@ export function ManageStakeContribution({
         message: dictionaryRewardsAddress('invalidAddress'),
       });
       return;
+    } else {
+      if (!connectedAddress) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('invalidAddress'),
+        });
+        return;
+      }
+      rewardsAddress = connectedAddress;
     }
 
-    if (!address || !isAddress(address)) {
+    if (!isAddress(rewardsAddress)) {
       form.setError('root', {
         type: 'manual',
-        message: dictionaryEthAddress('invalidAddress'),
+        message: dictionaryRewardsAddress('invalidAddress'),
       });
       return;
     }
 
     setStakingParams({
       stakeAmount: additionalStakeAmount,
-      userAddress: address,
       contractAddress: contract.address,
-      beneficiary: isAddress(data.rewardsAddress) ? data.rewardsAddress : undefined,
+      beneficiary: rewardsAddress,
     });
   };
 
