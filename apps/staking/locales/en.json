@@ -718,6 +718,10 @@
         "deployCost": "Deploy Cost:",
         "proxyApprovalCost": "Proxy Approval Cost:",
         "contributeFundsCost": "Contribute Funds Cost:",
+        "continueButton": {
+          "label": "Continue",
+          "aria": "Continue to the next stage of the registration process"
+        },
         "create": {
           "idle": "Creating Multicontributor Contract",
           "pending": "Creating Multicontributor Contract",

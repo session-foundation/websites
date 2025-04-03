@@ -5,6 +5,7 @@ import type { Address } from 'viem';
 // We mock them to control behavior.
 import { parseContracts } from '../hooks/parseContracts';
 import {
+  BLS_KEY,
   CONTRACT_ADDRESS,
   CONTRIBUTOR,
   DEPLOY_ARB_EVENT,
@@ -43,10 +44,10 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(50)],
       operator_address: WALLET_ADDRESS[1],
       service_node_pubkey: ED25519_ADDRESS[1],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
-      pubkey_bls: 'key1',
+      pubkey_bls: BLS_KEY[1],
     };
 
     const result = parseContracts({
@@ -64,6 +65,35 @@ describe('parseContracts', () => {
     expect(result.hiddenContractsWithStakes).toHaveLength(0);
   });
 
+  it('should only add awaiting operator contribution contracts to their own list', () => {
+    const contract = {
+      address: CONTRACT_ADDRESS[1],
+      contributors: [],
+      events: [DEPLOY_ARB_EVENT(50)],
+      operator_address: WALLET_ADDRESS[1],
+      service_node_pubkey: ED25519_ADDRESS[1],
+      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      fee: 10,
+      manual_finalize: false,
+      pubkey_bls: BLS_KEY[1],
+    };
+
+    const result = parseContracts({
+      contracts: [contract],
+      address: walletAddress,
+      addedBlsKeys: {},
+      runningStakesBlsKeysSet: new Set(),
+      nodeMinLifespanArbBlocks,
+      blockHeight: 1000,
+    });
+
+    expect(result.visibleContracts).toHaveLength(0);
+    expect(result.joiningContracts).toHaveLength(0);
+    expect(result.awaitingOperatorContracts).toHaveLength(1);
+    expect(result.awaitingOperatorContracts[0]).toEqual(contract);
+    expect(result.hiddenContractsWithStakes).toHaveLength(0);
+  });
+
   it('should not add contract when its a a duplicate of a newer shown contract', () => {
     const contract1 = {
       address: CONTRACT_ADDRESS[1],
@@ -71,11 +101,11 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(60)],
       operator_address: WALLET_ADDRESS[1],
       service_node_pubkey: ED25519_ADDRESS[1],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
-      pubkey_bls: 'dupKey',
-    };
+      pubkey_bls: BLS_KEY[1],
+    }
 
     const contract2 = {
       address: CONTRACT_ADDRESS[2],
@@ -83,10 +113,10 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(70)],
       operator_address: WALLET_ADDRESS[2],
       service_node_pubkey: ED25519_ADDRESS[2],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
-      pubkey_bls: 'dupKey',
+      pubkey_bls: BLS_KEY[1],
     };
 
     const contract3 = {
@@ -95,10 +125,10 @@ describe('parseContracts', () => {
       events: [DEPLOY_ARB_EVENT(65)],
       operator_address: WALLET_ADDRESS[3],
       service_node_pubkey: ED25519_ADDRESS[3],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
+      status: CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
       fee: 10,
       manual_finalize: false,
-      pubkey_bls: 'dupKey',
+      pubkey_bls: BLS_KEY[1],
     };
 
     const result = parseContracts({
@@ -127,7 +157,7 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
       fee: 20,
       manual_finalize: false,
-      pubkey_bls: 'dupKey',
+      pubkey_bls: BLS_KEY[1],
     };
 
     const result = parseContracts({
@@ -154,7 +184,7 @@ describe('parseContracts', () => {
     status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
     fee: 30,
     manual_finalize: false,
-    pubkey_bls: 'dupKey2',
+    pubkey_bls: BLS_KEY[2],
   };
 
   function hiddenWithStakeTestTemplate(
@@ -171,7 +201,7 @@ describe('parseContracts', () => {
       contracts: [contract],
       address: walletAddress,
       addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(['dupKey2']),
+      runningStakesBlsKeysSet: new Set([BLS_KEY[2]]),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -190,7 +220,7 @@ describe('parseContracts', () => {
 
     // With a positive stake, the duplicate is added to hiddenContractsWithStakes.
     expect(result.hiddenContractsWithStakes).toHaveLength(1);
-    expect(result.hiddenContractsWithStakes[0]?.pubkey_bls).toBe('dupKey2');
+    expect(result.hiddenContractsWithStakes[0]?.pubkey_bls).toBe(BLS_KEY[2]);
     // It should not appear in visibleContracts.
     expect(result.visibleContracts).toHaveLength(0);
   });
@@ -200,7 +230,7 @@ describe('parseContracts', () => {
 
     // With a positive stake, the duplicate is added to hiddenContractsWithStakes.
     expect(result.hiddenContractsWithStakes).toHaveLength(1);
-    expect(result.hiddenContractsWithStakes[0]?.pubkey_bls).toBe('dupKey2');
+    expect(result.hiddenContractsWithStakes[0]?.pubkey_bls).toBe(BLS_KEY[2]);
     // It should not appear in visibleContracts.
     expect(result.visibleContracts).toHaveLength(0);
   });
@@ -219,7 +249,7 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
       fee: 40,
       manual_finalize: false,
-      pubkey_bls: 'key4',
+      pubkey_bls: BLS_KEY[4],
     };
 
     const result = parseContracts({
@@ -251,7 +281,7 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
       fee: 50,
       manual_finalize: false,
-      pubkey_bls: 'key5',
+      pubkey_bls: BLS_KEY[5],
     };
 
     const result = parseContracts({
@@ -265,7 +295,7 @@ describe('parseContracts', () => {
 
     // Since the Finalized event's block (50) is less than the lifespan limit (nodeMinLifespanArbBlocks), it should be added to joiningContracts.
     expect(result.joiningContracts).toHaveLength(1);
-    expect(result.joiningContracts[0]?.pubkey_bls).toBe('key5');
+    expect(result.joiningContracts[0]?.pubkey_bls).toBe(BLS_KEY[5]);
     // It should not be in visibleContracts.
     expect(result.visibleContracts).toHaveLength(0);
   });
@@ -283,7 +313,7 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
       fee: 60,
       manual_finalize: false,
-      pubkey_bls: 'key6',
+      pubkey_bls: BLS_KEY[6],
     };
 
     const result = parseContracts({
@@ -311,12 +341,12 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
       fee: 70,
       manual_finalize: false,
-      pubkey_bls: 'key7',
+      pubkey_bls: BLS_KEY[7],
     };
 
     const addedBlsKeys = {
-      networkKey1: 0,
-      networkKey2: 1,
+      [BLS_KEY[1]]: 0,
+      [BLS_KEY[2]]: 1,
     };
 
     const result = parseContracts({
@@ -328,7 +358,7 @@ describe('parseContracts', () => {
       blockHeight: 1000,
     });
 
-    expect(result.networkBlsKeys).toEqual(new Set(['networkKey1', 'networkKey2']));
+    expect(result.networkBlsKeys).toEqual(new Set([BLS_KEY[1], BLS_KEY[2]]));
     expect(result.networkContractIds).toEqual(new Set([0, 1]));
   });
 
@@ -362,7 +392,7 @@ describe('parseContracts', () => {
       status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
       fee: 70,
       manual_finalize: false,
-      pubkey_bls: 'key7',
+      pubkey_bls: BLS_KEY[7],
     };
     const result = parseContracts({
       contracts: [contract],

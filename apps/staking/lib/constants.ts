@@ -237,6 +237,7 @@ export enum PREFERENCE {
   SKIP_VESTING_POPUP_ON_STARTUP = 'skipVestingPopupOnStartup',
   ANONYMIZE_UI = 'anonymizeUI',
   AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
+  OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
 }
 
 export const preferenceStorageDefaultItems = {} as const;
@@ -278,6 +279,12 @@ export const prefDetails = {
     type: 'boolean',
     defaultValue: false,
     description: 'Hide wallet addresses and other identifying information',
+  },
+  [PREFERENCE.OPEN_NODES_SHOW_AWAITING_OPERATOR]: {
+    label: 'Show Awaiting Operator Nodes',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Show awaiting operator contracts in the open nodes page',
   },
 } as const satisfies WalletSheetSettingDetailsGenerator;
 

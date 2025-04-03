@@ -24,7 +24,6 @@ import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form'
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
 import { isAddress } from 'viem';
@@ -45,7 +44,6 @@ export function ManageStakeContribution({
   const [isRemoveStake, setIsRemoveStake] = useState<boolean>(false);
 
   const address = useCurrentActor();
-  const { address: connectedAddress } = useWallet();
   const vestingContract = useActiveVestingContract();
   const bannedRewardsAddresses = useBannedRewardsAddresses();
 
@@ -54,7 +52,8 @@ export function ManageStakeContribution({
   const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-
+  const dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
+  const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
   const decimalDelimiter = useDecimalDelimiter();
 
   const isOperator = areHexesEqual(contract.operator_address, address);
@@ -111,7 +110,7 @@ export function ManageStakeContribution({
   const form = useForm<StakeFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rewardsAddress: contributor?.beneficiary_address ?? connectedAddress,
+      rewardsAddress: contributor?.beneficiary_address ?? '',
       stakeAmount: bigIntToString(contributorStakeAmount, SENT_DECIMALS, decimalDelimiter),
     },
     reValidateMode: 'onChange',
@@ -135,10 +134,29 @@ export function ManageStakeContribution({
   const onSubmit = (data: StakeFormSchema) => {
     setIsSubmitting(true);
 
-    if (data.rewardsAddress && !isAddress(data.rewardsAddress)) {
+    if (data.rewardsAddress) {
+      if (!isAddress(data.rewardsAddress)) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('invalidAddress'),
+        });
+        return;
+      }
+
+      if (
+        bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, data.rewardsAddress))
+      ) {
+        form.setError('root', {
+          type: 'manual',
+          message: dictionaryRewardsAddress('bannedVestingContract'),
+        });
+        return;
+      }
+      // If there is a vesting contract the rewards address is required
+    } else if (vestingContract) {
       form.setError('root', {
         type: 'manual',
-        message: 'Rewards Address is not a valid Ethereum Address',
+        message: dictionaryRewardsAddress('invalidAddress'),
       });
       return;
     }
@@ -146,7 +164,7 @@ export function ManageStakeContribution({
     if (!address || !isAddress(address)) {
       form.setError('root', {
         type: 'manual',
-        message: 'Wallet Address is not a valid Ethereum Address',
+        message: dictionaryEthAddress('invalidAddress'),
       });
       return;
     }

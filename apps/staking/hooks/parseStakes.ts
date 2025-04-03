@@ -1,13 +1,23 @@
-import type { ContributionContract, Stake } from '@session/staking-api-js/schema';
+import type {
+  ContributionContract,
+  ContributionContractNotReady,
+  Stake,
+  VestingContract,
+} from '@session/staking-api-js/schema';
 import { bigIntSortDesc } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { safeTrySyncWithFallback } from '@session/util-js/try';
 import type { Address } from 'viem';
 import {
+  STAKE_EVENT_STATE,
   STAKE_STATE,
   isStakeRequestingExit,
+  parseStakeEventState,
   parseStakeState,
 } from '../components/StakedNode/state';
 import { getTotalStakedAmountForAddress } from '../components/getTotalStakedAmountForAddress';
+import logger from '../lib/logger';
+import { getReadyContracts, parseContracts } from './parseContracts';
 
 /**
  * Sorts stakes by total staked amount descending.
@@ -111,4 +121,54 @@ export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight = 
 
   // operator_fee ascending
   return (a.operator_fee ?? 0) - (b.operator_fee ?? 0);
+}
+
+export type ParseStakesParams = {
+  address?: Address;
+  blockHeight: number;
+  stakes: Array<Stake>;
+  contracts: Array<ContributionContractNotReady>;
+  vesting: Array<VestingContract>;
+  addedBlsKeys: Record<string, number>;
+  nodeMinLifespanArbBlocks: number;
+};
+
+export function parseStakes({
+  stakes,
+  vesting,
+  address,
+  blockHeight,
+  contracts,
+  addedBlsKeys,
+  nodeMinLifespanArbBlocks,
+}: ParseStakesParams) {
+  stakes.sort((a, b) => sortStakes(a, b, address, blockHeight));
+
+  const runningStakesBlsKeysSet = new Set(
+    stakes
+      .filter((stake) => parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE)
+      .map(({ pubkey_bls }) => pubkey_bls)
+  );
+
+  vesting.sort((a, b) => bigIntSortDesc(a.initial_amount, b.initial_amount));
+
+  const [contractsErr, readyContracts] = safeTrySyncWithFallback(
+    () => getReadyContracts(contracts),
+    []
+  );
+  if (contractsErr) logger.error(contractsErr);
+
+  return {
+    ...parseContracts({
+      contracts: readyContracts,
+      address,
+      blockHeight,
+      addedBlsKeys,
+      nodeMinLifespanArbBlocks,
+      runningStakesBlsKeysSet,
+    }),
+    stakes,
+    vesting,
+    blockHeight,
+  };
 }

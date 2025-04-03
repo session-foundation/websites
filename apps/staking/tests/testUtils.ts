@@ -9,6 +9,7 @@ import type { Address } from 'viem';
 const WALLET_ADDR_START = `0x${'0'.repeat(37)}a`;
 const CONTRACT_ADDR_START = `0x${'0'.repeat(37)}c`;
 const ED25519_ADDR_START = '0'.repeat(62);
+const BLS_KEY_START = '0'.repeat(126);
 
 export const WALLET_ADDRESS = {
   1: `${WALLET_ADDR_START}0a` as Address,
@@ -44,6 +45,18 @@ export const ED25519_ADDRESS = {
   7: `${ED25519_ADDR_START}10` as Ed25519PublicKey,
   8: `${ED25519_ADDR_START}11` as Ed25519PublicKey,
   9: `${ED25519_ADDR_START}12` as Ed25519PublicKey,
+};
+
+export const BLS_KEY = {
+  1: `${BLS_KEY_START}0a` as string,
+  2: `${BLS_KEY_START}0b` as string,
+  3: `${BLS_KEY_START}0c` as string,
+  4: `${BLS_KEY_START}0d` as string,
+  5: `${BLS_KEY_START}0e` as string,
+  6: `${BLS_KEY_START}0f` as string,
+  7: `${BLS_KEY_START}10` as string,
+  8: `${BLS_KEY_START}11` as string,
+  9: `${BLS_KEY_START}12` as string,
 };
 
 export const DEPLOY_ARB_EVENT = (block: number) => {

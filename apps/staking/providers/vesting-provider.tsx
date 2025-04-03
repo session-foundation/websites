@@ -46,6 +46,7 @@ type VestingContext = {
   disconnectFromVestingContract: () => void;
   connectToVestingContract: (contract: VestingContract) => void;
   refetch: () => void;
+  isLoading: boolean;
 };
 
 const Context = createContext<VestingContext | undefined>(undefined);
@@ -124,6 +125,7 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
         disconnectFromVestingContract,
         connectToVestingContract,
         refetch,
+        isLoading,
       }}
     >
       {children}

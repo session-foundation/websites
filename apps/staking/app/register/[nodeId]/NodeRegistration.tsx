@@ -40,11 +40,7 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
 
   const registration = useMemo(
     () =>
-      registrationsData &&
-      'registrations' in registrationsData &&
-      Array.isArray(registrationsData.registrations)
-        ? registrationsData.registrations.find((node) => areHexesEqual(node.pubkey_ed25519, nodeId))
-        : null,
+      registrationsData?.registrations.find((node) => areHexesEqual(node.pubkey_ed25519, nodeId)),
     [registrationsData, nodeId]
   );
 

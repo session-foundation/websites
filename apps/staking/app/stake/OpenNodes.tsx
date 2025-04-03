@@ -11,7 +11,7 @@ import { useNetworkStatus } from '@/components/StatusBar';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
 import { useStakes } from '@/hooks/useStakes';
-import { SOCIALS, URL } from '@/lib/constants';
+import { PREFERENCE, SOCIALS, URL } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
@@ -23,6 +23,7 @@ import { Social } from '@session/ui/components/SocialLinkList';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useMemo } from 'react';
+import { usePreferences } from 'usepref';
 
 export default function OpenNodes() {
   useAllowTestingErrorToThrow();
@@ -30,12 +31,15 @@ export default function OpenNodes() {
   const address = useCurrentActor();
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts(address);
-  const { hiddenContractsWithStakes } = useStakes(address);
+  const { hiddenContractsWithStakes, awaitingOperatorContracts } = useStakes(address);
   const { setNetworkStatusVisible } = useNetworkStatus({ network, isFetching, refetch });
 
   const { enabled: isStakingDisabled } = useRemoteFeatureFlagQuery(
     REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI
   );
+
+  const { getItem } = usePreferences();
+  const showAwaitingOperator = getItem<boolean>(PREFERENCE.OPEN_NODES_SHOW_AWAITING_OPERATOR);
 
   const openContractBlsKeys = useMemo(() => {
     return new Set(contracts.map(({ pubkey_bls }) => pubkey_bls));
@@ -77,8 +81,15 @@ export default function OpenNodes() {
     />
   ) : isLoading ? (
     <NodesListSkeleton />
-  ) : hiddenContractsToShow?.length || contractsToShow?.length ? (
+  ) : hiddenContractsToShow.length ||
+    contractsToShow.length ||
+    (showAwaitingOperator && awaitingOperatorContracts.length) ? (
     <>
+      {showAwaitingOperator
+        ? awaitingOperatorContracts.map((contract) => (
+            <OpenNodeCard key={contract.address} contract={contract} />
+          ))
+        : null}
       {hiddenContractsToShow.map((contract) => (
         <OpenNodeCard key={contract.address} contract={contract} showAlreadyRunningWarning />
       ))}
