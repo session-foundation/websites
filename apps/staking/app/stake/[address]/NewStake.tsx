@@ -70,7 +70,6 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
   const dictionaryShared = useTranslations('actionModules.shared');
 
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
-  const _dictionaryEthAddress = useTranslations('actionModules.ethAddress.validation');
   const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
 
   const decimalDelimiter = useDecimalDelimiter();
