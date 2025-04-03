@@ -119,7 +119,7 @@ function RegistrationProvider({
   ed25519Signature,
   preparedAt,
 }: RegistrationProps & { children: ReactNode }) {
-  const { visibleContracts, networkBlsKeys } = useStakes();
+  const { visibleContracts, networkBlsKeys, awaitingOperatorContracts } = useStakes();
   const { activeContract: vestingContract } = useVesting();
   const isVestingMode = !!vestingContract;
 
@@ -130,6 +130,9 @@ function RegistrationProvider({
   const [tabHistory, setTabHistory] = useState<Array<REG_TAB>>([]);
   const [contract, setContract] = useState<ContributionContract | null>(
     visibleContracts.find(({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)) ??
+      awaitingOperatorContracts.find(
+        ({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)
+      ) ??
       null
   );
 

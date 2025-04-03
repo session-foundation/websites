@@ -1,12 +1,8 @@
-import { STAKE_EVENT_STATE, parseStakeEventState } from '@/components/StakedNode/state';
-import { parseContracts } from '@/hooks/parseContracts';
-import { sortStakes } from '@/hooks/parseStakes';
-import { getReadyContracts } from '@/hooks/useContributeStakeToOpenNode';
+import { parseStakes } from '@/hooks/parseStakes';
 import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE_TIME } from '@/lib/constants';
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
-import { bigIntSortDesc } from '@session/util-crypto/maths';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
@@ -45,6 +41,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     stakes,
     vesting,
     hiddenContractsWithStakes,
+    awaitingOperatorContracts,
     networkContractIds,
     visibleContracts,
     networkBlsKeys,
@@ -71,29 +68,16 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     const [stakesError, stakes] = safeTrySyncWithFallback(() => data?.stakes ?? [], []);
     if (stakesError) logger.error(stakesError);
 
-    stakes.sort((a, b) => sortStakes(a, b, address, blockHeight));
-
     const [addedBlsKeysSetsError, addedBlsKeys] = safeTrySyncWithFallback(
       () => data?.added_bls_keys ?? {},
       {}
     );
     if (addedBlsKeysSetsError) logger.error(addedBlsKeysSetsError);
 
-    const runningStakesBlsKeysSet = new Set(
-      stakes
-        .filter((stake) => parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE)
-        .map(({ pubkey_bls }) => pubkey_bls)
-    );
-
     const [vestingErr, vesting] = safeTrySyncWithFallback(() => data?.vesting ?? [], []);
     if (vestingErr) logger.error(vestingErr);
 
-    vesting.sort((a, b) => bigIntSortDesc(a.initial_amount, b.initial_amount));
-
-    const [contractsErr, contracts] = safeTrySyncWithFallback(
-      () => getReadyContracts(data?.contracts ?? []),
-      []
-    );
+    const [contractsErr, contracts] = safeTrySyncWithFallback(() => data?.contracts ?? [], []);
     if (contractsErr) logger.error(contractsErr);
 
     //Minimum time in seconds that a node can go from "joining" to "exited"
@@ -102,18 +86,16 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     const nodeMinLifespanArbBlocks = (nodeMinLifespan * 1000) / BLOCK_TIME_MS.ARBITRUM;
 
     return {
-      ...parseContracts({
+      ...parseStakes({
         contracts,
         address,
         blockHeight,
         addedBlsKeys,
         nodeMinLifespanArbBlocks,
-        runningStakesBlsKeysSet,
+        stakes,
+        vesting,
       }),
-      stakes,
-      vesting,
       network,
-      blockHeight,
       networkTime,
     };
   }, [data, address, chainId]);
@@ -122,6 +104,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     stakes,
     visibleContracts,
     joiningContracts,
+    awaitingOperatorContracts,
     vesting,
     hiddenContractsWithStakes,
     networkBlsKeys,
