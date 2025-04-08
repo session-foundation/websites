@@ -50,6 +50,7 @@ export function SanityCryptoAddressDisplay({
         copyToClipboardProps={{
           textToCopy: cleanSanityString(value.cryptoAddress.address),
           'data-testid': ButtonDataTestId.Crypto_Address_Copy_To_Clipboard,
+          className: 'hover:bg-transparent'
         }}
         variant={variant}
       />
