@@ -1,3 +1,5 @@
+'use client';
+
 import { type ButtonHTMLAttributes, forwardRef, useState } from 'react';
 import { BaseDataTestId, TestingProps } from '../data-test-ids';
 import { ClipboardIcon } from '../icons/ClipboardIcon';
@@ -66,7 +68,7 @@ const CopyToClipboardButton = forwardRef<HTMLButtonElement, CopyToClipboardButto
         ) : isCopied ? (
           <CheckIcon className="stroke-session-green h-5 w-5" />
         ) : (
-          <ClipboardIcon className="fill-session-white h-5 w-5" />
+          <ClipboardIcon className="h-5 w-5 fill-current" />
         )}
       </Button>
     );

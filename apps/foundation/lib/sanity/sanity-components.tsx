@@ -9,6 +9,8 @@ import { SANITY_SCHEMA_URL } from '@/lib/constants';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { getLangDir } from 'rtl-detect';
 import { SanityTiles } from '@session/sanity-cms/components/SanityTiles';
+import { SanityCryptoAddressDisplay } from '@session/sanity-cms/components/SanityCryptoAddressDisplay';
+import { getCryptoAddressById } from '@session/sanity-cms/queries/getCryptoAddress';
 
 const { marks, block } = basicComponents;
 export const components = {
@@ -43,6 +45,13 @@ export const components = {
           isRTLLocale={direction === 'rtl'}
         />
       );
+    },
+    cryptoAddressDisplay: async (props) => {
+      const refId = props.value.cryptoAddress._ref;
+
+      props.value.cryptoAddress = await getCryptoAddressById({ client, id: refId });
+
+      return <SanityCryptoAddressDisplay {...props} variant="light" />;
     },
   },
 } satisfies SanityPortableTextProps['components'];
