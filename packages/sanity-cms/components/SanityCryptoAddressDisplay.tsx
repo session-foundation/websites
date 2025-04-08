@@ -35,17 +35,17 @@ export function SanityCryptoAddressDisplay({
     <div
       className={cn(
         'group',
-        'flex w-full flex-col align-middle sm:flex-row sm:items-center',
+        'flex w-full flex-col align-middle md:flex-row md:items-center',
         'my-4 gap-2'
       )}
     >
-      <div className="flex flex-row items-start gap-1 align-middle sm:hidden">
+      <div className="flex flex-row items-start gap-1 align-middle md:hidden">
         <IconComp className="h-5 w-5" />
         <Typography variant="h4">{value.cryptoAddress.name}</Typography>
       </div>
-      <IconComp className="hidden h-9 w-9 sm:block" />
+      <IconComp className="hidden h-9 w-9 md:block" />
       <CopyableInputDisplay
-        className="text-xs sm:text-sm"
+        className="text-xs md:text-sm"
         value={value.cryptoAddress.address}
         copyToClipboardProps={{
           textToCopy: cleanSanityString(value.cryptoAddress.address),

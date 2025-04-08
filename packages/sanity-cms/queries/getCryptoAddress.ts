@@ -1,7 +1,6 @@
 import { groq } from 'next-sanity';
 import { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
-import type { AuthorSchemaType } from '../schemas/author';
 import type { CryptoAddressSchemaType } from '../schemas/crypto-address';
 
 type QUERY_GET_CRYPTO_ADDRESS_RETURN_TYPE = CryptoAddressSchemaType[];

@@ -53,7 +53,7 @@ const InputWithEndAdornment = forwardRef<HTMLInputElement, InputWithEndAdornment
           ref={ref}
           {...props}
         />
-        <div className="absolute right-0 top-0 flex h-full items-center">{endAdornment}</div>
+        <div className="absolute end-0 top-0 flex h-full items-center">{endAdornment}</div>
       </div>
     );
   }

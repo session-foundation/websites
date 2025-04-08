@@ -1,7 +1,7 @@
 import type { SchemaFieldsType } from './types';
 import type { DocumentFields } from '@session/sanity-types';
 import { defineField } from 'sanity';
-import { TokenIcon, UserIcon } from '@sanity/icons';
+import { TokenIcon } from '@sanity/icons';
 
 export const cryptoAddressFields = [
   defineField({
