@@ -14,9 +14,9 @@ const CopyableInputDisplay = forwardRef<HTMLInputElement, CopyableInputDisplayPr
       <InputWithEndAdornment
         {...props}
         ref={ref}
-        className={cn(className, 'pe-11')}
+        className={cn(className, 'pe-9')}
         endAdornment={
-          <div className="flex items-center pe-4">
+          <div className="flex items-center pe-2">
             <CopyToClipboardButton {...copyToClipboardProps} />
           </div>
         }
