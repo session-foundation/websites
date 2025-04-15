@@ -2,7 +2,9 @@ import { useTotalStaked } from '@/app/mystakes/modules/useTotalStaked';
 import { useVestingEndTime } from '@/app/vested-stakes/modules/VestingEndTimeModule';
 import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUnstakedBalanceModule';
 import { ActionModuleRow } from '@/components/ActionModule';
+import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
+import { DYNAMIC_MODULE, PREFERENCE } from '@/lib/constants';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
@@ -10,6 +12,7 @@ import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
+import { usePreferences } from 'usepref';
 
 export function useVestingInitialBalance() {
   const vestingContract = useActiveVestingContract();
@@ -39,7 +42,21 @@ export function VestingInfo({
 
   const { totalStakedFormatted } = useTotalStaked(vestingContract?.address);
   const { formattedAmount: vestingUnstakedBalance } = useVestingUnstakedBalance();
-  const { formattedUnclaimedRewardsAmount } = useUnclaimedTokens({ addressOverride: address });
+  const { unclaimed: unclaimedV2 } = useNetworkBalances({ addressOverride: address });
+  const formattedUnclaimedRewardsAmountV2 = formatSENTBigInt(
+    unclaimedV2,
+    DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS
+  );
+
+  // TODO: remove this v1 logic once v2 is stable
+  const { getItem } = usePreferences();
+  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
+  const { formattedUnclaimedRewardsAmount: formattedUnclaimedRewardsAmountV1 } = useUnclaimedTokens(
+    { addressOverride: address }
+  );
+  const formattedUnclaimedRewardsAmount = v2Rewards
+    ? formattedUnclaimedRewardsAmountV2
+    : formattedUnclaimedRewardsAmountV1;
 
   return (
     <>

@@ -1,6 +1,7 @@
-import ComingSoonModule from '@/app/mystakes/modules/ComingSoon';
 import PriceModule from '@/app/mystakes/modules/PriceModule';
-import TestnetPointsModule from '@/app/mystakes/modules/TestnetPointsModule';
+import UnclaimedRewardsModule from '@/app/mystakes/modules/UnclaimedRewardsModule';
+import UnclaimedStakesModule from '@/app/mystakes/modules/UnclaimedStakesModule';
+import UnlockingStakesModule from '@/app/mystakes/modules/UnlockingStakesModule';
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { siteMetadata } from '@/lib/metadata';
 import { ModuleGrid } from '@session/ui/components/ModuleGrid';
@@ -11,7 +12,6 @@ import DailyNodeReward from './modules/DailyNodeReward';
 import StakedBalanceModule from './modules/StakedBalanceModule';
 import StakedNodesModule from './modules/StakedNodesModule';
 import TotalRewardsModule from './modules/TotalRewardsModule';
-import UnclaimedTokensModule from './modules/UnclaimedTokensModule';
 
 export async function generateMetadata() {
   const dict = await getTranslations('metadata.myStakes');
@@ -28,10 +28,10 @@ export default function Page() {
         <ModuleGrid className="mr-1">
           <StakedBalanceModule />
           <DailyNodeReward />
-          <ComingSoonModule />
           <TotalRewardsModule />
-          <UnclaimedTokensModule />
-          <TestnetPointsModule />
+          <UnlockingStakesModule />
+          <UnclaimedRewardsModule />
+          <UnclaimedStakesModule />
           <ClaimTokensModule />
         </ModuleGrid>
         <PriceModule />

@@ -2,11 +2,19 @@ import type { ClaimDict } from '@/app/mystakes/modules/ClaimTokensModule';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import useClaimRewards from '@/hooks/useClaimRewards';
+import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
-import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import {
+  DYNAMIC_MODULE,
+  HANDRAIL_THRESHOLD_DYNAMIC,
+  PREFERENCE,
+  SIGNIFICANT_FIGURES,
+  URL,
+} from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { BlsRewardsSignatureResponse } from '@session/staking-api-js/schema';
 import { toast } from '@session/ui/lib/toast';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
@@ -15,8 +23,10 @@ import { Button } from '@session/ui/ui/button';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
+import { usePreferences } from 'usepref';
 import type { Address } from 'viem';
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is because of the v1 logic, will be removed once v2 is stable
 export function ClaimTokens({
   address,
   claimData,
@@ -29,16 +39,23 @@ export function ClaimTokens({
   refetchBalance?: () => void;
 }) {
   const dictionaryFee = useTranslations('fee');
-  const [overrideUnclaimedRewardsAmount, setOverrideUnclaimedRewardsAmount] = useState<
-    string | null
-  >(null);
-
+  const [overrideFormattedUnclaimed, setOverrideFormattedUnclaimed] = useState<string | null>(null);
   const { chainId } = useWallet();
-  const { refetch, formattedUnclaimedRewardsAmount } = useUnclaimedTokens({
-    addressOverride: address,
-  });
+  const { refetch: refetchV2, unclaimed } = useNetworkBalances({ addressOverride: address });
 
-  const unclaimedRewardsAmount = overrideUnclaimedRewardsAmount ?? formattedUnclaimedRewardsAmount;
+  const formattedUnclaimedV2 = formatSENTBigInt(unclaimed, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
+  // TODO: remove this v1 logic once v2 is stable
+  const { getItem } = usePreferences();
+  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
+  const { refetch: refetchV1, formattedUnclaimedRewardsAmount: formattedUnclaimedRewardsAmountV1 } =
+    useUnclaimedTokens({
+      addressOverride: address,
+    });
+
+  const formattedUnclaimed = v2Rewards ? formattedUnclaimedV2 : formattedUnclaimedRewardsAmountV1;
+  const refetch = v2Rewards ? refetchV2 : refetchV1;
+
+  const unclaimedRewardsAmount = overrideFormattedUnclaimed ?? formattedUnclaimed;
 
   const claimRewardsArgs = useMemo(
     () => ({
@@ -97,7 +114,7 @@ export function ClaimTokens({
   );
 
   const handleClick = () => {
-    setOverrideUnclaimedRewardsAmount(formattedUnclaimedRewardsAmount);
+    setOverrideFormattedUnclaimed(formattedUnclaimed);
     updateBalanceAndClaimRewards(claimRewardsArgs);
   };
 
@@ -115,7 +132,7 @@ export function ClaimTokens({
       void refetchBalance?.();
     } else if (claimRewardsStatus === PROGRESS_STATUS.ERROR) {
       toast.error(claimRewardsErrorMessage);
-      setOverrideUnclaimedRewardsAmount(null);
+      setOverrideFormattedUnclaimed(null);
     }
   }, [claimRewardsStatus]);
 
