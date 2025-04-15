@@ -269,7 +269,7 @@ export const rewardsInfoSchema = z.object({
   lifetime_unlocked_stakes: z.coerce.bigint(),
   /** Amount of tokens currently locked into nodes on the network. This is defined as `lifetime locked - lifetime unlocked`. */
   locked_stakes: z.coerce.bigint(),
-  /** Amount of tokens that have been unstaked from nodes but cannotd be claimed until the time lock on those individual stakes have been unlocked. */
+  /** Amount of tokens that have been unstaked from nodes but cannot be claimed until the time lock on those individual stakes have been unlocked. */
   timelocked_stakes: z.coerce.bigint(),
   /** Amount of tokens that have been claimed from the nodes this address has staked into. */
   claimed_stakes: z.coerce.bigint(),
