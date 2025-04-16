@@ -1,11 +1,11 @@
-import { defineConfig, type SchemaTypeDefinition } from 'sanity';
-import { structureTool } from 'sanity/structure';
-import { seoMetaFields } from 'sanity-plugin-seo';
-import { presentationTool } from 'sanity/presentation';
 import { visionTool } from '@sanity/vision';
 import { isProduction } from '@session/util-js/env';
-import { defaultDocumentNode } from './preview';
+import { type SchemaTypeDefinition, defineConfig } from 'sanity';
+import { seoMetaFields } from 'sanity-plugin-seo';
+import { presentationTool } from 'sanity/presentation';
+import { structureTool } from 'sanity/structure';
 import logger from './logger';
+import { defaultDocumentNode } from './preview';
 
 export type CreateSanityConfigOptions = {
   /** The Sanity project ID. */
@@ -64,7 +64,8 @@ export function createSanityConfig({
 
   if (!studioBasePath) {
     throw new TypeError('paths.studio must be defined to create a Sanity config');
-  } else if (!studioBasePath.startsWith('/')) {
+  }
+  if (!studioBasePath.startsWith('/')) {
     studioBasePath = `/${studioBasePath}`;
   }
 

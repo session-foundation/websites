@@ -6,7 +6,7 @@
  * @returns The rounded number.
  */
 export const roundNumber = (value: number, decimals = 4): number => {
-  const multiplier = Math.pow(10, decimals);
+  const multiplier = 10 ** decimals;
   return Math.round(value * multiplier) / multiplier;
 };
 
@@ -39,7 +39,7 @@ export const formatNumber = (value: number, decimals = 4): string => {
 export const bigIntToNumber = (value: bigint, decimals: number): number => {
   if (decimals === 0) return Number(value);
 
-  const floatValueWithDecimals = parseFloat(bigIntToString(value, decimals));
+  const floatValueWithDecimals = Number.parseFloat(bigIntToString(value, decimals));
 
   if (
     floatValueWithDecimals > Number.MAX_SAFE_INTEGER ||
@@ -69,6 +69,13 @@ export const formatBigIntTokenValue = (
   return formatNumber(number, decimals);
 };
 
+/**
+ * Converts a string to a BigInt.
+ * @param value - The string to convert.
+ * @param decimals - The number of decimals to round to.
+ * @param decimalDelimiter - The decimal delimiter to use. Defaults to '.'.
+ * @returns The BigInt representation of the string.
+ */
 export const stringToBigInt = (value: string, decimals: number, decimalDelimiter = '.'): bigint => {
   if (!value.includes(decimalDelimiter)) {
     return BigInt(value) * BigInt(10) ** BigInt(decimals);
@@ -83,10 +90,22 @@ export const stringToBigInt = (value: string, decimals: number, decimalDelimiter
   return BigInt(integer) * BigInt(10) ** BigInt(decimals) + BigInt(fraction.padEnd(decimals, '0'));
 };
 
+/**
+ * Converts a number to a BigInt.
+ * @param value - The number to convert.
+ * @returns The BigInt representation of the number.
+ */
 export const numberToBigInt = (value: number): bigint => {
   return BigInt(value.toString().replaceAll(',', '').replaceAll('.', ''));
 };
 
+/**
+ * Converts a BigInt to a string.
+ * @param value - The BigInt to convert.
+ * @param decimals - The number of decimals to round to.
+ * @param decimalDelimiter - The decimal delimiter to use. Defaults to '.'.
+ * @returns The string representation of the BigInt.
+ */
 export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter = '.'): string => {
   let str = value.toString();
   if (decimals === 0) return str;
@@ -95,7 +114,7 @@ export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter
   if (isNegative) str = str.slice(1);
 
   if (str.length <= decimals) {
-    // Turn the int into a decimal string by padding with zeros until the decimal size, the remove the trailing zeros
+    // Turn the int into a decimal string by padding with zeros until the decimal size, then remove the trailing zeros
     const dec = str.padStart(decimals, '0').replace(/0+$/, '');
     str = ['0', dec].join(decimalDelimiter);
   } else {
@@ -103,6 +122,10 @@ export const bigIntToString = (value: bigint, decimals: number, decimalDelimiter
     // Get the decimal part of the string and remove the trailing zeros
     const dec = str.slice(-decimals).replace(/0+$/, '');
     str = dec ? [int, dec].join(decimalDelimiter) : int;
+  }
+
+  if (str.charAt(str.length - 1) === '.') {
+    str = str.slice(0, -1);
   }
 
   return `${isNegative ? '-' : ''}${str}`;
@@ -117,18 +140,15 @@ export const bigIntMin = (
   v1?: bigint | null | undefined,
   v2?: bigint | null | undefined
 ): bigint => {
-  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
-    throw new Error('Both values are undefined or null');
-  }
-
   // Simulate v1 being Infinity if it is undefined or null
   if (v1 === undefined || v1 === null) {
-    return v2!;
+    if (typeof v2 !== 'bigint') throw new Error(`${v2} is not a bigint`);
+    return v2;
   }
 
   // Simulate v2 being Infinity if it is undefined or null
   if (v2 === undefined || v2 === null) {
-    return v1!;
+    return v1;
   }
 
   return v1 < v2 ? v1 : v2;
@@ -143,19 +163,38 @@ export const bigIntMax = (
   v1?: bigint | null | undefined,
   v2?: bigint | null | undefined
 ): bigint => {
-  if ((v1 === undefined || v1 === null) && (v2 === undefined || v2 === null)) {
-    throw new Error('Both values are undefined or null');
-  }
-
   // Simulate v1 being -Infinity if it is undefined or null
   if (v1 === undefined || v1 === null) {
-    return v2!;
+    if (typeof v2 !== 'bigint') throw new Error(`${v2} is not a bigint`);
+    return v2;
   }
 
   // Simulate v2 being -Infinity if it is undefined or null
   if (v2 === undefined || v2 === null) {
-    return v1!;
+    return v1;
   }
 
   return v1 > v2 ? v1 : v2;
+};
+
+/**
+ * Sorts two BigInt values in ascending order.
+ * @param a first bigint value
+ * @param b second bigint value
+ */
+export const bigIntSortAsc = (a: bigint, b: bigint): number => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
+/**
+ * Sorts two BigInt values in descending order.
+ * @param a first bigint value
+ * @param b second bigint value
+ */
+export const bigIntSortDesc = (a: bigint, b: bigint): number => {
+  if (a < b) return 1;
+  if (a > b) return -1;
+  return 0;
 };

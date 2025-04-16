@@ -1,0 +1,19 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": ["../../biome.jsonc"],
+  "linter": {
+    "ignore": ["app/faucet/"],
+    "rules": {
+      "performance": {
+        "useTopLevelRegex": "off"
+      },
+      "style": {
+        // TODO: resolve this once we have a better solution for wagmi query enabling with address
+        "noNonNullAssertion": "off"
+      }
+    }
+  },
+  "javascript": {
+    "globals": ["IntlMessages"]
+  }
+}

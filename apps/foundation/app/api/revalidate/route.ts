@@ -1,8 +1,8 @@
-import { createRevalidateHandler } from '@session/sanity-cms/api/revalidate';
 import { SANITY_SCHEMA_URL } from '@/lib/constants';
 import { generateRssFeed } from '@/lib/rss';
+import { createRevalidateHandler } from '@session/sanity-cms/api/revalidate';
 
-const SANITY_REVALIDATE_SECRET = process.env.SANITY_REVALIDATE_SECRET!;
+const SANITY_REVALIDATE_SECRET = process.env.SANITY_REVALIDATE_SECRET;
 if (!SANITY_REVALIDATE_SECRET) {
   throw new Error('SANITY_REVALIDATE_SECRET is not defined');
 }

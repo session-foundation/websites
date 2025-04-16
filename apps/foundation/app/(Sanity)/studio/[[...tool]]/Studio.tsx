@@ -1,7 +1,7 @@
 'use client';
 
-import SanityStudio from '@session/sanity-cms/components/SanityStudio';
 import { sanityConfig } from '@/lib/sanity/sanity.config';
+import SanityStudio from '@session/sanity-cms/components/SanityStudio';
 
 export default function Studio() {
   return <SanityStudio config={sanityConfig} />;

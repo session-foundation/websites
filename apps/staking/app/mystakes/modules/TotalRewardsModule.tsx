@@ -1,27 +1,24 @@
 'use client';
 
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
-import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { useStakingBackendQueryWithParams } from '@/lib/sent-staking-backend-client';
-import { getStakedNodes } from '@/lib/queries/getStakedNodes';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import {
-  getVariableFontSizeForSmallModule,
-  ModuleDynamicQueryText,
-} from '@/components/ModuleDynamic';
-import type { QUERY_STATUS } from '@/lib/query';
-import { useMemo } from 'react';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
-import { Address } from 'viem';
 import { LinkDataTestId } from '@/testing/data-test-ids';
+import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
-export default function TotalRewardsModule(params?: { addressOverride?: Address }) {
+export default function TotalRewardsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.totalRewards');
+  const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
+  const titleShort = dictionary('titleShort');
 
   const { address: connectedAddress } = useWallet();
   const address = useMemo(
@@ -29,19 +26,12 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
     [params?.addressOverride, connectedAddress]
   );
 
-  const { data, status, refetch } = useStakingBackendQueryWithParams(
-    getStakedNodes,
-    {
-      address: address!,
-    },
-    {
-      enabled: !!address,
-    }
-  );
+  const { claimed, status, refetch } = useGetRecipients({ address: address! });
 
-  const formattedTotalRewardsAmount = useMemo(() => {
-    return formatSENTBigInt(data?.wallet?.rewards, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
-  }, [data?.wallet?.rewards]);
+  const formattedTotalRewardsAmount = formatSENTBigInt(
+    claimed,
+    DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS
+  );
 
   return (
     <Module>
@@ -53,10 +43,15 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
           }),
         })}
       </ModuleTooltip>
-      <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
-      <ModuleDynamicQueryText
-        status={status as QUERY_STATUS}
+      <ModuleTitleDynamic
+        longText={titleFormat('format', { title })}
+        shortText={titleFormat('format', { title: titleShort })}
+      />
+      <ModuleDynamicContractReadText
+        status={status}
         fallback={0}
+        enabled={!!address}
+        errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),
@@ -65,12 +60,9 @@ export default function TotalRewardsModule(params?: { addressOverride?: Address 
           },
           refetch,
         }}
-        style={{
-          fontSize: getVariableFontSizeForSmallModule(formattedTotalRewardsAmount.length),
-        }}
       >
         {formattedTotalRewardsAmount}
-      </ModuleDynamicQueryText>
+      </ModuleDynamicContractReadText>
     </Module>
   );
 }

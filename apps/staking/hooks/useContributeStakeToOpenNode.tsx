@@ -1,31 +1,40 @@
 'use client';
 
-import { useProxyApproval } from '@session/contracts/hooks/SENT';
-import { useEffect, useMemo, useState } from 'react';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
-import { useTranslations } from 'next-intl';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import type { Address } from 'viem';
 
+export type UseContributeStakeToOpenNodeParams = {
+  stakeAmount: bigint;
+  userAddress: Address;
+  beneficiary?: Address;
+  contractAddress: Address | null;
+};
+
+/**
+ * Hook to contribute to a multicontributor contract.
+ * @param stakeAmount - The amount of stake to contribute.
+ * @param userAddress - The user address.
+ * @param beneficiary - The rewards beneficiary address.
+ * @param contractAddress - The contract address to contribute to.
+ * @returns The contribute stake to open node hook.
+ */
 export default function useContributeStakeToOpenNode({
   stakeAmount,
   userAddress,
   beneficiary,
   contractAddress,
-}: {
-  stakeAmount: bigint;
-  userAddress: Address;
-  beneficiary?: Address;
-  contractAddress: Address | null;
-}) {
+}: UseContributeStakeToOpenNodeParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const stageDictKey = 'actionModules.register.stageMulti' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('actionModules.registration.submitMulti');
+  const dictGeneral = useTranslations('general');
 
   const {
     approve,
@@ -40,6 +49,7 @@ export default function useContributeStakeToOpenNode({
     // TODO: Create network provider to handle network specific logic
     contractAddress,
     tokenAmount: stakeAmount,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const {
@@ -50,7 +60,7 @@ export default function useContributeStakeToOpenNode({
     transactionError: contributeFundsTransactionError,
   } = useContributeFunds({
     amount: stakeAmount,
-    beneficiary: beneficiary ?? userAddress,
+    beneficiary: beneficiary || userAddress,
   });
 
   const contributeStake = () => {
@@ -68,29 +78,33 @@ export default function useContributeStakeToOpenNode({
   const approveErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'approve',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: approveSimulateError,
         writeError: approveWriteError,
         transactionError: approveTransactionError,
       }),
-    [approveSimulateError, approveWriteError, approveTransactionError]
+    [approveSimulateError, approveWriteError, approveTransactionError, dict, dictGeneral]
   );
 
   const contributeFundsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'contribute',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: contributeFundsSimulateError,
         writeError: contributeFundsWriteError,
         transactionError: contributeFundsTransactionError,
       }),
-    [contributeFundsSimulateError, contributeFundsWriteError, contributeFundsTransactionError]
+    [
+      contributeFundsSimulateError,
+      contributeFundsWriteError,
+      contributeFundsTransactionError,
+      dict,
+      dictGeneral,
+    ]
   );
 
   const allowanceReadStatus = useMemo(
@@ -109,6 +123,7 @@ export default function useContributeStakeToOpenNode({
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger success or address change
   useEffect(() => {
     if (enabled && approveWriteStatusRaw === 'success' && contractAddress) {
       contributeFunds(contractAddress);
@@ -124,5 +139,11 @@ export default function useContributeStakeToOpenNode({
     contributeFundsErrorMessage,
     contributeFundsStatus,
     enabled,
+    approveWriteError,
+    approveSimulateError,
+    approveTransactionError,
+    contributeFundsSimulateError,
+    contributeFundsWriteError,
+    contributeFundsTransactionError,
   };
 }

@@ -1,13 +1,13 @@
 import { forwardRef } from 'react';
-import { SVGAttributes } from './types';
 import { cn } from '../lib/utils';
+import type { SVGAttributes } from './types';
 
 export const HamburgerIcon = forwardRef<SVGSVGElement, SVGAttributes>(
   ({ className, ...props }, ref) => (
     <svg
       viewBox="0 0 58 57"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('stroke-current stroke-2', className)}
+      className={cn('stroke-2 stroke-current', className)}
       {...props}
       ref={ref}
     >

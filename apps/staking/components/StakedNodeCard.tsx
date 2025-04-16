@@ -1,190 +1,82 @@
 'use client';
 
+import { ActionModuleDivider } from '@/components/ActionModule';
+import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
+import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
+import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
+import { StakeCard } from '@/components/StakedNode/StakeCard';
 import {
-  formatDate,
+  STAKE_EVENT_STATE,
+  STAKE_STATE,
+  isStakeRequestingExit,
+  parseStakeEventState,
+  parseStakeState,
+} from '@/components/StakedNode/state';
+import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
+import useRelativeTime from '@/hooks/useRelativeTime';
+import { useStakes } from '@/hooks/useStakes';
+import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
+import { FEATURE_FLAG } from '@/lib/feature-flags';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import {
   formatLocalizedTimeFromSeconds,
   formatNumber,
   formatPercentage,
+  useFormatDate,
 } from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
 import {
   ButtonDataTestId,
   LinkDataTestId,
   NodeCardDataTestId,
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
-import { NODE_STATE, Stake } from '@session/sent-staking-js/client';
-import { StatusIndicator, statusVariants } from '@session/ui/components/StatusIndicator';
-import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
+import type { Stake } from '@session/staking-api-js/schema';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { PubKey } from '@session/ui/components/PubKey';
+import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
 import { cn } from '@session/ui/lib/utils';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { useTranslations } from 'next-intl';
-import { forwardRef, type HTMLAttributes, ReactNode, useMemo, useState } from 'react';
-import { NodeCard, NodeCardText, NodeCardTitle, NodeContributorList } from './NodeCard';
-import { PubKey } from '@session/ui/components/PubKey';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { Button } from '@session/ui/ui/button';
-import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
-import { useChain } from '@session/contracts/hooks/useChain';
-import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
-import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
-import { externalLink } from '@/lib/locale-defaults';
-import { TextSeparator } from '@session/ui/components/Separator';
-import useRelativeTime from '@/hooks/useRelativeTime';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
-import { ActionModuleDivider } from '@/components/ActionModule';
-import { Address } from 'viem';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import Link from 'next/link';
-import { SENT_DECIMALS } from '@session/contracts';
-
-type StakeInContract = Stake & {
-  contract_id: NonNullable<Stake['contract_id']>;
-  staked_balance: NonNullable<Stake['staked_balance']>;
-};
-
-/** The stake is awaiting contributors. */
-type AwaitingContributorsNode = Stake & {
-  state: NODE_STATE.AWAITING_CONTRIBUTORS;
-  last_uptime_proof: null;
-};
-
-/** The stake has been cancelled. */
-type CancelledNode = AwaitingContributorsNode & { state: NODE_STATE.CANCELLED };
-
-/** The stake is a running node. */
-type RunningNode = StakeInContract & {
-  state: NODE_STATE.RUNNING;
-  last_uptime_proof: NonNullable<Stake['last_uptime_proof']>;
-};
-
-/** The stake has been decommissioned. */
-type DecommissionedNode = StakeInContract & {
-  state: NODE_STATE.DECOMMISSIONED;
-};
-
-/** The stake has been deregistered. */
-type DeregisteredNode = Stake & {
-  state: NODE_STATE.DEREGISTERED;
-  deregistration_unlock_height: NonNullable<Stake['deregistration_unlock_height']>;
-  liquidation_height: NonNullable<Stake['liquidation_height']>;
-};
-
-/** The stake has been requested to exit the smart contract.*/
-type NodeRequestingExit = (RunningNode | DecommissionedNode) & {
-  requested_unlock_height: NonNullable<Stake['requested_unlock_height']>;
-  liquidation_height: NonNullable<Stake['liquidation_height']>;
-};
-
-/** The stake is awaiting liquidation. */
-type AwaitingExitNode = NodeRequestingExit & {
-  state: NODE_STATE.AWAITING_EXIT;
-  liquidation_height: NonNullable<Stake['liquidation_height']>;
-};
-
-/** The stake has exited the smart contract gracefully. */
-type ExitedNode = NodeRequestingExit & {
-  state: NODE_STATE.EXITED;
-  exited: true;
-};
-
-/**
- * Checks if a node is being deregistered.
- * @param node - The node to check.
- * @returns `true` if the node is being deregistered, `false` otherwise.
- */
-export const isBeingDeregistered = (node: Stake): node is DecommissionedNode =>
-  node.state === NODE_STATE.DECOMMISSIONED;
-
-export const hasDeregistrationUnlockHeight = (node: Stake): node is DeregisteredNode =>
-  !!('deregistration_unlock_height' in node && node.deregistration_unlock_height);
-
-const hasRequestedUnlockHeight = (node: Stake): node is NodeRequestingExit =>
-  !!('requested_unlock_height' in node && node.requested_unlock_height);
-
-/**
- * Checks if a given stake has exited the smart contract.
- * @see {@link ExitedNode}
- * @see {@link DeregisteredNode}
- * @param stake - The stake to check.
- *
- * @note The `contract_id` check here is for and edge case. If a node has exited the smart contract
- * and the network hasn't confirmed the event yet then the `contract_id` is `null`. BUT this should
- * not happen as the node info should be stored in the database and the backend should use that data,
- * which includes the contract_id. So it's a technically possible edge case but not likely to happen
- * as long as the backend is doing its job well. BUT if people host their own backend there is no
- * guarantee the database has the node in it so the `contract_id` might be `null`.
- */
-const hasExited = (stake: Stake): boolean =>
-  stake.exited || ('contract_id' in stake && stake.contract_id === null);
-
-/**
- * Checks if a given stake is requesting to exit the smart contract.
- * @see {@link NodeRequestingExit}
- * @param stake - The stake to check.
- * @param blockHeight - The current block height.
- */
-export const isRequestingToExit = (
-  stake: Stake,
-  blockHeight: number
-): stake is NodeRequestingExit =>
-  !hasExited(stake) &&
-  hasRequestedUnlockHeight(stake) &&
-  stake.requested_unlock_height >= blockHeight;
-
-export const isBeingExitedByDeregistration = (
-  stake: Stake,
-  blockHeight: number
-): stake is NodeRequestingExit =>
-  !hasExited(stake) &&
-  hasDeregistrationUnlockHeight(stake) &&
-  stake.deregistration_unlock_height >= blockHeight;
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import type { VariantProps } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
+import { type HTMLAttributes, forwardRef, useMemo } from 'react';
+import type { Address } from 'viem';
+import { CollapsableContent, NodeContributorList, RowLabel } from './NodeCard';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
- * @see {@link NodeRequestingExit}
- * @param stake - The stake to check.
+ * @param state - The stake state.
+ * @param eventState - The stake event state.
+ * @param unlockHeight - The unlock height.
  * @param blockHeight - The current block height.
  */
-export const isReadyToExit = (stake: Stake, blockHeight: number): stake is NodeRequestingExit =>
-  !hasExited(stake) &&
-  ((hasRequestedUnlockHeight(stake) && stake.requested_unlock_height <= blockHeight) ||
-    (hasDeregistrationUnlockHeight(stake) && stake.deregistration_unlock_height <= blockHeight));
+export const isReadyToExitByUnlock = (
+  state: STAKE_STATE,
+  eventState: STAKE_EVENT_STATE,
+  unlockHeight?: number,
+  blockHeight?: number
+) =>
+  !!(
+    state === STAKE_STATE.AWAITING_EXIT &&
+    eventState !== STAKE_EVENT_STATE.EXITED &&
+    unlockHeight &&
+    blockHeight &&
+    unlockHeight <= blockHeight
+  );
 
-// const isNodePastLiquidationBlock = (node: Stake, blockHeight: number): boolean =>
-//   !!(
-//     'liquidation_height' in node &&
-//     node.liquidation_height &&
-//     node.liquidation_height <= blockHeight
-//   );
-
-/**
- * Checks if a given node is operated by a specific user.
- * @param node - The session node to check.
- * @param address - The address of the user to compare with.
- * @returns `true` if the node is operated by the specified user, `false` otherwise.
- */
-export const isNodeOperator = (node: Stake, address: string): boolean =>
-  areHexesEqual(node.operator_address, address);
-
-function getNodeStatus(state: NODE_STATE): VariantProps<typeof statusVariants>['status'] {
+function getNodeStatus(state: STAKE_STATE): VariantProps<typeof statusVariants>['status'] {
   switch (state) {
-    case NODE_STATE.RUNNING:
+    case STAKE_STATE.RUNNING:
       return 'green';
-    case NODE_STATE.AWAITING_OPERATOR_START:
-    case NODE_STATE.AWAITING_CONTRIBUTORS:
-      return 'blue';
-    case NODE_STATE.DECOMMISSIONED:
+    case STAKE_STATE.DECOMMISSIONED:
       return 'yellow';
-    case NODE_STATE.CANCELLED:
-    case NODE_STATE.DEREGISTERED:
+    case STAKE_STATE.DEREGISTERED:
       return 'red';
-    case NODE_STATE.EXITED:
     default:
       return 'grey';
   }
@@ -207,42 +99,6 @@ class BlockTimeManager {
   }
 }
 
-type ToggleCardExpansionButtonProps = HTMLAttributes<HTMLLabelElement> & {
-  htmlFor: string;
-};
-
-const ToggleCardExpansionButton = forwardRef<HTMLLabelElement, ToggleCardExpansionButtonProps>(
-  ({ className, ...props }, ref) => {
-    const [expanded, setExpanded] = useState(false);
-    const dictionary = useTranslations('nodeCard.staked');
-    return (
-      <label
-        ref={ref}
-        role="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        aria-label={expanded ? dictionary(`ariaCollapse`) : dictionary(`ariaExpand`)}
-        data-testid={
-          expanded ? StakedNodeDataTestId.Collapse_Button : StakedNodeDataTestId.Expand_Button
-        }
-        className={cn(
-          'ml-auto flex w-max cursor-pointer select-none items-center align-middle peer-checked:[&>svg]:rotate-180',
-          className
-        )}
-        {...props}
-      >
-        <span className="text-gradient-white hidden font-medium lg:inline-block">
-          {expanded ? dictionary('labelCollapse') : dictionary('labelExpand')}
-        </span>
-        <ArrowDownIcon
-          className={cn(
-            'fill-session-text stroke-session-text ml-1 h-4 w-4 transform transition-all duration-300 ease-in-out motion-reduce:transition-none'
-          )}
-        />
-      </label>
-    );
-  }
-);
-
 type NodeNotificationProps = HTMLAttributes<HTMLSpanElement> & {
   level?: 'info' | 'warning' | 'error';
 };
@@ -252,7 +108,7 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
     <span
       ref={ref}
       className={cn(
-        'flex w-3/4 flex-row gap-2 text-xs font-normal sm:w-max md:text-base',
+        'flex w-3/4 flex-row gap-2 font-normal text-xs sm:w-max md:text-base',
         level === 'warning'
           ? 'text-warning'
           : level === 'error'
@@ -268,36 +124,35 @@ const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProps>(
   )
 );
 
-export const NodeOperatorIndicator = forwardRef<
-  HTMLDivElement,
-  HTMLAttributes<HTMLDivElement> & {
-    hideTextOnMobile?: boolean;
-  }
->(({ className, hideTextOnMobile, ...props }, ref) => {
-  const dictionary = useTranslations('nodeCard.staked');
+type NodeOperatorIndicatorProps = HTMLAttributes<HTMLDivElement> & {
+  isOperatorConnectedWallet?: boolean;
+};
 
-  return (
-    <>
-      <Tooltip tooltipContent={dictionary('operatorTooltip')}>
+export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeOperatorIndicatorProps>(
+  ({ className, isOperatorConnectedWallet, ...props }, ref) => {
+    const dictionary = useTranslations('nodeCard.staked');
+    return (
+      <Tooltip
+        tooltipContent={
+          isOperatorConnectedWallet
+            ? dictionary('operatorTooltip')
+            : dictionary('operatorTooltipOther')
+        }
+      >
         <div
           ref={ref}
           className={cn(
-            'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
+            'flex flex-row items-center gap-1 align-middle font-normal text-session-green text-sm md:text-base',
             className
           )}
           {...props}
         >
-          <SpannerAndScrewdriverIcon className="fill-session-green h-3.5 w-3.5" />
-          {hideTextOnMobile ? (
-            <span className="hidden md:block">{dictionary('operator')}</span>
-          ) : (
-            dictionary('operator')
-          )}
+          <SpannerAndScrewdriverIcon className="h-3.5 w-3.5 fill-session-green" />
         </div>
       </Tooltip>
-    </>
-  );
-});
+    );
+  }
+);
 
 /**
  * Checks if a given date is in the past or `soon`
@@ -311,27 +166,32 @@ const isDateSoonOrPast = (date: Date | null): boolean =>
 const ReadyForExitNotification = ({
   date,
   timeString,
+  isDeregistered,
   className,
 }: {
   date: Date | null;
   timeString: string | null;
+  isDeregistered?: boolean;
   className?: string;
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
-  const notFoundString = dictionaryGeneral('notFound');
   const soonString = dictionaryGeneral('soon');
 
   const isLiquidationSoon = useMemo(() => isDateSoonOrPast(date), [date]);
   const relativeTime = useMemo(
-    () => (!isLiquidationSoon ? timeString : soonString) ?? notFoundString,
-    [isLiquidationSoon, timeString, soonString, notFoundString]
+    () => (!isLiquidationSoon ? timeString : soonString) ?? '',
+    [isLiquidationSoon, timeString, soonString]
   );
 
   return (
     <Tooltip
       tooltipContent={dictionary.rich(
-        isLiquidationSoon ? 'exitTimerDescriptionNow' : 'exitTimerDescription',
+        isDeregistered
+          ? 'liquidationDescription'
+          : isLiquidationSoon
+            ? 'exitTimerDescriptionNow'
+            : 'exitTimerDescription',
         {
           relativeTime,
           link: externalLink({
@@ -343,8 +203,11 @@ const ReadyForExitNotification = ({
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
-          ? dictionary('exitTimerNotificationNow')
-          : dictionary('exitTimerNotification', { relativeTime })}
+          ? dictionary(isDeregistered ? 'liquidationNotification' : 'exitTimerNotificationNow')
+          : dictionary(
+              isDeregistered ? 'deregistrationTimerDescription' : 'exitTimerNotification',
+              { relativeTime }
+            )}
       </NodeNotification>
     </Tooltip>
   );
@@ -354,31 +217,52 @@ const ExitUnlockTimerNotification = ({
   date,
   timeString,
   className,
+  isDeregistered,
 }: {
   date: Date | null;
   timeString: string | null;
+  isDeregistered?: boolean;
   className?: string;
 }) => {
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
   const notFoundString = dictionaryGeneral('notFound');
   const soonString = dictionaryGeneral('soon');
+  const formattedDate = useFormatDate(date, { dateStyle: 'full', timeStyle: 'short' });
 
-  const isExitableSoon = useMemo(() => isDateSoonOrPast(date), [date]);
-  const relativeTime = useMemo(
-    () => (!isExitableSoon ? timeString : soonString) ?? notFoundString,
-    [isExitableSoon, timeString, soonString, notFoundString]
+  const [isExitableSoon, isPastTime] = useMemo(
+    () => [isDateSoonOrPast(date), date && Date.now() > date.getTime()],
+    [date]
   );
+
+  const relativeTime = useMemo(
+    () => (!isExitableSoon ? timeString : soonString),
+    [isExitableSoon, timeString, soonString]
+  );
+
+  if (isPastTime) {
+    return null;
+  }
 
   return (
     <Tooltip
-      tooltipContent={dictionary('exitUnlockTimerDescription', {
-        relativeTime,
-        date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
-      })}
+      tooltipContent={dictionary(
+        isDeregistered ? 'deregisteredTimerDescription' : 'exitUnlockTimerDescription',
+        {
+          relativeTime,
+          date: formattedDate ?? notFoundString,
+        }
+      )}
     >
       <NodeNotification level="warning" className={className}>
-        {dictionary('exitUnlockTimerNotification', { relativeTime })}
+        {relativeTime
+          ? dictionary(
+              isDeregistered ? 'deregisteredTimerNotification' : 'exitUnlockTimerNotification',
+              {
+                relativeTime,
+              }
+            )
+          : dictionary(isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing')}
       </NodeNotification>
     </Tooltip>
   );
@@ -391,11 +275,12 @@ const DeregisteringNotification = ({
   date: Date | null;
   timeString: string | null;
 }) => {
-  const chain = useChain();
+  const { chainId } = useWallet();
   const dictionary = useTranslations('nodeCard.staked');
   const generalDictionary = useTranslations('general');
   const notFoundString = generalDictionary('notFound');
   const soonString = generalDictionary('soon');
+  const formattedDate = useFormatDate(date, { dateStyle: 'full', timeStyle: 'short' });
 
   const isDeregistrationSoon = isDateSoonOrPast(date);
   const relativeTime = useMemo(
@@ -407,11 +292,11 @@ const DeregisteringNotification = ({
     <Tooltip
       tooltipContent={dictionary('deregistrationTimerDescription', {
         lockedStakeTime: formatLocalizedTimeFromSeconds(
-          SESSION_NODE_TIME(chain).DEREGISTRATION_LOCKED_STAKE_SECONDS,
+          SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS,
           { unit: 'day' }
         ),
         relativeTime,
-        date: date ? formatDate(date, { dateStyle: 'full', timeStyle: 'short' }) : notFoundString,
+        date: formattedDate ?? notFoundString,
       })}
     >
       <NodeNotification level="error">
@@ -423,6 +308,7 @@ const DeregisteringNotification = ({
 
 type NodeSummaryProps = {
   node: Stake;
+  state: STAKE_STATE;
   blockHeight: number;
   deregistrationDate: Date | null;
   deregistrationTime: string | null;
@@ -434,10 +320,12 @@ type NodeSummaryProps = {
   liquidationTime: string | null;
   showAllTimers?: boolean;
   isOperator?: boolean;
+  isInContractIdList?: boolean;
 };
 
 const NodeSummary = ({
   node,
+  state,
   blockHeight,
   deregistrationDate,
   deregistrationTime,
@@ -447,189 +335,76 @@ const NodeSummary = ({
   deregistrationUnlockTime,
   liquidationDate,
   liquidationTime,
-  showAllTimers,
-  isOperator,
+  isInContractIdList,
 }: NodeSummaryProps) => {
-  const allTimers = [];
+  const eventState = parseStakeEventState(node);
+  const isExited = eventState === STAKE_EVENT_STATE.EXITED;
 
-  if (node.state !== NODE_STATE.AWAITING_CONTRIBUTORS) {
+  const contributors = (
+    <NodeContributorList
+      contributors={node.contributors}
+      data-testid={StakedNodeDataTestId.Contributor_List}
+    />
+  );
+
+  if (state === STAKE_STATE.DEREGISTERED) {
     return (
-      <NodeContributorList
-        contributors={node.contributors}
-        data-testid={StakedNodeDataTestId.Contributor_List}
-      />
-    );
-  }
-
-  if (isReadyToExit(node, blockHeight)) {
-    const readyToExitTimer = (
       <>
-        <NodeContributorList
-          contributors={node.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
-        <ReadyForExitNotification date={liquidationDate} timeString={liquidationTime} />
+        {contributors}
+        {!isExited && isInContractIdList ? (
+          <ReadyForExitNotification
+            timeString={liquidationTime}
+            date={liquidationDate}
+            isDeregistered
+          />
+        ) : (
+          <ExitUnlockTimerNotification
+            timeString={deregistrationUnlockTime}
+            date={deregistrationUnlockDate}
+            isDeregistered
+          />
+        )}
       </>
     );
-
-    if (showAllTimers) {
-      allTimers.push(readyToExitTimer);
-    } else {
-      return readyToExitTimer;
-    }
   }
 
-  if (hasDeregistrationUnlockHeight(node)) {
-    const deregisteringTimer = (
+  if (isStakeRequestingExit(node)) {
+    return (
       <>
-        <NodeContributorList
-          contributors={node.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
-        <ExitUnlockTimerNotification
-          date={deregistrationUnlockDate}
-          timeString={deregistrationUnlockTime}
-        />
-      </>
-    );
-
-    if (showAllTimers) {
-      allTimers.push(deregisteringTimer);
-    } else {
-      return deregisteringTimer;
-    }
-  }
-
-  if (isBeingDeregistered(node)) {
-    const beingDeregisteredTimers = (
-      <DeregisteringNotification date={deregistrationDate} timeString={deregistrationTime} />
-    );
-
-    if (showAllTimers) {
-      allTimers.push(beingDeregisteredTimers);
-    } else {
-      return beingDeregisteredTimers;
-    }
-  }
-
-  if (isRequestingToExit(node, blockHeight)) {
-    const requestingExitTimer = (
-      <>
-        <NodeContributorList
-          contributors={node.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
-        {
+        {contributors}
+        {isExited || !isInContractIdList ? null : isReadyToExitByUnlock(
+            state,
+            eventState,
+            node.requested_unlock_height,
+            blockHeight
+          ) ? (
+          <ReadyForExitNotification date={liquidationDate} timeString={liquidationTime} />
+        ) : (
           <ExitUnlockTimerNotification
             date={requestedUnlockDate}
             timeString={requestedUnlockTime}
           />
-        }
+        )}
       </>
     );
-
-    if (showAllTimers) {
-      allTimers.push(requestingExitTimer);
-    } else {
-      return requestingExitTimer;
-    }
   }
 
-  if (
-    (node.state === NODE_STATE.AWAITING_CONTRIBUTORS || node.state === NODE_STATE.RUNNING) &&
-    !showAllTimers
-  ) {
-    return (
-      <NodeContributorList
-        contributors={node.contributors}
-        showEmptySlots={node.state === NODE_STATE.AWAITING_CONTRIBUTORS}
-        data-testid={StakedNodeDataTestId.Contributor_List}
-      />
-    );
+  if (state === STAKE_STATE.DECOMMISSIONED) {
+    return <DeregisteringNotification date={deregistrationDate} timeString={deregistrationTime} />;
   }
 
-  if (showAllTimers) {
-    return allTimers;
-  } else {
-    return null;
-  }
+  return contributors;
 };
 
-const collapsableContentVariants = cva(
-  'h-full max-h-0 select-none gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
-  {
-    variants: {
-      size: {
-        xs: 'text-xs md:text-xs peer-checked:max-h-4',
-        base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
-        buttonMd: cn('peer-checked:max-h-10'),
-      },
-      width: {
-        'w-full': 'w-full',
-        'w-max': 'w-max',
-      },
-    },
-    defaultVariants: {
-      size: 'base',
-      width: 'w-full',
-    },
-  }
-);
-
-type CollapsableContentProps = HTMLAttributes<HTMLSpanElement> &
-  VariantProps<typeof collapsableContentVariants>;
-
-export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContentProps>(
-  ({ className, size, width, ...props }, ref) => (
-    <NodeCardText
-      ref={ref}
-      className={cn(collapsableContentVariants({ size, width, className }))}
-      {...props}
-    />
-  )
-);
-
-const RowLabel = ({ children }: { children: ReactNode }) => (
-  <span className="font-semibold">{children} </span>
-);
-
-export const CollapsableButton = forwardRef<
-  HTMLButtonElement,
-  HTMLAttributes<HTMLButtonElement> & {
-    ariaLabel: string;
-    dataTestId: ButtonDataTestId;
-    disabled?: boolean;
-    mobileChildren?: ReactNode;
-  }
->(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
-  <CollapsableContent
-    className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
-    size="buttonMd"
-  >
-    <Button
-      data-testid={dataTestId}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      rounded="md"
-      size="md"
-      variant="destructive-outline"
-      className="uppercase"
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </Button>
-  </CollapsableContent>
-));
-
 const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) => {
+  const { chainId } = useWallet();
   const blockTime = new BlockTimeManager(networkTime, currentBlock);
   const {
     last_reward_block_height: lastRewardBlock,
     last_uptime_proof: lastUptimeProofSeconds,
     earned_downtime_blocks: earnedDowntimeBlocks,
     requested_unlock_height: requestedUnlockBlock,
-    deregistration_unlock_height: deregistrationUnlockBlock,
+    deregistration_height: deregistrationHeight,
     liquidation_height: liquidationBlock,
   } = node;
 
@@ -637,17 +412,28 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
     const lastUptimeDate = lastUptimeProofSeconds
       ? getDateFromUnixTimestampSeconds(lastUptimeProofSeconds)
       : null;
+
     const deregistrationDate = earnedDowntimeBlocks
       ? blockTime.getDateOfBlock(currentBlock + earnedDowntimeBlocks)
       : null;
+
     const lastRewardDate = lastRewardBlock ? blockTime.getDateOfBlock(lastRewardBlock) : null;
+
     const requestedUnlockDate = requestedUnlockBlock
       ? blockTime.getDateOfBlock(requestedUnlockBlock)
       : null;
+
+    const deregistrationUnlockBlock = deregistrationHeight
+      ? deregistrationHeight +
+        msInBlocks(SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS * 1000)
+      : null;
+
     const deregistrationUnlockDate = deregistrationUnlockBlock
       ? blockTime.getDateOfBlock(deregistrationUnlockBlock)
       : null;
+
     const liquidationDate = liquidationBlock ? blockTime.getDateOfBlock(liquidationBlock) : null;
+
     return {
       lastUptimeDate,
       deregistrationDate,
@@ -657,14 +443,14 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
       liquidationDate,
     };
   }, [
+    chainId,
     blockTime,
-    networkTime,
     currentBlock,
     earnedDowntimeBlocks,
     lastUptimeProofSeconds,
     lastRewardBlock,
     requestedUnlockBlock,
-    deregistrationUnlockBlock,
+    deregistrationHeight,
     liquidationBlock,
   ]);
 };
@@ -672,31 +458,48 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
 const StakedNodeCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    node: Stake;
+    id: string;
+    stake: Stake;
     targetWalletAddress?: Address;
     blockHeight: number;
     networkTime: number;
     hideButton?: boolean;
   }
->(
-  (
-    { className, node, blockHeight, networkTime, hideButton, targetWalletAddress, ...props },
-    ref
-  ) => {
-    const dictionary = useTranslations('nodeCard.staked');
-    const generalDictionary = useTranslations('general');
-    const generalNodeDictionary = useTranslations('sessionNodes.general');
-    const stakingNodeDictionary = useTranslations('sessionNodes.staking');
-    const titleFormat = useTranslations('modules.title');
-    const notFoundString = generalDictionary('notFound');
+>(({ stake, blockHeight, networkTime, hideButton, targetWalletAddress, ...props }, ref) => {
+  const dictionary = useTranslations('nodeCard.staked');
+  const generalDictionary = useTranslations('general');
+  const generalNodeDictionary = useTranslations('sessionNodes.general');
+  const stakingNodeDictionary = useTranslations('sessionNodes.staking');
+  const titleFormat = useTranslations('modules.title');
+  const notFoundString = generalDictionary('notFound');
 
-    const { address: connectedAddress } = useWallet();
+  const { address: connectedAddress } = useWallet();
 
-    const walletAddress = useMemo(
-      () => targetWalletAddress ?? connectedAddress,
-      [targetWalletAddress, connectedAddress]
+  const address = targetWalletAddress ?? connectedAddress;
+
+  const { networkContractIds } = useStakes(address);
+  const isInContractIdList = networkContractIds?.has(stake.contract_id);
+
+  const {
+    operator_fee: fee,
+    operator_address: operatorAddress,
+    contributors,
+    last_reward_block_height: lastRewardBlock,
+    last_uptime_proof: lastUptimeProofSeconds,
+  } = stake;
+
+  const formattedStakedBalance = getTotalStakedAmountForAddressFormatted(contributors, address);
+  const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
+
+  const beneficiaryAddress = useMemo(() => {
+    if (!address) return null;
+
+    const contributor = contributors.find((contributor) =>
+      areHexesEqual(contributor.address, address)
     );
+    if (!contributor || !contributor.beneficiary) return null;
 
+<<<<<<< HEAD
     const {
       unique_id,
       service_node_pubkey: pubKey,
@@ -720,63 +523,57 @@ const StakedNodeCard = forwardRef<
     }, [node]);
 
     const toggleId = `toggle-${unique_id}`;
+=======
+    return !areHexesEqual(contributor.beneficiary, contributor.address)
+      ? contributor.beneficiary
+      : null;
+  }, [contributors, address]);
 
-    const formattedStakeBalance = useMemo(
-      () => formatSENTNumber(stakedBalance, SENT_DECIMALS),
-      [stakedBalance]
-    );
-    const showAllTimers = useFeatureFlag(FEATURE_FLAG.SHOW_ALL_TIMERS);
-    const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
+  const {
+    lastUptimeDate,
+    deregistrationDate,
+    lastRewardDate,
+    requestedUnlockDate,
+    deregistrationUnlockDate,
+    liquidationDate,
+  } = useNodeDates(stake, blockHeight, networkTime);
+>>>>>>> dev
 
-    const beneficiaryAddress = useMemo(() => {
-      const contributor = contributors.find((contributor) =>
-        areHexesEqual(contributor.address, walletAddress)
-      );
-      if (!contributor) return null;
+  const formattedLastRewardDate = useFormatDate(lastRewardDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
+  const formattedLastUptimeDate = useFormatDate(lastUptimeDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
 
-      return !areHexesEqual(contributor.beneficiary, contributor.address)
-        ? contributor.beneficiary
-        : null;
-    }, [contributors, walletAddress]);
+  const lastRewardTime = useRelativeTime(lastRewardDate, { addSuffix: true });
+  const deregistrationTime = useRelativeTime(deregistrationDate, { addSuffix: true });
+  const lastUptimeTime = useRelativeTime(lastUptimeDate, { addSuffix: true });
+  const requestedUnlockTime = useRelativeTime(requestedUnlockDate, { addSuffix: true });
+  const deregistrationUnlockTime = useRelativeTime(deregistrationUnlockDate, { addSuffix: true });
+  const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
 
-    const {
-      lastUptimeDate,
-      deregistrationDate,
-      lastRewardDate,
-      requestedUnlockDate,
-      deregistrationUnlockDate,
-      liquidationDate,
-    } = useNodeDates(node, blockHeight, networkTime);
+  const isSoloNode = contributors.length === 1;
 
-    const lastRewardTime = useRelativeTime(lastRewardDate, { addSuffix: true });
-    const deregistrationTime = useRelativeTime(deregistrationDate, { addSuffix: true });
-    const lastUptimeTime = useRelativeTime(lastUptimeDate, { addSuffix: true });
-    const requestedUnlockTime = useRelativeTime(requestedUnlockDate, { addSuffix: true });
-    const deregistrationUnlockTime = useRelativeTime(deregistrationUnlockDate, { addSuffix: true });
-    const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
+  const state = parseStakeState(stake, blockHeight);
 
-    const isSoloNode = contributors.length === 1 && !node.contract;
-    const isOperator = walletAddress ? isNodeOperator(node, walletAddress) : false;
-
-    return (
-      <NodeCard
-        ref={ref}
-        {...props}
-        className={cn(
-          'relative flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5 overflow-hidden pb-4 align-middle',
-          className
-        )}
-        data-testid={NodeCardDataTestId.Staked_Node}
-      >
-        <input id={toggleId} type="checkbox" className="peer hidden appearance-none" />
-        <StatusIndicator
-          status={getNodeStatus(state)}
-          data-testid={StakedNodeDataTestId.Indicator}
-        />
-        <NodeCardTitle data-testid={StakedNodeDataTestId.Title}>{state}</NodeCardTitle>
+  return (
+    <StakeCard
+      ref={ref}
+      {...props}
+      data-testid={NodeCardDataTestId.Staked_Node}
+      title={state}
+      statusIndicatorColor={getNodeStatus(state)}
+      publicKey={stake.service_node_pubkey}
+      isOperator={areHexesEqual(stake.operator_address, address)}
+      summary={
         <NodeSummary
-          node={node}
+          node={stake}
+          state={state}
           blockHeight={blockHeight}
+          isInContractIdList={isInContractIdList}
           deregistrationDate={deregistrationDate}
           deregistrationTime={deregistrationTime}
           deregistrationUnlockDate={deregistrationUnlockDate}
@@ -785,8 +582,8 @@ const StakedNodeCard = forwardRef<
           liquidationTime={liquidationTime}
           requestedUnlockTime={requestedUnlockTime}
           requestedUnlockDate={requestedUnlockDate}
-          isOperator={isOperator}
         />
+<<<<<<< HEAD
         <ToggleCardExpansionButton htmlFor={toggleId} />
         {showAllTimers ? (
           <CollapsableContent size="xs">
@@ -862,165 +659,185 @@ const StakedNodeCard = forwardRef<
               <NodeOperatorIndicator />
               <TextSeparator className="separator mx-1 font-medium" />{' '}
             </>
+=======
+      }
+      collapsableFirstChildren={
+        <>
+          {state === STAKE_STATE.DECOMMISSIONED && stake.requested_unlock_height ? (
+            <CollapsableContent className="text-warning" size="xs">
+              <ExitUnlockTimerNotification
+                date={requestedUnlockDate}
+                timeString={requestedUnlockTime}
+                className="md:text-xs"
+              />
+            </CollapsableContent>
+>>>>>>> dev
           ) : null}
-          <span className="inline-flex flex-nowrap gap-1">
+          {state !== STAKE_STATE.RUNNING ? (
+            <CollapsableContent size="xs">
+              <Tooltip
+                tooltipContent={dictionary('lastRewardDescription', {
+                  blockNumber: lastRewardBlock ? formatNumber(lastRewardBlock) : notFoundString,
+                  date: formattedLastRewardDate ?? notFoundString,
+                })}
+              >
+                <span className="font-normal text-gray-lightest">
+                  {dictionary('lastReward', {
+                    relativeTime: lastRewardTime ?? notFoundString,
+                  })}
+                </span>
+              </Tooltip>
+            </CollapsableContent>
+          ) : null}
+          {lastUptimeProofSeconds || state === STAKE_STATE.RUNNING ? (
+            <CollapsableContent size="xs">
+              <Tooltip
+                tooltipContent={dictionary('lastUptimeDescription', {
+                  blockNumber: lastUptimeProofSeconds
+                    ? formatNumber(
+                        blockHeight - msInBlocks(Date.now() - lastUptimeProofSeconds * 1000)
+                      )
+                    : notFoundString,
+                  date: formattedLastUptimeDate ?? notFoundString,
+                })}
+              >
+                <span className="font-normal text-gray-lightest">
+                  {dictionary('lastUptime', { relativeTime: lastUptimeTime ?? notFoundString })}
+                </span>
+              </Tooltip>
+            </CollapsableContent>
+          ) : null}
+        </>
+      }
+      collapsableLastChildren={
+        <>
+          <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
             <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
+              {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
-            <PubKey pubKey={pubKey} alwaysShowCopyButton />
-          </span>
-        </NodeCardText>
-        <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-          <RowLabel>
-            {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
-          </RowLabel>
-          <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
-        </CollapsableContent>
-        {beneficiaryAddress ? (
-          <CollapsableContent className="inline-flex flex-wrap peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-            <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
-            </RowLabel>
-            <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+            <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
           </CollapsableContent>
-        ) : null}
-        <CollapsableContent>
-          <RowLabel>
-            {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
-          </RowLabel>
-          {formattedStakeBalance}
-        </CollapsableContent>
-        {!isSoloNode ? (
+          {beneficiaryAddress ? (
+            <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
+              <RowLabel>
+                {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
+              </RowLabel>
+              <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+            </CollapsableContent>
+          ) : null}
           <CollapsableContent>
             <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
+              {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
             </RowLabel>
-            {/** TODO: remove the fee divisor awaiting contributor change when the backend is updated to return the correct amount */}
-            {operatorFee !== null
-              ? formatPercentage(
-                  operatorFee / (state === NODE_STATE.AWAITING_CONTRIBUTORS ? 10000 : 1000000)
-                )
-              : notFoundString}
+            {formattedStakedBalance}
+            <CopyToClipboardButton
+              textToCopy={formattedStakedBalance}
+              data-testid={ButtonDataTestId.Staked_Node_Copy_Staked_Balance}
+            />
           </CollapsableContent>
-        ) : null}
-        {showRawNodeData ? (
-          <>
-            <CollapsableContent className="hidden peer-checked:block">
+          {!isSoloNode ? (
+            <CollapsableContent>
               <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('rawData') })}
+                {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
               </RowLabel>
+              {fee !== null ? formatPercentage(fee / 1_000_000) : notFoundString}
             </CollapsableContent>
-            <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
-              <ActionModuleDivider className="h-0.5" />
-            </CollapsableContent>
-            {Object.entries(node).map(([key, value]) => {
-              const valueToDisplay = JSON.stringify(value);
-              return (
-                <CollapsableContent
-                  size="xs"
-                  key={key}
-                  className={cn(
-                    'hidden peer-checked:block',
-                    valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
-                  )}
-                >
-                  <RowLabel>{`${key}: `}</RowLabel>
-                  <span>{valueToDisplay}</span>
-                </CollapsableContent>
-              );
-            })}
-          </>
-        ) : null}
-        {!hideButton ? (
-          <StakeNodeCardButton
-            stake={node}
-            blockHeight={blockHeight}
-            deregistrationUnlockDate={deregistrationUnlockDate}
-            deregistrationUnlockTime={deregistrationUnlockTime}
-            requestedUnlockDate={requestedUnlockDate}
-            requestedUnlockTime={requestedUnlockTime}
-            notFoundString={notFoundString}
-          />
-        ) : null}
-      </NodeCard>
-    );
-  }
-);
+          ) : null}
+          {showRawNodeData ? (
+            <>
+              <CollapsableContent className="hidden peer-checked:block">
+                <RowLabel>
+                  {titleFormat('format', { title: generalNodeDictionary('rawData') })}
+                </RowLabel>
+              </CollapsableContent>
+              <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
+                <ActionModuleDivider className="h-0.5" />
+              </CollapsableContent>
+              {Object.entries(stake).map(([key, value]) => {
+                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
+                return (
+                  <CollapsableContent
+                    size="xs"
+                    key={key}
+                    className={cn(
+                      'hidden peer-checked:block',
+                      valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
+                    )}
+                  >
+                    <RowLabel>{`${key}: `}</RowLabel>
+                    <span>{valueToDisplay}</span>
+                  </CollapsableContent>
+                );
+              })}
+            </>
+          ) : null}
+          {!hideButton ? (
+            <StakeNodeCardButton
+              stake={stake}
+              state={state}
+              blockHeight={blockHeight}
+              requestedUnlockDate={requestedUnlockDate}
+              requestedUnlockTime={requestedUnlockTime}
+              notFoundString={notFoundString}
+            />
+          ) : null}
+        </>
+      }
+    />
+  );
+});
 StakedNodeCard.displayName = 'StakedNodeCard';
 
 function StakeNodeCardButton({
   stake,
+  state,
   blockHeight,
   notFoundString,
   requestedUnlockDate,
-  deregistrationUnlockDate,
   requestedUnlockTime,
-  deregistrationUnlockTime,
 }: {
   stake: Stake;
+  state: STAKE_STATE;
   blockHeight: number;
-  deregistrationUnlockTime?: string | null;
-  deregistrationUnlockDate?: Date | null;
   requestedUnlockDate?: Date | null;
   requestedUnlockTime?: string | null;
   notFoundString?: string;
 }) {
   const dictionary = useTranslations('nodeCard.staked');
-  const dictionaryOpenNode = useTranslations('nodeCard.open');
+  const formattedReqUnlockDate = useFormatDate(requestedUnlockDate, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
+
+  const eventState = parseStakeEventState(stake);
 
   if (
-    stake.contract &&
-    (stake.state === NODE_STATE.AWAITING_CONTRIBUTORS ||
-      stake.state == NODE_STATE.AWAITING_OPERATOR_START)
+    state === STAKE_STATE.EXITED ||
+    eventState === STAKE_EVENT_STATE.EXITED ||
+    state === STAKE_STATE.DEREGISTERED
   ) {
-    return (
-      <CollapsableContent
-        className="bottom-4 right-6 flex w-max items-end min-[500px]:absolute"
-        size="buttonMd"
-      >
-        <Link href={`/stake/${stake.contract}`}>
-          <Button
-            rounded="md"
-            size="md"
-            variant="outline"
-            className="uppercase"
-            aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
-            data-testid={ButtonDataTestId.Node_Card_View}
-          >
-            {dictionaryOpenNode('viewButton.text')}
-          </Button>
-        </Link>
-      </CollapsableContent>
-    );
-  }
-
-  if (hasExited(stake)) {
     return null;
   }
 
-  if (isReadyToExit(stake, blockHeight)) return <NodeExitButtonDialog node={stake} />;
-
-  if (
-    (isRequestingToExit(stake, blockHeight) && !isBeingDeregistered(stake)) ||
-    isBeingExitedByDeregistration(stake, blockHeight)
-  ) {
-    return (
-      <Tooltip
-        tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
-          relativeTime: deregistrationUnlockTime ?? requestedUnlockTime ?? notFoundString,
-          date: deregistrationUnlockDate
-            ? formatDate(deregistrationUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-            : requestedUnlockDate
-              ? formatDate(requestedUnlockDate, { dateStyle: 'full', timeStyle: 'short' })
-              : notFoundString,
-        })}
-      >
-        <NodeExitButton disabled />
-      </Tooltip>
-    );
+  if (isReadyToExitByUnlock(state, eventState, stake.requested_unlock_height, blockHeight)) {
+    return <NodeExitButtonDialog node={stake} />;
   }
 
-  return <NodeRequestExitButton node={stake} />;
+  if (state === STAKE_STATE.RUNNING) {
+    if (isStakeRequestingExit(stake)) {
+      return (
+        <Tooltip
+          tooltipContent={dictionary('exit.disabledButtonTooltipContent', {
+            relativeTime: requestedUnlockTime ?? notFoundString,
+            date: formattedReqUnlockDate ?? notFoundString,
+          })}
+        >
+          <NodeExitButton disabled />
+        </Tooltip>
+      );
+    }
+    return <NodeRequestExitButton node={stake} />;
+  }
 }
 
 export { StakedNodeCard };

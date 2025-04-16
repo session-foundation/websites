@@ -1,54 +1,76 @@
-import { type Address } from 'viem';
+import type { Address } from 'viem';
+import { arbitrum, arbitrumSepolia, mainnet } from 'viem/chains';
 import type { ContractWithAbiName } from './abis';
-import { CHAIN } from './chains';
 
 const contracts = [
   'RewardRatePool',
-  'SENT',
+  'Token',
   'ServiceNodeRewards',
   'ServiceNodeContributionFactory',
   'ServiceNodeContribution',
+  'TokenVestingStaking',
 ] as const satisfies Array<ContractWithAbiName>;
 export type ContractName = (typeof contracts)[number];
 
+const ethChainId = mainnet.id;
+const arbitrumChainId = arbitrum.id;
+const arbitrumSepoliaChainId = arbitrumSepolia.id;
+
+export type ChainId = typeof ethChainId | typeof arbitrumChainId | typeof arbitrumSepoliaChainId;
+
+export const isValidChainId = (chainId?: number | undefined): chainId is ChainId =>
+  chainId === arbitrumChainId || chainId === arbitrumSepoliaChainId || chainId === ethChainId;
+
 // TODO - Replace Mainnet addresses with the correct addresses once they are available
-export const addresses: Record<ContractName, Record<CHAIN, Address>> = {
-  SENT: {
+export const addresses: Record<ContractName, Record<ChainId, Address>> = {
+  Token: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+    [arbitrumChainId]: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
-    [CHAIN.TESTNET]: '0x70c1f36C9cEBCa51B9344121D284D85BE36CD6bB',
+    [ethChainId]: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
+    [arbitrumSepoliaChainId]: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   },
   ServiceNodeRewards: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
+    [arbitrumChainId]: '0x9d8aB00880CBBdc2Dcd29C179779469A82E7be35',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
-    [CHAIN.TESTNET]: '0x4abfFB7f922767f22c7aa6524823d93FDDaB54b1',
+    [ethChainId]: '0x9d8aB00880CBBdc2Dcd29C179779469A82E7be35',
+    [arbitrumSepoliaChainId]: '0x9d8aB00880CBBdc2Dcd29C179779469A82E7be35',
   },
   RewardRatePool: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
+    [arbitrumChainId]: '0xaAD853fE7091728dac0DAa7b69990ee68abFC636',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
-    [CHAIN.TESTNET]: '0x38cD8D3F93d591C18cf26B3Be4CB2c872aC37953',
+    [ethChainId]: '0xaAD853fE7091728dac0DAa7b69990ee68abFC636',
+    [arbitrumSepoliaChainId]: '0xaAD853fE7091728dac0DAa7b69990ee68abFC636',
   },
   ServiceNodeContributionFactory: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
+    [arbitrumChainId]: '0x36Ee2Da54a7E727cC996A441826BBEdda6336B71',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
-    [CHAIN.TESTNET]: '0x66d0D4f71267b3150DafF7bD486AC5E097E7E4C6',
+    [ethChainId]: '0x36Ee2Da54a7E727cC996A441826BBEdda6336B71',
+    [arbitrumSepoliaChainId]: '0x36Ee2Da54a7E727cC996A441826BBEdda6336B71',
   },
   ServiceNodeContribution: {
     /** @deprecated - The Mainnet value is a mock value */
-    [CHAIN.MAINNET]: '0x0000000000000000000000000000000000000000',
+    [arbitrumChainId]: '0x0000000000000000000000000000000000000000',
     /** @deprecated - The Eth value is a mock value */
-    [CHAIN.ETHEREUM]: '0x0000000000000000000000000000000000000000',
-    [CHAIN.TESTNET]: '0x0000000000000000000000000000000000000000',
+    [ethChainId]: '0x0000000000000000000000000000000000000000',
+    [arbitrumSepoliaChainId]: '0x0000000000000000000000000000000000000000',
+  },
+  TokenVestingStaking: {
+    /** @deprecated - The Mainnet value is a mock value */
+    [arbitrumChainId]: '0x0000000000000000000000000000000000000000',
+    /** @deprecated - The Eth value is a mock value */
+    [ethChainId]: '0x0000000000000000000000000000000000000000',
+    [arbitrumSepoliaChainId]: '0x0000000000000000000000000000000000000000',
   },
 } as const;
 
+export enum TOKEN {
+  DECIMALS = 9,
+  SYMBOL = 'SESH',
+}
+
 export const SENT_DECIMALS = 9;
-export const SENT_SYMBOL = 'SENT';
+export const SENT_SYMBOL = 'SESH';

@@ -1,25 +1,30 @@
-import { SENT_DECIMALS } from '@session/contracts';
-import { bigIntToNumber, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { FormControl, FormItem, FormMessage } from '@session/ui/ui/form';
+import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUnstakedBalanceModule';
 import { ActionModuleTooltip } from '@/components/ActionModule';
-import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/SENT';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
+import { type DecimalDelimiter, useDecimalDelimiter } from '@/lib/locale-client';
+import { useActiveVestingContract } from '@/providers/vesting-provider';
+import type { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
+import { SENT_DECIMALS } from '@session/contracts';
+import { formatSENTBigInt, formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
 import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { FormControl, FormItem, FormMessage } from '@session/ui/ui/form';
 import { Input } from '@session/ui/ui/input';
 import { Slider, SliderLineCircle } from '@session/ui/ui/slider';
-import * as React from 'react';
-import type { DecimalDelimiter } from '@/lib/locale-client';
+import { AlertTooltip } from '@session/ui/ui/tooltip';
+import { bigIntToNumber, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
+import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
-import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
 
-type GetStakeAmountFormFieldSchemaArgs = {
+export type GetStakeAmountFormFieldSchemaArgs = {
   minStake: bigint;
   maxStake: bigint;
   isOperator?: boolean;
   decimalDelimiter: DecimalDelimiter;
+  underMinMessage: string;
+  underMinOperatorMessage: string;
+  overMaxMessage: string;
 };
 
 export const getStakeAmountFormFieldSchema = ({
@@ -27,53 +32,77 @@ export const getStakeAmountFormFieldSchema = ({
   maxStake,
   isOperator,
   decimalDelimiter,
+  underMinMessage,
+  underMinOperatorMessage,
+  overMaxMessage,
 }: GetStakeAmountFormFieldSchemaArgs) => {
-  const dictionary = useTranslations('actionModules.stakeAmount.validation');
   return z
     .string()
     .regex(/^[0-9]*[.,]?[0-9]*$/)
-    .refine(
-      (value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) >= minStake,
-      dictionary(isOperator ? 'underMinOperator' : 'underMin', {
-        min: formatSENTBigIntNoRounding(minStake),
-      })
-    )
-    .refine(
-      (value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) <= maxStake,
-      dictionary('overMax', {
-        max: formatSENTBigIntNoRounding(maxStake),
-      })
-    );
+    .refine((value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) >= minStake, {
+      message: isOperator ? underMinOperatorMessage : underMinMessage,
+    })
+    .refine((value) => stringToBigInt(value, SENT_DECIMALS, decimalDelimiter) <= maxStake, {
+      message: overMaxMessage,
+    });
 };
 
 export type StakeAmountFieldProps = {
+  dataTestId: InputDataTestId;
+  dataTestIds: {
+    buttonMin: ButtonDataTestId;
+    buttonMax: ButtonDataTestId;
+    slider0: ButtonDataTestId;
+    slider25: ButtonDataTestId;
+    slider50: ButtonDataTestId;
+    slider75: ButtonDataTestId;
+    slider100: ButtonDataTestId;
+    sliderMin: ButtonDataTestId;
+    sliderMax: ButtonDataTestId;
+  };
   disabled?: boolean;
-  minStake: bigint;
-  maxStake: bigint;
-  decimalDelimiter: DecimalDelimiter;
-  watchedStakeAmount: string;
-  onChange: (value: string) => void;
-  value: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- This is fine for now TODO: resolve properly
+  // biome-ignore lint/suspicious/noExplicitAny: This is fine for now TODO: resolve properly
   field: any;
+  maxStake: bigint;
+  minStake: bigint;
+  stickiness?: number;
+  watchedStakeAmount: string;
+  stakeAmountDescription?: string;
+  ignoreBalance?: boolean;
 };
 
 export default function StakeAmountField({
+  dataTestId,
+  dataTestIds,
   disabled,
-  minStake,
-  maxStake,
-  decimalDelimiter,
-  watchedStakeAmount,
-  onChange,
-  value,
   field,
+  maxStake,
+  minStake,
+  stickiness = 400,
+  watchedStakeAmount,
+  stakeAmountDescription,
+  ignoreBalance,
 }: StakeAmountFieldProps) {
-  const fullStake = SESSION_NODE_FULL_STAKE_AMOUNT;
-  const fullStakeString = bigIntToString(fullStake, SENT_DECIMALS, decimalDelimiter);
-  const dictionary = useTranslations('actionModules.register');
+  const dictionary = useTranslations('general');
+  const dictionaryStakeAmount = useTranslations('actionModules.registration.stakeAmount');
   const actionModuleSharedDictionary = useTranslations('actionModules.shared');
-  const { tokenBalance, isConnected } = useWallet();
+  const { isConnected } = useWallet();
 
+  const { value, onChange } = field;
+  const decimalDelimiter = useDecimalDelimiter();
+  const { balance: balanceWallet, value: balanceWalletValue } = useWalletTokenBalance();
+  const { formattedAmount: balanceVesting, amount: balanceVestingValue } =
+    useVestingUnstakedBalance();
+  const activeVestingContract = useActiveVestingContract();
+
+  const balanceValue = activeVestingContract ? balanceVestingValue : balanceWalletValue;
+  const balance = activeVestingContract ? balanceVesting : balanceWallet;
+
+  const fullStakeString = bigIntToString(
+    SESSION_NODE_FULL_STAKE_AMOUNT,
+    SENT_DECIMALS,
+    decimalDelimiter
+  );
   const thousandsSeparator = decimalDelimiter === '.' ? ',' : '.';
   const formatInputText = (value: string) => {
     if (value === '0') return '0';
@@ -100,7 +129,10 @@ export default function StakeAmountField({
       // If the value is greater than the full stake, return the full stake
     }
 
-    if (stringToBigInt(formattedValue, SENT_DECIMALS, decimalDelimiter) > fullStake) {
+    if (
+      stringToBigInt(formattedValue, SENT_DECIMALS, decimalDelimiter) >
+      SESSION_NODE_FULL_STAKE_AMOUNT
+    ) {
       return fullStakeString;
     }
 
@@ -115,14 +147,15 @@ export default function StakeAmountField({
             <span className="inline-flex items-center gap-2 text-nowrap align-middle">
               {actionModuleSharedDictionary('stakeAmount')}
               <ActionModuleTooltip>
-                {actionModuleSharedDictionary('stakeAmountDescription')}
+                {stakeAmountDescription ?? actionModuleSharedDictionary('stakeAmountDescription')}
               </ActionModuleTooltip>
-              {watchedStakeAmount &&
-              tokenBalance &&
-              tokenBalance < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (
+              {!ignoreBalance &&
+              watchedStakeAmount &&
+              balanceValue !== undefined &&
+              balanceValue < stringToBigInt(watchedStakeAmount, SENT_DECIMALS) ? (
                 <AlertTooltip
-                  tooltipContent={dictionary('notEnoughTokensAlert', {
-                    walletAmount: formatSENTBigInt(tokenBalance),
+                  tooltipContent={dictionary('error.InsufficientBalance', {
+                    walletAmount: balance,
                     tokenAmount: formatSENTBigInt(
                       stringToBigInt(watchedStakeAmount, SENT_DECIMALS)
                     ),
@@ -138,14 +171,14 @@ export default function StakeAmountField({
                 type="button"
                 className="gap-1 px-2"
                 disabled={disabled}
-                data-testid={ButtonDataTestId.Stake_Amount_Min}
+                data-testid={dataTestIds.buttonMin}
                 onClick={() =>
                   onChange(
                     formatInputText(bigIntToString(minStake, SENT_DECIMALS, decimalDelimiter))
                   )
                 }
               >
-                {dictionary.rich('minContribution', {
+                {dictionaryStakeAmount.rich('min', {
                   min: formatSENTBigIntNoRounding(minStake),
                 })}
               </Button>
@@ -157,14 +190,14 @@ export default function StakeAmountField({
                 type="button"
                 className="gap-1 px-2"
                 disabled={disabled}
-                data-testid={ButtonDataTestId.Stake_Amount_Max}
+                data-testid={dataTestIds.buttonMax}
                 onClick={() =>
                   onChange(
                     formatInputText(bigIntToString(maxStake, SENT_DECIMALS, decimalDelimiter))
                   )
                 }
               >
-                {dictionary.rich('maxContribution', {
+                {dictionaryStakeAmount.rich('max', {
                   max: formatSENTBigIntNoRounding(maxStake),
                 })}
               </Button>
@@ -173,7 +206,8 @@ export default function StakeAmountField({
           <Input
             placeholder={bigIntToString(maxStake, SENT_DECIMALS)}
             disabled={!isConnected || disabled}
-            className="w-full rounded-lg border-[2px] border-[#668C83] border-opacity-80 px-4 py-8 text-3xl shadow-md"
+            className="w-full rounded-lg border-[#668C83] border-[2px] border-opacity-80 px-4 py-8 text-3xl shadow-md"
+            {...field}
             value={value}
             onChange={(e) => onChange(formatInputText(e.target.value))}
             onPaste={(e) => {
@@ -181,54 +215,73 @@ export default function StakeAmountField({
               e.stopPropagation();
               return onChange(formatInputText(e.clipboardData.getData('text/plain')));
             }}
-            {...field}
+            data-testid={dataTestId}
           />
           <Slider
             className="my-2"
-            max={bigIntToNumber(fullStake, SENT_DECIMALS)}
+            max={bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS)}
             step={1}
             disabled={disabled}
             value={[
               bigIntToNumber(stringToBigInt(value, SENT_DECIMALS, decimalDelimiter), SENT_DECIMALS),
             ]}
+            dataTestIds={{
+              slider0: dataTestIds.slider0,
+              slider25: dataTestIds.slider25,
+              slider50: dataTestIds.slider50,
+              slider75: dataTestIds.slider75,
+              slider100: dataTestIds.slider100,
+            }}
             onValueChange={([val]) => {
               if (!val) return;
 
               const distanceToMax = Math.abs(bigIntToNumber(maxStake, SENT_DECIMALS) - val);
-              if (distanceToMax < 200) {
+              if (distanceToMax < stickiness) {
                 return onChange(bigIntToString(maxStake, SENT_DECIMALS, decimalDelimiter));
               }
 
               const distanceToMin = Math.abs(bigIntToNumber(minStake, SENT_DECIMALS) - val);
-              if (distanceToMin < 200) {
+              if (distanceToMin < stickiness) {
                 return onChange(bigIntToString(minStake, SENT_DECIMALS, decimalDelimiter));
               }
 
-              if (val < 200) {
+              if (val < stickiness) {
                 return onChange('0');
               }
 
-              const distanceTo50 = Math.abs(bigIntToNumber(fullStake, SENT_DECIMALS) / 2 - val);
-              if (distanceTo50 < 200) {
+              const distanceTo50 = Math.abs(
+                bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS) / 2 - val
+              );
+              if (distanceTo50 < stickiness) {
                 return onChange(
-                  bigIntToString(fullStake / BigInt(2), SENT_DECIMALS, decimalDelimiter)
+                  bigIntToString(
+                    SESSION_NODE_FULL_STAKE_AMOUNT / BigInt(2),
+                    SENT_DECIMALS,
+                    decimalDelimiter
+                  )
                 );
               }
 
-              const distanceTo25 = Math.abs(bigIntToNumber(fullStake, SENT_DECIMALS) / 4 - val);
-              if (distanceTo25 < 200) {
+              const distanceTo25 = Math.abs(
+                bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS) / 4 - val
+              );
+              if (distanceTo25 < stickiness) {
                 return onChange(
-                  bigIntToString(fullStake / BigInt(4), SENT_DECIMALS, decimalDelimiter)
+                  bigIntToString(
+                    SESSION_NODE_FULL_STAKE_AMOUNT / BigInt(4),
+                    SENT_DECIMALS,
+                    decimalDelimiter
+                  )
                 );
               }
 
               const distanceTo75 = Math.abs(
-                (bigIntToNumber(fullStake, SENT_DECIMALS) / 4) * 3 - val
+                (bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS) / 4) * 3 - val
               );
-              if (distanceTo75 < 200) {
+              if (distanceTo75 < stickiness) {
                 return onChange(
                   bigIntToString(
-                    (fullStake / BigInt(4)) * BigInt(3),
+                    (SESSION_NODE_FULL_STAKE_AMOUNT / BigInt(4)) * BigInt(3),
                     SENT_DECIMALS,
                     decimalDelimiter
                   )
@@ -236,12 +289,12 @@ export default function StakeAmountField({
               }
 
               const distanceTo100 = Math.abs(
-                (bigIntToNumber(fullStake, SENT_DECIMALS) / 100) * 100 - val
+                (bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS) / 100) * 100 - val
               );
-              if (distanceTo100 < 200) {
+              if (distanceTo100 < stickiness) {
                 return onChange(
                   bigIntToString(
-                    (fullStake / BigInt(100)) * BigInt(100),
+                    (SESSION_NODE_FULL_STAKE_AMOUNT / BigInt(100)) * BigInt(100),
                     SENT_DECIMALS,
                     decimalDelimiter
                   )
@@ -254,15 +307,17 @@ export default function StakeAmountField({
             <SliderLineCircle
               variant="blue"
               strokeVariant="blue"
+              data-testid={dataTestIds.sliderMax}
               style={{
-                left: `calc(${(bigIntToNumber(maxStake, SENT_DECIMALS) / bigIntToNumber(fullStake, SENT_DECIMALS)) * 100}% - 8px)`,
+                left: `calc(${(bigIntToNumber(maxStake, SENT_DECIMALS) / bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS)) * 100}% - 8px)`,
               }}
             />
             <SliderLineCircle
               variant="blue"
               strokeVariant="blue"
+              data-testid={dataTestIds.sliderMin}
               style={{
-                left: `calc(${(bigIntToNumber(minStake, SENT_DECIMALS) / bigIntToNumber(fullStake, SENT_DECIMALS)) * 100}%)`,
+                left: `calc(${(bigIntToNumber(minStake, SENT_DECIMALS) / bigIntToNumber(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS)) * 100}%)`,
               }}
             />
           </Slider>

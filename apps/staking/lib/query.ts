@@ -1,6 +1,6 @@
-import { defaultShouldDehydrateQuery, QueryClient } from '@tanstack/react-query';
 import { QUERY } from '@/lib/constants';
 import { isProduction } from '@/lib/env';
+import { QueryClient, defaultShouldDehydrateQuery } from '@tanstack/react-query';
 
 export function createQueryClient() {
   return new QueryClient({

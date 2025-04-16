@@ -1,38 +1,41 @@
-import { isProduction, NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
-import { getLocalizationData } from '@/lib/locale-server';
-import { Toaster } from '@session/ui/components/ui/sonner';
+import { siteMetadata } from '@/lib/metadata';
 import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
-
-import { DevSheet } from '@/components/DevSheet';
-import { siteMetadata, wagmiMetadata } from '@/lib/metadata';
 import '@session/ui/styles';
-import { createWagmiConfig } from '@session/wallet/lib/wagmi';
-import { headers } from 'next/headers';
-import { cookieToInitialState } from 'wagmi';
-import ChainBanner from '@/components/ChainBanner';
-import { GlobalProvider } from '@/providers/global-provider';
-import { TOSHandler } from '@/components/TOSHandler';
-import { getBuildInfo } from '@session/util-js/build';
-import { FeatureFlagProvider } from '@/lib/feature-flags-client';
-import RemoteBanner from '@/components/RemoteBanner';
+import { DevSheet } from '@/components/DevSheet';
 import Header from '@/components/Header';
-import { Suspense } from 'react';
+import Maintenance from '@/components/Maintenance';
+import RemoteBanner from '@/components/RemoteBanner';
+import RouterListener from '@/components/RouterListener';
+import { StatusBar } from '@/components/StatusBar';
+import { TOSHandler } from '@/components/TOSHandler';
+import { VestingDialog } from '@/components/Vesting/VestingDialog';
+import { WalletUserSheet } from '@/components/WalletUserSheet';
+import { isProduction } from '@/lib/env';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { getRemoteFeatureFlags } from '@/lib/feature-flags-server';
+import { getLocalizationData } from '@/lib/locale-server';
+import { GlobalProvider } from '@/providers/global-provider';
 import { cn } from '@session/ui/lib/utils';
-
-const wagmiConfig = createWagmiConfig({
-  projectId: NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-  metadata: wagmiMetadata,
-});
+import { Toaster } from '@session/ui/ui/sonner';
+import { getBuildInfo } from '@session/util-js/build';
+import { headers } from 'next/headers';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata() {
-  return siteMetadata({});
+  return await siteMetadata({});
 }
 
 const buildInfo = getBuildInfo();
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, direction, messages } = await getLocalizationData();
-  const initialWagmiState = cookieToInitialState(wagmiConfig, headers().get('cookie'));
+  const wagmiCookie = (await headers()).get('cookie');
+
+  /**
+   *  We don't need to handle any errors from the remote flag functions as any errors are handled
+   *  in the function call, and that call happens on the same thread, as this is server-side rendered.
+   */
+  const enabledFlags = new Set((await getRemoteFeatureFlags()).flags);
 
   return (
     <html
@@ -40,28 +43,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={direction}
       className={cn(RobotoFlex.variable, MonumentExtended.variable)}
     >
-      <FeatureFlagProvider>
-        <GlobalProvider
-          messages={messages}
-          locale={locale}
-          initialState={initialWagmiState}
-          wagmiMetadata={wagmiMetadata}
-        >
-          <body className="bg-session-black font-roboto-flex text-session-text overflow-x-hidden">
-            <ChainBanner />
-            <Suspense>
-              <RemoteBanner />
-            </Suspense>
-            <Suspense>
+      <GlobalProvider messages={messages} locale={locale} wagmiCookie={wagmiCookie}>
+        <body className="overflow-x-hidden bg-session-black font-roboto-flex text-session-text">
+          {enabledFlags.has(REMOTE_FEATURE_FLAG.ENABLE_MAINTENANCE_MODE) ? (
+            <Maintenance />
+          ) : (
+            <>
+              {/*<ChainBanner />*/}
+              <RemoteBanner enabledFlags={enabledFlags} />
               <Header />
-            </Suspense>
-            <main>{children}</main>
-            {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
-            <TOSHandler />
-          </body>
-          <Toaster />
-        </GlobalProvider>
-      </FeatureFlagProvider>
+              <main>{children}</main>
+              <WalletUserSheet />
+              {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
+              <TOSHandler />
+              <VestingDialog />
+              <Toaster />
+              <StatusBar />
+              {!isProduction ? <RouterListener /> : null}
+            </>
+          )}
+        </body>
+      </GlobalProvider>
     </html>
   );
 }

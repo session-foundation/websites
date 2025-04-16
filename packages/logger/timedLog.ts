@@ -1,5 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-
 import { LOG_LEVEL, type Logger } from './logger';
 
 export type InitialLog = { message: string; level?: keyof Logger };

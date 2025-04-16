@@ -1,15 +1,19 @@
 'use server';
 
 import { COMMUNITY_DATE, FAUCET, FAUCET_ERROR, TICKER } from '@/lib/constants';
-import { addresses, CHAIN, isChain, SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { TOKEN, addresses } from '@session/contracts';
 import { SENTAbi } from '@session/contracts/abis';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { ETH } from '@session/wallet/lib/eth';
 import { createPublicWalletClient, createServerWallet } from '@session/wallet/lib/server-wallet';
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { type Address, formatEther, isAddress as isAddressViem } from 'viem';
-import { FaucetFormSchema } from './AuthModule';
+import { type Address, type Chain, formatEther, isAddress as isAddressViem } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
+import type { FaucetFormSchema } from './AuthModule';
 import {
+  TABLE,
+  type TransactionHistory,
   codeExists,
   getCodeUseTransactionHistory,
   getReferralCodeDetails,
@@ -18,10 +22,7 @@ import {
   idIsInTable,
   openDatabase,
   setupDatababse,
-  TABLE,
-  TransactionHistory,
 } from './utils';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
 
 class FaucetError extends Error {
   faucetError: FAUCET_ERROR;
@@ -71,12 +72,12 @@ class FaucetResult {
   }
 }
 
-const faucetTokenWarning = BigInt(20000 * Math.pow(10, SENT_DECIMALS));
-const faucetGasWarning = BigInt(0.01 * Math.pow(10, ETH_DECIMALS));
+const faucetTokenWarning = BigInt(20000 * Math.pow(10, TOKEN.DECIMALS));
+const faucetGasWarning = BigInt(0.01 * Math.pow(10, ETH.DECIMALS));
 
-const minTargetEthBalance = BigInt(FAUCET.MIN_ETH_BALANCE * Math.pow(10, ETH_DECIMALS));
+const minTargetEthBalance = BigInt(FAUCET.MIN_ETH_BALANCE * Math.pow(10, ETH.DECIMALS));
 
-const hoursBetweenTransactions = parseInt(process.env.FAUCET_HOURS_BETWEEN_USES ?? '0');
+const hoursBetweenTransactions = Number.parseInt(process.env.FAUCET_HOURS_BETWEEN_USES ?? '0');
 
 const isAddress = (address?: string): address is Address => {
   return !!address && isAddressViem(address, { strict: false });
@@ -86,18 +87,16 @@ const isPrivateKey = (key?: string): key is Address => {
   return !!key && key.startsWith('0x');
 };
 
-export async function getEthBalance({ address, chain }: { address?: Address; chain: CHAIN }) {
+export async function getEthBalance({ address, chain }: { address?: Address; chain: Chain }) {
   if (!isAddress(address)) {
     throw new Error('Address is required');
   }
 
   const client = createPublicWalletClient(chain);
 
-  const balance = await client.getBalance({
+  return client.getBalance({
     address,
   });
-
-  return balance;
 }
 
 export async function getSessionTokenBalance({
@@ -105,7 +104,7 @@ export async function getSessionTokenBalance({
   chain,
 }: {
   address?: Address;
-  chain: CHAIN;
+  chain: Chain;
 }) {
   if (!isAddress(address)) {
     throw new Error('Address is required');
@@ -113,34 +112,35 @@ export async function getSessionTokenBalance({
 
   const client = createPublicWalletClient(chain);
 
-  // TODO: Change this to be a list of all valid session token chains
-  if (chain !== CHAIN.TESTNET && chain !== CHAIN.MAINNET) {
-    throw new Error('Invalid chain');
-  }
-
-  const balance = await client.readContract({
-    address: addresses.SENT[chain],
+  return client.readContract({
+    address: addresses.Token[arbitrumSepolia.id],
     abi: SENTAbi,
     functionName: 'balanceOf',
     args: [address],
   });
-
-  return balance;
 }
 
 setupDatababse();
 
+/**
+ * NOTE: discord and telegram functionality is disabled, the code will stay here and be set
+ *   to null in case it's needed in the future
+ */
 export async function transferTestTokens({
   walletAddress: targetAddress,
-  discordId,
-  telegramId,
+  // discordId,
+  // telegramId,
   code,
 }: FaucetFormSchema) {
   const dictionary = await getTranslations('faucet.form.error');
   const locale = await getLocale();
+
+  const discordId = null;
+  const telegramId = null;
+
   let result: FaucetResult = new FaucetResult({});
   let db: BetterSql3.Database | undefined;
-  let faucetTokenDrip = BigInt(FAUCET.DRIP * Math.pow(10, SENT_DECIMALS));
+  let faucetTokenDrip = BigInt(FAUCET.DRIP * Math.pow(10, TOKEN.DECIMALS));
 
   try {
     if (!isAddress(targetAddress)) {
@@ -150,13 +150,7 @@ export async function transferTestTokens({
       );
     }
 
-    /**
-     * NOTE: This enforces a set chain but its locked to {@see CHAIN.TESTNET} for now this should be changed to allow for multiple chains.
-     */
-    const chain = process.env.FAUCET_CHAIN;
-    if (!chain || !isChain(chain) || chain !== CHAIN.TESTNET) {
-      throw new FaucetError(FAUCET_ERROR.INCORRECT_CHAIN, dictionary(FAUCET_ERROR.INCORRECT_CHAIN));
-    }
+    const chain = arbitrumSepolia;
 
     const { faucetAddress, faucetWallet } = await connectFaucetWallet();
 
@@ -190,7 +184,7 @@ export async function transferTestTokens({
      */
     if (faucetTokenBalance < faucetTokenWarning) {
       console.warn(
-        `Faucet wallet ${SENT_SYMBOL} balance (${formatSENTBigInt(faucetTokenBalance)}) is below the warning threshold (${formatSENTBigInt(faucetTokenWarning)})`
+        `Faucet wallet ${TOKEN.SYMBOL} balance (${formatSENTBigInt(faucetTokenBalance)}) is below the warning threshold (${formatSENTBigInt(faucetTokenWarning)})`
       );
     }
 
@@ -211,7 +205,16 @@ export async function transferTestTokens({
         );
       }
 
-      const { wallet, maxuses: maxUses, drip: codeDrip } = getReferralCodeDetails({ db, code });
+      const details = getReferralCodeDetails({ db, code });
+
+      if (!details) {
+        throw new FaucetError(
+          FAUCET_ERROR.INVALID_REFERRAL_CODE,
+          dictionary(FAUCET_ERROR.INVALID_REFERRAL_CODE)
+        );
+      }
+
+      const { wallet, maxuses: maxUses, drip: codeDrip } = details;
 
       if (wallet === targetAddress) {
         throw new FaucetError(
@@ -248,13 +251,13 @@ export async function transferTestTokens({
       const idIsOxenOperator = idIsInTable({
         db,
         source: TABLE.OPERATOR,
-        id: targetAddress,
+        id: targetAddress.toUpperCase(),
       });
 
       const idIsInWalletList = idIsInTable({
         db,
         source: TABLE.WALLET,
-        id: targetAddress,
+        id: targetAddress.toUpperCase(),
       });
 
       if (!idIsOxenOperator && !idIsInWalletList) {
@@ -369,7 +372,7 @@ export async function transferTestTokens({
 
     // TODO: extract the simulate -> write logic into a separate reusable library
     const sessionTokenTxHash = await faucetWallet.writeContract({
-      address: addresses.SENT[chain],
+      address: addresses.Token[arbitrumSepolia.id],
       abi: SENTAbi,
       functionName: 'transfer',
       args: [targetAddress, faucetTokenDrip],
@@ -465,11 +468,43 @@ async function connectFaucetWallet() {
     throw new Error('Invalid faucet wallet private key');
   }
 
-  const faucetWallet = createServerWallet(privateKey, CHAIN.TESTNET);
+  const faucetWallet = createServerWallet(privateKey, arbitrumSepolia);
   const faucetAddress = (await faucetWallet.getAddresses())[0];
 
   if (!isAddress(faucetAddress)) {
     throw new Error('Faucet wallet address is required');
   }
   return { faucetAddress, faucetWallet };
+}
+
+export async function getReferralCodeInfo({ code }: { code: string }) {
+  let db: BetterSql3.Database | undefined;
+  try {
+    const db = openDatabase();
+    const details = getReferralCodeDetails({ db, code });
+
+    if (!details) {
+      return null;
+    }
+
+    const { maxuses: maxUses, drip } = details;
+
+    const codeTransactionHistory = getCodeUseTransactionHistory({ db, code });
+
+    const outOfUses = codeTransactionHistory.length >= (maxUses ?? 1);
+
+    return {
+      maxUses,
+      uses: codeTransactionHistory.length,
+      drip,
+      outOfUses,
+    };
+  } catch (error) {
+    console.error('Error getting referral code info:', error);
+    return null;
+  } finally {
+    if (db) {
+      db.close();
+    }
+  }
 }

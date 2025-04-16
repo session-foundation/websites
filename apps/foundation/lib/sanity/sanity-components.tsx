@@ -1,14 +1,14 @@
-import {
-  basicComponents,
-  type SanityPortableTextProps,
-} from '@session/sanity-cms/components/SanityPortableText';
-import { SanityImage } from '@session/sanity-cms/components/SanityImage';
+import { SANITY_SCHEMA_URL } from '@/lib/constants';
 import { client } from '@/lib/sanity/sanity.client';
 import { SanityButton } from '@session/sanity-cms/components/SanityButton';
-import { SANITY_SCHEMA_URL } from '@/lib/constants';
+import { SanityImage } from '@session/sanity-cms/components/SanityImage';
+import {
+  type SanityPortableTextProps,
+  basicComponents,
+} from '@session/sanity-cms/components/SanityPortableText';
+import { SanityTiles } from '@session/sanity-cms/components/SanityTiles';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { getLangDir } from 'rtl-detect';
-import { SanityTiles } from '@session/sanity-cms/components/SanityTiles';
 
 const { marks, block } = basicComponents;
 export const components = {

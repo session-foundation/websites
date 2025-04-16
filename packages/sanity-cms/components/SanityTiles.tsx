@@ -1,13 +1,12 @@
+import { cn } from '@session/ui/lib/utils';
 import type { SessionSanityClient } from '../lib/client';
 import {
-  isTileVariant,
   TILES_VARIANT,
   type TilesSchemaType,
+  isTileVariant,
 } from '../schemas/fields/component/tiles';
 import { SanityTile } from './SanityTile';
-import { cn } from '@session/ui/lib/utils';
 import { ScrollButton } from './ScrollButton';
-import React from 'react';
 
 export function SanityTiles({
   value,
@@ -30,7 +29,7 @@ export function SanityTiles({
 
   const tiles = value.tiles;
 
-  if (!tiles || !Array.isArray(tiles)) {
+  if (!(tiles && Array.isArray(tiles))) {
     console.warn('Missing tiles for tiles');
     return null;
   }
@@ -55,7 +54,7 @@ export function SanityTiles({
           parentId={id}
           tileContainerId={tileContainer}
           isRTLLocale={isRTLLocale}
-          className="absolute left-0 top-0 md:hidden"
+          className="absolute top-0 left-0 md:hidden"
         />
       ) : null}
       <div

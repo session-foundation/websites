@@ -1,16 +1,16 @@
+import type { SanityImageSource } from '@sanity/asset-utils';
 import urlBuilder from '@sanity/image-url';
-import type { SessionSanityClient } from '../lib/client';
+import { cn } from '@session/ui/lib/utils';
+import { safeTry } from '@session/util-js/try';
 import Image from 'next/image';
-import logger from '../lib/logger';
 import { getPlaiceholder } from 'plaiceholder';
+import { Fragment } from 'react';
+import type { SessionSanityClient } from '../lib/client';
+import logger from '../lib/logger';
 import type {
   ImageFieldsSchemaType,
   ImageFieldsSchemaTypeWithoutAltText,
 } from '../schemas/fields/basic/image';
-import { cn } from '@session/ui/lib/utils';
-import { safeTry } from '@session/util-js/try';
-import { Fragment } from 'react';
-import type { SanityImageSource } from '@sanity/asset-utils';
 import type { CustomImageType } from '../schemas/fields/basic/seo';
 
 export type SanityImageType = ImageFieldsSchemaType | ImageFieldsSchemaTypeWithoutAltText;
@@ -48,6 +48,7 @@ type SanityImageProps = {
   figureNumberTextTemplate?: string;
   className?: string;
 };
+
 export const SanityImage = async ({
   value,
   isInline,

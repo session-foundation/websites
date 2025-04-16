@@ -1,24 +1,25 @@
+import { type ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import {
+  type ContributionContractContributor,
+  type StakeContributor,
+  isContributionContractContributor,
+} from '@session/staking-api-js/schema';
 import { Loading } from '@session/ui/components/loading';
+import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
 import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import { bigIntToNumber } from '@session/util-crypto/maths';
-import { SENT_DECIMALS } from '@session/contracts';
-import { useTranslations } from 'next-intl';
+import { bigIntSortDesc } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatSENTBigInt, formatSENTNumber } from '@session/contracts/hooks/SENT';
-import { StakeContributor } from '@session/sent-staking-js/client';
-
-export interface Contributor {
-  address: string;
-  amount: bigint;
-}
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
+import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
 
 export const outerNodeCardVariants = cva(
-  'rounded-xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
+  'rounded-xl bg-module-outline p-px bg-blend-lighten shadow-md transition-all ease-in-out',
   {
     variants: {
       variant: {
@@ -32,7 +33,7 @@ export const outerNodeCardVariants = cva(
 );
 
 const innerNodeCardVariants = cva(
-  'rounded-xl w-full h-full flex align-middle flex-col py-5 px-6 bg-module',
+  'flex h-full w-full flex-col rounded-xl bg-module px-6 py-5 align-middle',
   {
     variants: {
       variant: {
@@ -65,7 +66,7 @@ const NodeCard = forwardRef<HTMLDivElement, StakeCardProps>(
 
 NodeCard.displayName = 'NodeCard';
 
-const nodeCardHeaderVariants = cva('w-full flex flex-row', {
+const nodeCardHeaderVariants = cva('flex w-full flex-row', {
   variants: {
     variant: {
       default: '',
@@ -97,7 +98,7 @@ const NodeCardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingE
   ({ className, ...props }, ref) => (
     <h4
       ref={ref}
-      className={cn('text-gradient-white text-lg font-medium leading-none md:text-xl', className)}
+      className={cn('font-medium text-gradient-white text-lg leading-none md:text-xl', className)}
       {...props}
     />
   )
@@ -108,7 +109,7 @@ const NodeCardText = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>
   ({ className, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn('text-gradient-white text-sm font-light md:text-base', className)}
+      className={cn('font-light text-gradient-white text-sm md:text-base', className)}
       {...props}
     />
   )
@@ -121,76 +122,38 @@ const ContributorIcon = ({
   isUser,
 }: {
   className?: string;
-  contributor?: StakeContributor;
+  contributor?: StakeContributor | ContributionContractContributor;
   isUser?: boolean;
 }) => {
   const dictionary = useTranslations('general');
   return (
     <Tooltip
       tooltipContent={
-        <p>
-          {contributor
-            ? `${isUser ? dictionary('you') : contributor.address} | ${formatSENTNumber(contributor.amount)}`
-            : dictionary('emptySlot')}
-        </p>
+        contributor ? (
+          <div className="flex flex-col gap-1">
+            <span>{isUser ? dictionary('you') : contributor.address}</span>
+            <span>
+              {`${formatSENTBigInt(contributor.amount)} ${dictionary('staked')}`}
+              {isContributionContractContributor(contributor) && contributor.reserved
+                ? ` (${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')})`
+                : ''}
+            </span>
+          </div>
+        ) : (
+          dictionary('emptySlot')
+        )
       }
     >
       <HumanIcon
-        className={cn('fill-text-primary h-4 w-4 cursor-pointer', className)}
+        className={cn('h-4 w-4 cursor-pointer fill-text-primary', className)}
         full={Boolean(contributor)}
       />
     </Tooltip>
   );
 };
 
-/**
- * @deprecated Use {@link getTotalStakedAmountForAddress} instead.
- * Returns the total staked amount for a given address.
- * @param contributors - The list of contributors.
- * @param address - The address to check.
- * @returns The total staked amount for the given address.
- */
-export const getTotalStakedAmountForAddressNumber = (
-  contributors: Contributor[],
-  address: string
-): number => {
-  return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address)
-      ? acc + bigIntToNumber(amount, SENT_DECIMALS)
-      : acc;
-  }, 0);
-};
-
-export const getTotalStakedAmountForAddressBigInt = (
-  contributors: Contributor[],
-  address: string
-): bigint => {
-  contributors = contributors.map(({ amount, address: contributorAddress }) => {
-    return {
-      amount: typeof amount === 'bigint' ? amount : BigInt(`${amount}`),
-      address: contributorAddress,
-    };
-  });
-  return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address) ? acc + amount : acc;
-  }, BigInt(0));
-};
-
-export const getTotalStakedAmountForAddress = (
-  contributors: Contributor[],
-  address: string,
-  decimals?: number,
-  hideSymbol?: boolean
-): string => {
-  return formatSENTBigInt(
-    getTotalStakedAmountForAddressBigInt(contributors, address),
-    decimals,
-    hideSymbol
-  );
-};
-
 type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
-  contributors: StakeContributor[];
+  contributors: Array<StakeContributor | ContributionContractContributor>;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
 };
@@ -205,14 +168,16 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
       const userContributor = contributors.find(({ address }) =>
         areHexesEqual(address, userAddress)
       );
-      const otherContributors = contributors.filter(
-        ({ address }) => !areHexesEqual(address, userAddress)
-      );
-      // TODO - add contributor list sorting
-      //.sort((a, b) => b.amount - a.amount);
+      const otherContributors = contributors
+        .filter(({ address }) => !areHexesEqual(address, userAddress))
+        .sort((a, b) => {
+          const aAmount = isContributionContractContributor(a) ? a.amount || a.reserved : a.amount;
+          const bAmount = isContributionContractContributor(b) ? b.amount || b.reserved : b.amount;
+          return bigIntSortDesc(bAmount, aAmount);
+        });
 
       return userContributor ? [userContributor, ...otherContributors] : otherContributors;
-    }, [contributors]);
+    }, [contributors, userAddress]);
 
     const emptyContributorSlots = useMemo(
       () =>
@@ -249,12 +214,19 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
             <ContributorIcon
               key={contributor.address}
               contributor={contributor}
-              className={cn('fill-text-primary h-4')}
+              className={cn(
+                'h-4',
+                contributor.amount
+                  ? 'fill-text-primary'
+                  : isContributionContractContributor(contributor) && contributor.reserved
+                    ? 'fill-warning'
+                    : ''
+              )}
             />
           ))}
           {showEmptySlots
             ? emptyContributorSlots.map((key) => (
-                <ContributorIcon key={key} className="fill-text-primary h-4" />
+                <ContributorIcon key={key} className="h-4 fill-text-primary" />
               ))
             : null}
           <span
@@ -271,6 +243,114 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
     );
   }
 );
+
+type ToggleCardExpansionButtonProps = HTMLAttributes<HTMLLabelElement> & {
+  htmlFor: string;
+};
+
+export const ToggleCardExpansionButton = forwardRef<
+  HTMLLabelElement,
+  ToggleCardExpansionButtonProps
+>(({ htmlFor, className, ...props }, ref) => {
+  const [expanded, setExpanded] = useState(false);
+  const dictionary = useTranslations('nodeCard.staked');
+  return (
+    <label
+      ref={ref}
+      htmlFor={htmlFor}
+      // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole lint/a11y/useSemanticElements: This is a toggle button
+      role="button"
+      tabIndex={-1}
+      onClick={() => setExpanded((prev) => !prev)}
+      aria-label={expanded ? dictionary('ariaCollapse') : dictionary('ariaExpand')}
+      data-testid={
+        expanded ? StakedNodeDataTestId.Collapse_Button : StakedNodeDataTestId.Expand_Button
+      }
+      className={cn(
+        'ms-auto flex w-max cursor-pointer select-none items-center align-middle peer-checked:[&>svg]:rotate-180',
+        className
+      )}
+      {...props}
+    >
+      <span className="hidden font-medium text-gradient-white lg:inline-block">
+        {expanded ? dictionary('labelCollapse') : dictionary('labelExpand')}
+      </span>
+      <ArrowDownIcon
+        className={cn(
+          'ms-1 h-4 w-4 transform fill-session-text stroke-session-text transition-all duration-300 ease-in-out motion-reduce:transition-none'
+        )}
+      />
+    </label>
+  );
+});
+
+export const RowLabel = ({ children }: { children: ReactNode }) => (
+  <span className="font-semibold">{children} </span>
+);
+
+const collapsableContentVariants = cva(
+  'inline-flex h-full max-h-0 select-none flex-wrap gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
+  {
+    variants: {
+      size: {
+        xs: 'text-xs peer-checked:max-h-4 md:text-xs',
+        base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
+        buttonMd: cn('peer-checked:max-h-11'),
+        buttonSm: cn('peer-checked:max-h-9'),
+      },
+      width: {
+        'w-full': 'w-full',
+        'w-max': 'w-max',
+      },
+    },
+    defaultVariants: {
+      size: 'base',
+      width: 'w-full',
+    },
+  }
+);
+
+type CollapsableContentProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof collapsableContentVariants>;
+
+export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContentProps>(
+  ({ className, size, width, ...props }, ref) => (
+    <NodeCardText
+      ref={ref}
+      className={cn(collapsableContentVariants({ size, width, className }))}
+      {...props}
+    />
+  )
+);
+
+export const CollapsableButton = forwardRef<
+  HTMLButtonElement,
+  HTMLAttributes<HTMLButtonElement> & {
+    ariaLabel: string;
+    dataTestId: ButtonDataTestId;
+    disabled?: boolean;
+    mobileChildren?: ReactNode;
+  }
+>(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
+  <CollapsableContent
+    className="end-6 bottom-4 flex w-max items-end min-[500px]:absolute"
+    size="buttonSm"
+  >
+    <Button
+      data-testid={dataTestId}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      rounded="md"
+      size="sm"
+      variant="destructive-outline"
+      className="uppercase"
+      ref={ref}
+      {...props}
+    >
+      {children}
+    </Button>
+  </CollapsableContent>
+));
 
 export {
   ContributorIcon,

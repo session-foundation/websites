@@ -1,19 +1,19 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { useTranslations } from 'next-intl';
 import { NodeCard, NodeCardText, NodeCardTitle } from '@/components/NodeCard';
-import { cn } from '@session/ui/lib/utils';
+import type { ButtonDataTestId } from '@/testing/data-test-ids';
+import { PubKey } from '@session/ui/components/PubKey';
+import { TextSeparator } from '@session/ui/components/Separator';
 import {
   StatusIndicator,
   type StatusIndicatorVariants,
 } from '@session/ui/components/StatusIndicator';
-import { PubKey } from '@session/ui/components/PubKey';
-import Link from 'next/link';
+import { cn } from '@session/ui/lib/utils';
 import { Button, ButtonSkeleton } from '@session/ui/ui/button';
 import { Skeleton } from '@session/ui/ui/skeleton';
-import { TextSeparator } from '@session/ui/components/Separator';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 
 export type InfoNodeCardProps = HTMLAttributes<HTMLDivElement> & {
   pubKey: string;
@@ -26,6 +26,7 @@ export type InfoNodeCardProps = HTMLAttributes<HTMLDivElement> & {
     dataTestId: ButtonDataTestId;
     ariaLabel: string;
   };
+  warnings?: ReactNode;
   statusIndicatorColour?: StatusIndicatorVariants['status'];
 };
 
@@ -39,6 +40,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
       forceSmall,
       pubKey,
       button,
+      warnings,
       children,
       ...props
     },
@@ -51,41 +53,56 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         ref={ref}
         {...props}
         className={cn(
-          'reduced-motion:transition-none flex flex-col items-center justify-between gap-2 border border-transparent align-middle transition-all duration-500 ease-in-out',
-          forceSmall ? '' : 'sm:flex-row md:gap-10',
+          'flex flex-row flex-wrap items-center justify-between gap-2 border border-transparent align-middle reduced-motion:transition-none transition-all duration-500 ease-in-out',
+          forceSmall ? '' : 'md:gap-10',
           isActive && 'border-session-green',
           className
         )}
       >
-        <div className={cn('text-center sm:text-start', className)}>
-          <div className="flex w-full cursor-pointer items-baseline gap-3 text-center align-middle sm:text-start">
-            {statusIndicatorColour ? (
-              <div className="-mr-2 mb-0.5 scale-75 p-0 sm:mr-0 md:scale-100">
-                <StatusIndicator status={statusIndicatorColour} />
-              </div>
-            ) : null}
-            <NodeCardTitle className="inline-flex flex-wrap gap-2 text-sm md:text-lg">
-              <span className="text-nowrap font-normal">
-                {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
-              </span>
-              <PubKey pubKey={pubKey} force="collapse" />
-            </NodeCardTitle>
+        <div className="flex flex-row gap-2 md:gap-4">
+          {warnings ? (
+            <div className="flex w-max flex-row items-center gap-2 align-middle">{warnings}</div>
+          ) : null}
+          <div className={cn('text-start', className)}>
+            <div className="flex w-full cursor-pointer items-baseline gap-1 align-middle md:gap-3">
+              {statusIndicatorColour ? (
+                <div className="scale-75 p-0 sm:mb-0.5 sm:pt-0.5 md:scale-100 md:pt-0">
+                  <StatusIndicator status={statusIndicatorColour} />
+                </div>
+              ) : null}
+              <NodeCardTitle
+                className={cn(
+                  'inline-flex flex-wrap gap-1.5',
+                  forceSmall ? 'text-xs md:text-base' : 'text-sm md:text-lg'
+                )}
+              >
+                <span className="text-nowrap font-normal">
+                  {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
+                </span>
+                <PubKey pubKey={pubKey} force="collapse" leadingChars={8} trailingChars={4} />
+              </NodeCardTitle>
+            </div>
+            <NodeCardText
+              className={cn(
+                'col-span-10 inline-flex max-h-max flex-row-reverse justify-start gap-2 text-center align-middle font-normal sm:text-start md:mt-0 md:flex-row',
+                forceSmall ? 'text-xs md:text-xs' : 'text-xs md:text-base'
+              )}
+            >
+              {children}
+            </NodeCardText>
           </div>
-          <NodeCardText className="col-span-10 mt-1 inline-flex max-h-max flex-row-reverse justify-center gap-2 text-center align-middle text-xs font-normal sm:justify-start sm:text-start md:mt-0 md:flex-row md:text-base">
-            {children}
-          </NodeCardText>
         </div>
-        <div className="flex flex-row items-center gap-2 align-middle">
+        <div className="flex w-full flex-row items-center gap-2 align-middle sm:w-auto">
           {buttonSiblings}
           {button ? (
-            <Link href={button.link} className="w-full sm:w-auto" prefetch>
+            <Link href={button.link} className="w-full md:w-auto" prefetch>
               <Button
                 variant={isActive ? 'default' : 'outline'}
-                size="md"
+                size={forceSmall ? 'sm' : 'md'}
                 rounded="md"
                 aria-label={button.ariaLabel}
                 data-testid={button.dataTestId}
-                className="w-full sm:w-auto"
+                className="w-full md:w-auto"
               >
                 {button.text}
               </Button>
@@ -99,7 +116,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
 
 export function InfoNodeCardSkeleton() {
   return (
-    <div className="border-muted flex w-full flex-row items-center justify-between gap-3 rounded-xl border-2 p-6">
+    <div className="flex w-full flex-row items-center justify-between gap-3 rounded-xl border-2 border-muted p-6">
       <div className="-bottom-1/2 flex w-full flex-col gap-3">
         <div className="flex w-full items-center gap-3 align-middle">
           <div className="-mr-2 scale-75 p-0 sm:mr-0 md:scale-100 md:p-0.5">

@@ -1,8 +1,8 @@
+import { components } from '@/lib/sanity/sanity-components';
 import {
   SanityPortableText,
   type SanityPortableTextProps,
 } from '@session/sanity-cms/components/SanityPortableText';
-import { components } from '@/lib/sanity/sanity-components';
 import type { PortableTextBlock } from 'sanity';
 
 type PortableTextProps = Omit<SanityPortableTextProps, 'value'> & {

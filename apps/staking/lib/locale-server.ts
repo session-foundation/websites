@@ -1,13 +1,13 @@
 import 'server-only';
 
 import { getMessages, getRequestConfig as i18nGetRequestConfig } from 'next-intl/server';
-import { headers } from 'next/headers';
+import { type UnsafeUnwrappedHeaders, headers } from 'next/headers';
 import { getLangDir } from 'rtl-detect';
 import { defaultTranslationValues } from './locale-defaults';
 import { DEFAULT_LOCALE, matchClosestLocale } from './locale-util';
 
 export const getServerSideLocale = () => {
-  const acceptLanguage = headers().get('accept-language');
+  const acceptLanguage = (headers() as unknown as UnsafeUnwrappedHeaders).get('accept-language');
   return matchClosestLocale(acceptLanguage);
 };
 

@@ -1,19 +1,24 @@
 'use client';
 
-import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { Input } from '@session/ui/ui/input';
-import { useMemo, useRef, useState } from 'react';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { encodeAddressToHashId } from '@/lib/hashid';
-import { WalletModalButtonWithLocales } from '@/components/WalletModalButtonWithLocales';
+import { getReferralCodeInfo } from '@/app/faucet/actions';
+import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { BASE_URL, URL } from '@/lib/constants';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
-import { Button } from '@session/ui/ui/button';
-import { toast } from '@session/ui/lib/toast';
+import { encodeAddressToHashId } from '@/lib/hashid';
 import { externalLink } from '@/lib/locale-defaults';
+import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
+import { formatSENTNumber } from '@session/contracts/hooks/Token';
+import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import { Module, ModuleContent, ModuleHeader, ModuleText } from '@session/ui/components/Module';
+import { LoadingText } from '@session/ui/components/loading-text';
+import { toast } from '@session/ui/lib/toast';
+import { Button } from '@session/ui/ui/button';
+import { Input } from '@session/ui/ui/input';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is fine
 export default function ReferralModule() {
   const [hidden, setHidden] = useState<boolean>(true);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -22,11 +27,29 @@ export default function ReferralModule() {
 
   const { address } = useWallet();
 
-  const referralLink = useMemo(() => {
-    if (!address) return null;
-    const hashId = encodeAddressToHashId(address);
-    return `${BASE_URL}/faucet/${hashId}`;
-  }, [address]);
+  const hashId = address
+    ? encodeAddressToHashId(
+        address,
+        process.env.NEXT_PUBLIC_SALT && !Number.isInteger(process.env.NEXT_PUBLIC_SALT)
+          ? Number.parseInt(process.env.NEXT_PUBLIC_SALT)
+          : undefined,
+        process.env.NEXT_PUBLIC_PEPPER
+      )
+    : '';
+  const referralLink = address ? `${BASE_URL}/faucet/${hashId}` : `${BASE_URL}/faucet`;
+
+  const { data, status } = useQuery({
+    queryKey: ['referral', address],
+    enabled: !hidden,
+    queryFn: async () => {
+      try {
+        return await getReferralCodeInfo({ code: hashId });
+      } catch (_error) {
+        toast.error('Failed to get referral code info');
+        return null;
+      }
+    },
+  });
 
   return (
     <Module size="lg" className="flex flex-grow">
@@ -56,23 +79,48 @@ export default function ReferralModule() {
         {address ? (
           <div className="w-full">
             {!hidden && referralLink ? (
-              <div className="flex w-full flex-row items-center gap-2 align-middle">
-                <Input
-                  readOnly
-                  ref={inputRef}
-                  value={referralLink}
-                  className="w-full select-all"
-                  onFocus={(e) => e.target.select()}
-                />
-                <CopyToClipboardButton
-                  textToCopy={referralLink}
-                  data-testid={ButtonDataTestId.Copy_Referral_Link}
-                  onCopyComplete={() => {
-                    inputRef.current?.select();
-                    toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
-                  }}
-                />
-              </div>
+              <>
+                {status === 'success' ? (
+                  data ? (
+                    <div className="flex w-full flex-row items-center gap-2 align-middle">
+                      <Input
+                        readOnly
+                        ref={inputRef}
+                        value={referralLink}
+                        className="w-full select-all"
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <CopyToClipboardButton
+                        textToCopy={referralLink}
+                        data-testid={ButtonDataTestId.Copy_Referral_Link}
+                        onCopyComplete={() => {
+                          inputRef.current?.select();
+                          toast.success(clipboardDictionary('copyToClipboardSuccessToast'));
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-base text-destructive">
+                      This wallet is not eligible for a referral code
+                    </span>
+                  )
+                ) : (
+                  <LoadingText />
+                )}
+                <div className="mt-2 text-session-text-secondary text-xs">
+                  {status === 'success' ? (
+                    data ? (
+                      dictionary.rich('description4', {
+                        uses: data?.uses ?? 0,
+                        remainingUses: (data?.maxUses ?? 1) - (data?.uses ?? 0),
+                        drip: formatSENTNumber(Number.parseInt(data?.drip ?? '0'), 0),
+                      })
+                    ) : null
+                  ) : (
+                    <LoadingText />
+                  )}
+                </div>
+              </>
             ) : (
               <Button
                 data-testid={ButtonDataTestId.Show_Referral_Link}
@@ -85,7 +133,7 @@ export default function ReferralModule() {
             )}
           </div>
         ) : (
-          <WalletModalButtonWithLocales rounded="md" size="lg" />
+          <WalletButtonWithLocales rounded="md" size="lg" />
         )}
       </ModuleContent>
     </Module>

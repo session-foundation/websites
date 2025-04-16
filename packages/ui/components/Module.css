@@ -1,0 +1,18 @@
+
+.module-title-dynamic-short {
+  display: inline-block;
+}
+
+.module-title-dynamic-long {
+  display: none;
+}
+
+@container (min-width: 180px) {
+  .module-title-dynamic-short {
+    display: none;
+  }
+
+  .module-title-dynamic-long {
+    display: inline-block;
+  }
+}

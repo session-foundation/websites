@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { cn } from '@session/ui/lib/utils';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export type NavLinkProps = {
   href: string;
@@ -12,6 +12,7 @@ export type NavLinkProps = {
   children?: ReactNode;
   ariaLabel?: string;
   className?: string;
+  suppressHydrationWarning?: boolean;
 };
 
 /**
@@ -25,12 +26,27 @@ function isExternalLink(href: string): boolean {
   return href.startsWith('https://');
 }
 
+<<<<<<< HEAD
 export function NavLink({ dataTestId, href, label, children, ariaLabel }: NavLinkProps) {
+=======
+export function NavLink({
+  href,
+  label,
+  children,
+  ariaLabel,
+  className,
+  suppressHydrationWarning,
+}: NavLinkProps) {
+>>>>>>> dev
   const pathname = usePathname();
   return (
     <Link
       href={href}
-      className={cn('hover:text-session-green', pathname.startsWith(href) && 'text-session-green')}
+      className={cn(
+        'hover:text-session-green',
+        pathname.startsWith(href) && 'text-session-green',
+        className
+      )}
       aria-label={ariaLabel}
       data-testid={dataTestId}
       {...(isExternalLink(href)
@@ -39,6 +55,8 @@ export function NavLink({ dataTestId, href, label, children, ariaLabel }: NavLin
             referrerPolicy: 'no-referrer',
           }
         : {})}
+      /* TODO: remove once we have proper skeletons and can dynamically import them */
+      suppressHydrationWarning={suppressHydrationWarning}
     >
       {children ?? label}
     </Link>

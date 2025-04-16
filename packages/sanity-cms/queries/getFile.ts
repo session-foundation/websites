@@ -1,7 +1,7 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
-import logger from '../lib/logger';
 import type { FileSchemaType } from 'sanity';
+import type { SessionSanityClient } from '../lib/client';
+import logger from '../lib/logger';
 
 const QUERY_GET_FILES_WITH_SLUG = groq`*[_type == 'cmsFile' && slug.current == $slug] {..., "src": file.asset -> url}`;
 type QUERY_GET_FILES_WITH_SLUG_RETURN_TYPE = Array<
@@ -19,7 +19,7 @@ export async function getFileBySlug({
   slug: string;
 }) {
   if (!slug || slug.length === 0) {
-    logger.warn(`No slug provided, returning null`);
+    logger.warn('No slug provided, returning null');
     return null;
   }
 

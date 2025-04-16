@@ -2,18 +2,11 @@
 
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import * as React from 'react';
-import {
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  forwardRef,
-  type ReactNode,
-  useState,
-} from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-/** @ts-ignore TS doesnt know what its talking about */
-import { useDebounce } from '@uidotdev/usehooks';
-import { cn } from '../../lib/utils';
+import { type ComponentPropsWithoutRef, type ElementRef, Fragment, type ReactNode, forwardRef, useState } from 'react';
+import { useDebounce } from '../../hooks/useDebounce';
 import { TriangleAlertIcon } from '../../icons/TriangleAlertIcon';
+import { cn } from '../../lib/utils';
+import { ReactPortal } from '../util/ReactPortal';
 
 const TooltipRoot = PopoverPrimitive.Root;
 
@@ -33,7 +26,7 @@ const TooltipContent = forwardRef<
     sideOffset={sideOffset}
     side="top"
     className={cn(
-      'text-session-white animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 bg-session-black border-px z-50 max-w-[90svw] flex-wrap overflow-hidden text-wrap rounded-xl border border-[#1C2624] bg-opacity-50 px-4 py-2 text-sm shadow-xl outline-none md:max-w-xl',
+      'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-w-[90svw] animate-in flex-wrap overflow-hidden text-wrap rounded-xl border border-[#1C2624] border-px bg-session-black bg-opacity-50 px-4 py-2 text-session-white text-sm shadow-xl outline-none focus-visible:outline-none data-[state=closed]:animate-out md:max-w-xl',
       className
     )}
     {...props}
@@ -46,10 +39,22 @@ type TooltipProps = ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & 
   tooltipContent: ReactNode;
   triggerProps?: Omit<ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>, 'children'>;
   contentProps?: Omit<ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>, 'children'>;
+  putContentInPortal?: boolean;
 };
 
 const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipProps>(
-  ({ tooltipContent, children, contentProps, triggerProps, disableOnHover, ...props }, ref) => {
+  (
+    {
+      tooltipContent,
+      children,
+      contentProps,
+      triggerProps,
+      disableOnHover,
+      putContentInPortal,
+      ...props
+    },
+    ref
+  ) => {
     const [hovered, setHovered] = useState(false);
     const [clicked, setClicked] = useState(false);
     const debouncedHover = useDebounce(hovered, 150);
@@ -70,6 +75,8 @@ const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipP
       setClicked((prev) => !prev);
     };
 
+    const Container = putContentInPortal ? ReactPortal : Fragment;
+
     return (
       <TooltipRoot open={debouncedHover || clicked} onOpenChange={setHovered} {...props}>
         <TooltipTrigger
@@ -81,26 +88,36 @@ const Tooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipP
         >
           {children}
         </TooltipTrigger>
-        <TooltipContent
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          ref={ref}
-          {...contentProps}
-        >
-          {tooltipContent}
-        </TooltipContent>
+        <Container>
+          <TooltipContent
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            ref={ref}
+            {...contentProps}
+          >
+            {tooltipContent}
+          </TooltipContent>
+        </Container>
       </TooltipRoot>
     );
   }
 );
 
+const UnderlinedTooltip = forwardRef<ElementRef<typeof PopoverPrimitive.Content>, TooltipProps>(
+  ({ children, ...props }, ref) => (
+    <Tooltip {...props} ref={ref}>
+      <span className="underline decoration-dotted">{children}</span>
+    </Tooltip>
+  )
+);
+
 const AlertTooltip = forwardRef<
   ElementRef<typeof PopoverPrimitive.Content>,
-  Omit<TooltipProps, 'children'>
->((props, ref) => (
+  Omit<TooltipProps, 'children'> & { iconClassName?: string }
+>(({ iconClassName, ...props }, ref) => (
   <Tooltip {...props} ref={ref}>
-    <TriangleAlertIcon className="stroke-warning h-4 w-4" />
+    <TriangleAlertIcon className={cn('h-4 w-4 stroke-warning', iconClassName)} />
   </Tooltip>
 ));
 
-export { Tooltip, TooltipRoot, TooltipContent, TooltipTrigger, AlertTooltip };
+export { Tooltip, TooltipRoot, TooltipContent, TooltipTrigger, AlertTooltip, UnderlinedTooltip };

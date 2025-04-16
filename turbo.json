@@ -4,6 +4,11 @@
     "NEXT_PUBLIC_ENV_FLAG"
   ],
   "tasks": {
+    "build:ci": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
     "build": {
       "dependsOn": [
         "^build"
@@ -19,25 +24,24 @@
       "env": [
         "NO_MINIFY",
         "NEXT_PUBLIC_IS_CANARY",
-        "NEXT_PUBLIC_HIDE_FAUCET",
+        "NEXT_PUBLIC_ENABLE_FAUCET",
+        "NEXT_PUBLIC_ENABLE_LEADERBOARD",
         "NEXT_PUBLIC_SENT_STAKING_API_URL",
-        "NEXT_PUBLIC_SENT_EXPLORER_API_URL",
         "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
         "FAUCET_WALLET_PRIVATE_KEY",
         "FAUCET_DB_SECRET_KEY",
         "FAUCET_HOURS_BETWEEN_USES",
         "FAUCET_CHAIN",
-        "DISCORD_CLIENT_SECRET",
-        "DISCORD_CLIENT_ID",
-        "TELEGRAM_BOT_TOKEN",
-        "NEXTAUTH_SECRET",
-        "NEXTAUTH_URL",
         "SANITY_API_READ_TOKEN",
         "NEXT_PUBLIC_SANITY_PROJECT_ID",
         "NEXT_PUBLIC_SANITY_DATASET",
         "NEXT_PUBLIC_SANITY_API_VERSION",
         "SANITY_REVALIDATE_SECRET",
-        "NEXT_PUBLIC_POINTS_PROGRAM_API"
+        "NEXT_PUBLIC_POINTS_PROGRAM_API",
+        "ARBITRUM_SEPOLIA_RPC_URL",
+        "CI",
+        "NEXT_PUBLIC_SALT",
+        "NEXT_PUBLIC_PEPPER"
       ]
     },
     "dev": {
@@ -58,14 +62,28 @@
         "^lint"
       ]
     },
+    "check": {
+      "dependsOn": [
+        "^check"
+      ]
+    },
+    "format": {
+      "dependsOn": [
+        "^format"
+      ]
+    },
     "check-telemetry": {
       "cache": false
     },
-    "test": {},
+    "test": {
+      "inputs": [
+        "**/*.spec.ts"
+      ]
+    },
     "gh": {
       "dependsOn": [
         "^check-types",
-        "^lint",
+        "^check",
         "^test",
         "^build"
       ]

@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { pino } from 'pino';
 
-// TODO: look into redoing the logger
-
-// TODO: change this to use the json logger properly
+// biome-ignore lint: correctness noUnusedVariables: TODO: change this to use the json logger properly
 export function constructLoggingArgs(...data: Array<any>) {
   if (data && typeof data[0] === 'object') {
     return data[0];
@@ -12,25 +8,8 @@ export function constructLoggingArgs(...data: Array<any>) {
   return [data?.join(' ')];
 }
 
-//
-// const createSessionLoggerOptions = ({
-//   isProd = isProduction(),
-// }: {
-//   isProd?: boolean;
-// }): SessionLoggerOptions => ({
-//   globalOptions: {
-//     constructLoggingArgs,
-//     ignoredLevels: isProd ? [LOG_LEVEL.DEBUG, LOG_LEVEL.INFO] : [],
-//   },
-// });
-
-// type InitLoggerOptions = {
-//   isProduction?: boolean;
-// };
-
-// export const initLogger = (options?: InitLoggerOptions) => {
 export const initLogger = () => {
-  const logger = pino({
+  return pino({
     transport: {
       target: 'pino-pretty',
       options: {
@@ -38,9 +17,6 @@ export const initLogger = () => {
       },
     },
   });
-
-  // return new SessionLogger(logger, createSessionLoggerOptions({ isProd: options?.isProduction }));
-  return logger;
 };
 
 export const logger = initLogger();

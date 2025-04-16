@@ -1,11 +1,24 @@
-import { CHAIN, chains, SENT_SYMBOL } from '@session/contracts';
+import { SENT_DECIMALS, SENT_SYMBOL, TOKEN } from '@session/contracts';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { cn } from '@session/ui/lib/utils';
-import { RichTranslationValues } from 'next-intl';
+import { UnderlinedTooltip } from '@session/ui/ui/tooltip';
+import { formatBigIntTokenValue } from '@session/util-crypto/maths';
+import type { RichTranslationValues } from 'next-intl';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { FAUCET, NETWORK, SESSION_NODE_TIME_STATIC, SOCIALS, TICKER, URL } from './constants';
-import { LinkDataTestId } from '@/testing/data-test-ids';
+import type { AriaRole, ReactNode } from 'react';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import {
+  FAUCET,
+  NETWORK,
+  SESSION_NETWORK,
+  SESSION_NODE_FULL_STAKE_AMOUNT,
+  SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
+  SESSION_NODE_MIN_STAKE_SOLO_OPERATOR,
+  SESSION_NODE_TIME_STATIC,
+  SOCIALS,
+  TICKER,
+  URL,
+} from './constants';
 
 export const internalLink = ({
   href,
@@ -17,12 +30,7 @@ export const internalLink = ({
   prefetch?: boolean;
 }) => {
   return (children: ReactNode) => (
-    <Link
-      href={href}
-      prefetch={prefetch}
-      data-testid={dataTestId}
-      className="text-session-green cursor-pointer underline"
-    >
+    <Link href={href} prefetch={prefetch} className="cursor-pointer text-session-green underline">
       {children}
     </Link>
   );
@@ -42,32 +50,36 @@ export const externalLink = ({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      data-testid={dataTestId}
-      className={className ?? 'text-session-green cursor-pointer'}
+      className={className ?? 'cursor-pointer text-session-green'}
     >
       {children}
     </a>
   );
 };
 
-const defaultExternalLink =
-  ({
-    href,
-    text,
-    dataTestId,
-    className,
-  }: {
-    href: string;
-    text: string;
-    dataTestId: string;
-    className?: string;
-  }) =>
-  () =>
-    externalLink({
-      href,
-      dataTestId,
-      className: className ?? 'text-white underline',
-    })(text);
+export const clickableText = (onClick: () => void, role: AriaRole = 'button') => {
+  return (children: ReactNode) => (
+    <span
+      className="cursor-pointer text-session-green underline"
+      onClick={onClick}
+      onKeyDown={onClick}
+      role={role}
+    >
+      {children}
+    </span>
+  );
+};
+
+export const underlinedTooltip = (tooltipContent: ReactNode) => {
+  return (children: ReactNode) => (
+    <UnderlinedTooltip tooltipContent={tooltipContent} putContentInPortal>
+      {children}
+    </UnderlinedTooltip>
+  );
+};
+
+const defaultExternalLink = (href: string, text: string, className?: string) => () =>
+  externalLink(href, className ?? 'text-white underline')(text);
 
 type FontWeight =
   | 'font-extralight'
@@ -92,63 +104,59 @@ export const defaultTranslationElements = {
   'text-bold': text('font-bold'),
   'text-extrabold': text('font-extrabold'),
   'text-black': text('font-black'),
-  'discord-server-link': defaultExternalLink({
-    href: SOCIALS[Social.Discord].link,
-    text: "Session Token's Discord server",
-    dataTestId: LinkDataTestId.I18n_Discord_Server,
-  }),
-  'contact-support-link': defaultExternalLink({
-    href: SOCIALS[Social.Discord].link,
-    text: 'contact the Session team via Discord.',
-    dataTestId: LinkDataTestId.I18n_Contact_Support,
-  }),
-  'incentive-program-link': defaultExternalLink({
-    href: URL.INCENTIVE_PROGRAM,
-    text: 'Session Testnet Incentive Program',
-    dataTestId: LinkDataTestId.I18n_Incentive_Program,
-  }),
-  'gas-faucet-link': externalLink({
-    href: URL.ARB_SEP_FAUCET,
-    dataTestId: LinkDataTestId.I18n_Gas_Faucet,
-    className: 'text-session-green',
-  }),
-  'gas-info-link': externalLink({
-    href: URL.GAS_INFO,
-    dataTestId: LinkDataTestId.I18n_Gas_Info,
-    className: 'text-session-green',
-  }),
-  'oxen-program-link': defaultExternalLink({
-    href: URL.OXEN_SERVICE_NODE_BONUS_PROGRAM,
-    text: 'Oxen Service Node Bonus program',
-    dataTestId: LinkDataTestId.I18n_Oxen_Program,
-    className: 'text-session-green',
-  }),
-  'session-token-community-snapshot-link': defaultExternalLink({
-    href: URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT,
-    text: 'Snapshot',
-    dataTestId: LinkDataTestId.I18n_Session_Token_Community_Snapshot,
-    className: 'text-session-green',
-  }),
-  'my-stakes-link': internalLink({
-    href: '/mystakes',
-    dataTestId: LinkDataTestId.I18n_My_Stakes,
-  }),
+  br: () => <br />,
+  'discord-server-link': defaultExternalLink(
+    SOCIALS[Social.Discord].link,
+    "Session Token's Discord server"
+  ),
+  'contact-support-link': defaultExternalLink(
+    SOCIALS[Social.Discord].link,
+    'contact the Session team via Discord.'
+  ),
+  'please-contract-support-link': defaultExternalLink(
+    SOCIALS[Social.Discord].link,
+    'please contract support',
+    'text-session-green'
+  ),
+  'incentive-program-link': defaultExternalLink(
+    URL.INCENTIVE_PROGRAM,
+    'Session Testnet Incentive Program'
+  ),
+  'gas-faucet-link': externalLink(URL.ARB_SEP_FAUCET, 'text-session-green'),
+  'gas-info-link': externalLink(URL.GAS_INFO, 'text-session-green'),
+  'oxen-program-link': defaultExternalLink(
+    URL.OXEN_SERVICE_NODE_BONUS_PROGRAM,
+    'Oxen Service Node Bonus program',
+    'text-session-green'
+  ),
+  'session-token-community-snapshot-link': defaultExternalLink(
+    URL.SESSION_TOKEN_COMMUNITY_SNAPSHOT,
+    'Snapshot',
+    'text-session-green'
+  ),
+  'my-stakes-link': internalLink('/mystakes'),
 } satisfies RichTranslationValues;
 
 export const defaultTranslationVariables = {
-  tokenSymbol: SENT_SYMBOL,
+  tokenSymbol: TOKEN.SYMBOL,
+  gas: 'Gas',
+  gasPrice: 'Gas Price',
   gasTokenSymbol: TICKER.ETH,
   ethTokenSymbol: TICKER.ETH,
   mainnetName: NETWORK.MAINNET,
   testnetName: NETWORK.TESTNET,
-  mainNetworkChain: chains[CHAIN.MAINNET].name,
-  testNetworkChain: chains[CHAIN.TESTNET].name,
+  mainNetworkChain: arbitrum.name,
+  testNetworkChain: arbitrumSepolia.name,
   minimumFaucetGasAmount: FAUCET.MIN_ETH_BALANCE,
   faucetDrip: FAUCET.DRIP,
+  sessionNetwork: SESSION_NETWORK,
   oxenProgram: 'Oxen Service Node Bonus program',
   notFoundContentType: 'page',
   smallContributorLeaveRequestDelay:
     SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS,
+  fullStateAmount: `${formatBigIntTokenValue(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeSolo: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_SOLO_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
+  minStakeMulti: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
 } satisfies RichTranslationValues;
 
 export const defaultTranslationValues: RichTranslationValues = {

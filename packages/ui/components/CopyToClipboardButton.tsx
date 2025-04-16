@@ -1,11 +1,11 @@
+import { CheckIcon } from 'lucide-react';
 import { type ButtonHTMLAttributes, forwardRef, useState } from 'react';
-import { BaseDataTestId, TestingProps } from '../data-test-ids';
+import type { BaseDataTestId, TestingProps } from '../data-test-ids';
 import { ClipboardIcon } from '../icons/ClipboardIcon';
+import { Spinner } from '../icons/Spinner';
 import { toast } from '../lib/toast';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
-import { CheckIcon } from 'lucide-react';
-import { Spinner } from '../icons/Spinner';
 
 export interface CopyToClipboardButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
@@ -55,7 +55,9 @@ const CopyToClipboardButton = forwardRef<HTMLButtonElement, CopyToClipboardButto
       <Button
         onClick={handleClick}
         variant="ghost"
-        rounded={'md'}
+        rounded="md"
+        size="collapse"
+        type="button"
         className={cn('select-all p-0', className)}
         ref={ref}
         {...props}
@@ -64,9 +66,9 @@ const CopyToClipboardButton = forwardRef<HTMLButtonElement, CopyToClipboardButto
         {isLoading ? (
           <Spinner className="h-5 w-5" />
         ) : isCopied ? (
-          <CheckIcon className="stroke-session-green h-5 w-5" />
+          <CheckIcon className='h-5 w-5 stroke-session-green' />
         ) : (
-          <ClipboardIcon className="fill-session-white h-5 w-5" />
+          <ClipboardIcon className='h-5 w-5 fill-session-white' />
         )}
       </Button>
     );

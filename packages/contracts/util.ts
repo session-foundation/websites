@@ -1,6 +1,11 @@
-import { formatUnits, parseUnits, type SimulateContractErrorType, type TransactionExecutionErrorType } from 'viem';
-import { SENT_DECIMALS } from './constants';
+import {
+  type SimulateContractErrorType,
+  type TransactionExecutionErrorType,
+  formatUnits,
+  parseUnits,
+} from 'viem';
 import type { WriteContractErrorType } from 'wagmi/actions';
+import { SENT_DECIMALS } from './constants';
 
 /**
  * Formats a value of type `bigint` as a string, using the {@link formatUnits} function and the {@link SENT_DECIMALS} constant.
@@ -26,10 +31,17 @@ export function parseSENT(value: string): bigint {
  * @param error - The error to get the name from.
  * @returns The error name.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: good luck reducing the complexity
 export function getContractErrorName(
   error: Error | SimulateContractErrorType | WriteContractErrorType | TransactionExecutionErrorType
 ) {
   let reason = error.name;
+
+  // uncomment this to log the object, trust me it's useful
+  // console.log({
+  //   error,
+  //   errorKeys: Object.keys(error),
+  // });
 
   if (error?.cause && typeof error.cause === 'object') {
     if (
@@ -40,7 +52,8 @@ export function getContractErrorName(
       error.cause.data.abiItem &&
       typeof error.cause.data.abiItem === 'object' &&
       'name' in error.cause.data.abiItem &&
-      typeof error.cause.data.abiItem.name === 'string'
+      typeof error.cause.data.abiItem.name === 'string' &&
+      error.cause.data.abiItem.name !== 'Error'
     ) {
       reason = error.cause.data.abiItem.name;
     } else if (
@@ -51,6 +64,23 @@ export function getContractErrorName(
       typeof error.cause.cause.name === 'string'
     ) {
       reason = error.cause.cause.name;
+    } else if ('name' in error.cause && error.cause.name && typeof error.cause.name === 'string') {
+      reason = error.cause.name;
+      if (
+        reason === 'ContractFunctionRevertedError' &&
+        'reason' in error.cause &&
+        error.cause.reason &&
+        typeof error.cause.reason === 'string'
+      ) {
+        const reasonLower = error.cause.reason.toLowerCase();
+        if (reasonLower.includes('reject') && reasonLower.includes('user')) {
+          reason = 'UserRejectedRequest';
+        } else if (reasonLower.includes('internal') && reasonLower.includes('rpc')) {
+          reason = 'InternalRpc';
+        } else if (reasonLower.includes('amount exceeds balance')) {
+          reason = 'InsufficientBalance';
+        }
+      }
     }
   }
 
@@ -83,8 +113,7 @@ export function encodeHexToBigIntChunks(hex: string, hexBytes: number): Array<bi
 
   const numberOfChunks = hexBytes / bytes64;
 
-  const chunks = [];
-
+  const chunks: Array<string> = [];
   for (let i = 0; i < numberOfChunks; i++) {
     chunks.push(hex.slice(i * bytes64, (i + 1) * bytes64));
   }

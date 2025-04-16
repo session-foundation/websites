@@ -1,0 +1,29 @@
+{
+  "name": "@session/staking-api-js",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write"
+  },
+  "dependencies": {
+    "zod": "^3.23.8",
+    "viem": "2.21.54"
+  },
+  "devDependencies": {
+    "@session/typescript-config": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10",
+    "yarn": "use pnpm",
+    "npm": "use pnpm"
+  }
+}

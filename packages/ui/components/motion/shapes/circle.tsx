@@ -1,13 +1,13 @@
+import { type VariantProps, cva } from 'class-variance-authority';
 import {
-  AnimationControls,
-  motion,
+  type AnimationControls,
   type MotionStyle,
-  TargetAndTransition,
-  VariantLabels,
-  Variants,
+  type TargetAndTransition,
+  type VariantLabels,
+  type Variants,
+  motion,
 } from 'framer-motion';
 import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 
 export const circleVariants = cva('', {
@@ -32,12 +32,12 @@ export const circleVariants = cva('', {
     },
     glow: {
       black: '',
-      grey: 'drop-shadow-[0_0_8px_var(--indicator-grey)] glow-grey',
-      'grey-lighter': 'drop-shadow-[0_0_8px_var(--indicator-grey-lighter)] glow-grey-lighter',
-      green: 'drop-shadow-[0_0_8px_var(--indicator-green)] glow',
-      blue: 'drop-shadow-[0_0_8px_var(--indicator-blue)] glow-blue',
-      yellow: 'drop-shadow-[0_0_8px_var(--indicator-yellow)] glow-yellow',
-      red: 'drop-shadow-[0_0_8px_var(--indicator-red)] glow-red',
+      grey: 'glow-grey drop-shadow-[0_0_8px_var(--indicator-grey)]',
+      'grey-lighter': 'glow-grey-lighter drop-shadow-[0_0_8px_var(--indicator-grey-lighter)]',
+      green: 'glow drop-shadow-[0_0_8px_var(--indicator-green)]',
+      blue: 'glow-blue drop-shadow-[0_0_8px_var(--indicator-blue)]',
+      yellow: 'glow-yellow drop-shadow-[0_0_8px_var(--indicator-yellow)]',
+      red: 'glow-red drop-shadow-[0_0_8px_var(--indicator-red)]',
     },
     partial: {
       '100': '',

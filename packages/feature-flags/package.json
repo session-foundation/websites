@@ -9,25 +9,28 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write"
   },
   "devDependencies": {
-    "@session/eslint-config": "workspace:*",
     "@session/typescript-config": "workspace:*",
     "@session/logger": "workspace:*",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.0",
-    "react": "18.3.1"
+    "@types/react": "19.0.11",
+    "@types/react-dom": "19.0.4",
+    "react": "19.0.0"
   },
   "dependencies": {
     "@session/testing": "workspace:*",
     "@session/util-js": "workspace:*",
     "better-sqlite3-multiple-ciphers": "11.1.2",
-    "next": "14.2.12"
+    "next": "15.2.3"
   },
   "engines": {
     "node": ">=22",
-    "pnpm": ">=9",
+    "pnpm": ">=10",
     "yarn": "use pnpm",
     "npm": "use pnpm"
   }

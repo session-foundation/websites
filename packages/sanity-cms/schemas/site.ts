@@ -1,17 +1,3 @@
-import { legalFields } from './fields/groups/legal';
-import { seoField } from './fields/basic/seo';
-import { defineField, defineType } from 'sanity';
-import type { SchemaFieldsType } from './types';
-import type { DocumentFields } from '@session/sanity-types';
-import {
-  type ExternalLinkArrayMember,
-  externalLinkFieldDefinition,
-  type InternalLinkArrayMember,
-  internalLinkFieldDefinition,
-  linksFieldDefinition,
-  type SocialLinkArrayMember,
-  socialLinkFieldDefinition,
-} from './fields/basic/links';
 import {
   BlockContentIcon,
   CogIcon,
@@ -19,7 +5,21 @@ import {
   InsertBelowIcon,
   RobotIcon,
 } from '@sanity/icons';
+import type { DocumentFields } from '@session/sanity-types';
+import { defineField, defineType } from 'sanity';
+import {
+  type ExternalLinkArrayMember,
+  type InternalLinkArrayMember,
+  type SocialLinkArrayMember,
+  externalLinkFieldDefinition,
+  internalLinkFieldDefinition,
+  linksFieldDefinition,
+  socialLinkFieldDefinition,
+} from './fields/basic/links';
+import { seoField } from './fields/basic/seo';
+import { legalFields } from './fields/groups/legal';
 import type { PageSchemaType } from './page';
+import type { SchemaFieldsType } from './types';
 
 const siteLinkFields = [
   defineField({

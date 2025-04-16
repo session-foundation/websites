@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
-import { CHAIN } from '@session/contracts/chains';
-import { Social, SocialLink } from '@session/ui/components/SocialLinkList';
-import { LocaleKey } from './locale-util';
+import {
+  REG_MODE,
+  REG_TAB,
+  type UserSelectableRegistrationMode,
+} from '@/app/register/[nodeId]/types';
+import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
-
-/** TODO - Change this to MAINNET when we launch mainnet */
-export const preferredChain = CHAIN.TESTNET as const;
+import type { WalletSheetSettingDetails } from '@session/wallet/components/WalletUserSheet';
+import { arbitrumSepolia, sepolia } from 'viem/chains';
+import type { LocaleKey } from './locale-util';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
 
@@ -36,10 +39,11 @@ export const LANDING_BUTTON_URL = {
 };
 
 export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register', '/faucet'];
+export const VESTING_PATHS = ['/stake', '/mystakes', '/register'];
 
 export enum COMMUNITY_DATE {
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = '2024-06-12',
-  OXEN_SERVICE_NODE_BONUS_PROGRAM = '2024-06-12',
+  OXEN_SERVICE_NODE_BONUS_PROGRAM = '2025-01-15',
 }
 
 export const SOCIALS = {
@@ -47,13 +51,13 @@ export const SOCIALS = {
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
-  [Social.Github]: { name: Social.Github, link: 'https://github.com/oxen-io/websites' },
+  [Social.Github]: { name: Social.Github, link: 'https://github.com/session-foundation/websites' },
   [Social.RSS]: { name: Social.RSS, link: 'https://token.getsession.org/blog/feed' },
 } satisfies Partial<Record<Social, SocialLink>>;
 
 export enum FAUCET {
   MIN_ETH_BALANCE = 0.001,
-  DRIP = 40_000,
+  DRIP = 100_000,
 }
 
 export enum FAUCET_ERROR {
@@ -80,18 +84,27 @@ export enum NETWORK {
   TESTNET = 'Testnet',
 }
 
+export const SESSION_NETWORK = 'Session Network' as const;
+
 type LinkItem = {
   href: string;
   dictionaryKey: keyof Omit<LocaleKey['navigation'], 'hamburgerDropdown'>;
   linkType?: 'internal' | 'external';
 };
 
-export const ROUTES: LinkItem[] = [
-  { dictionaryKey: 'stake', href: '/stake' },
-  { dictionaryKey: 'register', href: '/register' },
-  { dictionaryKey: 'myStakes', href: '/mystakes' },
-  { dictionaryKey: 'faucet', href: '/faucet' },
-] as const;
+export const STATIC_LINKS = {
+  stake: { dictionaryKey: 'stake', href: '/stake' },
+  register: { dictionaryKey: 'register', href: '/register' },
+  leaderboard: { dictionaryKey: 'leaderboard', href: '/leaderboard' },
+  faucet: { dictionaryKey: 'faucet', href: '/faucet' },
+} as const;
+
+export const SSR_LINKS: LinkItem[] = Object.values(STATIC_LINKS);
+
+export const DYNAMIC_LINKS = {
+  myStakes: { dictionaryKey: 'myStakes', href: '/mystakes' },
+  vestedStakes: { dictionaryKey: 'vestedStakes', href: '/vested-stakes' },
+} as const;
 
 export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'tokenSite', href: 'https://token.getsession.org', linkType: 'external' },
@@ -101,16 +114,14 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
 ] as const;
 
 export enum QUERY {
-  /** 60 seconds */
-  STALE_TIME_DEFAULT = 60 * 1000,
+  /** 5 seconds */
+  STALE_TIME_DEFAULT = 5 * 1000,
   /** 1 second */
   STALE_TIME_DEFAULT_DEV = 1000,
   /** 1 second */
-  STALE_TIME_REGISTRATIONS_PAGE = 1000,
-  /** 1 second */
   STALE_TIME_REGISTRATIONS_LIST_DEV = 1000,
-  /** 60 seconds */
-  STALE_TIME_REGISTRATIONS_LIST = 60 * 1000,
+  /** 10 seconds */
+  STALE_TIME_REGISTRATIONS_LIST = 10 * 1000,
   /** 2 minutes */
   STALE_TIME_CLAIM_REWARDS = 2 * 60 * 1000,
   /** 60 seconds */
@@ -118,11 +129,33 @@ export enum QUERY {
 }
 
 /** 20,000 SENT  */
-export const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
+
+export const SIGNIFICANT_FIGURES = {
+  GAS_FEE_TOTAL: 3,
+  GAS_FEE_BREAKDOWN: 4,
+};
+
+export enum BLOCK_TIME_MS {
+  ARBITRUM = 250,
+  APPCHAIN = 1000 * 120,
+}
 
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
   MS_PER_BLOCK = 2 * 60 * 1000,
+  /** The number of confirmations required to register a node */
+  GOAL_REGISTRATION_CONFIRMATIONS = 5,
+  /** 5 minutes */
+  REGISTRATION_MS_PER_CONFIRMATION_ESTIMATE = 5 * 60 * 1000,
+  /** Min Operator Fee */
+  MIN_OPERATOR_FEE = 0,
+  /** Max Operator Fee */
+  MAX_OPERATOR_FEE = 100,
+  /** Max contributors */
+  MAX_CONTRIBUTORS = 10,
 }
 
 export enum SESSION_NODE_TIME_STATIC {
@@ -130,6 +163,8 @@ export enum SESSION_NODE_TIME_STATIC {
   SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS = 2,
   /** isSoon amount in seconds for time based notifications (2 minutes) */
   SOON_TIME = 120_000,
+  /** 24 hours in ms */
+  NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS = 24 * 60 * 60 * 1000,
 }
 
 enum SESSION_NODE_TIME_TESTNET {
@@ -150,27 +185,165 @@ enum SESSION_NODE_TIME_MAINNET {
   DEREGISTRATION_LOCKED_STAKE_SECONDS = 30 * 24 * 60 * 60,
 }
 
-export const SESSION_NODE_TIME = (chain: CHAIN) => {
-  switch (chain) {
-    case CHAIN.TESTNET:
+export const SESSION_NODE_TIME = (chainId?: number) => {
+  switch (chainId) {
+    case arbitrumSepolia.id:
+    case sepolia.id:
       return SESSION_NODE_TIME_TESTNET;
 
     default:
-    case CHAIN.MAINNET:
       return SESSION_NODE_TIME_MAINNET;
   }
 };
-
-export enum TOAST {
-  ERROR_COLLAPSE_LENGTH = 128,
-}
 
 export enum DYNAMIC_MODULE {
   /** The number of decimal places to round SENT values to */
   SENT_ROUNDED_DECIMALS = 2,
 }
 
-export enum HANDRAIL_THRESHOLD {
+const MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024 = 67681024783n;
+const MEDIAN_GAS_PRICE_ARBITRUM_SEPOLIA_2024 = 1082870990n;
+
+export const HANDRAIL_THRESHOLD = {
   /** 0.005 SENT */
-  CLAIM_REWARDS_AMOUNT = '5000000',
+  CLAIM_REWARDS_AMOUNT: 5000000n,
+};
+
+export const HANDRAIL_THRESHOLD_TESTNET = {
+  GAS_PRICE: MEDIAN_GAS_PRICE_ARBITRUM_SEPOLIA_2024,
+};
+
+export const HANDRAIL_THRESHOLD_MAINNET = {
+  GAS_PRICE: MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024,
+};
+
+export const HANDRAIL_THRESHOLD_DYNAMIC = (chainId?: number) => {
+  switch (chainId) {
+    case arbitrumSepolia.id:
+    case sepolia.id:
+      return HANDRAIL_THRESHOLD_TESTNET;
+
+    default:
+      return HANDRAIL_THRESHOLD_MAINNET;
+  }
+};
+
+export const preferenceStorageKey = 'stake_settings';
+
+export enum PREFERENCE {
+  BACKEND_URL = 'backendUrl',
+  PREF_REGISTRATION_MODE = 'prefRegistrationMode',
+  SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
+  SKIP_VESTING_POPUP_ON_STARTUP = 'skipVestingPopupOnStartup',
+  ANONYMIZE_UI = 'anonymizeUI',
+  AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
+  OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
 }
+
+export const preferenceStorageDefaultItems = {} as const;
+
+type WalletSheetSettingDetailsGenerator = Record<
+  PREFERENCE,
+  Omit<WalletSheetSettingDetails, 'key'>
+>;
+
+export const prefDetails = {
+  [PREFERENCE.AUTO_REFRESH_BACKEND]: {
+    label: 'Auto Refresh',
+    type: 'boolean',
+    defaultValue: true,
+  },
+  [PREFERENCE.BACKEND_URL]: {
+    label: 'Backend URL',
+    type: 'string',
+    defaultValue: '/api/ssb',
+  },
+  [PREFERENCE.PREF_REGISTRATION_MODE]: {
+    label: 'Registration Mode',
+    type: 'string',
+    defaultValue: REG_MODE.EXPRESS as UserSelectableRegistrationMode,
+  },
+  [PREFERENCE.SHOW_L2_HEIGHT_ON_STATUS_BAR]: {
+    label: 'Show L2 Height On Status Bar',
+    type: 'boolean',
+    defaultValue: false,
+  },
+  [PREFERENCE.SKIP_VESTING_POPUP_ON_STARTUP]: {
+    label: 'Skip Vesting Popup On Startup',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Disable the vesting popup on startup',
+  },
+  [PREFERENCE.ANONYMIZE_UI]: {
+    label: 'Anonymize UI',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Hide wallet addresses and other identifying information',
+  },
+  [PREFERENCE.OPEN_NODES_SHOW_AWAITING_OPERATOR]: {
+    label: 'Show Awaiting Operator Nodes',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Show awaiting operator contracts in the open nodes page',
+  },
+} as const satisfies WalletSheetSettingDetailsGenerator;
+
+const hiddenPreferences = [
+  PREFERENCE.PREF_REGISTRATION_MODE,
+  PREFERENCE.ANONYMIZE_UI,
+  PREFERENCE.BACKEND_URL,
+];
+
+export const customSettings = Object.entries(prefDetails)
+  .map(([key, value]) => ({
+    ...value,
+    key,
+  }))
+  .filter(({ key }) => !hiddenPreferences.includes(key as PREFERENCE));
+
+export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
+  [REG_TAB.START]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
+  [REG_TAB.STAKE_AMOUNT]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-session-tokens',
+  [REG_TAB.OPERATOR_FEE]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee ',
+  [REG_TAB.REWARDS_ADDRESS]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr ',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address ',
+  [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
+  [REG_TAB.RESERVE_SLOTS]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node ',
+  [REG_TAB.RESERVE_SLOTS_INPUT]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node ',
+  [REG_TAB.AUTO_ACTIVATE]:
+    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
+} as const;
+
+export enum BACKEND {
+  /** 30 seconds */
+  L2_BACKGROUND_UPDATE_INTERVAL_SECONDS = 30,
+  /** 2 minutes */
+  NODE_TARGET_UPDATE_INTERVAL_SECONDS = 2 * 60,
+  /** 2 seconds */
+  MULTI_REGISTRATION_SN_POLL_INTERVAL_MS = 2 * 1000,
+}
+
+export enum LAST_UPDATED_BEHIND_TRIGGER {
+  /** 2.5 minutes */
+  BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
+  /** 4 minutes */
+  BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
+  /** 2.5 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
+}
+
+export const allowedVestingRegistrationTabs = [
+  REG_TAB.REWARDS_ADDRESS_INPUT_SOLO,
+  REG_TAB.SUBMIT_SOLO,
+  REG_TAB.SUCCESS_SOLO,
+];

@@ -1,8 +1,8 @@
 import { groq } from 'next-sanity';
-import { SessionSanityClient } from '../lib/client';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
-import type { PostSchemaType } from '../schemas/post';
 import type { AuthorSchemaType } from '../schemas/author';
+import type { PostSchemaType } from '../schemas/post';
 
 const QUERY_GET_POSTS_SLUGS = groq`*[_type == 'post']{ slug, label }`;
 type QUERY_GET_POSTS_SLUGS_RETURN_TYPE = Array<Pick<PostSchemaType, 'slug'>>;

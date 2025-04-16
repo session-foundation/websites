@@ -1,8 +1,8 @@
-import { defineField, defineType } from 'sanity';
-import type { DocumentFields } from '@session/sanity-types';
-import type { SchemaFieldsType } from './types';
 import { TwitterIcon } from '@sanity/icons';
+import type { DocumentFields } from '@session/sanity-types';
+import { defineField, defineType } from 'sanity';
 import { urlField } from './fields/basic/url';
+import type { SchemaFieldsType } from './types';
 
 // TODO: look into sharing the same source as the ui. socials package? (hopefully not)
 enum Socials {

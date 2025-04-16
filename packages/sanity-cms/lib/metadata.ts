@@ -1,6 +1,6 @@
+import type { Metadata, ResolvedMetadata } from 'next';
 import { getSanityImageUrlBuilder } from '../components/SanityImage';
 import type { SeoType } from '../schemas/fields/basic/seo';
-import type { Metadata, ResolvedMetadata } from 'next';
 import type { SessionSanityClient } from './client';
 
 type GenericMetadataProps = {

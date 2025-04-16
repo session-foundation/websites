@@ -1,20 +1,11 @@
 'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@session/ui/ui/dialog';
-import * as React from 'react';
-import { useEffect } from 'react';
-import Link from 'next/link';
 import { TOS_LOCKED_PATHS, URL } from '@/lib/constants';
-import { usePathname } from 'next/navigation';
+import { FEATURE_FLAG } from '@/lib/feature-flags';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { useSetTOS, useTOS } from '@/providers/tos-provider';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Checkbox } from '@session/ui/components/ui/checkbox';
 import {
   Form,
@@ -24,12 +15,20 @@ import {
   FormLabel,
   FormSubmitButton,
 } from '@session/ui/components/ui/form';
-import { toast } from '@session/ui/lib/toast';
 import { XIcon } from '@session/ui/icons/XIcon';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
-import { useSetTOS, useTOS } from '@/providers/tos-provider';
+import { toast } from '@session/ui/lib/toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@session/ui/ui/dialog';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const FormSchema = z.object({
   accept: z
@@ -78,6 +77,7 @@ export function TOSHandler() {
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't need to worry about setters changing
   useEffect(() => {
     if (clearAcceptTOSFlag) {
       acceptTOS(false);
@@ -93,7 +93,7 @@ export function TOSHandler() {
             <Link
               href="/"
               prefetch
-              className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+              className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
             >
               <XIcon className="h-4 w-4" />
               <span className="sr-only">Close</span>

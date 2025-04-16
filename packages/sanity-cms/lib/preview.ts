@@ -1,8 +1,8 @@
-import { type DefaultDocumentNodeResolver } from 'sanity/structure';
-import { Iframe } from 'sanity-plugin-iframe-pane';
-import type { RouteFieldsSchemaType } from '../schemas/fields/groups/route';
 import { DeadLinks, Preflight } from '@planetary/sanity-plugin-preflight';
 import { DesktopIcon, EditIcon, RocketIcon } from '@sanity/icons';
+import { Iframe } from 'sanity-plugin-iframe-pane';
+import type { DefaultDocumentNodeResolver } from 'sanity/structure';
+import type { RouteFieldsSchemaType } from '../schemas/fields/groups/route';
 
 const iframeDefaultOptions = {
   url: {
@@ -12,7 +12,7 @@ const iframeDefaultOptions = {
     draftMode: '/api/draft/enable', // the route you enable draft mode, see: https://github.com/sanity-io/visual-editing/tree/main/packages/preview-url-secret#sanitypreview-url-secret
   },
   showDisplayUrl: true,
-  defaultSize: `desktop`,
+  defaultSize: 'desktop',
   reload: {
     button: true,
   },
@@ -26,7 +26,7 @@ export const defaultDocumentNode: DefaultDocumentNodeResolver = (S) =>
       .component(Iframe)
       .options({
         ...iframeDefaultOptions,
-        defaultSize: `desktop`,
+        defaultSize: 'desktop',
       })
       .title('Preview')
       .icon(DesktopIcon),

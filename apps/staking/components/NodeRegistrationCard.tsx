@@ -1,19 +1,19 @@
 'use client';
 
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { useTranslations } from 'next-intl';
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
-import type { Registration } from '@session/sent-staking-js/client';
 import { InfoNodeCard, NodeItem, NodeItemLabel, NodeItemValue } from '@/components/InfoNodeCard';
-import { usePathname } from 'next/navigation';
 import useRelativeTime from '@/hooks/useRelativeTime';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Registration } from '@session/staking-api-js/schema';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { type HTMLAttributes, forwardRef, useMemo } from 'react';
 
 const NodeRegistrationCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & { node: Registration }
 >(({ className, node, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.pending');
-  const actionModulesRegisterDictionary = useTranslations('actionModules.register');
+  const dictRegistration = useTranslations('actionModules.registration.shared');
   const titleFormat = useTranslations('modules.title');
   const pathname = usePathname();
 
@@ -85,17 +85,21 @@ const NodeRegistrationCard = forwardRef<
           </Button>
         ) : null
       }*/
-      button={{
-        ariaLabel: dictionary('registerButton.ariaLabel'),
-        text: dictionary('registerButton.text'),
-        dataTestId: ButtonDataTestId.Node_Card_Register,
-        link: `/register/${pubKey}`,
-      }}
+      button={
+        !isRegistrationFormOpen
+          ? {
+              ariaLabel: dictionary('registerButton.ariaLabel'),
+              text: dictionary('registerButton.text'),
+              dataTestId: ButtonDataTestId.Node_Card_Register,
+              link: `/register/${pubKey}`,
+            }
+          : undefined
+      }
       {...props}
     >
       <NodeItem>
         <NodeItemLabel>
-          {titleFormat('format', { title: actionModulesRegisterDictionary('preparedAtTimestamp') })}
+          {titleFormat('format', { title: dictRegistration('submit.preparedAt') })}
         </NodeItemLabel>
         <NodeItemValue>{preparedTimer}</NodeItemValue>
       </NodeItem>

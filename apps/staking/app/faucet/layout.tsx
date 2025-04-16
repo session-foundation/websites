@@ -1,10 +1,10 @@
 import { siteMetadata } from '@/lib/metadata';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export async function generateMetadata() {
-  return siteMetadata({
+  return await siteMetadata({
     title: 'Faucet',
-    description: 'Claim test SENT to participate in the Session Testnet Incentive Program.',
+    description: 'Claim test SESH to participate in the Session Testnet Incentive Program.',
   });
 }
 

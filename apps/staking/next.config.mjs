@@ -12,22 +12,7 @@ const getSENTStakingApiUrl = () => {
     url = url.substring(0, url.length - 1);
   }
 
-  console.log('SENT Staking API URL:', url);
-
-  return url;
-};
-
-const getSENTExplorerApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_SENT_EXPLORER_API_URL;
-  if (!url) {
-    throw new Error('NEXT_PUBLIC_SENT_EXPLORER_API_URL is not set');
-  }
-
-  if (url.endsWith('/')) {
-    url = url.substring(0, url.length - 1);
-  }
-
-  console.log('SENT Explorer API URL:', url);
+  console.log('Staking Backend API URL:', url);
 
   return url;
 };
@@ -44,10 +29,14 @@ const nextConfig = {
     '@session/feature-flags',
     'better-sqlite3-multiple-ciphers',
   ],
-  experimental: {
-    serverComponentsExternalPackages: ['pino', 'pino-pretty'],
-  },
-  webpack: (config) => {
+  serverExternalPackages: ['pino', 'pino-pretty'],
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        bufferutil: false,
+        'utf-8-validate': false,
+      };
+    }
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     if (process.env.NO_MINIFY?.toLowerCase() === 'true') {
       config.optimization = {
@@ -69,8 +58,9 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: '/nodes',
-        destination: '/stake',
+        source: '/bridge',
+        destination:
+          'https://bridge.arbitrum.io/?destinationChain=arbitrum-sepolia&sourceChain=sepolia',
         permanent: false,
       },
     ];
@@ -80,10 +70,6 @@ const nextConfig = {
       {
         source: '/api/ssb/:path*',
         destination: `${getSENTStakingApiUrl()}/:path*`,
-      },
-      {
-        source: '/api/explorer',
-        destination: getSENTExplorerApiUrl(),
       },
     ];
   },

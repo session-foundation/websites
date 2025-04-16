@@ -1,7 +1,7 @@
 import { AuthDataValidator } from '@telegram-auth/server';
 import { objectToAuthDataMap } from '@telegram-auth/server/utils';
-import { Session } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import type { Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 type TelegramProviderOptions = {
@@ -20,7 +20,7 @@ export const TelegramProvider = ({ botToken }: TelegramProviderOptions) =>
     name: 'Telegram',
     credentials: {},
     /** @ts-expect-error -- trust me im right -- we are enforcing the return to include the telegram id */
-    async authorize(credentials, req) {
+    async authorize(_credentials, req) {
       const validator = new AuthDataValidator({ botToken });
 
       const data = objectToAuthDataMap(req.query || {});

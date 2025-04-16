@@ -1,57 +1,60 @@
 'use client';
 
+import { getContractErrorName } from '@session/contracts';
 import {
+  type UpdateRewardsBalanceArgs,
   useClaimRewardsQuery,
   useUpdateRewardsBalanceQuery,
-  type UseUpdateRewardsBalanceQueryParams,
 } from '@session/contracts/hooks/ServiceNodeRewards';
-import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { getContractErrorName } from '@session/contracts';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 
-type UseClaimRewardsParams = UseUpdateRewardsBalanceQueryParams;
-
-export default function useClaimRewards({
-  address,
-  rewards,
-  blsSignature,
-  excludedSigners,
-}: UseClaimRewardsParams) {
+/**
+ * Hook to claim rewards. This executes the claim rewards flow:
+ * 1. Updates the rewards balance
+ * 2. Claims the rewards
+ * @param defaultArgs - The default arguments for the hook. @see {@link UpdateRewardsBalanceArgs}
+ * @returns The claim rewards hook.
+ */
+export default function useClaimRewards(defaultArgs?: UpdateRewardsBalanceArgs) {
   const [enabled, setEnabled] = useState<boolean>(false);
   const [skipUpdateBalance, setSkipUpdateBalance] = useState<boolean>(false);
 
   const stageDictKey = 'modules.claim.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations(stageDictKey);
+  const dictGeneral = useTranslations('general');
+
+  const vestingContractAddress = useActiveVestingContractAddress();
 
   const {
     updateRewardsBalance,
     fee: updateBalanceFee,
-    estimateContractWriteFee: updateBalanceEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: updateBalanceRefetchContractWriteFeeEstimate,
+    gasPrice: updateBalanceGasPrice,
+    gasAmount: updateBalanceGasAmountEstimate,
     contractCallStatus: updateBalanceContractCallStatus,
     transactionStatus: updateBalanceTransactionStatus,
     estimateFeeError: updateBalanceEstimateFeeError,
     simulateError: updateBalanceSimulateError,
     writeError: updateBalanceWriteError,
     transactionError: updateBalanceTransactionError,
-  } = useUpdateRewardsBalanceQuery({ address, rewards, blsSignature, excludedSigners });
+  } = useUpdateRewardsBalanceQuery(defaultArgs);
 
   const {
     claimRewards,
     fee: claimFee,
-    estimateContractWriteFee: claimEstimateContractWriteFee,
-    refetchContractWriteFeeEstimate: claimRefetchContractWriteFeeEstimate,
+    gasPrice: claimGasPrice,
+    gasAmount: claimGasAmountEstimate,
     contractCallStatus: claimContractCallStatus,
     simulateError: claimSimulateError,
     writeError: claimWriteError,
     transactionError: claimTransactionError,
-  } = useClaimRewardsQuery();
+  } = useClaimRewardsQuery({ vestingContractAddress });
 
   const updateRewardsBalanceStatus = useMemo(
     () => parseContractStatusToProgressStatus(updateBalanceContractCallStatus),
@@ -63,51 +66,46 @@ export default function useClaimRewards({
     [claimContractCallStatus]
   );
 
-  const estimateFee = () => {
-    updateBalanceEstimateContractWriteFee();
-    claimEstimateContractWriteFee();
-  };
-
-  const refetchFeeEstimate = () => {
-    claimRefetchContractWriteFeeEstimate();
-    updateBalanceRefetchContractWriteFeeEstimate();
-  };
-
-  const updateBalanceAndClaimRewards = () => {
+  const updateBalanceAndClaimRewards = (args: UpdateRewardsBalanceArgs) => {
     setEnabled(true);
     if (!skipUpdateBalance) {
-      updateRewardsBalance();
+      updateRewardsBalance(args);
     }
   };
 
   const updateRewardsBalanceErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'balance',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: updateBalanceSimulateError,
         writeError: updateBalanceWriteError,
         transactionError: updateBalanceTransactionError,
       }),
-    [updateBalanceSimulateError, updateBalanceWriteError, updateBalanceTransactionError]
+    [
+      updateBalanceSimulateError,
+      updateBalanceWriteError,
+      updateBalanceTransactionError,
+      dict,
+      dictGeneral,
+    ]
   );
 
   const claimRewardsErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'claim',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: claimSimulateError,
         writeError: claimWriteError,
         transactionError: claimTransactionError,
       }),
-    [claimSimulateError, claimWriteError, claimTransactionError]
+    [claimSimulateError, claimWriteError, claimTransactionError, dict, dictGeneral]
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on success
   useEffect(() => {
     if (enabled && (skipUpdateBalance || updateBalanceTransactionStatus === 'success')) {
       claimRewards();
@@ -126,10 +124,12 @@ export default function useClaimRewards({
 
   return {
     updateBalanceAndClaimRewards,
-    refetchFeeEstimate,
     claimFee,
+    claimGasPrice,
+    claimGasAmountEstimate,
     updateBalanceFee,
-    estimateFee,
+    updateBalanceGasPrice,
+    updateBalanceGasAmountEstimate,
     updateRewardsBalanceStatus,
     claimRewardsStatus,
     enabled,

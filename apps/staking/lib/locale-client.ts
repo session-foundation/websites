@@ -1,14 +1,14 @@
 'use client';
 
+import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
 import {
+  type FormatDistanceStrictOptions,
+  type FormatDistanceToNowStrictOptions,
   formatDistanceStrict,
-  FormatDistanceStrictOptions,
   formatDistanceToNowStrict,
-  FormatDistanceToNowStrictOptions,
 } from 'date-fns';
 import { useLocale as _useLocale } from 'next-intl';
-import { getDateFnsLocale, type Locale } from './locale-util';
-import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { type Locale, getDateFnsLocale } from './locale-util';
 
 export const useLocale = _useLocale as () => Locale;
 
@@ -42,8 +42,7 @@ export const formatLocalizedTimeFromSeconds = (
   formatLocalizedRelativeTimeClient(getDateFromUnixTimestampSeconds(seconds), new Date(0), options);
 
 export const formatNumber = (num: number, options?: Intl.NumberFormatOptions) => {
-  const locale = useLocale();
-  return new Intl.NumberFormat(locale, options).format(num);
+  return new Intl.NumberFormat(undefined, options).format(num);
 };
 
 export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions) => {
@@ -55,9 +54,18 @@ export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions
   });
 };
 
-export const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions) => {
-  const locale = useLocale();
+export const formatDate = (date: Date, options?: Intl.DateTimeFormatOptions, locale?: Locale) => {
   return new Intl.DateTimeFormat(locale, options).format(date);
+};
+
+export const useFormatDate = (
+  date?: Date | null,
+  options?: Intl.DateTimeFormatOptions,
+  fallback?: string | null
+) => {
+  const locale = useLocale();
+  if (!date) return fallback ?? null;
+  return formatDate(date, options, locale);
 };
 
 export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions) => {
@@ -67,7 +75,7 @@ export const formatList = (list: Array<string>, options?: Intl.ListFormatOptions
 
 export type DecimalDelimiter = '.' | ',';
 
-export const getDecimalDelimiter = (): DecimalDelimiter => {
+export const useDecimalDelimiter = (): DecimalDelimiter => {
   const locale = useLocale();
   const decimal = Intl.NumberFormat(locale)
     .formatToParts(1.1)

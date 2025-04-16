@@ -31,6 +31,7 @@
             rgba(215, 222, 218, 1) 0%,
             rgba(188, 200, 193, 1) 100%
     );
+    --session-gradient-white-mock: #c6d0ca;
     --session-green-dark: #00aa59;
     --session-green-link: #008547;
     --session-disabled: #939393;
@@ -44,6 +45,7 @@
     --session-gray-light: #55595c;
     --session-gray-DEFAULT: #3a3a3a;
     --session-gray-dark: #333132;
+    --session-gray-darker: #2e2e2e;
 
     --text-static: #dbdbdb;
     --text-gradient: linear-gradient(135deg, #ffffff -38.86%, #97a99e 133.98%);
@@ -134,4 +136,18 @@
 .glow-yellow {
   @apply drop-shadow-lg filter;
   filter: drop-shadow(0 0 8px #ffea00);
+}
+
+.fade-to-transparent-b {
+  position: relative;
+}
+
+.fade-to-transparent-b::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  mask: linear-gradient(to top, transparent, var(--session-black) 7%);
+  backdrop-filter: blur(8px);
 }

@@ -1,7 +1,8 @@
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
-import Database from 'better-sqlite3-multiple-ciphers';
-import path from 'path';
+// biome-ignore lint/correctness/noNodejsModules: runs on server
+import path from 'node:path';
 import { isProduction } from '@session/util-js/env';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 
 export enum TABLE {
   FLAGS = 'flags',
@@ -30,7 +31,7 @@ export type CountType<F extends string> = Record<`count(${F})`, number>;
  *
  * @returns A boolean indicating whether the count value exists and is greater than zero.
  */
-export const hasCount = <F extends string>(row: CountType<F>, countField: F) => {
+export const hasCount = <F extends FLAGS_TABLE>(row: CountType<F>, countField: F) => {
   const count = row[`count(${countField})`];
   return count && count > 0;
 };

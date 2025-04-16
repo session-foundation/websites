@@ -1,13 +1,14 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { forwardRef, type HTMLAttributes } from 'react';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { type HTMLAttributes, forwardRef } from 'react';
 import { QuestionIcon } from '../icons/QuestionIcon';
 import { cn } from '../lib/utils';
 import { Loading } from './loading';
-import { Tooltip } from './ui/tooltip';
 import { Button, type ButtonProps } from './ui/button';
+import { Tooltip } from './ui/tooltip';
+import './Module.css';
 
 export const outerModuleVariants = cva(
-  'rounded-3xl transition-all ease-in-out bg-module-outline bg-blend-lighten shadow-md p-px',
+  'overflow-hidden rounded-2xl p-px bg-blend-lighten shadow-md transition-all ease-in-out',
   {
     variants: {
       variant: {
@@ -18,36 +19,41 @@ export const outerModuleVariants = cva(
         default: 'col-span-1',
         lg: 'col-span-1 sm:col-span-2',
       },
+      outline: {
+        true: 'bg-module-outline',
+        false: '',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      outline: true,
     },
   }
 );
 
 const innerModuleVariants = cva(
   cn(
-    'rounded-3xl w-full h-full flex align-middle flex-col bg-module',
-    '[&>span]:font-medium [&>*>span]:font-medium'
+    'flex h-full w-full flex-col rounded-[15px] bg-module align-middle',
+    '[&>*>span]:font-medium [&>span]:font-medium'
   ),
   {
     variants: {
       variant: {
         default: cn(
-          'bg-blend-lighten shadow-md gap-1',
-          '[&>h3]:text-lg [&>*>h3]:text-lg',
-          '[&>span]:text-3xl [&>*>span]:text-3xl [&>h3]:font-normal [&>*>h3]:font-normal'
+          'gap-1 bg-blend-lighten shadow-md',
+          '[&>*>h3]:text-lg [&>h3]:text-lg',
+          '[&>*>h3]:font-normal [&>*>span]:text-3xl [&>h3]:font-normal [&>span]:text-3xl'
         ),
         hero: cn(
-          'gap-3 sm:gap-5 hover:brightness-125',
-          '[&>h3]:text-3xl [&>h3]:font-normal [&>*>h3]:text-2xl [&>*>h3]:font-normal [&>h3]:text-session-white',
-          '[&>span]:text-8xl [&>*>span]:text-8xl [&>span]:text-session-white [&>*>span]:text-session-white'
+          'gap-3 hover:brightness-125 sm:gap-4',
+          '[&>*>h3]:font-normal [&>*>h3]:text-2xl [&>h3]:font-normal [&>h3]:text-3xl [&>h3]:text-session-white',
+          '[&>*>span]:text-8xl [&>*>span]:text-session-white [&>span]:text-8xl [&>span]:text-session-white'
         ),
       },
       size: {
         default: 'p-4 sm:p-6',
-        lg: 'px-6 sm:px-10 py-8 sm:py-10',
+        lg: 'p-8',
       },
     },
     defaultVariants: {
@@ -73,20 +79,21 @@ const Module = forwardRef<HTMLDivElement, ModuleProps>(
             'relative',
             innerModuleVariants({ size, variant, className }),
             noPadding && 'p-0 sm:p-0',
-            props.onClick && 'hover:bg-session-green hover:text-session-black hover:cursor-pointer'
+            props.onClick && 'hover:cursor-pointer hover:bg-session-green hover:text-session-black'
           )}
           ref={ref}
           {...props}
-          style={
-            variant === 'hero'
+          style={{
+            containerType: 'inline-size',
+            ...(variant === 'hero'
               ? {
                   background: 'url(/images/module-hero.png)',
                   backgroundPositionX: '35%',
                   backgroundPositionY: '35%',
                   backgroundSize: '150%',
                 }
-              : undefined
-          }
+              : {}),
+          }}
         >
           {loading ? <Loading /> : children}
         </div>
@@ -105,33 +112,45 @@ export interface ButtonModuleProps
 }
 
 const ButtonModule = forwardRef<HTMLButtonElement, ButtonModuleProps>(
-  ({ className, variant, size, loading, children, noPadding, ...props }, ref) => {
+  ({ className, variant, size, loading, children, noPadding, disabled, ...props }, ref) => {
     return (
-      <div className={cn(outerModuleVariants({ size, variant, className }))}>
-        <Button
+      <Button
+        className={cn(
+          outerModuleVariants({ size, variant, outline: disabled, className }),
+          'relative h-full transition-all duration-300 disabled:opacity-100 group-hover:shadow-none motion-reduce:transition-none',
+          !disabled &&
+            'border-2 border-session-green hover:bg-session-green group-hover:bg-session-green',
+          noPadding && 'p-0'
+        )}
+        variant="ghost"
+        ref={ref}
+        {...props}
+        style={
+          variant === 'hero'
+            ? {
+                background: 'url(/images/module-hero.png)',
+                backgroundPositionX: '35%',
+                backgroundPositionY: '35%',
+                backgroundSize: '135%',
+              }
+            : undefined
+        }
+        disabled={disabled}
+      >
+        <div
           className={cn(
-            innerModuleVariants({ size, variant, className }),
-            'relative disabled:opacity-100',
-            !props.disabled && 'hover:bg-session-green border-session-green border',
-            noPadding && 'p-0'
+            innerModuleVariants({
+              size,
+              variant,
+              className,
+            }),
+            !disabled &&
+              'transition-all duration-300 group-hover:bg-none group-hover:shadow-none motion-reduce:transition-none'
           )}
-          variant="ghost"
-          ref={ref}
-          {...props}
-          style={
-            variant === 'hero'
-              ? {
-                  background: 'url(/images/module-hero.png)',
-                  backgroundPositionX: '35%',
-                  backgroundPositionY: '35%',
-                  backgroundSize: '135%',
-                }
-              : undefined
-          }
         >
           {loading ? <Loading /> : children}
-        </Button>
-      </div>
+        </div>
+      </Button>
     );
   }
 );
@@ -167,20 +186,46 @@ const ModuleHeader = forwardRef<HTMLDivElement, ModuleHeaderProps>(
 );
 ModuleHeader.displayName = 'ModuleHeader';
 
+const moduleTitleClassName = 'text-gradient-white-mock truncate leading-none tracking-tight';
+
 const ModuleTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3
-      ref={ref}
-      className={cn('text-gradient-white leading-none tracking-tight', className)}
-      {...props}
-    />
+    <h3 ref={ref} className={cn(moduleTitleClassName, className)} {...props} />
   )
 );
 ModuleTitle.displayName = 'ModuleTitle';
 
-const ModuleText = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
-  ({ className, ...props }, ref) => (
-    <span ref={ref} className={cn('text-gradient-white overflow-hidden', className)} {...props} />
+type ModuleTitleDynamicProps = Omit<HTMLAttributes<HTMLHeadingElement>, 'children'> & {
+  longText: string;
+  shortText?: string;
+};
+
+const ModuleTitleDynamic = forwardRef<HTMLHeadingElement, ModuleTitleDynamicProps>(
+  ({ shortText, longText, ...props }, ref) => (
+    <ModuleTitle ref={ref} {...props}>
+      {shortText ? (
+        <>
+          <div className={cn('module-title-dynamic-short', moduleTitleClassName)}>{shortText}</div>
+          <div className={cn('module-title-dynamic-long', moduleTitleClassName)}>{longText}</div>
+        </>
+      ) : (
+        longText
+      )}
+    </ModuleTitle>
+  )
+);
+ModuleTitleDynamic.displayName = 'ModuleTitleDynamic';
+
+export type ModuleTextProps = HTMLAttributes<HTMLSpanElement> & { isLarge?: boolean };
+
+const ModuleText = forwardRef<HTMLSpanElement, ModuleTextProps>(
+  ({ className, isLarge, ...props }, ref) => (
+    <span
+      ref={ref}
+      className={cn('overflow-hidden text-gradient-white', className)}
+      {...props}
+      style={{ fontSize: isLarge ? 'clamp(24px, 12cqi, 48px)' : 'clamp(18px, 12cqi, 30px)' }}
+    />
   )
 );
 ModuleText.displayName = 'ModuleText';
@@ -193,12 +238,12 @@ const ModuleDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPa
 ModuleDescription.displayName = 'ModuleDescription';
 
 const moduleContentVariants = cva(
-  'flex flex-col align-middle justify-center w-full h-full text-center items-center',
+  'flex h-full w-full flex-col items-center justify-center text-center align-middle',
   {
     variants: {
       variant: {
         default: '',
-        underlay: 'absolute inset-0 -z-1',
+        underlay: '-z-1 absolute inset-0',
       },
     },
     defaultVariants: {
@@ -224,13 +269,15 @@ const ModuleContent = forwardRef<HTMLDivElement, ModuleContentProps>(
 );
 
 const ModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => (
-    <Tooltip ref={ref} tooltipContent={children}>
-      <div className={cn('absolute right-5 top-4 cursor-pointer', className)} {...props}>
-        <QuestionIcon className="fill-session-text h-4 w-4" />
-      </div>
-    </Tooltip>
-  )
+  ({ className, children, ...props }, ref) => {
+    return (
+      <Tooltip ref={ref} tooltipContent={children} putContentInPortal>
+        <div className={cn('absolute top-4 right-5 cursor-pointer', className)} {...props}>
+          <QuestionIcon className='h-4 w-4 fill-session-text' />
+        </div>
+      </Tooltip>
+    );
+  }
 );
 ModuleTooltip.displayName = 'ModuleTooltip';
 
@@ -245,5 +292,6 @@ export {
   ModuleTitle,
   ModuleTooltip,
   ButtonModule,
+  ModuleTitleDynamic,
   innerModuleVariants as moduleVariants,
 };

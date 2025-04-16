@@ -1,37 +1,33 @@
-import { ROUTES } from '@/lib/constants';
+import HeaderClient from '@/components/HeaderClient';
+import { NavLink } from '@/components/NavLink';
+import { SSR_LINKS } from '@/lib/constants';
 import { cn } from '@session/ui/lib/utils';
+import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
+<<<<<<< HEAD
 import { WalletModalButtonWithLocales } from './WalletModalButtonWithLocales';
 import { WalletNetworkDropdownWithLocales } from './WalletNetworkDropdownWithLocales';
 import { NavLink } from '@/components/NavLink';
 import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import { getTranslations } from 'next-intl/server';
 import { LinkDataTestId } from '@/testing/data-test-ids';
+=======
+>>>>>>> dev
 
 export default async function Header() {
-  const dictionary = await getTranslations('navigation');
+  const dict = await getTranslations('navigation');
   const isCanary = process.env.NEXT_PUBLIC_IS_CANARY?.toLowerCase() === 'true';
-
-  const routes: typeof ROUTES = [];
-  ROUTES.forEach(({ dictionaryKey, href }) => {
-    if (
-      process.env.NEXT_PUBLIC_HIDE_FAUCET?.toLowerCase() === 'true' &&
-      dictionaryKey === 'faucet'
-    ) {
-      return;
-    }
-    routes.push({ dictionaryKey, href });
-  });
 
   return (
     <nav className="z-30 flex items-center justify-between p-6">
-      <div className={cn('flex flex-row gap-10 pr-4')}>
+      <HeaderClient>
         <Link href="/" className="relative">
           <Image src="/images/logo.png" alt="Session Token Logo" width={144} height={50} />
-          {isCanary ? <span className="absolute -top-4 left-1 h-max w-max text-sm">🐤</span> : null}
+          {isCanary ? <span className="-top-4 absolute left-1 h-max w-max text-sm">🐤</span> : null}
         </Link>
         <div className="hidden flex-row gap-10 lg:flex">
+<<<<<<< HEAD
           {routes.map(({ dictionaryKey, href }) => (
             <NavLink
               dataTestId={LinkDataTestId.Header_Nav_Link_Item}
@@ -40,13 +36,32 @@ export default async function Header() {
               label={dictionary(dictionaryKey)}
             />
           ))}
+=======
+          {SSR_LINKS.map(({ dictionaryKey, href }) => {
+            if (
+              (dictionaryKey === 'faucet' &&
+                !(process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true')) ||
+              (dictionaryKey === 'leaderboard' &&
+                !(process.env.NEXT_PUBLIC_ENABLE_LEADERBOARD?.toLowerCase() === 'true'))
+            ) {
+              return null;
+            }
+            return (
+              <NavLink
+                key={href}
+                href={href}
+                label={dict(dictionaryKey)}
+                className={cn(
+                  dictionaryKey === 'faucet' || dictionaryKey === 'leaderboard'
+                    ? 'hidden xl:block'
+                    : ''
+                )}
+              />
+            );
+          })}
+>>>>>>> dev
         </div>
-      </div>
-      <div className="flex flex-row items-center justify-end gap-3">
-        <WalletModalButtonWithLocales />
-        <WalletNetworkDropdownWithLocales className="hidden h-full px-5 py-3 lg:flex" />
-        <DropdownHamburgerMenu />
-      </div>
+      </HeaderClient>
     </nav>
   );
 }

@@ -1,5 +1,5 @@
-import { SessionStakingClient } from '@session/sent-staking-js/client';
+import type { SessionStakingClient } from '@session/staking-api-js/client';
 
-export async function getNodes(client: SessionStakingClient) {
-  return client.getNodes();
-}
+export const getNodes = (client: SessionStakingClient) => client.getNodes();
+
+getNodes.fnName = 'getNodes';

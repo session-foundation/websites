@@ -1,23 +1,31 @@
 import {
+  type MODULE_GRID_ALIGNMENT,
   ModuleGrid,
   ModuleGridContent,
   ModuleGridHeader,
-  ModuleGridInfoContent,
   ModuleGridTitle,
 } from '@session/ui/components/ModuleGrid';
 import { QuestionIcon } from '@session/ui/icons/QuestionIcon';
 import { cn } from '@session/ui/lib/utils';
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@session/ui/ui/accordion';
 import { Skeleton } from '@session/ui/ui/skeleton';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 
 type ActionModuleProps = {
-  title?: string;
+  title?: ReactNode;
   children?: ReactNode;
   headerAction?: ReactNode;
   background?: keyof typeof actionModuleBackground;
   className?: string;
   contentClassName?: string;
+  contentContainerClassName?: string;
+  contentAlignment?: MODULE_GRID_ALIGNMENT;
   noHeader?: boolean;
 };
 
@@ -28,6 +36,8 @@ export default function ActionModule({
   children,
   className,
   contentClassName,
+  contentContainerClassName,
+  contentAlignment,
   noHeader,
 }: ActionModuleProps) {
   return (
@@ -42,12 +52,16 @@ export default function ActionModule({
           ) : null}
         </ModuleGridHeader>
       ) : null}
-      <ModuleGridContent className={cn('overflow-y-auto p-8', contentClassName)}>
+      <ModuleGridContent
+        className={contentClassName}
+        containerClassName={contentContainerClassName}
+        alignment={contentAlignment}
+      >
         {children}
       </ModuleGridContent>
       <div
         className={cn(
-          'absolute -z-10 h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg xl:opacity-100 xl:blur-0'
+          '-z-10 absolute h-full w-full bg-gradient-to-b from-[#0A0C0C] to-[#081512] opacity-70 bg-blend-lighten blur-lg xl:opacity-100 xl:blur-0'
         )}
         style={background ? actionModuleBackground[background] : undefined}
       />
@@ -83,31 +97,92 @@ export const ActionModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTM
   ({ className, children, ...props }, ref) => (
     <Tooltip ref={ref} tooltipContent={children}>
       <div className={cn('cursor-pointer', className)} {...props}>
-        <QuestionIcon className="fill-session-text h-4 w-4" />
+        <QuestionIcon className="h-3.5 w-3.5 fill-session-text" />
       </div>
     </Tooltip>
   )
 );
-ActionModuleTooltip.displayName = 'ModuleTooltip';
+ActionModuleTooltip.displayName = 'ActionModuleTooltip';
+
+type ActionModuleRowContentProps = {
+  label: string;
+  tooltip: ReactNode;
+  children: ReactNode;
+  containerClassName?: string;
+  parentClassName?: string;
+};
+
+const ActionModuleRowContent = ({
+  label,
+  tooltip,
+  children,
+  containerClassName,
+  parentClassName,
+}: ActionModuleRowContentProps) => (
+  <div
+    className={cn('flex w-full flex-row flex-wrap items-center justify-between', parentClassName)}
+  >
+    <span className="inline-flex items-center gap-2 text-nowrap align-middle">
+      {label}
+      <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
+    </span>
+    <div className={cn('flex flex-row', containerClassName)}>{children}</div>
+  </div>
+);
+
+type ActionModuleRowProps = ActionModuleRowContentProps & {
+  last?: boolean;
+};
 
 export const ActionModuleRow = ({
   label,
   tooltip,
   children,
-}: {
-  label: string;
-  tooltip: ReactNode;
-  children: ReactNode;
+  containerClassName,
+  parentClassName,
+  last,
+}: ActionModuleRowProps) => (
+  <>
+    <ActionModuleRowContent
+      label={label}
+      tooltip={tooltip}
+      containerClassName={containerClassName}
+      parentClassName={parentClassName}
+    >
+      {children}
+    </ActionModuleRowContent>
+    {!last ? <ActionModuleDivider /> : null}
+  </>
+);
+
+export const ActionModuleAccordionRow = ({
+  label,
+  tooltip,
+  children,
+  containerClassName,
+  parentClassName,
+  accordionContent,
+  last,
+}: ActionModuleRowProps & {
+  accordionContent: ReactNode;
 }) => (
   <>
-    <div className="flex flex-row flex-wrap items-center justify-between">
-      <span className="inline-flex items-center gap-2 text-nowrap align-middle">
-        {label}
-        <ActionModuleTooltip>{tooltip}</ActionModuleTooltip>
-      </span>
-      <div>{children}</div>
-    </div>
-    <ActionModuleDivider />
+    <Accordion type="single" collapsible className="-my-4">
+      <AccordionItem value="action-module-accordion-row" hideDivider>
+        <AccordionTrigger className="font-normal">
+          <ActionModuleRowContent
+            label={label}
+            tooltip={tooltip}
+            containerClassName={containerClassName}
+            parentClassName={parentClassName}
+          >
+            {children}
+          </ActionModuleRowContent>
+        </AccordionTrigger>
+        <AccordionContent>{accordionContent}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+    {!last ? <ActionModuleDivider /> : null}
   </>
 );
 
@@ -122,13 +197,17 @@ export const ActionModuleRowSkeleton = () => (
 );
 
 export const ActionModuleDivider = ({ className }: { className?: string }) => (
-  <div className={cn('bg-gray-dark h-px w-full', className)} />
+  <div className={cn('h-px w-full bg-gray-dark', className)} />
 );
 
 export const ActionModulePage = ({ children, ...props }: ActionModuleProps) => (
-  <ActionModule background={1} noHeader {...props}>
-    <div className="flex h-full w-full flex-col text-lg md:py-40">
-      <ModuleGridInfoContent className="w-full xl:w-3/4">{children}</ModuleGridInfoContent>
-    </div>
+  <ActionModule
+    background={1}
+    noHeader
+    {...props}
+    contentClassName="text-xl text-center px-6 md:px-16 gap-6"
+    contentContainerClassName="min-h-52"
+  >
+    {children}
   </ActionModule>
 );

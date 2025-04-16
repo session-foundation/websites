@@ -1,54 +1,89 @@
-import { SENT_SYMBOL } from '@session/contracts';
-import { Button } from '@session/ui/components/ui/button';
 import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 import { cn } from '@session/ui/lib/utils';
-import { collapseString } from '@session/util-crypto/string';
-import { useMemo } from 'react';
+import { Button, type ButtonProps } from '@session/ui/ui/button';
+import { formatBigIntTokenValue } from '@session/util-crypto/maths';
+import { useERC20Balance } from '@web3sheet/core';
+import { ConnectedWalletAvatar } from '@web3sheet/wallet';
+import { type ReactNode, useMemo } from 'react';
+import { useWallet } from '../hooks/useWallet';
+import { useWalletButton } from '../providers/wallet-button-provider';
 import { ButtonDataTestId } from '../testing/data-test-ids';
-import { ConnectedWalletAvatar } from './WalletAvatar';
-import { WalletButtonProps } from './WalletModalButton';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
+
+export type WalletButtonProps = Omit<ButtonProps, 'data-testid'> & {
+  disconnectedLabel: string;
+  disconnectedAriaLabel: string;
+  connectedAriaLabel: string;
+  hideBalance?: boolean;
+  balanceOverride?: string;
+  avatarOverride?: ReactNode;
+  identifierOverride?: ReactNode;
+};
+
+export function useWalletTokenBalance() {
+  const { chainId, tokens } = useWallet();
+
+  const token = useMemo(
+    () => tokens?.find((token) => token.network.id === chainId),
+    [chainId, tokens]
+  );
+
+  const { data: tokenData, refetch } = useERC20Balance({
+    chainId,
+    tokenAddress: token && 'tokenAddress' in token ? token.tokenAddress : undefined,
+  });
+
+  const tokenBalance = useMemo(
+    () =>
+      tokenData
+        ? `${tokenData.value ? formatBigIntTokenValue(tokenData.value, tokenData.decimals ?? 0) : 0} ${tokenData.symbol ?? ''}`
+        : '0',
+    [tokenData]
+  );
+  return {
+    value: tokenData?.value,
+    decimals: tokenData?.decimals,
+    symbol: tokenData?.symbol,
+    balance: tokenBalance,
+    refetch,
+  };
+}
 
 export function WalletButton({
-  labels,
-  ariaLabels,
-  handleClick,
-  isConnected,
-  isLoading,
-  forceBalanceOpen,
-  status,
-  address,
-  ensAvatar,
-  ensName,
-  arbName,
-  tokenBalance,
-  fallbackName,
+  disconnectedLabel,
+  disconnectedAriaLabel,
+  connectedAriaLabel,
   hideBalance,
+  avatarOverride,
+  balanceOverride,
+  identifierOverride,
+  className,
+  onClick,
   ...props
 }: WalletButtonProps) {
-  const name = useMemo(
-    () => collapseString(arbName ?? ensName ?? address ?? fallbackName, 6, 4),
-    [ensName, arbName, address, fallbackName]
-  );
+  const { isConnected, userSheetOpen, setUserSheetOpen, resolvedIdentifierShort } = useWallet();
 
-  const formattedBalance = useMemo(
-    () => (tokenBalance ? formatSENTBigInt(tokenBalance) : `0 ${SENT_SYMBOL}`),
-    [tokenBalance]
-  );
+  const { isBalanceVisible } = useWalletButton();
+
+  const { balance: tokenBalance } = useWalletTokenBalance();
+
+  const handleClick = () => {
+    if (userSheetOpen) return;
+    setUserSheetOpen(true);
+  };
 
   return (
     <Button
-      onClick={handleClick}
-      disabled={isLoading}
+      onClick={onClick ?? handleClick}
       className={cn(
         'group',
         'select-none justify-end overflow-x-hidden text-xs',
         isConnected
-          ? 'bg-session-green hover:bg-session-green hover:text-session-black h-full w-full max-w-28 border-2 px-0 py-0 transition-all duration-1000 ease-in-out hover:brightness-110 motion-reduce:transition-none sm:max-w-36 lg:hover:max-w-full lg:focus:max-w-full lg:active:max-w-full'
+          ? 'h-full w-full max-w-28 border-2 bg-session-green px-0 py-0 transition-all duration-1000 ease-in-out hover:bg-session-green hover:text-session-black hover:brightness-110 motion-reduce:transition-none sm:max-w-36 lg:active:max-w-full lg:focus:max-w-full lg:hover:max-w-full'
           : 'px-3 py-2',
-        forceBalanceOpen && 'lg:max-w-full'
+        isBalanceVisible && 'lg:max-w-full',
+        className
       )}
-      aria-label={isConnected ? ariaLabels.connected : ariaLabels.disconnected}
+      aria-label={isConnected ? connectedAriaLabel : disconnectedAriaLabel}
       data-testid={ButtonDataTestId.Wallet_Modal}
       {...props}
     >
@@ -57,27 +92,27 @@ export function WalletButton({
           {!hideBalance ? (
             <div
               className={cn(
-                'text-session-white -mr-4 inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-s-full py-2.5 pe-6 ps-3 text-xs md:text-sm',
-                'group-hover:bg-session-black group-active:bg-session-black group-focus:bg-session-black transition-colors delay-1000 duration-0 ease-in-out group-hover:delay-0 group-focus:delay-0 group-active:delay-0 motion-reduce:transition-none',
-                forceBalanceOpen && 'bg-session-black delay-0'
+                '-mr-4 inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-s-md py-2.5 ps-3 pe-6 text-session-white text-xs md:text-sm',
+                'transition-colors delay-1000 duration-0 ease-in-out group-hover:bg-session-black group-hover:delay-0 group-focus:bg-session-black group-focus:delay-0 group-active:bg-session-black group-active:delay-0 motion-reduce:transition-none',
+                isBalanceVisible && 'bg-session-black delay-0'
               )}
             >
               <SessionTokenIcon className="h-4 w-4" />
-              {formattedBalance}
+              {balanceOverride ?? tokenBalance}
             </div>
           ) : null}
           <div
             className={cn(
               'inline-flex h-full items-center justify-evenly gap-1 whitespace-nowrap px-2 py-2 text-xs md:text-sm',
-              !hideBalance && 'bg-session-green w-full rounded-s-full sm:w-36 sm:min-w-36'
+              !hideBalance && 'w-full bg-session-green sm:w-36 sm:min-w-36'
             )}
           >
-            <ConnectedWalletAvatar className="h-5 w-5 sm:h-6 sm:w-6" avatarSrc={ensAvatar} />
-            {name}
+            {avatarOverride ?? <ConnectedWalletAvatar size="md" />}
+            {identifierOverride ?? resolvedIdentifierShort}
           </div>
         </>
       ) : (
-        labels[status]
+        disconnectedLabel
       )}
     </Button>
   );

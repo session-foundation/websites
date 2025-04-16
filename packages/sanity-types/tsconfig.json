@@ -4,12 +4,6 @@
     "baseUrl": ".",
     "outDir": "dist"
   },
-  "include": [
-    "./**/**.ts",
-  ],
-  "exclude": [
-    "node_modules",
-    "turbo",
-    "dist"
-  ]
+  "include": ["./**/**.ts"],
+  "exclude": ["node_modules", "turbo", "dist"]
 }

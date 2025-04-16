@@ -1,6 +1,23 @@
+<<<<<<< HEAD
 import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { useTranslations } from 'next-intl';
 import { CollapsableButton } from '@/components/StakedNodeCard';
+=======
+import { CollapsableButton } from '@/components/NodeCard';
+import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
+import useRequestNodeExit from '@/hooks/useRequestNodeExit';
+import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
+import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
+import { externalLink } from '@/lib/locale-defaults';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Stake } from '@session/staking-api-js/schema';
+import { Social } from '@session/ui/components/SocialLinkList';
+import { Loading } from '@session/ui/components/loading';
+import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
+import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
+>>>>>>> dev
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,29 +26,14 @@ import {
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
 import { Button } from '@session/ui/ui/button';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
-import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
-import { useChain } from '@session/contracts/hooks/useChain';
-import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
-import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import { Loading } from '@session/ui/components/loading';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Social } from '@session/ui/components/SocialLinkList';
-import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
-import { Progress, PROGRESS_STATUS } from '@session/ui/motion/progress';
-import useRequestNodeExit from '@/hooks/useRequestNodeExit';
-import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
-import { SENT_SYMBOL } from '@session/contracts';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
+import { type ReactNode, useState } from 'react';
 
 enum EXIT_REQUEST_STATE {
-  ALERT,
-  PENDING,
+  ALERT = 0,
+  PENDING = 1,
 }
 
 export function NodeRequestExitButton({ node }: { node: Stake }) {
@@ -57,7 +59,7 @@ export function NodeRequestExitButton({ node }: { node: Stake }) {
           <>
             {exitRequestState !== EXIT_REQUEST_STATE.ALERT ? (
               <ChevronsDownIcon
-                className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+                className="absolute left-8 mt-1.5 rotate-90 cursor-pointer rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
                 onClick={() => setExitRequestState(EXIT_REQUEST_STATE.ALERT)}
               />
             ) : null}
@@ -90,7 +92,7 @@ function RequestNodeExitDisabled() {
       {dictionary.rich('disabledInfo', {
         link: (children: ReactNode) => (
           <Link
-            className="text-session-green font-medium underline"
+            className="font-medium text-session-green underline"
             href={SOCIALS[Social.Discord].link}
             referrerPolicy="no-referrer"
             target="_blank"
@@ -103,39 +105,45 @@ function RequestNodeExitDisabled() {
   );
 }
 
+function formatEnglishTimeDistance(seconds: number, delimiter = ' ', addPluralSuffix = false) {
+  const days = Math.floor(seconds / 86400);
+  if (days > 0) return `${days}${delimiter}day${days > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const hours = Math.floor((seconds % 86400) / 3600);
+  if (hours > 0) return `${hours}${delimiter}hour${hours > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (minutes > 0)
+    return `${minutes}${delimiter}minute${minutes > 1 && addPluralSuffix ? 's' : ''}`;
+
+  return `${Math.floor(seconds)}${delimiter}second${seconds > 1 && addPluralSuffix ? 's' : ''}`;
+}
+
 function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () => void }) {
-  const chain = useChain();
+  const { chainId } = useWallet();
+
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog');
 
   return (
     <>
-      <div className="text-lg font-medium">{dictionary('description1')}</div>
+      <div className="font-medium text-lg">{dictionary('description.title')}</div>
       <p>
-        {dictionary('description2', {
+        {dictionary.rich('description.content', {
           request_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_REQUEST_TIME_SECONDS,
+            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
               addSuffix: true,
             }
           ),
-        })}
-        <br />
-        <br />
-        {dictionary.rich('description3', {
-          request_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_REQUEST_TIME_SECONDS
-          ),
-          exit_time: formatLocalizedTimeFromSeconds(
-            SESSION_NODE_TIME(chain).EXIT_GRACE_TIME_SECONDS
+          exit_time: formatEnglishTimeDistance(
+            SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS,
+            '-'
           ),
           link: externalLink({
             href: URL.NODE_LIQUIDATION_LEARN_MORE,
             dataTestId: LinkDataTestId.Request_Exit_Liquidation_Learn_More,
           }),
         })}
-        <br />
-        <br />
-        {dictionary('description4')}
       </p>
       <AlertDialogFooter className="mt-4 flex w-full flex-col font-medium sm:flex-row">
         <Button
@@ -177,7 +185,8 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
   const {
     initiateRemoveBLSPublicKey,
     fee,
-    estimateContractWriteFee,
+    gasAmount,
+    gasPrice,
     simulateEnabled,
     resetContract,
     status,
@@ -185,16 +194,6 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
   } = useRequestNodeExit({
     contractId: node.contract_id,
   });
-
-  const feeEstimate = useMemo(
-    () => (fee !== null ? formatBigIntTokenValue(fee ?? BigInt(0), ETH_DECIMALS, 18) : null),
-    [fee]
-  );
-
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
-  );
 
   const handleClick = () => {
     if (simulateEnabled) {
@@ -205,28 +204,15 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
 
   const isDisabled = !node.contract_id;
 
-  useEffect(() => {
-    if (!isDisabled) {
-      estimateContractWriteFee();
-    }
-  }, [node.contract_id]);
-
   return (
     <>
-      <NodeActionModuleInfo
-        node={node}
-        feeEstimate={feeEstimate}
-        feeEstimateText={dictionary('requestFee')}
-      />
+      <NodeActionModuleInfo node={node} fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
       <AlertDialogFooter className="mt-4 flex flex-col gap-8 sm:flex-col">
         <Button
           variant="destructive"
           rounded="md"
           size="lg"
-          aria-label={dictionary('buttons.submitAria', {
-            tokenAmount: stakedAmount,
-            gasAmount: feeEstimate ?? 0,
-          })}
+          aria-label={dictionary('buttons.submitAria')}
           className="w-full"
           data-testid={ButtonDataTestId.Staked_Node_Request_Exit_Write_Dialog_Submit}
           disabled={isDisabled || (simulateEnabled && status !== PROGRESS_STATUS.ERROR)}

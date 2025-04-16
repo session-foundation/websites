@@ -1,30 +1,28 @@
 'use client';
 
+import type { AddressModuleProps } from '@/app/mystakes/modules/types';
+import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import { URL } from '@/lib/constants';
+import { formatNumber, formatPercentage } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
-import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import {
-  getVariableFontSizeForSmallModule,
-  ModuleDynamicQueryText,
-} from '@/components/ModuleDynamic';
 import type { QUERY_STATUS } from '@/lib/query';
-import { useMemo } from 'react';
-import { Address } from 'viem';
-import { useQuery } from '@tanstack/react-query';
+import { LinkDataTestId } from '@/testing/data-test-ids';
+import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { toast } from '@session/ui/lib/toast';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { formatNumber } from '@/lib/locale-client';
-import { LinkDataTestId } from '@/testing/data-test-ids';
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 const noPointsObject = {
   score: 0,
   percent: 0,
 };
 
-export default function TestnetPointsModule(params?: { addressOverride?: Address }) {
+export default function TestnetPointsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.points');
+  const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
@@ -57,7 +55,7 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
     },
   });
 
-  const points = data?.score ? `${formatNumber(data.score)} points` : null;
+  const points = `${formatNumber(data?.score ?? 0)} points`;
 
   return (
     <Module>
@@ -69,10 +67,16 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
           }),
         })}
       </ModuleTooltip>
-      <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
+      {/* We don't care that it hydrates differently based on client locale. */}
+      <ModuleTitle suppressHydrationWarning>
+        {titleFormat('format', { title })}
+        {` (${formatPercentage((data?.percent ?? 0) / 100, { maximumSignificantDigits: 2 })})`}
+      </ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
+        enabled
+        errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {
             error: toastDictionary('error', { module: title }),
@@ -80,9 +84,6 @@ export default function TestnetPointsModule(params?: { addressOverride?: Address
             success: toastDictionary('refetchSuccess', { module: title }),
           },
           refetch,
-        }}
-        style={{
-          fontSize: getVariableFontSizeForSmallModule(points?.length ?? 1),
         }}
       >
         {points}

@@ -1,23 +1,26 @@
-import { useMemo } from 'react';
-import { useInitiateRemoveBLSPublicKey } from '@session/contracts/hooks/ServiceNodeRewards';
-import { useTranslations } from 'next-intl';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
+import { useInitiateRemoveBLSPublicKey } from '@session/contracts/hooks/ServiceNodeRewards';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 type UseRequestNodeExitParams = {
   contractId: number;
 };
 
 export default function useRequestNodeExit({ contractId }: UseRequestNodeExitParams) {
-  const stageDictKey = 'nodeCard.staked.requestExit.dialog.stage' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('nodeCard.staked.requestExit.dialog.stage');
+  const dictGeneral = useTranslations('general');
+  const vestingContractAddress = useActiveVestingContractAddress();
 
   const {
     initiateRemoveBLSPublicKey,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     contractCallStatus,
     simulateError,
@@ -27,20 +30,20 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
     resetContract,
   } = useInitiateRemoveBLSPublicKey({
     contractId,
+    vestingContractAddress,
   });
 
   const errorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'arbitrum',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError,
         writeError,
         transactionError,
       }),
-    [simulateError, writeError, transactionError]
+    [simulateError, writeError, transactionError, dict, dictGeneral]
   );
 
   const status = useMemo(
@@ -51,6 +54,8 @@ export default function useRequestNodeExit({ contractId }: UseRequestNodeExitPar
   return {
     initiateRemoveBLSPublicKey,
     fee,
+    gasAmount,
+    gasPrice,
     estimateContractWriteFee,
     simulateEnabled,
     resetContract,

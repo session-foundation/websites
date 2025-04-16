@@ -1,7 +1,8 @@
-import Database, * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
-import { Address } from 'viem';
 import { isProduction } from '@/lib/env';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
+import type { Address } from 'viem';
 
 export enum TABLE {
   TRANSACTIONS = 'transactions',
@@ -91,25 +92,11 @@ export const openDatabase = (fileMustExist = true): BetterSql3.Database => {
     dbOptions.verbose = console.log;
   }
 
-  const db = new Database('db/faucet.sqlite', dbOptions);
-
-  // db.pragma('journal_mode = WAL');
-
-  db.pragma(`cipher='sqlcipher'`);
-  db.pragma(`legacy=4`);
-  db.pragma(`key = '${dbSecretKey}'`);
-
-  return db;
+  return new Database('db/faucet.sqlite', dbOptions);
 };
 
 export const setupDatababse = () => {
   const db = openDatabase(false);
-  const dbSecretKey = process.env.FAUCET_DB_SECRET_KEY;
-  if (!dbSecretKey) {
-    throw new Error('Faucet database secret key is required');
-  }
-
-  db.pragma(`rekey='${dbSecretKey}'`);
 
   db.prepare(
     `CREATE TABLE IF NOT EXISTS ${TABLE.FAUCET} (
@@ -294,10 +281,8 @@ export const parseCSV = (csv: string) => {
   }
 };
 
-export const importOperatorIds = (operatorExport: Array<OperatorAddressExport>) => {
-  const filtered = operatorExport.filter((row, index, self) => {
-    return index === self.findIndex((t) => t.destination === row.destination);
-  });
+export const importOperatorIds = (operatorExport: Array<string>) => {
+  const filtered = Array.from(new Set(operatorExport));
 
   let db: BetterSql3.Database | undefined;
 
@@ -306,9 +291,9 @@ export const importOperatorIds = (operatorExport: Array<OperatorAddressExport>) 
 
     const insert = db.prepare(`INSERT INTO ${TABLE.OPERATOR} (${OPERATOR_TABLE.ID}) VALUES (?)`);
 
-    const transaction = db.transaction((operatorExport: Array<OperatorAddressExport>) => {
-      for (const { destination } of operatorExport) {
-        insert.run(destination);
+    const transaction = db.transaction((operatorExport: Array<string>) => {
+      for (const destination of operatorExport) {
+        insert.run(`0X${destination}`);
       }
     });
 
@@ -378,9 +363,9 @@ export function hasRecentTransaction({
     : 0;
 
   const row = db
-    .prepare<
-      [IdTableParams['id'], TransactionsRow['timestamp']]
-    >(`SELECT count(${source}) FROM ${TABLE.TRANSACTIONS} WHERE ${source} = ? AND timestamp > ?`)
+    .prepare<[IdTableParams['id'], TransactionsRow['timestamp']]>(
+      `SELECT count(${source}) FROM ${TABLE.TRANSACTIONS} WHERE ${source} = ? AND timestamp > ?`
+    )
     .get(id, lastTransactionCutoff) as CountType<typeof source>;
 
   return hasCount(row, source);
@@ -440,7 +425,7 @@ type CodeDetails = {
  * @param props.code The code to get details for.
  * @returns The referral code details.
  */
-export function getReferralCodeDetails({ db, code }: CodeDetailParams): CodeDetails {
+export function getReferralCodeDetails({ db, code }: CodeDetailParams): CodeDetails | undefined {
   return db
     .prepare<string>(
       `SELECT ${CODE_TABLE.ID}, ${CODE_TABLE.WALLET}, ${CODE_TABLE.DRIP}, ${CODE_TABLE.MAXUSES} FROM ${TABLE.CODE} WHERE ${CODE_TABLE.ID} = ?`
@@ -676,17 +661,22 @@ export function createWalletReferralCodes({ params }: CreateWalletReferralCodesP
   }
 }
 
-//
-// const test: Array<{ address: Address; uses: number }> = [
-//
-// ];
+// const test: Array<{ address: Address; uses: number; creatorWallet: Address }> = [];
 //
 // export function createWalletCodes() {
-//   const params: Array<AddReferralCodesParams> = test.map(({ address, uses }) => ({
-//     codes: new Set([encodeAddressToHashId(address)]),
-//     creatorWallet: address,
+//   const params: Array<AddReferralCodesParams> = test.map(({ address, uses, creatorWallet }) => ({
+//     codes: new Set([
+//       encodeAddressToHashId(
+//         address,
+//         process.env.NEXT_PUBLIC_SALT && !Number.isInteger(process.env.NEXT_PUBLIC_SALT)
+//           ? Number.parseInt(process.env.NEXT_PUBLIC_SALT)
+//           : undefined,
+//         process.env.NEXT_PUBLIC_PEPPER
+//       ),
+//     ]),
+//     creatorWallet: creatorWallet ?? address,
 //     maxUses: uses,
-//     drip: 5000000000000n,
+//     drip: 2000_000000000n,
 //   }));
 //   createWalletReferralCodes({ params });
 // }

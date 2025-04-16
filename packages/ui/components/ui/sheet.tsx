@@ -1,11 +1,12 @@
 'use client';
 
 import * as SheetPrimitive from '@radix-ui/react-dialog';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { X } from 'lucide-react';
+import { type VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
 
+import { ChevronsDownIcon } from '../../icons/ChevronsDownIcon';
 import { cn } from '../../lib/utils';
+import { ModuleGrid } from '../ModuleGrid';
 
 const Sheet = SheetPrimitive.Root;
 
@@ -21,7 +22,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80',
+      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed z-50 bg-web3wallet-black data-[state=closed]:animate-out data-[state=open]:animate-in',
       className
     )}
     {...props}
@@ -31,16 +32,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-session-black p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'fixed z-50 gap-4 bg-session-black p-6 shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        top: 'data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 border-b',
         bottom:
-          'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        left: 'inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
+          'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 border-t',
+        left: 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm',
         right:
-          'inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
+          'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm',
       },
     },
     defaultVariants: {
@@ -58,18 +59,42 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, closeSheet, ...props }, ref) => (
+>(({ className, children, closeSheet, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      {children}
-      <SheetPrimitive.Close
-        className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+    <SheetPrimitive.Content
+      ref={ref}
+      className={cn(
+        'fixed z-50 gap-4 p-2 shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:duration-300 data-[state=open]:duration-500',
+        'md:data-[state=closed]:slide-out-to-right md:data-[state=open]:slide-in-from-right md:inset-y-0 md:right-0 md:h-full md:w-3/4 md:border-transparent md:sm:max-w-md',
+        'max-md:data-[state=closed]:slide-out-to-bottom max-md:data-[state=open]:slide-in-from-bottom bottom-0 h-max w-full'
+      )}
+    >
+      <div
+        className={cn(
+          'md:-translate-x-16 md:hover:-translate-x-14 md:hover:-translate-y-0 w-full cursor-pointer opacity-55 transition-all duration-200 hover:translate-y-6 md:fixed md:h-full md:w-24 md:pb-4'
+        )}
         onClick={closeSheet}
       >
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
+        <div className="flex h-full flex-row justify-between rounded-lg bg-[rgba(255,255,255,0.1)] px-4 py-6 transition-all duration-200 hover:bg-[rgba(255,255,255,0.2)] md:flex-col">
+          <SheetPrimitive.Close
+            className="rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+            onClick={closeSheet}
+          >
+            <ChevronsDownIcon className='md:-rotate-90 h-8 w-8 transform stroke-web3wallet-text' />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+          <SheetPrimitive.Close
+            className="rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+            onClick={closeSheet}
+          >
+            <ChevronsDownIcon className='md:-rotate-90 h-8 w-8 transform stroke-web3wallet-text' />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        </div>
+      </div>
+      <ModuleGrid variant="section" className={cn('p-4 md:h-full', className)} {...props}>
+        {children}
+      </ModuleGrid>
     </SheetPrimitive.Content>
   </SheetPortal>
 ));
@@ -94,7 +119,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn('text-foreground text-lg font-semibold', className)}
+    className={cn('font-semibold text-foreground text-lg', className)}
     {...props}
   />
 ));

@@ -1,7 +1,7 @@
-import { safeTrySync } from '@session/util-js/try';
+import { isProduction } from '@session/util-js/env';
+import { safeTry } from '@session/util-js/try';
 import { draftMode } from 'next/headers';
 import logger from './logger';
-import { isProduction } from '@session/util-js/env';
 
 /**
  * Checks if draft mode is enabled.
@@ -10,8 +10,8 @@ import { isProduction } from '@session/util-js/env';
  *
  * @returns If draft mode is enabled
  */
-export const isDraftModeEnabled = () => {
-  const [err, result] = safeTrySync(draftMode);
+export const isDraftModeEnabled = async () => {
+  const [err, result] = await safeTry(draftMode());
 
   if (err) {
     /**
@@ -23,7 +23,7 @@ export const isDraftModeEnabled = () => {
       return false;
     }
 
-    logger.error(`Error getting draft mode`);
+    logger.error('Error getting draft mode');
 
     if (isProduction()) {
       logger.error(err);

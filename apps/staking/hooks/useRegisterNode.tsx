@@ -1,33 +1,49 @@
 'use client';
 
-import { addresses } from '@session/contracts';
-import { useProxyApproval } from '@session/contracts/hooks/SENT';
-import { useAddBLSPubKey } from '@session/contracts/hooks/ServiceNodeRewards';
-import { useEffect, useMemo, useState } from 'react';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
+import { addresses, isValidChainId } from '@session/contracts';
+import {
+  type UseAddBlsPubKeyParams,
+  useAddBLSPubKey,
+} from '@session/contracts/hooks/ServiceNodeRewards';
+import { useProxyApproval } from '@session/contracts/hooks/Token';
+import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 
+export type NodeRegistrationBasicParams = {
+  blsPubKey: string;
+  blsSignature: string;
+  nodePubKey: string;
+  userSignature: string;
+};
+
+export type UseRegisterNodeParams = Omit<UseAddBlsPubKeyParams, 'fee'>;
+
+/**
+ * Hook to register a node.
+ * @param blsPubKey - The BLS public key of the node.
+ * @param blsSignature - The BLS signature of the node.
+ * @param nodePubKey - The node public key.
+ * @param userSignature - The user signature.
+ * @param contributors - The contributors.
+ */
 export default function useRegisterNode({
   blsPubKey,
   blsSignature,
   nodePubKey,
   userSignature,
-  stakeAmount,
-}: {
-  blsPubKey: string;
-  blsSignature: string;
-  nodePubKey: string;
-  userSignature: string;
-  stakeAmount: bigint;
-}) {
+  contributors,
+}: UseRegisterNodeParams) {
   const [enabled, setEnabled] = useState<boolean>(false);
+  const { chainId } = useWallet();
 
-  const stageDictKey = 'actionModules.register.stageSolo' as const;
-  const dictionary = useTranslations(stageDictKey);
-  const dictionaryGeneral = useTranslations('general');
+  const dict = useTranslations('actionModules.registration.submitSolo');
+  const dictGeneral = useTranslations('general');
 
   const {
     approve,
@@ -39,9 +55,9 @@ export default function useRegisterNode({
     simulateError: approveSimulateError,
     transactionError: approveTransactionError,
   } = useProxyApproval({
-    // TODO: Create network provider to handle network specific logic
-    contractAddress: addresses.ServiceNodeRewards.testnet,
-    tokenAmount: stakeAmount,
+    contractAddress: isValidChainId(chainId) ? addresses.ServiceNodeRewards[chainId] : null,
+    tokenAmount: contributors[0].stakedAmount ?? SESSION_NODE_FULL_STAKE_AMOUNT,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const {
@@ -55,6 +71,7 @@ export default function useRegisterNode({
     blsSignature,
     nodePubKey,
     userSignature,
+    contributors,
   });
 
   const registerAndStake = () => {
@@ -72,29 +89,27 @@ export default function useRegisterNode({
   const approveErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'approve',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: approveSimulateError,
         writeError: approveWriteError,
         transactionError: approveTransactionError,
       }),
-    [approveSimulateError, approveWriteError, approveTransactionError]
+    [approveSimulateError, approveWriteError, approveTransactionError, dict, dictGeneral]
   );
 
   const addBLSErrorMessage = useMemo(
     () =>
       formatAndHandleLocalizedContractErrorMessages({
-        parentDictKey: stageDictKey,
         errorGroupDictKey: 'arbitrum',
-        dictionary,
-        dictionaryGeneral,
+        dict,
+        dictGeneral,
         simulateError: addBLSSimulateError,
         writeError: addBLSWriteError,
         transactionError: addBLSTransactionError,
       }),
-    [addBLSSimulateError, addBLSWriteError, addBLSTransactionError]
+    [addBLSSimulateError, addBLSWriteError, addBLSTransactionError, dict, dictGeneral]
   );
 
   const allowanceReadStatus = useMemo(
@@ -113,6 +128,7 @@ export default function useRegisterNode({
   );
 
   // NOTE: Automatically triggers the write stage once the approval has succeeded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only trigger on success
   useEffect(() => {
     if (enabled && approveWriteStatusRaw === 'success') {
       addBLSPubKey();
@@ -128,5 +144,11 @@ export default function useRegisterNode({
     addBLSErrorMessage,
     addBLSStatus,
     enabled,
+    approveWriteError,
+    approveSimulateError,
+    approveTransactionError,
+    addBLSSimulateError,
+    addBLSWriteError,
+    addBLSTransactionError,
   };
 }

@@ -1,32 +1,31 @@
 import { ActionModuleRow } from '@/components/ActionModule';
+import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import { NodeContributorList } from '@/components/NodeCard';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import type { Stake } from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
-import { externalLink } from '@/lib/locale-defaults';
-import { TICKER, URL } from '@/lib/constants';
-import { LoadingText } from '@session/ui/components/loading-text';
 import { useTranslations } from 'next-intl';
-import { Stake } from '@session/sent-staking-js/client';
-import { formatSENTNumber } from '@session/contracts/hooks/SENT';
-import { SENT_SYMBOL } from '@session/contracts';
 import { useMemo } from 'react';
 import { LinkDataTestId } from '@/testing/data-test-ids';
 
 export default function NodeActionModuleInfo({
   node,
-  feeEstimate,
-  feeEstimateText,
+  fee,
+  gasAmount,
+  gasPrice,
 }: {
   node: Stake;
-  feeEstimate?: string | null;
-  feeEstimateText?: string;
+  fee: bigint | null;
+  gasAmount: bigint | null;
+  gasPrice: bigint | null;
 }) {
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog.write');
   const dictionaryActionModulesNode = useTranslations('actionModules.node');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
 
-  const stakedAmount = useMemo(
-    () => (node.staked_balance ? formatSENTNumber(node.staked_balance) : `0 ${SENT_SYMBOL}`),
-    [node.staked_balance]
+  const formattedTotalStaked = useMemo(
+    () => formatSENTBigInt(node.contributors.reduce((acc, { amount }) => acc + amount, 0n)),
+    [node.contributors]
   );
 
   return (
@@ -49,10 +48,9 @@ export default function NodeActionModuleInfo({
         label={sessionNodeDictionary('operatorAddress')}
         tooltip={sessionNodeDictionary('operatorAddressTooltip')}
       >
-        {node.contributors[0]?.address ? (
-          <PubKey pubKey={node.contributors[0]?.address} force="collapse" alwaysShowCopyButton />
-        ) : null}
+        <PubKey pubKey={node.operator_address} force="collapse" alwaysShowCopyButton />
       </ActionModuleRow>
+<<<<<<< HEAD
       {typeof feeEstimate !== 'undefined' ? (
         <ActionModuleRow
           label={feeEstimateText ?? dictionaryActionModulesNode('feeEstimate')}
@@ -72,12 +70,15 @@ export default function NodeActionModuleInfo({
           </span>
         </ActionModuleRow>
       ) : null}
+=======
+>>>>>>> dev
       <ActionModuleRow
         label={dictionary('amountStaked')}
         tooltip={dictionary('amountStakedTooltip')}
       >
-        {stakedAmount}
+        {formattedTotalStaked}
       </ActionModuleRow>
+      <ActionModuleFeeRow fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
     </div>
   );
 }

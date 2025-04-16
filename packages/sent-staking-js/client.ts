@@ -465,3 +465,4 @@ export class SessionStakingClient {
  */
 export const createSessionStakingClient = (config: SSBClientConfig): SessionStakingClient =>
   new SessionStakingClient(config);
+

@@ -1,9 +1,10 @@
 'use client';
 
+import { useWallet } from '@session/wallet/hooks/useWallet';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import type { ReadContractData } from 'wagmi/query';
 import type { RewardRatePoolAbi } from '../abis';
 import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
-import { useChain } from './useChain';
 
 type RewardRate = ReadContractData<typeof RewardRatePoolAbi, 'rewardRate', []>;
 
@@ -13,11 +14,12 @@ export type RewardRateQuery = ContractReadQueryProps & {
 };
 
 export function useRewardRateQuery(): RewardRateQuery {
-  const chain = useChain();
+  const { chainId } = useWallet();
+
   const { data: rewardRate, ...rest } = useContractReadQuery({
     contract: 'RewardRatePool',
     functionName: 'rewardRate',
-    chain,
+    chainIdOverride: chainId === arbitrumSepolia.id ? arbitrumSepolia.id : arbitrum.id,
   });
 
   return {

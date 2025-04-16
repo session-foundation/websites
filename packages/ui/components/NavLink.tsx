@@ -1,19 +1,19 @@
 'use client';
 
+import { type VariantProps, cva } from 'class-variance-authority';
 import Link from 'next/link';
-import { cn } from '../lib/utils';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../lib/utils';
 
 /** TODO: This was copied from the staking portal, investigate if we can turn it into a shared library */
 
 export const navlinkVariants = cva(
-  'hover:text-session-text-black hover:border-b-session-green border-b-2 border-b-transparent w-max',
+  'w-max border-b-2 border-b-transparent hover:border-b-session-green hover:text-session-text-black',
   {
     variants: {
       active: {
-        true: 'text-session-text-black border-b-session-green',
+        true: 'border-b-session-green text-session-text-black',
         false: '',
       },
     },

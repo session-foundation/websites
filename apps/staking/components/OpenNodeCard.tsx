@@ -1,11 +1,10 @@
 'use client';
 
-import { formatPercentage } from '@/lib/locale-client';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import type { OpenNode } from '@session/sent-staking-js/client';
-import { useTranslations } from 'next-intl';
-import * as React from 'react';
-import { forwardRef, type HTMLAttributes, useMemo } from 'react';
+import {
+  getContributedContributor,
+  getContributionRangeForWallet,
+  getReservedContributorNonContributed,
+} from '@/app/stake/[address]/StakeInfo';
 import {
   InfoNodeCard,
   NodeItem,
@@ -13,22 +12,28 @@ import {
   NodeItemSeparator,
   NodeItemValue,
 } from '@/components/InfoNodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/SENT';
-import { usePathname } from 'next/navigation';
-import { useWallet } from '@session/wallet/hooks/wallet-hooks';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
-import { getContributionRangeFromContributors } from '@/lib/maths';
+import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
-import { cn } from '@session/ui/lib/utils';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
+import { formatPercentage } from '@/lib/locale-client';
+import { getTotalStaked } from '@/lib/maths';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import type { ContributionContract } from '@session/staking-api-js/schema';
+import { ContactIcon } from '@session/ui/icons/ContactIcon';
 import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
-import { numberToBigInt } from '@session/util-crypto/maths';
-import type { Address } from 'viem';
+import { cn } from '@session/ui/lib/utils';
+import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { type HTMLAttributes, forwardRef } from 'react';
 
 export const StakedToIndicator = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    tokenAmount: number;
+    tokenAmount: bigint;
     hideTextOnMobile?: boolean;
   }
 >(({ className, hideTextOnMobile, tokenAmount, ...props }, ref) => {
@@ -38,18 +43,18 @@ export const StakedToIndicator = forwardRef<
     <>
       <Tooltip
         tooltipContent={dictionary('stakedToTooltip', {
-          tokenAmount: formatSENTBigInt(numberToBigInt(tokenAmount)),
+          tokenAmount: formatSENTBigInt(tokenAmount),
         })}
       >
         <div
           ref={ref}
           className={cn(
-            'text-session-green flex flex-row items-center gap-1 align-middle text-sm font-normal md:text-base',
+            'flex flex-row items-center gap-1 align-middle font-normal text-session-green text-sm md:text-base',
             className
           )}
           {...props}
         >
-          <SessionTokenIcon className="fill-session-green h-3.5 w-3.5" />
+          <SessionTokenIcon className="h-3.5 w-3.5 fill-session-green" />
           {hideTextOnMobile ? (
             <span className="hidden md:block">{dictionary('stakedTo')}</span>
           ) : (
@@ -61,85 +66,136 @@ export const StakedToIndicator = forwardRef<
   );
 });
 
-export const isOpenNodeOperator = (node: OpenNode, address?: Address) =>
-  address ? areHexesEqual(node.operator, address) : false;
-export const isOpenNodeContributor = (node: OpenNode, address?: Address) =>
-  address
-    ? node.contributors?.find((contributor) => areHexesEqual(contributor.address, address))
-    : undefined;
-
 const OpenNodeCard = forwardRef<
   HTMLDivElement,
-  HTMLAttributes<HTMLDivElement> & { node: OpenNode; forceSmall?: boolean }
->(({ className, forceSmall, node, ...props }, ref) => {
+  HTMLAttributes<HTMLDivElement> & {
+    contract: ContributionContract;
+    forceSmall?: boolean;
+    showAlreadyRunningWarning?: boolean;
+  }
+>(({ className, forceSmall, showAlreadyRunningWarning, contract, ...props }, ref) => {
   const dictionary = useTranslations('nodeCard.open');
   const generalNodeDictionary = useTranslations('sessionNodes.general');
+  const dictGeneral = useTranslations('general');
   const titleFormat = useTranslations('modules.title');
   const pathname = usePathname();
-  const { address } = useWallet();
+  const address = useCurrentActor();
 
-  const { service_node_pubkey: pubKey, fee, total_contributions, contract } = node;
+  const isOperator = areHexesEqual(contract.operator_address, address);
+  const contributor = getContributedContributor(contract, address);
+  const reservedContributor = getReservedContributorNonContributed(contract, address);
 
-  const { minStake, maxStake } = getContributionRangeFromContributors(node.contributors);
+  const { minStake, maxStake } = getContributionRangeForWallet(contract, address);
+  const totalStaked = getTotalStaked(contract.contributors);
 
-  const isOperator = isOpenNodeOperator(node, address);
-  const isContributor = isOpenNodeContributor(node, address);
+  const connectedWalletNonContributedReservedStakeAmount =
+    (!contributor && reservedContributor?.reserved) || 0;
 
-  const isStakeFromOpen = useMemo(() => pathname === `/stake/${contract}`, [pathname, contract]);
+  const state = parseStakeContractState(contract);
+
+  const isActive = pathname === `/stake/${contract.address}`;
 
   return (
     <InfoNodeCard
       ref={ref}
       className={className}
-      pubKey={pubKey}
-      statusIndicatorColour="blue"
-      isActive={isStakeFromOpen}
+      pubKey={contract.service_node_pubkey}
+      statusIndicatorColour={
+        state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION || showAlreadyRunningWarning
+          ? 'yellow'
+          : connectedWalletNonContributedReservedStakeAmount
+            ? 'green'
+            : 'blue'
+      }
+      isActive={pathname === `/stake/${contract.address}`}
       forceSmall={forceSmall}
-      button={{
-        ariaLabel: dictionary('viewButton.ariaLabel'),
-        text: dictionary('viewButton.text'),
-        dataTestId: ButtonDataTestId.Node_Card_View,
-        link: `/stake/${contract}`,
-      }}
+      button={
+        !isActive
+          ? {
+              ariaLabel: dictionary('viewButton.ariaLabel'),
+              text: dictionary('viewButton.text'),
+              dataTestId: ButtonDataTestId.Node_Card_View,
+              link: `/stake/${contract.address}`,
+            }
+          : undefined
+      }
+      warnings={
+        <>
+          {showAlreadyRunningWarning ? (
+            <AlertTooltip
+              iconClassName="h-4 w-4 md:h-10 md:w-10"
+              tooltipContent={dictionary('errorStakedButAlreadyRunning')}
+            />
+          ) : null}
+          {state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_CONTRIBUTION ? (
+            <AlertTooltip
+              iconClassName="h-10 w-10"
+              tooltipContent={dictionary('youOperatorNotStaked')}
+            />
+          ) : connectedWalletNonContributedReservedStakeAmount ? (
+            <Tooltip
+              tooltipContent={dictionary('youReservedNotContributed', {
+                tokenAmount: formatSENTBigInt(connectedWalletNonContributedReservedStakeAmount),
+              })}
+            >
+              <ContactIcon className="h-10 w-10 stroke-session-green" />
+            </Tooltip>
+          ) : null}
+        </>
+      }
       {...props}
     >
       {isOperator ? (
-        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
-          {total_contributions === 0 ? (
-            <AlertTooltip tooltipContent={dictionary('youOperatorNotStaked')} />
-          ) : (
-            <>
-              <NodeOperatorIndicator hideTextOnMobile />
-              <NodeItemSeparator className="ms-2 hidden md:block" />
-            </>
-          )}
-        </NodeItem>
-      ) : isContributor ? (
-        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
-          <StakedToIndicator hideTextOnMobile tokenAmount={isContributor.amount} />
-          <NodeItemSeparator className="ms-2 hidden md:block" />
+        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center gap-1.5 align-middle">
+          <NodeOperatorIndicator isOperatorConnectedWallet />
         </NodeItem>
       ) : null}
-      <NodeItem>
-        <NodeItemLabel className="inline-flex md:hidden">
-          {titleFormat('format', { title: dictionary('min') })}
-        </NodeItemLabel>
-        <NodeItemLabel className="hidden md:inline-flex">
-          {titleFormat('format', { title: dictionary('minContribution') })}
-        </NodeItemLabel>
-        <NodeItemValue>{formatSENTBigInt(minStake, 2)}</NodeItemValue>
-      </NodeItem>
+      {contributor ? (
+        <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center align-middle">
+          <StakedToIndicator className="me-1.5" hideTextOnMobile tokenAmount={contributor.amount} />
+          <NodeItemValue>{formatSENTBigInt(contributor.amount, 1)}</NodeItemValue>
+        </NodeItem>
+      ) : null}
+      {!contributor ? (
+        <NodeItem className="sm:flex-nowrap sm:text-nowrap">
+          <NodeItemLabel className="inline-flex sm:flex-nowrap sm:text-nowrap lg:hidden">
+            {titleFormat('format', { title: dictionary('min') })}
+          </NodeItemLabel>
+          <NodeItemLabel className="hidden sm:flex-nowrap sm:text-nowrap lg:inline-flex">
+            {titleFormat('format', { title: dictionary('minContribution') })}
+          </NodeItemLabel>
+          <NodeItemValue>
+            {formatSENTBigInt(
+              reservedContributor?.reserved ? reservedContributor.reserved : minStake,
+              2
+            )}
+          </NodeItemValue>
+        </NodeItem>
+      ) : null}
       <NodeItemSeparator className="hidden md:block" />
-      <NodeItem className="hidden md:block">
-        <NodeItemLabel>{titleFormat('format', { title: dictionary('max') })}</NodeItemLabel>
-        <NodeItemValue>{formatSENTBigInt(maxStake, 2)}</NodeItemValue>
-      </NodeItem>
+      {contributor ? (
+        <NodeItem className="hidden md:block">
+          <NodeItemLabel>
+            {titleFormat('format', { title: dictionary('remainingStake') })}
+          </NodeItemLabel>
+          <NodeItemValue>
+            {formatSENTBigInt(SESSION_NODE_FULL_STAKE_AMOUNT - totalStaked, 2)}
+          </NodeItemValue>
+        </NodeItem>
+      ) : (
+        <NodeItem className="hidden md:block">
+          <NodeItemLabel>{titleFormat('format', { title: dictionary('max') })}</NodeItemLabel>
+          <NodeItemValue>{formatSENTBigInt(maxStake, 2)}</NodeItemValue>
+        </NodeItem>
+      )}
       <NodeItemSeparator />
       <NodeItem>
         <NodeItemLabel>
           {titleFormat('format', { title: generalNodeDictionary('operatorFeeShort') })}
         </NodeItemLabel>
-        <NodeItemValue>{formatPercentage(fee / 10000)}</NodeItemValue>
+        <NodeItemValue>
+          {contract.fee !== null ? formatPercentage(contract.fee / 10000) : dictGeneral('notFound')}
+        </NodeItemValue>
       </NodeItem>
     </InfoNodeCard>
   );

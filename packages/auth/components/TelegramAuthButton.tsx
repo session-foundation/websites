@@ -2,13 +2,13 @@
 
 import { Button } from '@session/ui/ui/button';
 import { LoginButton } from '@telegram-auth/react';
-import { SignInAuthorizationParams } from 'next-auth/react';
-import { forwardRef } from 'react';
+import type { SignInAuthorizationParams } from 'next-auth/react';
+import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { TelegramIcon } from '../icons/TelegramIcon';
 import { signIn, signOut, useSession } from '../lib/client';
 import { ButtonDataTestId } from '../testing/data-test-ids';
 
-type TelegramAuthButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type TelegramAuthButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   locale?: string;
 };
 
@@ -22,9 +22,9 @@ export const TelegramAuthButton = forwardRef<HTMLButtonElement, TelegramAuthButt
 
     const handleAuth = (data: unknown) => {
       if (!isConnected && data) {
-        signIn('telegram', {}, data as SignInAuthorizationParams);
+        void signIn('telegram', {}, data as SignInAuthorizationParams);
       } else {
-        signOut();
+        void signOut();
       }
     };
 
@@ -50,7 +50,7 @@ export const TelegramAuthButton = forwardRef<HTMLButtonElement, TelegramAuthButt
           </div>
         ) : null}
         <Button
-          className="text-session-black hover:text-session-black w-full gap-2 border-transparent bg-[#2AABEE] px-2 uppercase hover:bg-[#2AABEE] group-hover:brightness-125"
+          className="w-full gap-2 border-transparent bg-[#2AABEE] px-2 text-session-black uppercase hover:bg-[#2AABEE] hover:text-session-black group-hover:brightness-125"
           rounded="md"
           size="lg"
           data-testid={ButtonDataTestId.TELEGRAM_AUTH}

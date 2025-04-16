@@ -1,11 +1,11 @@
-import { SanityImage } from '@session/sanity-cms/components/SanityImage';
+import logger from '@/lib/logger';
 import { client } from '@/lib/sanity/sanity.client';
+import { SanityImage } from '@session/sanity-cms/components/SanityImage';
+import type { FormattedPostType } from '@session/sanity-cms/queries/getPost';
 import Typography from '@session/ui/components/Typography';
-import { getLocale } from 'next-intl/server';
 import { cn } from '@session/ui/lib/utils';
 import { safeTry } from '@session/util-js/try';
-import logger from '@/lib/logger';
-import type { FormattedPostType } from '@session/sanity-cms/queries/getPost';
+import { getLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
 const getLocalizedPosedDate = async (date: Date) => {
@@ -33,7 +33,7 @@ export default async function PostInfoBlock({
 }: PostBlockProps) {
   const { title, summary, featuredImage, author, date } = postInfo;
 
-  let localizedPublishedAt = null;
+  let localizedPublishedAt: null | string = null;
   if (date) {
     const [err, res] = await safeTry(getLocalizedPosedDate(date));
     if (err) {
@@ -66,7 +66,7 @@ export default async function PostInfoBlock({
         <Typography variant={columnAlways ? 'h2' : 'h1'} className="w-full">
           {title}
         </Typography>
-        <span className="text-session-text-black-secondary inline-flex w-full gap-1">
+        <span className="inline-flex w-full gap-1 text-session-text-black-secondary">
           {date ? <time dateTime={date.toISOString()}>{localizedPublishedAt}</time> : null}
           {date ? '/' : null}
           {author?.name ? <address>{author.name}</address> : null}

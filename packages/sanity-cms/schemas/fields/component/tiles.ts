@@ -1,7 +1,7 @@
-import { defineArrayMember, defineField } from 'sanity';
-import { tileFields, type TileSchemaType } from './tile';
-import type { SchemaFieldsType } from '../../types';
 import type { ArrayMemberFields } from '@session/sanity-types';
+import { defineArrayMember, defineField } from 'sanity';
+import type { SchemaFieldsType } from '../../types';
+import { type TileSchemaType, tileFields } from './tile';
 
 export enum TILES_VARIANT {
   TEXT_OVERLAY_IMAGE = 'text-overlay-image',

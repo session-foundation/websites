@@ -3,32 +3,19 @@
 import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useStakingBackendSuspenseQuery } from '@/lib/sent-staking-backend-client';
-import { getOpenNodes } from '@/lib/queries/getOpenNodes';
-import { useMemo } from 'react';
-import { Loading } from '@session/ui/components/loading';
-import { areHexesEqual } from '@session/util-crypto/string';
 
-export const BlockExplorerLink = ({ contract }: { contract: string }) => {
-  const { data, isLoading } = useStakingBackendSuspenseQuery(getOpenNodes);
-
-  const node = useMemo(() => {
-    return data?.nodes?.find((node) => areHexesEqual(node.contract, contract));
-  }, [data, contract]);
-
-  return isLoading ? (
-    <Loading />
-  ) : node ? (
-    <Link href={`/explorer/address/${node.contract}`} target="_blank">
+export const BlockExplorerLink = ({ address }: { address: string }) => {
+  return (
+    <Link href={`/explorer/address/${address}`} target="_blank" prefetch={false}>
       <BlockExplorerLinkText />
     </Link>
-  ) : null;
+  );
 };
 
 export const BlockExplorerLinkText = () => {
   const generalDictionary = useTranslations('general');
   return (
-    <span className="text-session-green fill-session-green inline-flex items-center gap-1 align-middle">
+    <span className="inline-flex items-center gap-1 fill-session-green align-middle text-session-green">
       <span className="hidden sm:inline-flex xl:hidden 2xl:inline-flex">
         {generalDictionary('viewOnExplorer')}
       </span>

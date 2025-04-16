@@ -1,20 +1,18 @@
-import { getRemoteFeatureFlagContent, getRemoteFeatureFlags } from '@/lib/feature-flags-server';
-import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
-import { Banner } from '@session/ui/components/Banner';
-import { RegistrationPausedInfo } from '@/components/RegistrationPausedInfo';
-import { NewTokenContractInfo } from '@/components/NewTokenContractInfo';
 import { ClaimRewardsDisabledInfo } from '@/components/ClaimRewardsDisabledInfo';
+import { NewTokenContractInfo } from '@/components/NewTokenContractInfo';
+import { RegistrationPausedInfo } from '@/components/RegistrationPausedInfo';
+import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
+import { getRemoteFeatureFlagContent } from '@/lib/feature-flags-server';
+import { Banner } from '@session/ui/components/Banner';
 
-export default async function RemoteBanner() {
-  /**
-   *  We don't need to handle any errors from the remote flag functions as any errors are handled
-   *  in the function call and call happens on the same thread as this is server-side rendered.
-   */
-  const enabledFlags = new Set((await getRemoteFeatureFlags()).flags);
-
+export default async function RemoteBanner({
+  enabledFlags,
+}: {
+  enabledFlags: Set<REMOTE_FEATURE_FLAG>;
+}) {
   // If the custom banner is enabled, fetch the content of the banner
   const customBanner = enabledFlags.has(REMOTE_FEATURE_FLAG.CUSTOM_BANNER)
-    ? (await getRemoteFeatureFlagContent(REMOTE_FEATURE_FLAG.CUSTOM_BANNER)).content ?? null
+    ? ((await getRemoteFeatureFlagContent(REMOTE_FEATURE_FLAG.CUSTOM_BANNER)).content ?? null)
     : null;
 
   return (

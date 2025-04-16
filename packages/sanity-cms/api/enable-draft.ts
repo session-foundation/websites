@@ -1,8 +1,8 @@
 import { validatePreviewUrl } from '@sanity/preview-url-secret';
+import type { SanityClient } from 'next-sanity';
 import { draftMode } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { SessionSanityClient } from '../lib/client';
-import { SanityClient } from 'next-sanity';
+import { type NextRequest, NextResponse } from 'next/server';
+import type { SessionSanityClient } from '../lib/client';
 import logger from '../lib/logger';
 
 type CreateEnableDraftHandlerOptions = {
@@ -29,7 +29,7 @@ export const createEnableDraftHandler = ({
       return new NextResponse('Invalid secret', { status: 401 });
     }
 
-    draftMode().enable();
+    (await draftMode()).enable();
     logger.info(`Enabled draft mode for ${req.url}`);
     return NextResponse.redirect(new URL(redirectTo, req.url));
   };

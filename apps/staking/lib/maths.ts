@@ -1,16 +1,29 @@
-import type { Contributor } from '@session/sent-staking-js/client';
+import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
+import {
+  type ContributionContractContributor,
+  type StakeContributor,
+  isContributionContractContributor,
+} from '@session/staking-api-js/schema';
+import { areHexesEqual } from '@session/util-crypto/string';
+import type { Address } from 'viem';
 
-const SESSION_NODE_FULL_STAKE_AMOUNT = 20000000000000n;
+const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
 
-export const getContributionRangeFromContributors = (contributors: Array<Contributor> = []) => {
-  let remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT;
+export const parseContributorDetails = (contributors: Array<ReservedContributorStruct> = []) => {
   let totalStaked = 0n;
 
   for (const contributor of contributors) {
-    const amount = BigInt(contributor.amount);
-    remainingStake -= amount;
+    const amount = contributor.amount;
     totalStaked += amount;
   }
+
+  if (totalStaked > SESSION_NODE_FULL_STAKE_AMOUNT) {
+    throw new Error(
+      `Total staked amount must be less than or equal to the full stake amount: ${totalStaked}`
+    );
+  }
+
+  const remainingStake = SESSION_NODE_FULL_STAKE_AMOUNT - totalStaked;
 
   const min = calcMinimumContribution(
     remainingStake,
@@ -31,30 +44,64 @@ function calcMinimumContribution(
   numContributors: bigint,
   maxNumContributors: bigint
 ): bigint {
-  if (maxNumContributors <= numContributors) {
-    throw new Error("Max contributors can't be greater than the max number of contributors");
+  if (maxNumContributors < numContributors) {
+    throw new Error(
+      `Number of contributors must be less than or equal to the max number of contributors. Max: ${maxNumContributors}, Current: ${numContributors}`
+    );
   }
 
   if (contributionRemaining < 0n) {
-    throw new Error(`contributionRemaining must be non-negative`);
+    throw new Error(`contributionRemaining must be non-negative: ${contributionRemaining}`);
   }
 
   if (numContributors < 0n) {
-    throw new Error(`numContributors must be non-negative`);
+    throw new Error(`numContributors must be non-negative: ${numContributors}`);
   }
 
   if (maxNumContributors < 0n) {
-    throw new Error(`maxNumContributors must be non-negative`);
+    throw new Error(`maxNumContributors must be non-negative, ${maxNumContributors}`);
   }
 
   let result: bigint;
   if (numContributors === 0n) {
     // Equivalent to Math.ceil(contributionRemaining / 4)
-    result = (contributionRemaining + 3n) / 4n;
+    result = contributionRemaining / 4n;
   } else {
     const slotsRemaining = maxNumContributors - numContributors;
     // Equivalent to Math.ceil(contributionRemaining / slotsRemaining)
-    result = (contributionRemaining + slotsRemaining - 1n) / slotsRemaining;
+    if (slotsRemaining) {
+      result = (contributionRemaining + slotsRemaining - 1n) / slotsRemaining;
+    } else {
+      return 0n;
+    }
   }
   return result;
 }
+
+export const getContributionRangeFromContributors = (
+  contributors: Array<StakeContributor | ContributionContractContributor> = []
+) =>
+  parseContributorDetails(
+    contributors.map((contributor) => {
+      return {
+        amount:
+          contributor.amount ||
+          (isContributionContractContributor(contributor) ? contributor.reserved : 0n),
+        addr: contributor.address,
+      };
+    })
+  );
+
+export const getContributionRangeFromContributorsIgnoreAddress = (
+  contributors: Array<StakeContributor | ContributionContractContributor> = [],
+  address?: Address
+) =>
+  getContributionRangeFromContributors(
+    contributors.filter(
+      ({ address: contributorAddress }) => !areHexesEqual(contributorAddress, address)
+    )
+  );
+
+export const getTotalStaked = (
+  contributors: Array<StakeContributor | ContributionContractContributor> = []
+) => contributors.reduce((acc, { amount }) => acc + amount, 0n);

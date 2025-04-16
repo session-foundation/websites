@@ -2,12 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@session/ui/ui/avatar';
 import { Button } from '@session/ui/ui/button';
-import { forwardRef } from 'react';
+import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { DiscordIcon } from '../icons/DiscordIcon';
 import { signIn, signOut, useSession } from '../lib/client';
 import { ButtonDataTestId } from '../testing/data-test-ids';
 
-type DiscordAuthButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type DiscordAuthButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   showAvatar?: boolean;
 };
 
@@ -29,7 +29,7 @@ export const DiscordAuthButton = forwardRef<HTMLButtonElement, DiscordAuthButton
 
     return (
       <Button
-        className="text-session-black hover:text-session-black w-full justify-center gap-2 border-transparent bg-[#5865F2] px-2 uppercase hover:bg-[#4853A4] hover:brightness-125"
+        className="w-full justify-center gap-2 border-transparent bg-[#5865F2] px-2 text-session-black uppercase hover:bg-[#4853A4] hover:text-session-black hover:brightness-125"
         data-testid={ButtonDataTestId.DISCORD_AUTH}
         rounded="md"
         size="lg"

@@ -1,15 +1,17 @@
+import { ActionModulePage } from '@/components/ActionModule';
 import { URL } from '@/lib/constants';
 import { siteMetadata } from '@/lib/metadata';
 import { ButtonDataTestId, LinkDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { ActionModulePage } from '@/components/ActionModule';
 
 export async function generateMetadata() {
+  const dict = await getTranslations('metadata.stake');
   return siteMetadata({
-    title: 'Stake Now',
-    description: 'Browse open Session Nodes to stake to.',
+    title: dict('title'),
+    description: dict('description'),
   });
 }
 

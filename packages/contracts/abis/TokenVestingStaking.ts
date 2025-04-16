@@ -33,12 +33,17 @@ export const TokenVestingStakingAbi = [
       },
       {
         internalType: 'contract IServiceNodeRewards',
-        name: 'stakingRewardsContract_',
+        name: 'rewardsContract_',
+        type: 'address',
+      },
+      {
+        internalType: 'contract IServiceNodeContributionFactory',
+        name: 'snContribFactory_',
         type: 'address',
       },
       {
         internalType: 'contract IERC20',
-        name: 'sent_',
+        name: 'sesh_',
         type: 'address',
       },
     ],
@@ -130,12 +135,6 @@ export const TokenVestingStakingAbi = [
         name: 'token',
         type: 'address',
       },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'refund',
-        type: 'uint256',
-      },
     ],
     name: 'TokenVestingRevoked',
     type: 'event',
@@ -160,8 +159,27 @@ export const TokenVestingStakingAbi = [
     type: 'event',
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'contract IERC20',
+        name: 'token',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'TokensRevokedReleased',
+    type: 'event',
+  },
+  {
     inputs: [],
-    name: 'SENT',
+    name: 'SESH',
     outputs: [
       {
         internalType: 'contract IERC20',
@@ -245,6 +263,11 @@ export const TokenVestingStakingAbi = [
         name: 'serviceNodeParams',
         type: 'tuple',
       },
+      {
+        internalType: 'address',
+        name: 'snBeneficiary',
+        type: 'address',
+      },
     ],
     name: 'addBLSPublicKey',
     outputs: [],
@@ -265,8 +288,44 @@ export const TokenVestingStakingAbi = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'claimRewards',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'claimRewards',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'snContribAddr',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'snContribBeneficiary',
+        type: 'address',
+      },
+    ],
+    name: 'contributeFunds',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -285,32 +344,6 @@ export const TokenVestingStakingAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'getBeneficiary',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getRevoker',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'uint64',
@@ -318,33 +351,9 @@ export const TokenVestingStakingAbi = [
         type: 'uint64',
       },
     ],
-    name: 'initiateRemoveBLSPublicKey',
+    name: 'initiateExitBLSPublicKey',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'investorServiceNodes',
-    outputs: [
-      {
-        internalType: 'uint64',
-        name: 'serviceNodeID',
-        type: 'uint64',
-      },
-      {
-        internalType: 'uint256',
-        name: 'deposit',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -356,19 +365,6 @@ export const TokenVestingStakingAbi = [
       },
     ],
     name: 'release',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'contract IERC20',
-        name: 'token',
-        type: 'address',
-      },
-    ],
-    name: 'retrieveRevokedFunds',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -414,10 +410,23 @@ export const TokenVestingStakingAbi = [
   },
   {
     inputs: [],
-    name: 'stakingRewardsContract',
+    name: 'rewardsContract',
     outputs: [
       {
         internalType: 'contract IServiceNodeRewards',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'snContribFactory',
+    outputs: [
+      {
+        internalType: 'contract IServiceNodeContributionFactory',
         name: '',
         type: 'address',
       },
@@ -475,6 +484,37 @@ export const TokenVestingStakingAbi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'snContribAddr',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'snContribBeneficiary',
+        type: 'address',
+      },
+    ],
+    name: 'updateBeneficiary',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'snContribAddr',
+        type: 'address',
+      },
+    ],
+    name: 'withdrawContribution',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
 ] as const;

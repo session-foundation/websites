@@ -1,37 +1,60 @@
-// #region - getBuildInfo
-
-import type { Contributor } from '@session/sent-staking-js/client';
-import { CHAIN, chains } from '@session/contracts';
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
-import { getContributionRangeFromContributors } from '../lib/maths';
-import { createPublicClient, http } from 'viem';
+import { http, type Address, createPublicClient } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
+import { parseContributorDetails } from '../lib/maths';
+
+type Contributor = {
+  addr: Address;
+  amount: bigint;
+};
 
 const address = '0x63528ae9247165fd89f093a591238009720fb422';
+const RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC_URL;
+const isCI = process.env.CI === 'true';
 
-function createContributor(amount: number) {
+const FULL_STAKE_AMOUNT = 20_000_000000000n;
+const MAX_CONTRIBUTORS = 10;
+
+function createContributor(amount: bigint): Contributor {
   return {
-    address: '0x',
-    beneficiary: '0x',
-    locked_contributions: [],
-    reserved: 0,
+    addr: '0x',
     amount,
-  } as Contributor;
+  };
 }
 
 const operatorContributorAmounts = [
-  5000000000000, 10000000000000, 15000000000000, 17500000000000, 5000000000001, 500000000002,
-  500000000009, 5100000000000, 5000000000099, 10005001000000,
+  5000_000000000n,
+  10000_000000000n,
+  15000_000000000n,
+  17500_000000000n,
+  50000_00000001n,
+  50000_0000002n,
+  50000_0000009n,
+  51000_00000000n,
+  50000_00000099n,
+  10005_001000000n,
+  11111_111111111n,
+  9999_000000000n,
+  9999_999999999n,
 ];
+
+for (const amount of operatorContributorAmounts) {
+  if (amount > FULL_STAKE_AMOUNT) {
+    throw new Error(
+      `Operator amount must be less than or equal to the full stake amount: ${amount}`
+    );
+  }
+}
 
 const operators = operatorContributorAmounts.map((amount) => createContributor(amount));
 
 async function getMinContributionFromContract(contributors: Array<Contributor>) {
   const client = createPublicClient({
-    chain: chains[CHAIN.TESTNET],
-    transport: http('http://10.24.0.1/arb_sepolia'),
+    chain: arbitrumSepolia,
+    transport: http(RPC_URL),
   });
 
-  let remainingStake = 20000000000000n;
+  let remainingStake = FULL_STAKE_AMOUNT;
 
   for (const contributor of contributors) {
     remainingStake -= BigInt(contributor.amount);
@@ -46,14 +69,25 @@ async function getMinContributionFromContract(contributors: Array<Contributor>) 
 }
 
 async function contributionTest(contributors: Array<Contributor>) {
-  const { minStake } = getContributionRangeFromContributors(contributors);
+  const { minStake } = parseContributorDetails(contributors);
 
-  const minFromContract = await getMinContributionFromContract(contributors);
+  let error: Error | null = null;
+  let minFromContract = 0n;
+  try {
+    minFromContract = await getMinContributionFromContract(contributors);
+  } catch (e) {
+    error = e as Error;
+  }
 
-  expect(minStake).toEqual(minFromContract);
+  if (contributors.length === MAX_CONTRIBUTORS) {
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toContain('CalcMinContributionGivenBadContribArgs');
+  } else {
+    expect(minStake).toEqual(minFromContract);
+  }
 }
 
-describe('getContributionRangeFromContributors', () => {
+describe('parseContributorDetails', () => {
   describe('0 contributor', () => {
     test.concurrent('first stake from operator', async () => contributionTest([]));
   });
@@ -64,20 +98,58 @@ describe('getContributionRangeFromContributors', () => {
   });
   describe('2nd contributor min', () => {
     for (const operator of operators) {
-      const { minStake } = getContributionRangeFromContributors([operator]);
+      const { minStake } = parseContributorDetails([operator]);
       test.concurrent(`${operator.amount} contribution, and ${minStake}`, async () =>
-        contributionTest([operator, createContributor(Number(minStake))])
+        contributionTest([operator, createContributor(minStake)])
       );
     }
   });
   describe('2nd contributor min * 2', () => {
     for (const operator of operators) {
-      const { minStake } = getContributionRangeFromContributors([operator]);
+      const { minStake } = parseContributorDetails([operator]);
       const stake = minStake * 2n;
       test.concurrent(`${operator.amount} contribution, and ${stake}`, async () =>
-        contributionTest([operator, createContributor(Number(stake))])
+        contributionTest([operator, createContributor(stake)])
       );
     }
+  });
+  describe('All contributors contribute minStake', () => {
+    const contributors = [createContributor(5000_000000000n)];
+    const { minStake: firstMinStake } = parseContributorDetails(contributors);
+    let lastMinStake = firstMinStake;
+    for (let i = 0; i < MAX_CONTRIBUTORS - 1; i++) {
+      contributors.push(createContributor(lastMinStake));
+      test.concurrent(`All contributors contribute ${lastMinStake}`, async () =>
+        contributionTest(contributors)
+      );
+      const { minStake } = parseContributorDetails(contributors);
+      lastMinStake = minStake;
+    }
+    test('Contributors are at max number of contributors', () => {
+      expect(contributors.length).toEqual(MAX_CONTRIBUTORS);
+    });
+  });
+  describe('Full node resolves stakes properly', () => {
+    const fullContributorList = [
+      createContributor(11000_000000000n),
+      ...Array.from({ length: MAX_CONTRIBUTORS - 1 }, () => createContributor(1000_000000000n)),
+    ];
+
+    expect(fullContributorList.length).toEqual(MAX_CONTRIBUTORS);
+
+    const { minStake, maxStake, totalStaked } = parseContributorDetails(fullContributorList);
+
+    test('Min stake is 0 when contract is full', () => {
+      expect(minStake).toEqual(0n);
+    });
+
+    test('Max stake 0 when contract is full', () => {
+      expect(maxStake).toEqual(0n);
+    });
+
+    test('Total staked is full stake', () => {
+      expect(totalStaked).toEqual(FULL_STAKE_AMOUNT);
+    });
   });
 });
 
@@ -110,19 +182,20 @@ function createRandomContributorArray() {
 
   const operatorAmount = getRandomOperatorContributorAmount();
 
-  const contributors = [createContributor(Number(operatorAmount))];
+  const contributors = [createContributor(operatorAmount)];
 
   for (let i = 0; i < numContributors; i++) {
-    const { minStake, maxStake } = getContributionRangeFromContributors(contributors);
+    const { minStake, maxStake } = parseContributorDetails(contributors);
     const amount = getRandomContributorAmount(minStake, maxStake);
-    contributors.push(createContributor(Number(amount)));
+    contributors.push(createContributor(amount));
   }
   return contributors;
 }
 
-const fuzzAmount = 400;
+// Needs to be low on CI as GitHub Actions get rate limited quickly
+const fuzzAmount = isCI ? 10 : 1000;
 
-describe('getContributionRangeFromContributors fuzzing', () => {
+describe(`parseContributorDetails fuzzing (fuzzAmount: ${fuzzAmount}`, () => {
   const tests = [];
   const testInfo = [];
   for (let i = 0; i < fuzzAmount; i++) {
@@ -130,7 +203,7 @@ describe('getContributionRangeFromContributors fuzzing', () => {
     let minStake: bigint;
     let totalStaked: bigint;
     try {
-      const res = getContributionRangeFromContributors(contributors);
+      const res = parseContributorDetails(contributors);
       minStake = res.minStake;
       totalStaked = res.totalStaked;
     } catch (e) {

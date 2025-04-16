@@ -15,6 +15,8 @@ export enum REMOTE_FEATURE_FLAG {
   DISABLE_REQUEST_NODE_EXIT = 'remote_disableRequestNodeExit',
   DISABLE_NODE_EXIT = 'remote_disableNodeExit',
   DISABLE_NODE_STAKING_MULTI = 'remote_disableNodeStakingMulti',
+  ENABLE_MAINTENANCE_MODE = 'remote_enableMaintenanceMode',
+  ENABLE_APP_MAINTENANCE_MODE = 'remote_enableAppMaintenanceMode',
 }
 
 export const remoteFeatureFlagsInfo: Record<
@@ -61,6 +63,14 @@ export const remoteFeatureFlagsInfo: Record<
     name: 'Disable Node Staking Multi',
     description: 'Disable the ability to stake to an open node.',
   },
+  [REMOTE_FEATURE_FLAG.ENABLE_MAINTENANCE_MODE]: {
+    name: 'Enable Maintenance Mode',
+    description: 'Enable the maintenance mode.',
+  },
+  [REMOTE_FEATURE_FLAG.ENABLE_APP_MAINTENANCE_MODE]: {
+    name: 'Enable App Maintenance Mode',
+    description: 'Enable the app maintenance mode.',
+  },
 };
 
 export const experimentalFeatureFlags = Object.values(
@@ -106,6 +116,8 @@ export enum FEATURE_FLAG {
   CLEAR_ACCEPT_EXPERIMENTAL = 'clearAcceptExperimental',
   SHOW_ALL_TIMERS = 'showAllTimers',
   SHOW_NODE_RAW_DATA = 'showNodeRawData',
+  THROW_TESTING_ERROR = 'throwTestingError',
+  THROW_TESTING_ERROR_LONG = 'throwTestingErrorLong',
 }
 
 export const FEATURE_FLAG_DESCRIPTION = {
@@ -123,6 +135,8 @@ export const FEATURE_FLAG_DESCRIPTION = {
   [FEATURE_FLAG.CLEAR_ACCEPT_EXPERIMENTAL]: 'Clear the accepted experimental features conditions',
   [FEATURE_FLAG.SHOW_ALL_TIMERS]: 'Show all staked node timers',
   [FEATURE_FLAG.SHOW_NODE_RAW_DATA]: 'Show raw data for staked nodes',
+  [FEATURE_FLAG.THROW_TESTING_ERROR]: 'Throw a testing error',
+  [FEATURE_FLAG.THROW_TESTING_ERROR_LONG]: 'Throw a long testing error',
 };
 
 export const validFeatureFlags = Object.values(FEATURE_FLAG);
@@ -134,6 +148,7 @@ export const pageFeatureFlags: Record<string, Array<FEATURE_FLAG>> = {
     FEATURE_FLAG.SHOW_ALL_TIMERS,
     FEATURE_FLAG.SHOW_NODE_RAW_DATA,
   ],
+  vestedStakes: [FEATURE_FLAG.SHOW_ALL_TIMERS, FEATURE_FLAG.SHOW_NODE_RAW_DATA],
   address: [
     FEATURE_FLAG.MOCK_STAKED_NODES,
     FEATURE_FLAG.MOCK_NO_STAKED_NODES,
@@ -155,6 +170,8 @@ export const pageFeatureFlags: Record<string, Array<FEATURE_FLAG>> = {
 export const globalFeatureFlags = [
   FEATURE_FLAG.CLEAR_ACCEPT_BUG_BOUNTY,
   FEATURE_FLAG.CLEAR_ACCEPT_EXPERIMENTAL,
+  FEATURE_FLAG.THROW_TESTING_ERROR,
+  FEATURE_FLAG.THROW_TESTING_ERROR_LONG,
 ];
 
 export type FeatureFlags = Record<FEATURE_FLAG | EXPERIMENTAL_FEATURE_FLAG, boolean>;

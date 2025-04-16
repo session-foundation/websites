@@ -1,11 +1,13 @@
+import { ActionModulePage } from '@/components/ActionModule';
 import { siteMetadata } from '@/lib/metadata';
 import { useTranslations } from 'next-intl';
-import { ActionModulePage } from '@/components/ActionModule';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata() {
+  const dict = await getTranslations('metadata.register');
   return siteMetadata({
-    title: 'Register Session Node',
-    description: 'Register a Session Node and stake to it.',
+    title: dict('title'),
+    description: dict('description'),
   });
 }
 

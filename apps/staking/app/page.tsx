@@ -63,7 +63,7 @@ export default function LandingPage() {
     <div className={cn('mx-auto flex flex-col items-center justify-center overflow-hidden')}>
       <div
         className={cn(
-          'max-w-screen-3xl flex h-dvh w-screen flex-col-reverse items-center justify-around py-16 align-middle',
+          'flex h-dvh w-screen max-w-screen-3xl flex-col-reverse items-center justify-around py-16 align-middle',
           'md:-mt-header-displacement',
           'lg:grid lg:grid-cols-2 lg:gap-x-48 lg:p-8 lg:py-0',
           'xl:p-32'
@@ -79,12 +79,12 @@ export default function LandingPage() {
           <div
             className={'flex flex-col items-center justify-start backdrop-blur-sm lg:items-start'}
           >
-            <h1 className="3xl:text-8xl whitespace-nowrap text-center text-5xl font-medium md:text-7xl lg:text-start">
+            <h1 className="whitespace-nowrap text-center font-medium 3xl:text-8xl text-5xl md:text-7xl lg:text-start">
               {dictionary.rich('title')}
             </h1>
             <h2
               className={cn(
-                '3xl:text-8xl whitespace-nowrap text-center text-3xl font-medium md:text-4xl lg:text-start xl:text-7xl'
+                'whitespace-nowrap text-center font-medium 3xl:text-8xl text-3xl md:text-4xl lg:text-start xl:text-7xl'
               )}
             >
               {dictionary('titleDescription')}

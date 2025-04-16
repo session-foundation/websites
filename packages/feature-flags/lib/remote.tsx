@@ -1,11 +1,11 @@
 'use server';
 
-import * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
-import { hasCount, openDatabase, setupDatabase } from './db';
-import { getEnabledFeatureFlags } from './queries/getEnabledFeatureFlags';
+import type * as BetterSql3 from 'better-sqlite3-multiple-ciphers';
+import { FLAGS_TABLE, hasCount, openDatabase, setupDatabase } from './db';
 import { getEnabledFeatureFlag } from './queries/getEnabledFeatureFlag';
-import type { GenericRemoteFeatureFlag } from './utils';
+import { getEnabledFeatureFlags } from './queries/getEnabledFeatureFlags';
 import { getFeatureFlagContent } from './queries/getFeatureFlagContent';
+import type { GenericRemoteFeatureFlag } from './utils';
 
 type GetRemoteFeatureFlagResponse = {
   enabled: boolean;
@@ -22,6 +22,7 @@ type GetRemoteFeatureFlagContentResponse = {
   error?: unknown;
 };
 
+// biome-ignore lint/suspicious/useAwait: server actions must have async in signature
 export async function getRemoteFeatureFlagGeneric<Flag extends GenericRemoteFeatureFlag>(
   flag: Flag
 ): Promise<GetRemoteFeatureFlagResponse> {
@@ -29,7 +30,7 @@ export async function getRemoteFeatureFlagGeneric<Flag extends GenericRemoteFeat
   try {
     db = openDatabase();
     const enabledFlagRow = getEnabledFeatureFlag<Flag>({ db, flag });
-    const enabled = hasCount<Flag>(enabledFlagRow, flag);
+    const enabled = hasCount(enabledFlagRow, FLAGS_TABLE.FLAG);
     return {
       enabled,
     };
@@ -46,6 +47,7 @@ export async function getRemoteFeatureFlagGeneric<Flag extends GenericRemoteFeat
   }
 }
 
+// biome-ignore lint/suspicious/useAwait: server actions must have async in signature
 export async function getRemoteFeatureFlagContentGeneric<Flag extends GenericRemoteFeatureFlag>(
   flag: Flag
 ): Promise<GetRemoteFeatureFlagContentResponse> {

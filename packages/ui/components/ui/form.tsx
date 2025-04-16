@@ -1,18 +1,19 @@
-import * as LabelPrimitive from '@radix-ui/react-label';
+import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
 import {
   Controller,
-  ControllerProps,
-  FieldPath,
-  FieldValues,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
   FormProvider,
   useFormContext,
   useFormState,
+  useForm as useReactHookFormState,
 } from 'react-hook-form';
 
 import { cn } from '../../lib/utils';
-import { Button, ButtonProps } from './button';
+import { Button, type ButtonProps } from './button';
 import { Label } from './label';
 
 const Form = FormProvider;
@@ -23,6 +24,8 @@ type FormFieldContextValue<
 > = {
   name: TName;
 };
+
+const useForm = useReactHookFormState;
 
 const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
 
@@ -90,7 +93,7 @@ const FormLabel = React.forwardRef<
   return (
     <Label
       ref={ref}
-      className={cn(error && 'text-destructive', className)}
+      className={cn(error && 'text-destructive', 'cursor-pointer', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -148,7 +151,7 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn('text-destructive text-sm font-medium', className)}
+      className={cn('font-medium text-destructive text-sm', className)}
       {...props}
     >
       {body}
@@ -202,4 +205,5 @@ export {
   FormMessage,
   FormSubmitButton,
   useFormField,
+  useForm,
 };

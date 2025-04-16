@@ -1,13 +1,14 @@
 'use client';
 
+import * as SliderPrimitive from '@radix-ui/react-slider';
 import {
-  type ComponentPropsWithoutRef,
   type CSSProperties,
+  type ComponentPropsWithoutRef,
   type ElementRef,
   forwardRef,
   useState,
 } from 'react';
-import * as SliderPrimitive from '@radix-ui/react-slider';
+import type { DataTestId } from '../../data-test-ids';
 import { cn } from '../../lib/utils';
 import { Circle, type CircleVariantProps } from '../motion/shapes/circle';
 
@@ -33,8 +34,16 @@ export const SliderLineCircle = forwardRef<
 
 const Slider = forwardRef<
   ElementRef<typeof SliderPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ value, max, className, children, ...props }, ref) => {
+  ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
+    dataTestIds?: {
+      slider0?: DataTestId;
+      slider25?: DataTestId;
+      slider50?: DataTestId;
+      slider75?: DataTestId;
+      slider100?: DataTestId;
+    };
+  }
+>(({ value, max, className, children, dataTestIds, ...props }, ref) => {
   const [showPercent, setShowPercent] = useState<boolean>(false);
   const decimalPercent =
     value?.[0] !== undefined && max !== undefined && max !== 0 ? value[0] / max : 0;
@@ -46,34 +55,38 @@ const Slider = forwardRef<
       max={max}
       {...props}
     >
-      <SliderPrimitive.Track className="bg-gray-lighter relative mx-1 h-0.5 w-full grow rounded-full">
-        <SliderPrimitive.Range className="bg-session-green absolute h-full" />
-        <div className="absolute left-0 right-0 flex h-full items-center justify-center">
-          <SliderLineCircle className="-left-0.5" variant="green" strokeVariant="green" />
+      <SliderPrimitive.Track className='relative mx-1 h-0.5 w-full grow rounded-full bg-gray-lighter'>
+        <SliderPrimitive.Range className='absolute h-full bg-session-green' />
+        <div className='absolute right-0 left-0 flex h-full items-center justify-center'>
           <SliderLineCircle
-            className="-right-0.5"
-            variant="grey-lighter"
-            strokeVariant="grey-lighter"
+            className="-left-0.5"
+            variant="green"
+            strokeVariant="green"
+            data-testid={dataTestIds?.slider0}
           />
           <SliderLineCircle
             className="-right-0.5"
             variant="grey-lighter"
             strokeVariant="grey-lighter"
+            data-testid={dataTestIds?.slider100}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.25 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.25 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${25}%)` }}
+            data-testid={dataTestIds?.slider25}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.5 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.5 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${50}% - 8px)` }}
+            data-testid={dataTestIds?.slider50}
           />
           <SliderLineCircle
             variant={decimalPercent > 0.75 ? 'green' : 'grey-lighter'}
             strokeVariant={decimalPercent > 0.75 ? 'green' : 'grey-lighter'}
             style={{ left: `calc(${75}% - 8px)` }}
+            data-testid={dataTestIds?.slider75}
           />
           {children}
         </div>
@@ -103,8 +116,8 @@ const Slider = forwardRef<
         {showPercent ? (
           <span
             className={cn(
-              'absolute -top-8',
-              'text-session-white animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 bg-session-black border-px z-50 max-w-[90svw] flex-wrap overflow-hidden text-wrap rounded-lg border border-gray-800 bg-opacity-50 px-1.5 py-1 text-xs shadow-xl outline-none md:max-w-xl'
+              '-top-8 absolute',
+              'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-w-[90svw] animate-in flex-wrap overflow-hidden text-wrap rounded-lg border border-gray-800 border-px bg-session-black bg-opacity-50 px-1.5 py-1 text-session-white text-xs shadow-xl outline-none data-[state=closed]:animate-out md:max-w-xl'
             )}
             style={{ left: -circleRadius - extraRad }}
           >

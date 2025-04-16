@@ -1,9 +1,9 @@
 'use client';
 
-import { PubKey } from '@session/ui/components/PubKey';
 import { TICKER } from '@/lib/constants';
 import { formatLocalizedRelativeTimeToNowClient } from '@/lib/locale-client';
-import { SENT_DECIMALS, SENT_SYMBOL } from '@session/contracts';
+import { TOKEN } from '@session/contracts';
+import { PubKey } from '@session/ui/components/PubKey';
 import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import {
   Table,
@@ -15,18 +15,17 @@ import {
   TableRow,
 } from '@session/ui/ui/table';
 import { formatBigIntTokenValue } from '@session/util-crypto/maths';
-import { ETH_DECIMALS } from '@session/wallet/lib/eth';
+import { ETH } from '@session/wallet/lib/eth';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { TransactionHistory } from './utils';
-import { LinkDataTestId } from '@/testing/data-test-ids';
+import type { TransactionHistory } from './utils';
 
 interface TransactionRow {
   date: Date;
   hash: string;
   amount: string;
-  token: typeof SENT_SYMBOL | typeof TICKER.ETH;
+  token: TOKEN.SYMBOL | TICKER.ETH;
 }
 
 export function FaucetTransactions({
@@ -55,7 +54,7 @@ export function FaucetTransactions({
           date: new Date(timestamp),
           hash,
           amount,
-          token: SENT_SYMBOL,
+          token: TOKEN.SYMBOL,
         });
       }
     });
@@ -63,7 +62,7 @@ export function FaucetTransactions({
   }, [transactionHistory]);
 
   return (
-    <div className="border-session-text overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-xl border border-session-text">
       <Table className="bg-transparent">
         <TableCaption className="pb-3">{transactionsDictionary('tableCaption')}</TableCaption>
         <TableHeader>
@@ -86,17 +85,13 @@ export function FaucetTransactions({
               <TableCell>
                 {formatBigIntTokenValue(
                   BigInt(amount),
-                  token === SENT_SYMBOL ? SENT_DECIMALS : ETH_DECIMALS
+                  token === TOKEN.SYMBOL ? TOKEN.DECIMALS : ETH.DECIMALS
                 )}
                 {` ${token}`}
               </TableCell>
               <TableCell className="text-right">
-                <Link
-                  href={`/explorer/tx/${hash}`}
-                  target="_blank"
-                  data-testid={LinkDataTestId.Faucet_Explorer_Transaction}
-                >
-                  <span className="text-session-green fill-session-green inline-flex w-max items-center gap-1 align-middle">
+                <Link href={`/explorer/tx/${hash}`} target="_blank">
+                  <span className="inline-flex w-max items-center gap-1 fill-session-green align-middle text-session-green">
                     <span className="hidden 2xl:flex">{dictionary('viewOnExplorer')}</span>
                     <span className="flex 2xl:hidden">{dictionary('viewOnExplorerShort')}</span>
                     <LinkOutIcon className="h-4 w-4" />

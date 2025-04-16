@@ -16,9 +16,9 @@ describe('isValidUnixTimestampSeconds', () => {
 
   test('should return false for invalid timestamp', () => {
     expect(isValidUnixTimestampSeconds(-1)).toBe(false); // Negative timestamp
-    expect(isValidUnixTimestampSeconds(NaN)).toBe(false); // NaN
-    expect(isValidUnixTimestampSeconds(Infinity)).toBe(false); // Infinity
-    expect(isValidUnixTimestampSeconds(-Infinity)).toBe(false); // -Infinity
+    expect(isValidUnixTimestampSeconds(Number.NaN)).toBe(false); // NaN
+    expect(isValidUnixTimestampSeconds(Number.POSITIVE_INFINITY)).toBe(false); // Infinity
+    expect(isValidUnixTimestampSeconds(Number.NEGATIVE_INFINITY)).toBe(false); // -Infinity
     expect(isValidUnixTimestampSeconds(1.5)).toBe(false); // Decimal value
     // @ts-expect-error - Invalid argument type
     expect(isValidUnixTimestampSeconds('1625097600')).toBe(false); // String value
