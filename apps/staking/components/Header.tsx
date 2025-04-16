@@ -5,15 +5,6 @@ import { cn } from '@session/ui/lib/utils';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
-<<<<<<< HEAD
-import { WalletModalButtonWithLocales } from './WalletModalButtonWithLocales';
-import { WalletNetworkDropdownWithLocales } from './WalletNetworkDropdownWithLocales';
-import { NavLink } from '@/components/NavLink';
-import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
-import { getTranslations } from 'next-intl/server';
-import { LinkDataTestId } from '@/testing/data-test-ids';
-=======
->>>>>>> dev
 
 export default async function Header() {
   const dict = await getTranslations('navigation');
@@ -27,16 +18,6 @@ export default async function Header() {
           {isCanary ? <span className="-top-4 absolute left-1 h-max w-max text-sm">🐤</span> : null}
         </Link>
         <div className="hidden flex-row gap-10 lg:flex">
-<<<<<<< HEAD
-          {routes.map(({ dictionaryKey, href }) => (
-            <NavLink
-              dataTestId={LinkDataTestId.Header_Nav_Link_Item}
-              key={href}
-              href={href}
-              label={dictionary(dictionaryKey)}
-            />
-          ))}
-=======
           {SSR_LINKS.map(({ dictionaryKey, href }) => {
             if (
               (dictionaryKey === 'faucet' &&
@@ -59,7 +40,6 @@ export default async function Header() {
               />
             );
           })}
->>>>>>> dev
         </div>
       </HeaderClient>
     </nav>
