@@ -195,7 +195,6 @@ export function SubmitMultiTab() {
 
       setStakingParams({
         stakeAmount,
-        userAddress: address,
         beneficiary: data.rewardsAddress,
       });
     } finally {
@@ -555,13 +554,6 @@ function SubmitMulti({
     contract && contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib
   );
 
-  const stakingParamsMemoized = useMemo(() => {
-    return {
-      ...stakingParams,
-      contractAddress,
-    };
-  }, [stakingParams, contractAddress]);
-
   const {
     contributeStake,
     resetContributeStake,
@@ -577,7 +569,10 @@ function SubmitMulti({
     contributeFundsSimulateError,
     contributeFundsWriteError,
     contributeFundsTransactionError,
-  } = useContributeStakeToOpenNode(stakingParamsMemoized);
+  } = useContributeStakeToOpenNode({
+    ...stakingParams,
+    contractAddress,
+  });
 
   /**
    * If an error is thrown by this function that error is caught by the ErrorBoundary and handled there.
