@@ -205,8 +205,8 @@ const MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024 = 67681024783n;
 const MEDIAN_GAS_PRICE_ARBITRUM_SEPOLIA_2024 = 1082870990n;
 
 export const HANDRAIL_THRESHOLD = {
-  /** 0.005 SENT */
-  CLAIM_REWARDS_AMOUNT: 5000000n,
+  /** 0.5 SESH */
+  CLAIM_REWARDS_AMOUNT: 500000000n,
 };
 
 export const HANDRAIL_THRESHOLD_TESTNET = {
@@ -238,6 +238,7 @@ export enum PREFERENCE {
   ANONYMIZE_UI = 'anonymizeUI',
   AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
   OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
+  V2_Rewards = 'v2Rewards',
 }
 
 export const preferenceStorageDefaultItems = {} as const;
@@ -285,6 +286,12 @@ export const prefDetails = {
     type: 'boolean',
     defaultValue: false,
     description: 'Show awaiting operator contracts in the open nodes page',
+  },
+  [PREFERENCE.V2_Rewards]: {
+    label: 'Use V2 Rewards Endpoint',
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Use the V2 rewards endpoint',
   },
 } as const satisfies WalletSheetSettingDetailsGenerator;
 

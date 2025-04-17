@@ -256,13 +256,45 @@ export type RegistrationsResponse = z.infer<typeof registrationsResponseSchema>;
 //                                                          //
 //////////////////////////////////////////////////////////////
 
+export const rewardsInfoSchema = z.object({
+  /** Total amount of claimable tokens for the given address. This includes the earnt rewards as well as unlocked stakes that are available to be claimed. */
+  amount: z.coerce.bigint(),
+  /** Total amount of tokens in the lifetime of the network that have been liquidated from the stakes for this address. */
+  lifetime_liquidated_stakes: z.coerce.bigint(),
+  /** Total amount of tokens in the lifetime of the network that has been staked into nodes for this address. */
+  lifetime_locked_stakes: z.coerce.bigint(),
+  /** Total amount of tokens in the lifetime of the network that has been earnt from staking into nodes for this address. */
+  lifetime_rewards: z.coerce.bigint(),
+  /** Total amount of tokens in the lifetime of the network that has been unlocked from the nodes this address has staked into. */
+  lifetime_unlocked_stakes: z.coerce.bigint(),
+  /** Amount of tokens currently locked into nodes on the network. This is defined as `lifetime locked - lifetime unlocked`. */
+  locked_stakes: z.coerce.bigint(),
+  /** Amount of tokens that have been unstaked from nodes but cannot be claimed until the time lock on those individual stakes have been unlocked. */
+  timelocked_stakes: z.coerce.bigint(),
+  /** Amount of tokens that have been claimed from the nodes this address has staked into. */
+  claimed_stakes: z.coerce.bigint(),
+  /** Amount of tokens that have been claimed from the rewards that have been earned from the nodes this address has staked into. */
+  claimed_rewards: z.coerce.bigint(),
+});
+
+export type BlsRewardsInfo = z.infer<typeof rewardsInfoSchema>;
+
 export const blsRewardsResponseSchema = z.object({
-  rewards: z.coerce.bigint(),
+  rewards: rewardsInfoSchema,
   network: networkInfoSchema,
   t: z.number(),
 });
 
 export type BlsRewardsResponse = z.infer<typeof blsRewardsResponseSchema>;
+
+// TODO: remove this v1 logic once v2 is stable
+export const v1BlsRewardsResponseSchema = z.object({
+  rewards: z.coerce.bigint(),
+  network: networkInfoSchema,
+  t: z.number(),
+});
+
+export type V1BlsRewardsResponse = z.infer<typeof v1BlsRewardsResponseSchema>;
 
 export const blsRewardsSignatureSchema = z.object({
   aggregate_pubkey: z.string(),

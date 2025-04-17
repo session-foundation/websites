@@ -295,6 +295,11 @@
       "titleShort": "Total Rewards",
       "description": "The total amount of lifetime rewards earned from staking. <link>Learn more</link>"
     },
+    "unlockingStakes": {
+      "title": "Unlocking Stakes",
+      "titleShort": "Unlocking Stakes",
+      "description": "The total amount of unlocking stakes from node that have been exited or deregistered. <link>Learn more</link>"
+    },
     "unclaimedTokens": {
       "title": "Unclaimed Tokens",
       "description": "The total amount of rewards that have not been claimed yet. <link>Learn more</link>"
