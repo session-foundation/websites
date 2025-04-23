@@ -1,6 +1,6 @@
 'use client';
 
-import UnclaimedTokensModule from '@/app/mystakes/modules/UnclaimedTokensModule';
+import TestnetPointsModule from '@/app/mystakes/modules/TestnetPointsModule';
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
@@ -12,27 +12,27 @@ import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/component
 import { useTranslations } from 'next-intl';
 import { usePreferences } from 'usepref';
 
-export default function UnclaimedStakesModule({
+export default function UnclaimedRewardsModule({
   addressOverride,
   titleOverride,
 }: AddressModuleProps) {
-  const dictionary = useTranslations('modules.unclaimedStakes');
+  const dictionary = useTranslations('modules.unclaimedRewards');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = titleOverride ?? dictionary('title');
 
-  const { claimableStakes, status, refetch } = useNetworkBalances({
+  const { claimableRewards, status, refetch } = useNetworkBalances({
     addressOverride,
   });
 
   const { getItem } = usePreferences();
   const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
   if (!v2Rewards) {
-    return <UnclaimedTokensModule />;
+    return <TestnetPointsModule />;
   }
 
-  const formattedAmount = formatSENTBigInt(claimableStakes, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
+  const formattedAmount = formatSENTBigInt(claimableRewards, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
 
   return (
     <Module>

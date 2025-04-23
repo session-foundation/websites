@@ -1,11 +1,11 @@
 'use client';
 
+import ComingSoonModule from '@/app/mystakes/modules/ComingSoon';
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { DYNAMIC_MODULE, PREFERENCE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
-import { useGetRecipients } from '@session/contracts/hooks/ServiceNodeRewards';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useWallet } from '@session/wallet/hooks/useWallet';
@@ -13,16 +13,13 @@ import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
 
-export default function TotalRewardsModule(params?: AddressModuleProps) {
-  const dictionary = useTranslations('modules.totalRewards');
+export default function UnlockingStakesModule(params?: AddressModuleProps) {
+  const dictionary = useTranslations('modules.unlockingStakes');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
   const title = dictionary('title');
   const titleShort = dictionary('titleShort');
-
-  const { getItem } = usePreferences();
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
 
   const { address: connectedAddress } = useWallet();
   const address = useMemo(
@@ -30,14 +27,18 @@ export default function TotalRewardsModule(params?: AddressModuleProps) {
     [params?.addressOverride, connectedAddress]
   );
 
-  const { claimed, status, refetch } = useGetRecipients({ address: address! });
-
-  const { lifetimeRewards } = useNetworkBalances({ addressOverride: address });
+  const { timeLockedStakes, refetch, status } = useNetworkBalances({ addressOverride: address });
 
   const formattedTotalRewardsAmount = formatSENTBigInt(
-    v2Rewards ? lifetimeRewards : claimed,
+    timeLockedStakes,
     DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS
   );
+
+  const { getItem } = usePreferences();
+  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
+  if (!v2Rewards) {
+    return <ComingSoonModule />;
+  }
 
   return (
     <Module>

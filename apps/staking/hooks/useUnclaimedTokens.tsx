@@ -13,6 +13,8 @@ import type { Address } from 'viem';
 /**
  * Hook to get the unclaimed tokens for an ethereum address.
  *
+ * @deprecated Use @see {@link useNetworkBalances} instead
+ *
  * @param params - The parameters for the hook.
  * @param params.addressOverride - The address to get the unclaimed tokens for. If not provided, the connected address will be used.
  */
@@ -32,6 +34,7 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
     getRewardsInfo,
     {
       address: address!,
+      v2: false,
     },
     {
       enabled,
@@ -49,6 +52,7 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
     if (!data || claimed === undefined) return undefined;
     const [err, rewards] = safeTrySync(() => data.rewards);
     if (err) return undefined;
+    if (typeof rewards !== 'bigint') return undefined;
 
     // Don't show negative rewards
     return bigIntMax(rewards - claimed, 0n);

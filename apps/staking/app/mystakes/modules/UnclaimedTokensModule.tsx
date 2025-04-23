@@ -9,11 +9,14 @@ import type { QUERY_STATUS } from '@/lib/query';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 
+/**
+ * @deprecated TODO: Delete this module when rewards v2 is stable
+ */
 export default function UnclaimedTokensModule({
   addressOverride,
   titleOverride,
 }: AddressModuleProps) {
-  const dictionary = useTranslations('modules.unclaimedRewards');
+  const dictionary = useTranslations('modules.unclaimedTokens');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
