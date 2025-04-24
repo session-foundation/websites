@@ -3,6 +3,8 @@ import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE_TIME } from '@/lib/con
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
@@ -19,7 +21,6 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
   const { address: connectedAddress, chainId } = useWallet();
   const address = overrideAddress ?? connectedAddress;
   const { getItem } = usePreferences();
-
   const enabled = !!address;
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
@@ -36,6 +37,10 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
           : undefined,
       }
     );
+
+  const {
+    nodes: { nodesConfirmingRegistration },
+  } = useNodesWithConfirmations();
 
   const {
     stakes,
@@ -100,10 +105,29 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     };
   }, [data, address, chainId]);
 
+  const notFoundJoiningNodes = useMemo(
+    () =>
+      nodesConfirmingRegistration.filter((node) => {
+        return (
+          !joiningContracts.some(
+            ({ pubkey_bls, service_node_pubkey }) =>
+              pubkey_bls === node.pubkeyBls ||
+              areHexesEqual(service_node_pubkey, node.pubkeyEd25519)
+          ) &&
+          !stakes.some(
+            (stake) =>
+              stake.pubkey_bls === node.pubkeyBls || stake.pubkey_ed25519 === node.pubkeyEd25519
+          )
+        );
+      }),
+    [nodesConfirmingRegistration, stakes, joiningContracts]
+  );
+
   return {
     stakes,
     visibleContracts,
     joiningContracts,
+    notFoundJoiningNodes,
     awaitingOperatorContracts,
     vesting,
     hiddenContractsWithStakes,

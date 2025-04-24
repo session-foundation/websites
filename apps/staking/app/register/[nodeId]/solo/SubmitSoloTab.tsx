@@ -50,7 +50,7 @@ import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type Address, isAddress } from 'viem';
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a complex component
@@ -354,39 +354,31 @@ export function SubmitSoloTab() {
   );
 }
 
-export function useConfirmationProgress() {
-  const [enabled, setEnabled] = useState<boolean>(false);
-  const [confirmations, setConfirmations] = useState<number>(0);
-
-  /**
-   * TODO: replace this useEffect with a query to get real confirmation data once confirmation is implemented
-   */
-  useEffect(() => {
-    if (enabled) {
-      setInterval(
-        () => setConfirmations((prev) => prev + 1),
-        (20 * 60 * 1000) / SESSION_NODE.GOAL_REGISTRATION_CONFIRMATIONS
-      );
-    }
-  }, [enabled]);
+export function useConfirmationProgress(endTimestampMs?: number | null, addSuffix?: boolean) {
+  const enabled = !!endTimestampMs;
 
   const endDateEstimate = useMemo(
-    () =>
-      new Date(
-        Date.now() +
-          (SESSION_NODE.GOAL_REGISTRATION_CONFIRMATIONS - confirmations) *
-            SESSION_NODE.REGISTRATION_MS_PER_CONFIRMATION_ESTIMATE
-      ),
-    [confirmations]
+    () => (endTimestampMs ? new Date(endTimestampMs) : null),
+    [endTimestampMs]
   );
-  const remainingTimeEst = useRelativeTime(endDateEstimate);
+
+  const remainingTimeEst = useRelativeTime(endDateEstimate, { addSuffix });
+
+  const confirmations = endDateEstimate
+    ? SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS *
+      Math.floor(
+        (endDateEstimate.getTime() - Date.now()) / SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS
+      )
+    : 0;
 
   return {
     remainingTimeEst,
+    enabled,
     confirmations,
-    start: () => setEnabled(true),
   };
 }
+
+export type UseConfirmationProgressReturn = ReturnType<typeof useConfirmationProgress>;
 
 function ErrorSolo({ error }: ErrorBoxProps) {
   const dict = useTranslations('actionModules.registration.errorSolo');

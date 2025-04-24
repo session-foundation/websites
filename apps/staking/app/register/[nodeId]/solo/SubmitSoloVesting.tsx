@@ -58,7 +58,6 @@ export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams })
   const { confirmations, remainingTimeEst, handleRetry } = useSubmitSolo({
     error: addBLSTransactionError ?? addBLSWriteError ?? addBLSSimulateError,
     enabled,
-    beginConfirmationTracking: addBLSStatus === PROGRESS_STATUS.SUCCESS,
     isError,
     registerAndStake,
     resetRegisterAndStake,
