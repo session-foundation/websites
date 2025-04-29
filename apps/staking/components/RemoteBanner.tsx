@@ -1,5 +1,4 @@
 import { ClaimRewardsDisabledInfo } from '@/components/ClaimRewardsDisabledInfo';
-import { NewTokenContractInfo } from '@/components/NewTokenContractInfo';
 import { RegistrationPausedInfo } from '@/components/RegistrationPausedInfo';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { getRemoteFeatureFlagContent } from '@/lib/feature-flags-server';
@@ -20,11 +19,6 @@ export default async function RemoteBanner({
       {customBanner ? (
         <Banner>
           <span>{customBanner}</span>
-        </Banner>
-      ) : null}
-      {enabledFlags.has(REMOTE_FEATURE_FLAG.NEW_TOKEN_CONTRACT) ? (
-        <Banner>
-          <NewTokenContractInfo />
         </Banner>
       ) : null}
       {enabledFlags.has(REMOTE_FEATURE_FLAG.DISABLE_CLAIM_REWARDS) ? (

@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 
+/** @deprecated Referral program is finished, if this component is to be used again it needs to be updated. */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is fine
 export default function ReferralModule() {
   const [hidden, setHidden] = useState<boolean>(true);

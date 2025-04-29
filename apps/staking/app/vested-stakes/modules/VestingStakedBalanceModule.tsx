@@ -19,8 +19,9 @@ export default function VestingStakedBalanceModule({
   const title = titleOverride ?? dictionary('title');
 
   const vestingAddress = useActiveVestingContractAddress();
-  const address = addressOverride ?? vestingAddress;
-  const { totalStakedFormatted, status, refetch, enabled } = useTotalStaked(address);
+  const { totalStakedFormatted, status, refetch } = useTotalStaked(
+    addressOverride ?? vestingAddress
+  );
 
   return (
     <Module>
@@ -29,7 +30,7 @@ export default function VestingStakedBalanceModule({
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
-        enabled={enabled}
+        enabled
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {

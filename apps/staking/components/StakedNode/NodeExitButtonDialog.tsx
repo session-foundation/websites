@@ -1,6 +1,7 @@
 import { ErrorMessage } from '@/components/ErrorMessage';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import useExitNode from '@/hooks/useExitNode';
 import { SOCIALS } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
@@ -18,7 +19,6 @@ import {
   AlertDialogFooter,
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
-import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type ReactNode, useMemo } from 'react';
@@ -149,7 +149,7 @@ function NodeExitContractWriteDialog({
     <>
       <NodeActionModuleInfo node={node} fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
       <AlertDialogFooter className="mt-4 flex flex-col gap-8 sm:flex-col">
-        <Button
+        <WalletInteractionButtonWithLocales
           variant="destructive"
           rounded="md"
           size="lg"
@@ -160,7 +160,7 @@ function NodeExitContractWriteDialog({
           onClick={handleClick}
         >
           {dictionary('buttons.submit')}
-        </Button>
+        </WalletInteractionButtonWithLocales>
         {simulateEnabled ? (
           <Progress
             steps={[
