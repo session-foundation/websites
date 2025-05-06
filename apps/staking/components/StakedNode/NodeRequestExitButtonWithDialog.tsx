@@ -1,4 +1,4 @@
-import { CollapsableButton } from '@/components/NodeCard';
+import { CollapsableContent } from '@/components/NodeCard';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import useRequestNodeExit from '@/hooks/useRequestNodeExit';
@@ -12,6 +12,7 @@ import type { Stake } from '@session/staking-api-js/schema';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
 import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
+import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import {
   AlertDialog,
@@ -24,14 +25,47 @@ import { Button } from '@session/ui/ui/button';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { type ReactNode, useState } from 'react';
+import { type HTMLAttributes, type ReactNode, forwardRef, useState } from 'react';
 
 enum EXIT_REQUEST_STATE {
   ALERT = 0,
   PENDING = 1,
 }
 
-export function NodeRequestExitButton({ node }: { node: Stake }) {
+export const NodeRequestExitButton = forwardRef<
+  HTMLSpanElement,
+  HTMLAttributes<HTMLSpanElement> & {
+    disabled?: boolean;
+  }
+>(({ disabled, className, ...props }, ref) => {
+  const dictionary = useTranslations('nodeCard.staked.requestExit');
+  return (
+    <CollapsableContent
+      className={cn('end-6 bottom-4 flex items-end min-[500px]:absolute', className)}
+      size="buttonSm"
+      width="w-max"
+      {...props}
+      ref={ref}
+    >
+      <Button
+        aria-label={dictionary('buttonAria')}
+        data-testid={ButtonDataTestId.Staked_Node_Request_Exit}
+        disabled={disabled}
+        rounded="md"
+        size="sm"
+        variant="destructive-outline"
+        className="uppercase"
+      >
+        {dictionary('buttonText')}
+      </Button>
+    </CollapsableContent>
+  );
+});
+
+export function NodeRequestExitButtonWithDialog({
+  node,
+  disabled,
+}: { node: Stake; disabled?: boolean }) {
   const [exitRequestState, setExitRequestState] = useState<EXIT_REQUEST_STATE>(
     EXIT_REQUEST_STATE.ALERT
   );
@@ -42,12 +76,7 @@ export function NodeRequestExitButton({ node }: { node: Stake }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <CollapsableButton
-          ariaLabel={dictionary('buttonAria')}
-          dataTestId={ButtonDataTestId.Staked_Node_Request_Exit}
-        >
-          {dictionary('buttonText')}
-        </CollapsableButton>
+        <NodeRequestExitButton disabled={disabled} />
       </AlertDialogTrigger>
       <AlertDialogContent
         dialogTitle={
@@ -116,21 +145,24 @@ function formatEnglishTimeDistance(seconds: number, delimiter = ' ', addPluralSu
 
 function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () => void }) {
   const { chainId } = useWallet();
-
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog');
+  const dictInfoNotice = useTranslations('infoNotice');
 
   return (
     <>
-      <div className="font-medium text-lg">{dictionary('description.title')}</div>
       <p>
-        {dictionary.rich('description.content', {
-          request_time: formatLocalizedTimeFromSeconds(
+        {dictInfoNotice.rich('requestExit', {
+          relativeRequestTime: formatLocalizedTimeFromSeconds(
             SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
               addSuffix: true,
             }
           ),
-          exit_time: formatEnglishTimeDistance(
+          requestTime: formatEnglishTimeDistance(
+            SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
+            '-'
+          ),
+          exitTime: formatEnglishTimeDistance(
             SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS,
             '-'
           ),
