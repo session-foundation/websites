@@ -140,6 +140,10 @@ export enum ButtonDataTestId {
   Vesting_Info_Edit_Beneficiary = 'button:vesting-info-edit-beneficiary',
   Vesting_Claim_Principal_Open_Dialog = 'button:vesting-claim-principal-open-dialog',
   Vesting_Claim_Principal_Confirm = 'button:vesting-claim-principal-confirm',
+  Registration_Notice_Continue = 'button:registration-notice-continue',
+  Stake_Notice_Continue = 'button:stake-notice-continue',
+  Stake_Notice_Cancel = 'button:stake-notice-cancel',
+  Unstake_Operator_Notice_Continue = 'button:unstake-operator-notice-continue',
 }
 
 export enum InputDataTestId {
@@ -163,6 +167,11 @@ export enum SwitchDataTestId {
 export enum RadioDataTestId {
   Registration_Start_Radio_Express = 'radio:registration-start-radio-express',
   Registration_Start_Radio_Guided = 'radio:registration-start-radio-guided',
+}
+
+export enum CheckboxDataTestId {
+  Notice_Registration_Dont_Show_Again = 'checkbox:registration-start-radio-dont-show-again',
+  Notice_Staking_Dont_Show_Again = 'checkbox:registration-start-radio-dont-show-again',
 }
 
 export enum SpecialDataTestId {
