@@ -1,44 +1,112 @@
 import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 import { type StakeFormSchema, getStakeFormSchema } from '@/app/stake/[address]/NewStake';
+import { StakeNotice } from '@/app/stake/[address]/StakeNotice';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
 import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
 import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import EthereumAddressField from '@/components/Form/EthereumAddressField';
 import StakeAmountField from '@/components/Form/StakeAmountField';
+import { WizardSectionDescription } from '@/components/Wizard';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
-import { useDecimalDelimiter } from '@/lib/locale-client';
+import useRelativeTime from '@/hooks/useRelativeTime';
+import {
+  BLOCK_TIME_MS,
+  PREFERENCE,
+  SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT,
+  SESSION_NODE_TIME,
+  SESSION_NODE_TIME_STATIC,
+} from '@/lib/constants';
+import { formatLocalizedTimeFromSeconds, useDecimalDelimiter } from '@/lib/locale-client';
+import logger from '@/lib/logger';
 import { getContributionRangeFromContributors } from '@/lib/maths';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
+import { ARBITRUM_EVENT } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
+import { Tooltip } from '@session/ui/ui/tooltip';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
+import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
-import { isAddress } from 'viem';
+import { usePreferences } from 'usepref';
+import { type Address, isAddress } from 'viem';
 import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
 
+const useWithdrawableStake = ({
+  contract,
+  address,
+}: { contract: ContributionContract; address?: Address }) => {
+  const { data: blockNumber } = useBlockNumber();
+  const withdrawableBlock = useMemo(() => {
+    const contributionEvent = contract.events.find(
+      (e) =>
+        e.name === ARBITRUM_EVENT.NewContribution &&
+        e.args &&
+        typeof e.args === 'object' &&
+        'contributor' in e.args &&
+        typeof e.args.contributor === 'string' &&
+        areHexesEqual(e.args.contributor, address)
+    );
+
+    if (!contributionEvent) {
+      logger.warn(`No contribution event found for ${address}`);
+      return 0;
+    }
+
+    return (
+      contributionEvent.block +
+      SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_SECONDS *
+        (1000 / BLOCK_TIME_MS.ARBITRUM)
+    );
+  }, [contract, address]);
+
+  const isTooSoonToWithdraw = blockNumber !== undefined && blockNumber < withdrawableBlock;
+
+  const withdrawDate = useMemo(() => {
+    if (blockNumber == null) return null;
+    const msUntilWithdraw = (withdrawableBlock - Number(blockNumber)) * BLOCK_TIME_MS.ARBITRUM;
+    return new Date(Date.now() + msUntilWithdraw);
+  }, [withdrawableBlock, blockNumber]);
+
+  const withdrawRelativeTime = useRelativeTime(withdrawDate, { addSuffix: true });
+  const withdrawRelativeTimeNoSuffix = useRelativeTime(withdrawDate);
+
+  return {
+    isTooSoonToWithdraw,
+    withdrawRelativeTime,
+    withdrawRelativeTimeNoSuffix,
+  };
+};
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: kinda has to be
 export function ManageStakeContribution({
   contract,
   isSubmitting,
   setIsSubmitting,
+  refetch,
 }: {
   contract: ContributionContract;
   isSubmitting: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
+  refetch: () => void;
 }) {
+  const { getItem } = usePreferences();
+  const [acceptedTopUpNotice, setAcceptedTopUpNotice] = useState<boolean>(
+    !!getItem(PREFERENCE.INFO_NOTICE_DONT_SHOW_STAKE_TOP_UP)
+  );
   const [stakingParams, setStakingParams] = useState<UseContributeStakeToOpenNodeParams | null>(
     null
   );
@@ -52,29 +120,19 @@ export function ManageStakeContribution({
   const dictionary = useTranslations('actionModules.staking.manage');
   const dictionaryShared = useTranslations('actionModules.shared');
   const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
-
+  const dictionaryInfoNotice = useTranslations('infoNotice');
   const dictionaryStakeAmount = useTranslations('actionModules.stakeAmount.validation');
   const dictionaryRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
   const decimalDelimiter = useDecimalDelimiter();
 
   const isOperator = areHexesEqual(contract.operator_address, address);
 
-  // TODO: implement the remove stake amount limit feature
-  // const stakeAmountLastEdited = new Date('2025-06-06').getTime();
-  //
-  // /** If the time since the last stake update is within the
-  //  *  last {@link SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS} ms, the
-  //  *  user can remove the stake amount */
-  // const isStakeAmountRemovable = useMemo(
-  //   () =>
-  //     stakeAmountLastEdited + SESSION_NODE_TIME_STATIC.NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS <
-  //     Date.now(),
-  //   [stakeAmountLastEdited]
-  // );
-
   const contributor = contract.contributors.find((contributor) =>
     areHexesEqual(contributor.address, address)
   );
+
+  const { withdrawRelativeTime, withdrawRelativeTimeNoSuffix, isTooSoonToWithdraw } =
+    useWithdrawableStake({ contract, address });
 
   const contributorStakeAmount = useMemo(() => {
     if (!contributor || !contributor.amount) return 0n;
@@ -186,6 +244,47 @@ export function ManageStakeContribution({
     setIsRemoveStake(true);
   };
 
+  const isSmallContributor = contributorStakeAmount < SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT;
+
+  const removeStakeBaseButton = !isOperator ? (
+    <Button
+      type="button"
+      variant="destructive"
+      className="w-full"
+      disabled={!isOperator && isTooSoonToWithdraw}
+      data-testid={ButtonDataTestId.Stake_Manage_Remove_Stake}
+      aria-label={dictionary('buttonRemoveStake.aria')}
+      onClick={handleRemoveStake}
+    >
+      {dictionary('buttonRemoveStake.text')}
+    </Button>
+  ) : null;
+
+  const removeStakeButton =
+    !isOperator && isTooSoonToWithdraw ? (
+      <Tooltip
+        tooltipContent={
+          <WizardSectionDescription
+            description={dictionaryInfoNotice.rich('withdrawContributorTooSoon', {
+              relativeTime: withdrawRelativeTime,
+              relativeTimeNoSuffix: withdrawRelativeTimeNoSuffix,
+              unlockWaitTime: formatLocalizedTimeFromSeconds(
+                isSmallContributor
+                  ? SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_SECONDS
+                  : SESSION_NODE_TIME().EXIT_REQUEST_TIME_SECONDS
+              ),
+              linkOut: '',
+            })}
+            href="https://docs.getsession.org/"
+          />
+        }
+      >
+        <div>{removeStakeBaseButton}</div>
+      </Tooltip>
+    ) : (
+      removeStakeBaseButton
+    );
+
   return (
     <>
       {stakingParams ? (
@@ -258,27 +357,33 @@ export function ManageStakeContribution({
           >
             {dictionaryRegistrationShared('buttonConfirmAndStake.text')}
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            className="w-full"
-            data-testid={ButtonDataTestId.Stake_Manage_Remove_Stake}
-            aria-label={dictionary('buttonRemoveStake.aria')}
-            onClick={handleRemoveStake}
-          >
-            {dictionary('buttonRemoveStake.text')}
-          </Button>
           <FormErrorMessage />
         </form>
       </Form>
-      {stakingParams ? (
+      {!stakingParams && !isRemoveStake ? removeStakeButton : null}
+      {!isOperator && stakingParams && !acceptedTopUpNotice ? (
+        <StakeNotice
+          onContinue={() => setAcceptedTopUpNotice(true)}
+          onCancel={() => {
+            setStakingParams(null);
+            setIsSubmitting(false);
+          }}
+          stakeAmount={contributorStakeAmount + stakingParams.stakeAmount}
+        />
+      ) : null}
+      {stakingParams && (isOperator || acceptedTopUpNotice) ? (
         vestingContract ? (
           <SubmitContributeFundsVesting
             stakingParams={stakingParams}
             setIsSubmitting={setIsSubmitting}
+            refetch={refetch}
           />
         ) : (
-          <SubmitContributeFunds stakingParams={stakingParams} setIsSubmitting={setIsSubmitting} />
+          <SubmitContributeFunds
+            stakingParams={stakingParams}
+            setIsSubmitting={setIsSubmitting}
+            refetch={refetch}
+          />
         )
       ) : null}
       {isRemoveStake ? (
@@ -288,7 +393,11 @@ export function ManageStakeContribution({
             contractAddress={contract.address}
           />
         ) : (
-          <SubmitRemoveFunds setIsSubmitting={setIsSubmitting} contractAddress={contract.address} />
+          <SubmitRemoveFunds
+            setIsSubmitting={setIsSubmitting}
+            contractAddress={contract.address}
+            refetch={refetch}
+          />
         )
       ) : null}
     </>

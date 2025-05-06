@@ -58,7 +58,7 @@ export function StakingActionModuleTitle({ address }: { address: string }) {
 }
 
 export default function Staking({ address }: { address: string }) {
-  const { data, isLoading } = useStakingBackendSuspenseQuery(getContributionContracts);
+  const { data, isLoading, refetch } = useStakingBackendSuspenseQuery(getContributionContracts);
   const dictionary = useTranslations('general');
 
   const connectedAddress = useCurrentActor();
@@ -73,9 +73,9 @@ export default function Staking({ address }: { address: string }) {
     <Loading />
   ) : contract ? (
     contributor ? (
-      <ManageStake contract={contract} />
+      <ManageStake contract={contract} refetch={refetch} />
     ) : !isLoadingVesting ? (
-      <NewStake contract={contract} />
+      <NewStake contract={contract} refetch={refetch} />
     ) : null
   ) : (
     <span>{dictionary('nodeNotFound')}</span>
