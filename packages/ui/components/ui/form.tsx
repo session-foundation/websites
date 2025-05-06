@@ -173,8 +173,12 @@ const FormErrorMessage = React.forwardRef<
 });
 FormErrorMessage.displayName = 'FormErrorMessage';
 
-const FormSubmitButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, ...props }, ref) => {
+export type FormButtonProps = ButtonProps & {
+  allowNonDirtySubmission?: boolean;
+}
+
+const FormSubmitButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(
+  ({ allowNonDirtySubmission, className, children, ...props }, ref) => {
     const { isSubmitting, isDirty } = useFormState();
     return (
       <>
@@ -183,7 +187,7 @@ const FormSubmitButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className={cn('w-full', className)}
           type="submit"
           {...props}
-          disabled={!isDirty || isSubmitting}
+          disabled={(!allowNonDirtySubmission && !isDirty) || isSubmitting}
         >
           {isSubmitting ? '...' : children}
         </Button>

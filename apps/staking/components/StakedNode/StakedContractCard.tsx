@@ -69,6 +69,7 @@ const ContractSummary = ({ contract, state, isOperator }: ContractSummaryProps) 
     <NodeContributorList
       contributors={contract.contributors}
       data-testid={StakedNodeDataTestId.Contributor_List}
+      showEmptySlots
     />
   );
 };

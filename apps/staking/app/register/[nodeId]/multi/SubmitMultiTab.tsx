@@ -354,9 +354,8 @@ export function SubmitMultiTab() {
       </ActionModuleRow>
       <ActionModuleFeeAccordionRow
         label={dictFee('networkFee')}
-        tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
+        tooltip={dictFee.rich('networkFeeTooltip', {
           link: externalLink(URL.GAS_INFO),
-          formula: () => formulaDeploy,
         })}
         fees={[
           {
