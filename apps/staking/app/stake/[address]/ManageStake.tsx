@@ -1,5 +1,6 @@
 import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
+import { OperatorRemoveStake } from '@/app/stake/[address]/OperatorRemoveStake';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
@@ -17,7 +18,10 @@ enum EditableStakeGroup {
   OperatorFee = 'operatorFee',
 }
 
-export function ManageStake({ contract }: { contract: ContributionContract }) {
+export function ManageStake({
+  contract,
+  refetch,
+}: { contract: ContributionContract; refetch: () => void }) {
   const [editableStakeGroup, setEditableStakeGroup] = useState<EditableStakeGroup | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -85,6 +89,14 @@ export function ManageStake({ contract }: { contract: ContributionContract }) {
             contract={contract}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
+            refetch={refetch}
+          />
+        ) : null}
+        {!isLoading && isOperator ? (
+          <OperatorRemoveStake
+            contract={contract}
+            setIsSubmitting={setIsSubmitting}
+            refetch={refetch}
           />
         ) : null}
       </ErrorBoundary>

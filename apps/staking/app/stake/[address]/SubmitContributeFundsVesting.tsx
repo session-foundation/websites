@@ -14,9 +14,11 @@ import { type Dispatch, type SetStateAction, useEffect } from 'react';
 export function SubmitContributeFundsVesting({
   stakingParams,
   setIsSubmitting,
+  refetch,
 }: {
   stakingParams: UseContributeStakeToOpenNodeParams;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
+  refetch: () => void;
 }) {
   const dict = useTranslations('actionModules.registration.submitMulti');
   const dictShared = useTranslations('actionModules.shared');
@@ -82,6 +84,13 @@ export function SubmitContributeFundsVesting({
       handleError();
     }
   }, [isError]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
+  useEffect(() => {
+    if (contributeFundsStatus === PROGRESS_STATUS.SUCCESS) {
+      refetch();
+    }
+  }, [contributeFundsStatus]);
 
   return (
     <div>

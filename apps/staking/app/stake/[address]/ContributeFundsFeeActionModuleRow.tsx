@@ -73,7 +73,7 @@ export function ContributeFundsFeeActionModuleRow({
 
   const gasPrice = gasPriceContributeFunds;
 
-  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+  const { feeFormatted: feeEstimate } = useNetworkFeeFormula({
     fee:
       feeProxyApproval || feeContributeFunds
         ? (feeProxyApproval ?? 0n) + (feeContributeFunds ?? 0n)
@@ -91,9 +91,8 @@ export function ContributeFundsFeeActionModuleRow({
   return (
     <ActionModuleFeeAccordionRow
       label={dictFee('networkFee')}
-      tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
+      tooltip={dictFee.rich('networkFeeTooltip', {
         link: externalLink(URL.GAS_INFO),
-        formula: () => (needsApproval ? feeFormula : formulaContributeFunds),
       })}
       fees={[
         {

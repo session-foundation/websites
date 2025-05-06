@@ -1,11 +1,11 @@
 import { ActionModuleRow } from '@/components/ActionModule';
 import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import { NodeContributorList } from '@/components/NodeCard';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import type { Stake } from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
 
 export default function NodeActionModuleInfo({
   node,
@@ -21,11 +21,8 @@ export default function NodeActionModuleInfo({
   const dictionary = useTranslations('nodeCard.staked.requestExit.dialog.write');
   const dictionaryActionModulesNode = useTranslations('actionModules.node');
   const sessionNodeDictionary = useTranslations('sessionNodes.general');
-
-  const formattedTotalStaked = useMemo(
-    () => formatSENTBigInt(node.contributors.reduce((acc, { amount }) => acc + amount, 0n)),
-    [node.contributors]
-  );
+  const address = useCurrentActor();
+  const amountStakedFormatted = getTotalStakedAmountForAddressFormatted(node.contributors, address);
 
   return (
     <div className="flex flex-col gap-4">
@@ -34,7 +31,7 @@ export default function NodeActionModuleInfo({
         tooltip={dictionaryActionModulesNode('contributorsTooltip')}
       >
         <span className="flex flex-row flex-wrap items-center gap-2 align-middle">
-          <NodeContributorList contributors={node.contributors} forceExpand showEmptySlots />
+          <NodeContributorList contributors={node.contributors} forceExpand />
         </span>
       </ActionModuleRow>
       <ActionModuleRow
@@ -53,7 +50,7 @@ export default function NodeActionModuleInfo({
         label={dictionary('amountStaked')}
         tooltip={dictionary('amountStakedTooltip')}
       >
-        {formattedTotalStaked}
+        {amountStakedFormatted}
       </ActionModuleRow>
       <ActionModuleFeeRow fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
     </div>

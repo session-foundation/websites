@@ -17,9 +17,11 @@ import type { Address } from 'viem';
 export function SubmitRemoveFunds({
   setIsSubmitting,
   contractAddress,
+  refetch,
 }: {
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
   contractAddress: Address;
+  refetch: () => void;
 }) {
   const dict = useTranslations('actionModules.staking.manage');
   const dictShared = useTranslations('actionModules.shared');
@@ -76,6 +78,8 @@ export function SubmitRemoveFunds({
     [simulateError, writeError, transactionError, dict, dictGeneral]
   );
 
+  const status = parseContractStatusToProgressStatus(contractCallStatus);
+
   const handleRetry = () => {
     setIsSubmitting(true);
     resetContract();
@@ -95,6 +99,13 @@ export function SubmitRemoveFunds({
     }
   }, [isError]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
+  useEffect(() => {
+    if (status === PROGRESS_STATUS.SUCCESS) {
+      refetch();
+    }
+  }, [status]);
+
   return (
     <div>
       <Typography variant="h3" className="text-start">
@@ -109,7 +120,7 @@ export function SubmitRemoveFunds({
               [PROGRESS_STATUS.SUCCESS]: dict('withdrawContribution.success'),
               [PROGRESS_STATUS.ERROR]: withdrawFundsErrorMessage,
             },
-            status: parseContractStatusToProgressStatus(contractCallStatus),
+            status,
           },
         ]}
       />

@@ -14,7 +14,6 @@ import {
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
   SESSION_NODE_MIN_STAKE_SOLO_OPERATOR,
-  SESSION_NODE_TIME_STATIC,
   SOCIALS,
   TICKER,
   URL,
@@ -62,7 +61,7 @@ export const underlinedTooltip = (tooltipContent: ReactNode) => {
   );
 };
 
-const defaultExternalLink = (href: string, text: string, className?: string) => () =>
+const defaultExternalLink = (href: string, text: ReactNode, className?: string) => () =>
   externalLink(href, className ?? 'text-white underline')(text);
 
 type FontWeight =
@@ -106,6 +105,7 @@ export const defaultTranslationElements = {
     URL.INCENTIVE_PROGRAM,
     'Session Testnet Incentive Program'
   ),
+  'discord-link': externalLink(SOCIALS[Social.Discord].link, 'text-session-green'),
   'gas-faucet-link': externalLink(URL.ARB_SEP_FAUCET, 'text-session-green'),
   'gas-info-link': externalLink(URL.GAS_INFO, 'text-session-green'),
   'oxen-program-link': defaultExternalLink(
@@ -136,8 +136,6 @@ export const defaultTranslationVariables = {
   sessionNetwork: SESSION_NETWORK,
   oxenProgram: 'Oxen Service Node Bonus program',
   notFoundContentType: 'page',
-  smallContributorLeaveRequestDelay:
-    SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS,
   fullStateAmount: `${formatBigIntTokenValue(SESSION_NODE_FULL_STAKE_AMOUNT, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
   minStakeSolo: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_SOLO_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,
   minStakeMulti: `${formatBigIntTokenValue(SESSION_NODE_MIN_STAKE_MULTI_OPERATOR, SENT_DECIMALS, 0)} ${SENT_SYMBOL}`,

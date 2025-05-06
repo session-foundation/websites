@@ -23,7 +23,7 @@ export default function ActionModuleFeeRow({
 }: ActionModuleFeeRowProps) {
   const dictionaryFee = useTranslations('fee');
 
-  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+  const { feeFormatted: feeEstimate } = useNetworkFeeFormula({
     fee,
     gasAmount,
     gasPrice,
@@ -35,9 +35,8 @@ export default function ActionModuleFeeRow({
   return typeof feeEstimate !== 'undefined' ? (
     <ActionModuleRow
       label={dictionaryFee('networkFee')}
-      tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+      tooltip={dictionaryFee.rich('networkFeeTooltip', {
         link: externalLink(URL.GAS_INFO),
-        formula: () => feeFormula,
       })}
       containerClassName={className}
       last={last}

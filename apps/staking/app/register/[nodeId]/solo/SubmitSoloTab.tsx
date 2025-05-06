@@ -158,7 +158,7 @@ export function SubmitSoloTab() {
 
   const gasPrice = gasPriceAddBlsPubKey ?? gasPriceProxyApproval;
 
-  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+  const { feeFormatted: feeEstimate } = useNetworkFeeFormula({
     fee:
       feeProxyApproval || feeAddBlsPubKey
         ? (feeProxyApproval ?? 0n) + (feeAddBlsPubKey ?? 0n)
@@ -300,9 +300,8 @@ export function SubmitSoloTab() {
       ) : (
         <ActionModuleFeeAccordionRow
           label={dictFee('networkFee')}
-          tooltip={dictFee.rich('networkFeeTooltipWithFormula', {
+          tooltip={dictFee.rich('networkFeeTooltip', {
             link: externalLink(URL.GAS_INFO),
-            formula: () => (needsApproval ? feeFormula : formulaAddBlsPubKey),
           })}
           fees={[
             {

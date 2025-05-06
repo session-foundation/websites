@@ -1,6 +1,7 @@
 import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ContributeFundsFeeActionModuleRow } from '@/app/stake/[address]/ContributeFundsFeeActionModuleRow';
 import { StakeInfo, getContributionRangeForWallet } from '@/app/stake/[address]/StakeInfo';
+import { StakeNotice } from '@/app/stake/[address]/StakeNotice';
 import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFunds';
 import { SubmitContributeFundsVesting } from '@/app/stake/[address]/SubmitContributeFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
@@ -16,7 +17,7 @@ import StakeAmountField, {
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
-import { SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
+import { PREFERENCE, SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
 import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
@@ -37,6 +38,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
+import { usePreferences } from 'usepref';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
@@ -53,8 +55,15 @@ export const getStakeFormSchema = ({ stakeAmount, rewardsAddress }: GetStakeForm
 
 export type StakeFormSchema = z.infer<ReturnType<typeof getStakeFormSchema>>;
 
-export function NewStake({ contract }: { contract: ContributionContract }) {
+export function NewStake({
+  contract,
+  refetch,
+}: { contract: ContributionContract; refetch: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { getItem } = usePreferences();
+  const [acceptedNotice, setAcceptedNotice] = useState<boolean>(
+    !!getItem(PREFERENCE.INFO_NOTICE_DONT_SHOW_STAKE)
+  );
   const [stakingParams, setStakingParams] = useState<UseContributeStakeToOpenNodeParams | null>(
     null
   );
@@ -314,17 +323,29 @@ export function NewStake({ contract }: { contract: ContributionContract }) {
           <FormErrorMessage />
         </form>
       </Form>
+      {stakingParams && !acceptedNotice ? (
+        <StakeNotice
+          onContinue={() => setAcceptedNotice(true)}
+          onCancel={() => {
+            setIsSubmitting(false);
+            setStakingParams(null);
+          }}
+          stakeAmount={stakingParams.stakeAmount}
+        />
+      ) : null}
       <ErrorBoundary errorComponent={ErrorStake}>
-        {stakingParams ? (
+        {acceptedNotice && stakingParams ? (
           vestingContract ? (
             <SubmitContributeFundsVesting
               stakingParams={stakingParams}
               setIsSubmitting={setIsSubmitting}
+              refetch={refetch}
             />
           ) : (
             <SubmitContributeFunds
               stakingParams={stakingParams}
               setIsSubmitting={setIsSubmitting}
+              refetch={refetch}
             />
           )
         ) : null}

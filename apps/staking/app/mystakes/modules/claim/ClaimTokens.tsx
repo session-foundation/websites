@@ -75,7 +75,7 @@ export function ClaimTokens({
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
   });
 
-  const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
+  const { feeFormatted: feeEstimate } = useNetworkFeeFormula({
     fee: updateBalanceFee || claimFee ? (updateBalanceFee ?? 0n) + (claimFee ?? 0n) : null,
     gasAmount:
       updateBalanceGasAmountEstimate || claimGasAmountEstimate
@@ -123,9 +123,8 @@ export function ClaimTokens({
         </ActionModuleRow>
         <ActionModuleFeeAccordionRow
           label={dictionaryFee('networkFee')}
-          tooltip={dictionaryFee.rich('networkFeeTooltipWithFormula', {
+          tooltip={dictionaryFee.rich('networkFeeTooltip', {
             link: externalLink(URL.GAS_INFO),
-            formula: () => feeFormula,
           })}
           fees={[
             {

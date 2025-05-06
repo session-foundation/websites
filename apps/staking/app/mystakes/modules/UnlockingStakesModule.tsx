@@ -25,7 +25,9 @@ export default function UnlockingStakesModule(params?: AddressModuleProps) {
     [params?.addressOverride, connectedAddress]
   );
 
-  const { timeLockedStakes, refetch, status } = useNetworkBalances({ addressOverride: address });
+  const { timeLockedStakes, refetch, status, enabled } = useNetworkBalances({
+    addressOverride: address,
+  });
 
   const formattedTotalRewardsAmount = formatSENTBigInt(
     timeLockedStakes,
@@ -44,7 +46,7 @@ export default function UnlockingStakesModule(params?: AddressModuleProps) {
       <ModuleDynamicContractReadText
         status={status}
         fallback={0}
-        enabled={!!address}
+        enabled={enabled}
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {

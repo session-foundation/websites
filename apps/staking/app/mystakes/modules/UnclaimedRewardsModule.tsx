@@ -20,7 +20,7 @@ export default function UnclaimedRewardsModule({
   const titleFormat = useTranslations('modules.title');
   const title = titleOverride ?? dictionary('title');
 
-  const { claimableRewards, status, refetch } = useNetworkBalances({
+  const { claimableRewards, status, refetch, enabled } = useNetworkBalances({
     addressOverride,
   });
 
@@ -35,7 +35,7 @@ export default function UnclaimedRewardsModule({
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
-        enabled
+        enabled={enabled}
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {

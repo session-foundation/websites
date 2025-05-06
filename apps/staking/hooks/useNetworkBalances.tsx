@@ -14,13 +14,15 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
 
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
+  const enabled = !!address;
+
   const { data, status, refetch } = useStakingBackendQueryWithParams(
     getRewardsInfo,
     {
       address: address!,
     },
     {
-      enabled: !!address,
+      enabled,
       refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
     }
   );
@@ -36,6 +38,9 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
     let claimableStakes = 0n;
     let claimableRewards = 0n;
 
+    let networkClaimRemainingInCurrentPeriod = 0n;
+    let networkClaimCurrentPeriodEnd = 0;
+
     if (data) {
       const rewards = rewardsInfoSchema.parse(data.rewards);
       lifetimeLiquidated = rewards.lifetime_liquidated_stakes;
@@ -47,6 +52,10 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
 
       claimableStakes = lifetimeUnlockedStakes - lifetimeLiquidated - rewards.claimed_stakes;
       claimableRewards = lifetimeRewards - rewards.claimed_rewards;
+
+      // TODO: implement network claim period data once available from backend
+      networkClaimRemainingInCurrentPeriod = 1_000_000_000000000n;
+      networkClaimCurrentPeriodEnd = Date.now() + 10_000;
     }
 
     const unclaimed = claimableRewards + claimableStakes;
@@ -59,16 +68,22 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
       lockedStakes,
       claimableRewards,
       claimableStakes,
+      networkClaimRemainingInCurrentPeriod,
+      networkClaimPeriodEnd: networkClaimCurrentPeriodEnd,
     };
   }, [data]);
 
   const canClaim =
     status === 'success' && parsedData.unclaimed >= BigInt(HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT);
 
+  const isClaimOverLimit = parsedData.unclaimed > parsedData.networkClaimRemainingInCurrentPeriod;
+
   return {
     ...parsedData,
     canClaim,
+    isClaimOverLimit,
     refetch,
     status,
+    enabled,
   };
 };

@@ -28,6 +28,7 @@ export enum URL {
   TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
   TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
   BUG_BOUNTY_TOS = 'https://token.getsession.org/bug-bounty-terms',
+  DOCS = 'https://docs.getsession.org/',
   SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
@@ -35,7 +36,7 @@ export enum URL {
 
 export const LANDING_BUTTON_URL = {
   PRIMARY: '/stake',
-  SECONDARY: URL.BUG_BOUNTY_PROGRAM,
+  SECONDARY: URL.DOCS,
 };
 
 export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register'];
@@ -109,7 +110,9 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'tokenSite', href: 'https://token.getsession.org', linkType: 'external' },
   { dictionaryKey: 'support', href: '/support', linkType: 'external' },
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
-  { dictionaryKey: 'explorer', href: 'https://stagenet.oxen.observer', linkType: 'external' },
+  { dictionaryKey: 'explorer', href: 'https://session.observer', linkType: 'external' },
+  { dictionaryKey: 'bridgeArbitrum', href: '/bridge/arbitrum', linkType: 'external' },
+  { dictionaryKey: 'swap', href: 'https://bridge.oxen.io', linkType: 'external' },
 ] as const;
 
 export enum QUERY {
@@ -126,11 +129,6 @@ export enum QUERY {
   /** 60 seconds */
   STALE_TIME_REMOTE_FEATURE_FLAGS = 60 * 1000,
 }
-
-/** 20,000 SENT  */
-export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
-export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
-export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
 
 export const SIGNIFICANT_FIGURES = {
   GAS_FEE_TOTAL: 3,
@@ -155,15 +153,24 @@ export enum SESSION_NODE {
   MAX_OPERATOR_FEE = 100,
   /** Max contributors */
   MAX_CONTRIBUTORS = 10,
+  /** A small contributor is one who contributes less than 1/DIVISOR of the total */
+  SMALL_CONTRIBUTOR_DIVISOR = 4,
 }
 
+/** 20,000 SESH  */
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
+export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
+export const SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT =
+  SESSION_NODE_FULL_STAKE_AMOUNT / BigInt(SESSION_NODE.SMALL_CONTRIBUTOR_DIVISOR);
+
 export enum SESSION_NODE_TIME_STATIC {
-  /** 30 days in days */
-  SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS = 30,
+  /** 30 days in seconds */
+  SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_SECONDS = 30 * 24 * 60 * 60,
   /** isSoon amount in seconds for time-based notifications (2 minutes) */
   SOON_TIME = 120_000,
-  /** 24 hours in ms */
-  NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS = 24 * 60 * 60 * 1000,
+  /** 24 hours in seconds */
+  NON_FINALIZED_TIME_TO_REMOVE_STAKE_SECONDS = 24 * 60 * 60,
 }
 
 enum SESSION_NODE_TIME_TESTNET {
@@ -223,6 +230,9 @@ export enum PREFERENCE {
   ANONYMIZE_UI = 'anonymizeUI',
   AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
   OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
+  INFO_NOTICE_DONT_SHOW_REGISTER = 'infoNoticeDontShowRegister',
+  INFO_NOTICE_DONT_SHOW_STAKE = 'infoNoticeDontShowStake',
+  INFO_NOTICE_DONT_SHOW_STAKE_TOP_UP = 'infoNoticeDontShowStakeTopUp',
 }
 
 export const preferenceStorageDefaultItems = {} as const;
@@ -271,6 +281,21 @@ export const prefDetails = {
     defaultValue: false,
     description: 'Show awaiting operator contracts in the open nodes page',
   },
+  [PREFERENCE.INFO_NOTICE_DONT_SHOW_REGISTER]: {
+    label: "Don't show registration warning",
+    type: 'boolean',
+    defaultValue: false,
+  },
+  [PREFERENCE.INFO_NOTICE_DONT_SHOW_STAKE]: {
+    label: "Don't show staking warning",
+    type: 'boolean',
+    defaultValue: false,
+  },
+  [PREFERENCE.INFO_NOTICE_DONT_SHOW_STAKE_TOP_UP]: {
+    label: "Don't show staking top up warning",
+    type: 'boolean',
+    defaultValue: false,
+  },
 } as const satisfies WalletSheetSettingDetailsGenerator;
 
 const hiddenPreferences = [
@@ -317,14 +342,14 @@ export enum BACKEND {
 }
 
 export enum LAST_UPDATED_BEHIND_TRIGGER {
-  /** 2.5 minutes */
-  BACKEND_LAST_BLOCK_WARNING = 2.5 * 60 * 1000,
-  /** 4 minutes */
-  BACKEND_LAST_BLOCK_ERROR = 4 * 60 * 1000,
-  /** 2.5 minutes */
-  BACKEND_L2_HEIGHT_WARNING = 2.5 * 60 * 1000,
   /** 3 minutes */
-  BACKEND_L2_HEIGHT_ERROR = 3 * 60 * 1000,
+  BACKEND_LAST_BLOCK_WARNING = 3 * 60 * 1000,
+  /** 5 minutes */
+  BACKEND_LAST_BLOCK_ERROR = 5 * 60 * 1000,
+  /** 3 minutes */
+  BACKEND_L2_HEIGHT_WARNING = 3 * 60 * 1000,
+  /** 5 minutes */
+  BACKEND_L2_HEIGHT_ERROR = 5 * 60 * 1000,
 }
 
 export const allowedVestingRegistrationTabs = [

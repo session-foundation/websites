@@ -25,7 +25,9 @@ export default function TotalRewardsModule(params?: AddressModuleProps) {
     [params?.addressOverride, connectedAddress]
   );
 
-  const { lifetimeRewards, refetch, status } = useNetworkBalances({ addressOverride: address });
+  const { lifetimeRewards, refetch, status, enabled } = useNetworkBalances({
+    addressOverride: address,
+  });
 
   const formattedTotalRewardsAmount = formatSENTBigInt(
     lifetimeRewards,
@@ -44,7 +46,7 @@ export default function TotalRewardsModule(params?: AddressModuleProps) {
       <ModuleDynamicContractReadText
         status={status}
         fallback={0}
-        enabled={!!address}
+        enabled={enabled}
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {

@@ -7,9 +7,11 @@ export function useTotalStaked(addressOverride?: Address) {
   const connectedAddress = useCurrentActor();
   const address = addressOverride ?? connectedAddress;
 
-  const { lockedStakes, refetch, status } = useNetworkBalances({ addressOverride: address });
+  const { lockedStakes, refetch, status, enabled } = useNetworkBalances({
+    addressOverride: address,
+  });
 
   const totalStakedFormatted = formatSENTBigInt(lockedStakes);
 
-  return { totalStakedFormatted, totalStaked: lockedStakes, status, refetch };
+  return { totalStakedFormatted, totalStaked: lockedStakes, status, refetch, enabled };
 }
