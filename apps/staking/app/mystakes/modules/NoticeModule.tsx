@@ -1,5 +1,7 @@
 'use client';
 
+import { URL } from '@/lib/constants';
+import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleHeader, ModuleText } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
 
@@ -11,7 +13,11 @@ export default function NoticeModule() {
       <ModuleHeader>
         <ModuleText>{dict('title')}</ModuleText>
         <br />
-        {dict.rich('description')}
+        <br />
+        {dict.rich('description', {
+          link: externalLink(URL.DOCS),
+          'bridge-link': externalLink('https://getsession.org/'),
+        })}
       </ModuleHeader>
     </Module>
   );
