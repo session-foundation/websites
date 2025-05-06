@@ -16,7 +16,7 @@ import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import {
-  HANDRAIL_THRESHOLD_DYNAMIC,
+  HANDRAIL_THRESHOLDS,
   SESSION_NODE,
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SIGNIFICANT_FIGURES,
@@ -177,9 +177,7 @@ export function SubmitSoloTab() {
     gasAmount: gasAmountVesting,
   } = useVestingAddBLSPubKeyFeeEstimate(addBlsVestingFeeParams);
 
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
-  );
+  const gasHighShowTooltip = !!(gasPrice && gasPrice > HANDRAIL_THRESHOLDS.GAS_PRICE);
 
   const onSubmit = (data: SoloRegistrationFormSchema) => {
     try {

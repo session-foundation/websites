@@ -1,6 +1,6 @@
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { useContributeFundsFeeEstimate } from '@session/contracts/hooks/ServiceNodeContribution';
 import {
@@ -24,7 +24,7 @@ export function ContributeFundsFeeActionModuleRow({
   minStake: bigint;
   maxStake: bigint;
 }) {
-  const { chainId, address } = useWallet();
+  const { address } = useWallet();
   const dictFee = useTranslations('fee');
   const dictSubmit = useTranslations('actionModules.registration.submitMulti');
   const dictShared = useTranslations('actionModules.shared');
@@ -86,9 +86,7 @@ export function ContributeFundsFeeActionModuleRow({
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
   });
 
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
-  );
+  const gasHighShowTooltip = !!(gasPrice && gasPrice > HANDRAIL_THRESHOLDS.GAS_PRICE);
 
   return (
     <ActionModuleFeeAccordionRow

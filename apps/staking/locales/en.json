@@ -114,6 +114,10 @@
       "ariaPending": "Adding {tokenSymbol} to your wallet watch list",
       "failError": "Your wallet does not support importing tokens"
     },
+    "walletInteractionButton": {
+      "connectWallet": "Connect Wallet",
+      "switchNetwork": "Switch Network"
+    },
     "networkDropdown": {
       "invalid": "Invalid network",
       "ariaMainnet": "Switch to {mainnetName}",
@@ -371,6 +375,10 @@
     "comingSoon": {
       "title": "Coming Soon",
       "description": "Coming Soon"
+    },
+    "notice": {
+      "title": "Landing Hardfork!",
+      "description": "The date of the Landing Hardfork activation, which coincides with TGE, will be announced following the successful completion of the Anchor Hardfork and further development of launch partnerships. <br></br> Because new nodes cannot be registered to the Oxen Service Node Network after the Anchor Hardfork, TGE and the Landing Hardfork activation are planned to take place within a few weeks of the Anchor Hardfork to ensure the stability of the network. "
     },
     "referral": {
       "title": "Referral Program",

@@ -287,15 +287,6 @@ export const blsRewardsResponseSchema = z.object({
 
 export type BlsRewardsResponse = z.infer<typeof blsRewardsResponseSchema>;
 
-// TODO: remove this v1 logic once v2 is stable
-export const v1BlsRewardsResponseSchema = z.object({
-  rewards: z.coerce.bigint(),
-  network: networkInfoSchema,
-  t: z.number(),
-});
-
-export type V1BlsRewardsResponse = z.infer<typeof v1BlsRewardsResponseSchema>;
-
 export const blsRewardsSignatureSchema = z.object({
   aggregate_pubkey: z.string(),
   /** The lifetime amount that the address can submit to the smart contract (the claimed amount

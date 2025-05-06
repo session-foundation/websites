@@ -166,8 +166,7 @@ export enum RadioDataTestId {
 }
 
 export enum SpecialDataTestId {
-  Unsupported_Chain_Link = 'special:unsupported-chain-link',
-  Mainnet_Not_Live_Link = 'special:mainnet-not-online-live',
+  Mainnet_Link = 'special:mainnet-link',
 }
 
 export enum ModuleDataTestId {

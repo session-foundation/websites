@@ -12,9 +12,6 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
   const { getItem } = usePreferences();
   const address = params?.addressOverride ?? connectedAddress;
 
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
-
-  const enabled = !!address && v2Rewards;
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
   const { data, status, refetch } = useStakingBackendQueryWithParams(
@@ -23,7 +20,7 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
       address: address!,
     },
     {
-      enabled,
+      enabled: !!address,
       refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
     }
   );
@@ -39,10 +36,7 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
     let claimableStakes = 0n;
     let claimableRewards = 0n;
 
-    // TODO: remove the safeParse once we make v2 rewards the default
-    const hasNetworkBalances = !!(data && rewardsInfoSchema.safeParse(data.rewards).success);
-
-    if (hasNetworkBalances) {
+    if (data) {
       const rewards = rewardsInfoSchema.parse(data.rewards);
       lifetimeLiquidated = rewards.lifetime_liquidated_stakes;
       lifetimeStaked = rewards.lifetime_locked_stakes;

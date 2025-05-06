@@ -3,8 +3,6 @@ import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUn
 import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import { VestingInfo } from '@/components/Vesting/VestingInfo';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
-import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
-import { PREFERENCE } from '@/lib/constants';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
@@ -21,7 +19,6 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
-import { usePreferences } from 'usepref';
 import { ActionModuleRow } from '../ActionModule';
 
 export function VestingClaimPrincipal() {
@@ -40,13 +37,8 @@ export function VestingClaimPrincipal() {
 
   const address = activeContract.address;
 
-  const { totalStakedBigInt } = useTotalStaked(address);
-  const { unclaimed: unclaimedV2 } = useNetworkBalances({ addressOverride: address });
-  // TODO: remove this v1 logic once v2 is stable
-  const { getItem } = usePreferences();
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
-  const { unclaimedRewards: unclaimedRewardsV1 } = useUnclaimedTokens({ addressOverride: address });
-  const unclaimedStakes = v2Rewards ? unclaimedV2 : unclaimedRewardsV1;
+  const { totalStaked } = useTotalStaked(address);
+  const { unclaimed: unclaimedStakes } = useNetworkBalances({ addressOverride: address });
 
   const {
     formattedAmount: formattedClaimableBalance,
@@ -57,7 +49,7 @@ export function VestingClaimPrincipal() {
   const nothingToClaim = claimableBalance === 0n;
   const notAllWithdrawable =
     claimableBalance < activeContract.initial_amount ||
-    totalStakedBigInt > 0 ||
+    totalStaked > 0 ||
     (unclaimedStakes ?? 0) > 0;
 
   const {

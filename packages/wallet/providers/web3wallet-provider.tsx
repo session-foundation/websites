@@ -141,7 +141,7 @@ const tokenDetailsEthereum: DynamicTokenRowProps = {
     iconSrc: '/images/eth.svg',
     className: 'bg-session-white',
   },
-  children: <TokenActionButton href="/bridge">Bridge</TokenActionButton>,
+  children: <TokenActionButton href="/bridge/arbitrum">Bridge</TokenActionButton>,
 };
 
 const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
@@ -156,7 +156,7 @@ const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
     iconSrc: '/images/eth.svg',
     className: 'bg-session-white',
   },
-  children: <TokenActionButton href="/bridge">Bridge</TokenActionButton>,
+  children: <TokenActionButton href="/bridge/arbitrum">Bridge</TokenActionButton>,
 };
 
 const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
@@ -173,10 +173,12 @@ const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
   children: <TokenActionButton href="https://ethereum.oxen.io">Swap</TokenActionButton>,
 };
 
-const createConfig = (projectId: string) => {
+const createConfig = (projectId: string, testnet: boolean) => {
+  const chains = testnet ? ([arbitrumSepolia, sepolia] as const) : ([arbitrum, mainnet] as const);
+
   const config = createWeb3WalletConfig({
     wagmiConfig: {
-      chains: [arbitrum, arbitrumSepolia, mainnet, sepolia],
+      chains,
     },
     walletConnectConfig: {
       projectId,
@@ -190,19 +192,17 @@ const createConfig = (projectId: string) => {
   });
 
   config.componentLibrary = componentLibrary;
-  config.tokens = [
-    tokenDetailsArbitrum,
-    tokenDetailsEthereum,
-    tokenDetailsArbitrumSepolia,
-    tokenDetailsEthereumSepolia,
-    tokenDetailsWOXENEthereum,
-  ];
+
+  config.tokens = testnet
+    ? [tokenDetailsArbitrumSepolia, tokenDetailsEthereumSepolia]
+    : [tokenDetailsArbitrum, tokenDetailsEthereum, tokenDetailsWOXENEthereum];
 
   return config;
 };
 
 export type Web3WalletProviderProps = Omit<WalletProviderProps, 'config'> & {
   projectId: string;
+  testnet?: boolean;
   children: ReactNode;
 };
 
@@ -211,8 +211,9 @@ export function Web3WalletProvider({
   projectId,
   wagmiCookie,
   settingsPreferenceStorage,
+  testnet = false,
 }: Web3WalletProviderProps) {
-  const [config] = useState(createConfig(projectId));
+  const [config] = useState(createConfig(projectId, testnet));
 
   return (
     <WalletProvider

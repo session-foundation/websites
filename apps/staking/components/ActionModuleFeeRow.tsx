@@ -1,10 +1,9 @@
 import { ActionModuleRow } from '@/components/ActionModule';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { LoadingText } from '@session/ui/components/loading-text';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 
 type ActionModuleFeeRowProps = {
@@ -24,8 +23,6 @@ export default function ActionModuleFeeRow({
 }: ActionModuleFeeRowProps) {
   const dictionaryFee = useTranslations('fee');
 
-  const { chainId } = useWallet();
-
   const { feeFormatted: feeEstimate, formula: feeFormula } = useNetworkFeeFormula({
     fee,
     gasAmount,
@@ -33,9 +30,7 @@ export default function ActionModuleFeeRow({
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_TOTAL,
   });
 
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
-  );
+  const gasHighShowTooltip = !!(gasPrice && gasPrice > HANDRAIL_THRESHOLDS.GAS_PRICE);
 
   return typeof feeEstimate !== 'undefined' ? (
     <ActionModuleRow

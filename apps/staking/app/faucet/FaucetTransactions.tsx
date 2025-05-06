@@ -90,7 +90,7 @@ export function FaucetTransactions({
                 {` ${token}`}
               </TableCell>
               <TableCell className="text-right">
-                <Link href={`/explorer/tx/${hash}`} target="_blank">
+                <Link href={`/explorer/arbitrum/tx/${hash}`} target="_blank">
                   <span className="inline-flex w-max items-center gap-1 fill-session-green align-middle text-session-green">
                     <span className="hidden 2xl:flex">{dictionary('viewOnExplorer')}</span>
                     <span className="flex 2xl:hidden">{dictionary('viewOnExplorerShort')}</span>

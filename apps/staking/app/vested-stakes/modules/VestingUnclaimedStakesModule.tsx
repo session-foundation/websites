@@ -1,12 +1,12 @@
 'use client';
 
-import UnclaimedTokensModule from '@/app/mystakes/modules/UnclaimedTokensModule';
+import UnclaimedStakesModule from '@/app/mystakes/modules/UnclaimedStakesModule';
 import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 import { useTranslations } from 'next-intl';
 
 export default function VestingUnclaimedStakesModule() {
   return (
-    <UnclaimedTokensModule
+    <UnclaimedStakesModule
       addressOverride={useActiveVestingContractAddress()}
       titleOverride={useTranslations('vesting.modules.unclaimedStakes')('title')}
     />

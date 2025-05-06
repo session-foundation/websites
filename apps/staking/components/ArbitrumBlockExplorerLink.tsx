@@ -4,15 +4,15 @@ import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-export const BlockExplorerLink = ({ address }: { address: string }) => {
+export const ArbitrumBlockExplorerLink = ({ address }: { address: string }) => {
   return (
-    <Link href={`/explorer/address/${address}`} target="_blank" prefetch={false}>
-      <BlockExplorerLinkText />
+    <Link href={`/explorer/arbitrum/address/${address}`} target="_blank" prefetch={false}>
+      <ArbitrumBlockExplorerLinkText />
     </Link>
   );
 };
 
-export const BlockExplorerLinkText = () => {
+export const ArbitrumBlockExplorerLinkText = () => {
   const generalDictionary = useTranslations('general');
   return (
     <span className="inline-flex items-center gap-1 fill-session-green align-middle text-session-green">

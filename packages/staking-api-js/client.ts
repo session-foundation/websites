@@ -11,7 +11,6 @@ import type {
   NodesBlsKeysResponse,
   RegistrationsResponse,
   StakesResponse,
-  V1BlsRewardsResponse,
 } from './schema';
 
 export interface RequestOptions {
@@ -169,18 +168,6 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return await this.request<BlsRewardsResponse>(options);
-  }
-
-  public async getRewardsInfoV1({
-    address,
-  }: {
-    address: string;
-  }): Promise<StakingBackendResponse<V1BlsRewardsResponse>> {
-    const options: RequestOptions = {
-      endpoint: `/rewardsv1/${address}`,
-      method: 'GET',
-    };
-    return await this.request<V1BlsRewardsResponse>(options);
   }
 
   public async getRewardsClaimSignature({

@@ -1,17 +1,15 @@
 'use client';
 
-import ComingSoonModule from '@/app/mystakes/modules/ComingSoon';
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
-import { DYNAMIC_MODULE, PREFERENCE, URL } from '@/lib/constants';
+import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import { usePreferences } from 'usepref';
 
 export default function UnlockingStakesModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.unlockingStakes');
@@ -33,12 +31,6 @@ export default function UnlockingStakesModule(params?: AddressModuleProps) {
     timeLockedStakes,
     DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS
   );
-
-  const { getItem } = usePreferences();
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
-  if (!v2Rewards) {
-    return <ComingSoonModule />;
-  }
 
   return (
     <Module>

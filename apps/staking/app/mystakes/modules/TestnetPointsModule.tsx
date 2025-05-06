@@ -19,6 +19,7 @@ const noPointsObject = {
   percent: 0,
 };
 
+/** @deprecated Testnet points program is finished, if this component is to be used again it needs to be updated. */
 export default function TestnetPointsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.points');
   const dictionaryShared = useTranslations('modules.shared');

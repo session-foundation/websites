@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import type { Address } from 'viem';
 
 export default function StakedBalanceModule({ addressOverride }: { addressOverride?: Address }) {
-  const { totalStakedFormatted, status, refetch, enabled } = useTotalStaked(addressOverride);
+  const { totalStakedFormatted, status, refetch } = useTotalStaked(addressOverride);
   const dictionary = useTranslations('modules.balance');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
@@ -20,7 +20,7 @@ export default function StakedBalanceModule({ addressOverride }: { addressOverri
       <ModuleTitle>{titleFormat('format', { title })}</ModuleTitle>
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
-        enabled={enabled}
+        enabled
         fallback={0}
         isLarge
         errorFallback={dictionaryShared('error')}

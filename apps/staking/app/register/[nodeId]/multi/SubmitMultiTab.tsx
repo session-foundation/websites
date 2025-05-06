@@ -19,7 +19,7 @@ import useCreateOpenNodeRegistration, {
   type UseCreateOpenNodeContractParams,
 } from '@/hooks/useCreateOpenNodeRegistration';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { BACKEND, HANDRAIL_THRESHOLD_DYNAMIC, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
+import { BACKEND, HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import {
@@ -50,7 +50,6 @@ import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { stringToBigInt } from '@session/util-crypto/maths';
 import { safeTrySync, safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
@@ -71,7 +70,6 @@ export function SubmitMultiTab() {
     REMOTE_FEATURE_FLAG.DISABLE_NODE_REGISTRATION_RESERVED
   );
 
-  const { chainId } = useWallet();
   const { balance, value: balanceValue } = useWalletTokenBalance();
 
   const decimalDelimiter = useDecimalDelimiter();
@@ -127,9 +125,7 @@ export function SubmitMultiTab() {
     maximumSignificantDigits: SIGNIFICANT_FIGURES.GAS_FEE_BREAKDOWN,
   });
 
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
-  );
+  const gasHighShowTooltip = !!(gasPrice && gasPrice > HANDRAIL_THRESHOLDS.GAS_PRICE);
 
   const onSubmit = (data: MultiRegistrationFormSchema) => {
     try {
@@ -717,7 +713,7 @@ function SubmitMulti({
               [PROGRESS_STATUS.IDLE]: dict('address.idle'),
               [PROGRESS_STATUS.PENDING]: dict('address.pending'),
               [PROGRESS_STATUS.SUCCESS]: dict.rich('address.success', {
-                link: externalLink(`/explorer/address/${contractAddress}`),
+                link: externalLink(`/explorer/arbitrum/address/${contractAddress}`),
               }),
               [PROGRESS_STATUS.ERROR]: createNodeContractErrorMessage,
             },

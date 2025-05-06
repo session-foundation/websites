@@ -1,5 +1,6 @@
 import { CollapsableButton } from '@/components/NodeCard';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import useRequestNodeExit from '@/hooks/useRequestNodeExit';
 import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
@@ -199,7 +200,7 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
     <>
       <NodeActionModuleInfo node={node} fee={fee} gasAmount={gasAmount} gasPrice={gasPrice} />
       <AlertDialogFooter className="mt-4 flex flex-col gap-8 sm:flex-col">
-        <Button
+        <WalletInteractionButtonWithLocales
           variant="destructive"
           rounded="md"
           size="lg"
@@ -210,7 +211,7 @@ function RequestNodeExitContractWriteDialog({ node }: { node: Stake }) {
           onClick={handleClick}
         >
           {dictionary('buttons.submit')}
-        </Button>
+        </WalletInteractionButtonWithLocales>
         {simulateEnabled ? (
           <Progress
             steps={[
