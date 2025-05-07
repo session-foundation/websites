@@ -212,9 +212,9 @@ const ReadyForExitNotification = ({
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
-          ? dictionary.rich(isDeregistered ? 'liquidationNotification' : 'exitTimerNotificationNow')
+          ? dictionary.rich('exitTimerNotificationNow')
           : dictionary.rich(
-              isDeregistered ? 'deregistrationTimerDescription' : 'exitTimerNotification',
+              'exitTimerNotification',
               { relativeTime }
             )}
       </NodeNotification>
