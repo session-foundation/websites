@@ -4,7 +4,7 @@ import {
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
-import OperatorFeeField from '@/components/Form/OperatorFeeField';
+import { OperatorFeeField } from '@/components/Form/OperatorFeeField';
 import { SESSION_NODE } from '@/lib/constants';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { Form, FormField } from '@session/ui/components/ui/form';

@@ -339,7 +339,7 @@ export function SubmitMultiTab() {
               data-testid={ButtonDataTestId.Registration_Submit_Multi_Edit_Reserve_Slots}
               tab={REG_TAB.RESERVE_SLOTS_INPUT}
               disabled={isReservedSlotsDisabled}
-              disabledReason={dictReservedSlotsTab('buttonReserve.disabledTooltip')}
+              disabledReason={dictReservedSlotsTab.rich('buttonReserve.disabledTooltip')}
               onClick={() => {
                 formMulti.setValue('reservedContributors', [
                   {

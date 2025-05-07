@@ -4,12 +4,14 @@ import {
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
-import EthereumAddressField, {
+import {
+  EthereumAddressField,
   getEthereumAddressFormFieldSchema,
 } from '@/components/Form/EthereumAddressField';
-import StakeAmountField, {
-  getStakeAmountFormFieldSchema,
+import {
   type GetStakeAmountFormFieldSchemaArgs,
+  StakeAmountField,
+  getStakeAmountFormFieldSchema,
 } from '@/components/Form/StakeAmountField';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
