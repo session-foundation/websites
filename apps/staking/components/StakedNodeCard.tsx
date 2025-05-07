@@ -213,10 +213,7 @@ const ReadyForExitNotification = ({
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
           ? dictionary.rich('exitTimerNotificationNow')
-          : dictionary.rich(
-              'exitTimerNotification',
-              { relativeTime }
-            )}
+          : dictionary.rich('exitTimerNotification', { relativeTime })}
       </NodeNotification>
     </Tooltip>
   );
