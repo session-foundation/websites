@@ -614,7 +614,7 @@ const StakedNodeCard = forwardRef<
               </Tooltip>
             </CollapsableContent>
           ) : null}
-          {lastUptimeProofSeconds || state === STAKE_STATE.RUNNING ? (
+          {lastUptimeProofSeconds ? (
             <CollapsableContent size="xs">
               <Tooltip
                 tooltipContent={dictionary('lastUptimeDescription', {
