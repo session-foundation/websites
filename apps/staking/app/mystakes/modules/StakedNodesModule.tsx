@@ -4,12 +4,14 @@ import Loading from '@/app/loading';
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeListModuleContent } from '@/components/NodesListModule';
-import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
+import {
+  StakedContractCard,
+  getStakedContractCardContractFromConfirmation,
+} from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useNetworkStatus } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { useStakes } from '@/hooks/useStakes';
-import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
 import { internalLink } from '@/lib/locale-defaults';
@@ -17,7 +19,6 @@ import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
-import type { ContributionContract } from '@session/staking-api-js/schema';
 import {
   ModuleGridHeader,
   ModuleGridInfoContent,
@@ -30,7 +31,7 @@ import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { type Address, zeroAddress } from 'viem';
+import type { Address } from 'viem';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
   useAllowTestingErrorToThrow();
@@ -78,30 +79,11 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
       ) : hasStakes && blockHeight && networkTime ? (
         <>
           {notFoundJoiningNodes.map((node) => {
-            const contract = {
-              service_node_pubkey: node.pubkeyEd25519,
-              pubkey_bls: node.pubkeyBls,
-              operator_address: node.operatorAddress,
-              fee: 0,
-              manual_finalize: false,
-              status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
-              address: zeroAddress,
-              contributors: [
-                {
-                  address: node.operatorAddress,
-                  amount: SESSION_NODE_FULL_STAKE_AMOUNT,
-                  beneficiary_address: node.rewardsAddress,
-                  reserved: SESSION_NODE_FULL_STAKE_AMOUNT,
-                },
-              ],
-              events: [],
-            } satisfies ContributionContract;
-
             return (
               <StakedContractCard
                 key={node.pubkeyEd25519}
                 id={node.pubkeyEd25519}
-                contract={contract}
+                contract={getStakedContractCardContractFromConfirmation(node)}
               />
             );
           })}

@@ -9,10 +9,14 @@ import { NotificationJoiningNetwork } from '@/components/StakedNode/Notification
 import { StakeCard } from '@/components/StakedNode/StakeCard';
 import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
 import { getTotalStakedAmountForAddress } from '@/components/getTotalStakedAmountForAddress';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { formatPercentage } from '@/lib/locale-client';
-import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import {
+  type VolatileStorageNodeConfirming,
+  useNodesWithConfirmations,
+} from '@/lib/volatile-storage';
 import {
   ButtonDataTestId,
   NodeCardDataTestId,
@@ -20,6 +24,7 @@ import {
 } from '@/testing/data-test-ids';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type {
   ContributionContract,
   ContributionContractNotReady,
@@ -35,7 +40,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
-import type { Address } from 'viem';
+import { type Address, zeroAddress } from 'viem';
 
 function getContractStatusColor(
   state: STAKE_CONTRACT_STATE
@@ -85,7 +90,11 @@ const ContractSummary = ({
     return (
       <>
         {contributorList}
-        <NotificationJoiningNetwork {...confirmationProgress} />
+        <NotificationJoiningNetwork
+          confirmations={confirmationProgress.confirmations}
+          enabled={confirmationProgress.enabled}
+          remainingTimeEst={confirmationProgress.remainingTimeEst}
+        />
       </>
     );
   }
@@ -272,5 +281,28 @@ function StakedContractCardButton({
     </CollapsableContent>
   );
 }
+
+export const getStakedContractCardContractFromConfirmation = (
+  node: VolatileStorageNodeConfirming
+): ContributionContract | ContributionContractNotReady => {
+  return {
+    service_node_pubkey: node.pubkeyEd25519,
+    pubkey_bls: node.pubkeyBls,
+    operator_address: node.operatorAddress,
+    fee: 0,
+    manual_finalize: false,
+    status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
+    address: zeroAddress,
+    contributors: [
+      {
+        address: node.operatorAddress,
+        amount: SESSION_NODE_FULL_STAKE_AMOUNT,
+        beneficiary_address: node.rewardsAddress,
+        reserved: SESSION_NODE_FULL_STAKE_AMOUNT,
+      },
+    ],
+    events: [],
+  } satisfies ContributionContract;
+};
 
 export { StakedContractCard };

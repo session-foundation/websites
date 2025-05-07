@@ -1,6 +1,8 @@
 import { useSubmitSolo } from '@/app/register/[nodeId]/solo/useSubmitSolo';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import useRegisterNode, { type UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import { SESSION_NODE } from '@/lib/constants';
+import logger from '@/lib/logger';
 import { CONFIRMATION_TYPE, useNodesWithConfirmations } from '@/lib/volatile-storage';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Ed25519PublicKey } from '@session/staking-api-js/refine';
@@ -37,6 +39,7 @@ export function SubmitSoloWallet({ params }: { params: UseRegisterNodeParams }) 
     approveWriteStatus === PROGRESS_STATUS.ERROR ||
     addBLSStatus === PROGRESS_STATUS.ERROR;
 
+  const address = useCurrentActor();
   const { addConfirmingNode } = useNodesWithConfirmations();
 
   const { confirmations, remainingTimeEst, handleRetry } = useSubmitSolo({
@@ -55,6 +58,11 @@ export function SubmitSoloWallet({ params }: { params: UseRegisterNodeParams }) 
 
   useEffect(() => {
     if (addBLSStatus === PROGRESS_STATUS.SUCCESS) {
+      if (!address) {
+        logger.error('No address found for adding node confirmation');
+        return;
+      }
+
       const staker = params.contributors[0].staker;
       addConfirmingNode({
         pubkeyEd25519: params.nodePubKey as Ed25519PublicKey,
@@ -64,9 +72,10 @@ export function SubmitSoloWallet({ params }: { params: UseRegisterNodeParams }) 
         confirmationType: CONFIRMATION_TYPE.REGISTRATION,
         estimatedConfirmationTimestampMs:
           Date.now() + SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS,
+        confirmationOwner: address,
       });
     }
-  }, [addBLSStatus, params, addConfirmingNode]);
+  }, [addBLSStatus, params, addConfirmingNode, address]);
 
   return (
     <div>

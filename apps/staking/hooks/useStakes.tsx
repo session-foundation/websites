@@ -1,3 +1,4 @@
+import { STAKE_STATE, parseStakeState } from '@/components/StakedNode/state';
 import { parseStakes } from '@/hooks/parseStakes';
 import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE_TIME } from '@/lib/constants';
 import logger from '@/lib/logger';
@@ -109,18 +110,24 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     () =>
       nodesConfirmingRegistration.filter((node) => {
         return (
+          areHexesEqual(node.confirmationOwner, address) &&
           !joiningContracts.some(
             ({ pubkey_bls, service_node_pubkey }) =>
               pubkey_bls === node.pubkeyBls ||
               areHexesEqual(service_node_pubkey, node.pubkeyEd25519)
           ) &&
-          !stakes.some(
-            (stake) =>
+          !stakes.some((stake) => {
+            const state = parseStakeState(stake, blockHeight);
+            if (state === STAKE_STATE.DEREGISTERED) {
+              return false;
+            }
+            return (
               stake.pubkey_bls === node.pubkeyBls || stake.pubkey_ed25519 === node.pubkeyEd25519
-          )
+            );
+          })
         );
       }),
-    [nodesConfirmingRegistration, stakes, joiningContracts]
+    [nodesConfirmingRegistration, stakes, joiningContracts, blockHeight, address]
   );
 
   return {

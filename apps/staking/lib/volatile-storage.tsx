@@ -19,24 +19,29 @@ const volatileStorageNodeConfirmingSchema = z.object({
   rewardsAddress: ethereumAddressSchema.nullable(),
   estimatedConfirmationTimestampMs: z.coerce.number(),
   confirmationType: z.nativeEnum(CONFIRMATION_TYPE),
+  confirmationOwner: ethereumAddressSchema,
 });
 
-type VolatileStorageNodeConfirming = z.infer<typeof volatileStorageNodeConfirmingSchema>;
+export type VolatileStorageNodeConfirming = z.infer<typeof volatileStorageNodeConfirmingSchema>;
 
 export const useNodesWithConfirmations = () => {
   const { getItem, setItem } = useVolatileStorage();
   const nodesConfirming = getItem<string>(VOLATILE_STORAGE.NODES_CONFIRMING);
 
   const nodes = useMemo(() => {
-    const nodesConfirmingRegistration: Array<VolatileStorageNodeConfirming> = [];
-    const nodesConfirmingExitRequest: Array<VolatileStorageNodeConfirming> = [];
-    const nodesConfirmingExit: Array<VolatileStorageNodeConfirming> = [];
+    const nodeMap = {
+      nodesConfirmingRegistration: [] as Array<VolatileStorageNodeConfirming>,
+      nodesConfirmingExitRequest: [] as Array<VolatileStorageNodeConfirming>,
+      nodesConfirmingExit: [] as Array<VolatileStorageNodeConfirming>,
+    };
 
     const [err, unvalidatedNodes] = safeTrySyncWithFallback(
       () => JSON.parse(nodesConfirming ?? '[]') as Array<unknown>,
       []
     );
     if (err) logger.error(err);
+
+    if (!Array.isArray(unvalidatedNodes)) return nodeMap;
 
     const nodes = unvalidatedNodes.filter(
       (m) => volatileStorageNodeConfirmingSchema.safeParse(m).success
@@ -45,20 +50,20 @@ export const useNodesWithConfirmations = () => {
     const now = Date.now();
     const nodesCurrentlyConfirming = nodes.filter((m) => m.estimatedConfirmationTimestampMs > now);
 
-    if (nodesCurrentlyConfirming.length < nodes.length) {
+    if (nodesCurrentlyConfirming.length < unvalidatedNodes.length) {
       logger.debug('Volatile storage contains expired or invalid confirmations, removing them');
       setItem(VOLATILE_STORAGE.NODES_CONFIRMING, JSON.stringify(nodesCurrentlyConfirming));
     } else {
       for (const node of nodesCurrentlyConfirming) {
         switch (node.confirmationType) {
           case CONFIRMATION_TYPE.REGISTRATION:
-            nodesConfirmingRegistration.push(node);
+            nodeMap.nodesConfirmingRegistration.push(node);
             break;
           case CONFIRMATION_TYPE.EXIT_REQUEST:
-            nodesConfirmingExitRequest.push(node);
+            nodeMap.nodesConfirmingExitRequest.push(node);
             break;
           case CONFIRMATION_TYPE.EXIT:
-            nodesConfirmingExit.push(node);
+            nodeMap.nodesConfirmingExit.push(node);
             break;
           default:
             logger.error('Unknown confirmation type:', node.confirmationType);
@@ -67,11 +72,7 @@ export const useNodesWithConfirmations = () => {
       }
     }
 
-    return {
-      nodesConfirmingRegistration,
-      nodesConfirmingExitRequest,
-      nodesConfirmingExit,
-    };
+    return nodeMap;
   }, [nodesConfirming, setItem]);
 
   const addConfirmingNode = useCallback(
