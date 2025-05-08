@@ -365,9 +365,14 @@ export function useConfirmationProgress(endTimestampMs?: number | null, addSuffi
   const remainingTimeEst = useRelativeTime(endDateEstimate, { addSuffix });
 
   const confirmations = endDateEstimate
-    ? SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS *
-      Math.floor(
-        (endDateEstimate.getTime() - Date.now()) / SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS
+    ? Math.min(
+        Math.floor(
+          SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS -
+            (SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS *
+              (endDateEstimate.getTime() - Date.now())) /
+              SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS
+        ),
+        SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS
       )
     : 0;
 

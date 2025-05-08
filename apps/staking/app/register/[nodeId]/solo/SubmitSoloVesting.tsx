@@ -1,14 +1,17 @@
 import { useSubmitSolo } from '@/app/register/[nodeId]/solo/useSubmitSolo';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRegisterNodeVesting from '@/hooks/useRegisterNodeVesting';
+import { SESSION_NODE } from '@/lib/constants';
+import { CONFIRMATION_TYPE, useNodesWithConfirmations } from '@/lib/volatile-storage';
 import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Ed25519PublicKey } from '@session/staking-api-js/refine';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { isAddress } from 'viem';
 
 export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams }) {
@@ -55,13 +58,32 @@ export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams })
 
   const isError = addBLSStatus === PROGRESS_STATUS.ERROR;
 
-  const { confirmations, remainingTimeEst, handleRetry } = useSubmitSolo({
+  const { addConfirmingNode } = useNodesWithConfirmations();
+  const { confirmations, remainingTimeEst, handleRetry, setConfirmTimestampMs } = useSubmitSolo({
     error: addBLSTransactionError ?? addBLSWriteError ?? addBLSSimulateError,
     enabled,
     isError,
     registerAndStake,
     resetRegisterAndStake,
   });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We don't want to re-trigger on function updates
+  useEffect(() => {
+    if (addBLSStatus === PROGRESS_STATUS.SUCCESS) {
+      const staker = params.contributors[0].staker;
+      const confirmedTimestamp = Date.now() + SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS;
+      addConfirmingNode({
+        pubkeyEd25519: params.nodePubKey as Ed25519PublicKey,
+        pubkeyBls: params.blsPubKey,
+        rewardsAddress: staker.beneficiary,
+        operatorAddress: staker.addr,
+        confirmationType: CONFIRMATION_TYPE.REGISTRATION,
+        estimatedConfirmationTimestampMs: confirmedTimestamp,
+        confirmationOwner: staker.addr,
+      });
+      setConfirmTimestampMs(confirmedTimestamp);
+    }
+  }, [addBLSStatus, params]);
 
   return (
     <div>

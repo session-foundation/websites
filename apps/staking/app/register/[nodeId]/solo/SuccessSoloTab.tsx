@@ -75,7 +75,7 @@ export function SuccessSoloTab() {
       {optimisticStake ? (
         <StakedNodeCard
           className="text-start"
-          id={optimisticStake.contract_id.toString()}
+          id={optimisticStake.pubkey_ed25519}
           stake={optimisticStake}
           blockHeight={blockHeight ?? 0}
           networkTime={networkTime ?? Date.now()}

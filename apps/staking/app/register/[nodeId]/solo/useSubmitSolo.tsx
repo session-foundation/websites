@@ -7,7 +7,7 @@ import { SESSION_NODE } from '@/lib/constants';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
 import { getContractErrorName } from '@session/contracts';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type SubmitSoloProps = {
   error?: Error | null;
@@ -30,6 +30,8 @@ export function useSubmitSolo({
     nodes: { nodesConfirmingRegistration },
   } = useNodesWithConfirmations();
 
+  const [confirmTimestampMs, setConfirmTimestampMs] = useState<number | null>(null);
+
   const confirmingNode = useMemo(
     () =>
       nodesConfirmingRegistration.find(
@@ -40,7 +42,7 @@ export function useSubmitSolo({
   );
 
   const { confirmations, remainingTimeEst } = useConfirmationProgress(
-    confirmingNode?.estimatedConfirmationTimestampMs
+    confirmingNode?.estimatedConfirmationTimestampMs ?? confirmTimestampMs
   );
 
   /**
@@ -101,5 +103,6 @@ export function useSubmitSolo({
     remainingTimeEst,
     confirmations,
     handleRetry,
+    setConfirmTimestampMs,
   };
 }
