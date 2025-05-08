@@ -28,8 +28,6 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
 
   const { data: arbBlock } = useBlockNumber({
-    enabled,
-    autoRefresh,
     query: {
       gcTime: autoUpdateIntervalOverride ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
     },
