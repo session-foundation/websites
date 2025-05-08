@@ -5,8 +5,10 @@ import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import { bigIntToNumber } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
+import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
@@ -24,6 +26,14 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
   const { getItem } = usePreferences();
   const enabled = !!address;
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+
+  const { data: arbBlock } = useBlockNumber({
+    enabled,
+    autoRefresh,
+    query: {
+      gcTime: autoUpdateIntervalOverride ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
+    },
+  });
 
   const { data, isLoading, isFetching, refetch, isError, status } =
     useStakingBackendQueryWithParams(
@@ -89,7 +99,9 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     //Minimum time in seconds that a node can go from "joining" to "exited"
     const nodeMinLifespan = SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS;
     // Minimum time in blocks that a node can go from "joining" to "exited"
-    const nodeMinLifespanArbBlocks = (nodeMinLifespan * 1000) / BLOCK_TIME_MS.ARBITRUM;
+    const nodeMinLifespanArbBlocks =
+      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) -
+      (nodeMinLifespan * 1000) / BLOCK_TIME_MS.ARBITRUM;
 
     return {
       ...parseStakes({
@@ -104,7 +116,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
       network,
       networkTime,
     };
-  }, [data, address, chainId]);
+  }, [data, address, chainId, arbBlock]);
 
   const notFoundJoiningNodes = useMemo(
     () =>

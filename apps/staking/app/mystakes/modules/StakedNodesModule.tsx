@@ -40,6 +40,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     stakes,
     hiddenContractsWithStakes,
     visibleContracts,
+    joiningContracts,
     notFoundJoiningNodes,
     network,
     blockHeight,
@@ -88,6 +89,16 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
             );
           })}
           {hiddenContractsWithStakes.map((contract) => {
+            return (
+              <StakedContractCard
+                key={contract.address}
+                id={contract.address}
+                contract={contract}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+          {joiningContracts.map((contract) => {
             return (
               <StakedContractCard
                 key={contract.address}
