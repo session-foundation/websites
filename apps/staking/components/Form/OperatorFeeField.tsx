@@ -13,6 +13,8 @@ export type GetOperatorFeeFormFieldSchemaArgs = {
   overMaxOperatorFeeMessage: string;
 };
 
+const operatorFeeRegex = /^[0-9]*[.,]?[0-9]*$/;
+
 export const getOperatorFeeFormFieldSchema = ({
   minOperatorFee,
   maxOperatorFee,
@@ -22,7 +24,7 @@ export const getOperatorFeeFormFieldSchema = ({
 }: GetOperatorFeeFormFieldSchemaArgs) => {
   return z
     .string()
-    .regex(/^[0-9]*[.,]?[0-9]*$/, { message: incorrectFormatMessage })
+    .regex(operatorFeeRegex, { message: incorrectFormatMessage })
     .refine(
       (v) => {
         const n = Number.parseFloat(v);
@@ -50,6 +52,9 @@ export type OperatorFeeFieldProps = {
   placeholder: string;
 };
 
+const operatorFeeFormattingRegex = /[^0-9.,]/g;
+const operatorFeeLeadingZerosRegex = /^0+/;
+
 export const OperatorFeeField = forwardRef<HTMLInputElement, OperatorFeeFieldProps>(
   ({ dataTestId, disabled, field, maxFee, placeholder, ...props }, ref) => {
     const decimalDelimiter = useDecimalDelimiter();
@@ -57,7 +62,7 @@ export const OperatorFeeField = forwardRef<HTMLInputElement, OperatorFeeFieldPro
     const formatInputText = (value: string) => {
       if (value === '0') return '0';
       // Remove non-numeric characters and non-decimal delimiters
-      let formattedValue = value.replace(/[^0-9.,]/g, '');
+      let formattedValue = value.replace(operatorFeeFormattingRegex, '');
 
       // Remove thousands separators
       if (formattedValue.includes(thousandsSeparator)) {
@@ -66,7 +71,7 @@ export const OperatorFeeField = forwardRef<HTMLInputElement, OperatorFeeFieldPro
 
       // Remove any leading zeroes except when its `0.`
       if (formattedValue.startsWith('0') && !formattedValue.startsWith('0.')) {
-        formattedValue = formattedValue.replace(/^0+/, '');
+        formattedValue = formattedValue.replace(operatorFeeLeadingZerosRegex, '');
       }
 
       // Remove all but the first decimal delimiter

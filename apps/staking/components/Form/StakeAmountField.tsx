@@ -72,6 +72,9 @@ export type StakeAmountFieldProps = {
   ignoreBalance?: boolean;
 };
 
+const stakeAmountLeadingZerosRegex = /^0+(?=\d)/;
+const stakeAmountNumericAndDelimitersRegex = /[^0-9.,]/g;
+
 export const StakeAmountField = forwardRef<HTMLInputElement, StakeAmountFieldProps>(
   (
     {
@@ -113,7 +116,7 @@ export const StakeAmountField = forwardRef<HTMLInputElement, StakeAmountFieldPro
     const formatInputText = (value: string) => {
       if (value === '0') return '0';
       // Remove non-numeric characters and non-decimal delimiters
-      let formattedValue = value.replace(/[^0-9.,]/g, '');
+      let formattedValue = value.replace(stakeAmountNumericAndDelimitersRegex, '');
 
       // Remove thousands separators
       if (formattedValue.includes(thousandsSeparator)) {
@@ -122,7 +125,7 @@ export const StakeAmountField = forwardRef<HTMLInputElement, StakeAmountFieldPro
 
       // Remove any leading zeroes except when its `0.` leaving 1 zero if it's all zeros.
       if (formattedValue.startsWith('0') && !formattedValue.startsWith('0.')) {
-        formattedValue = formattedValue.replace(/^0+(?=\d)/, '');
+        formattedValue = formattedValue.replace(stakeAmountLeadingZerosRegex, '');
       }
 
       // Remove all but the first decimal delimiter
