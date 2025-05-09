@@ -156,6 +156,8 @@ export enum SESSION_NODE {
   MAX_OPERATOR_FEE = 100,
   /** Max contributors */
   MAX_CONTRIBUTORS = 10,
+  /** 2 Hours */
+  INITIAL_DOWNTIME_CREDITS_HOURS = 2,
 }
 
 export enum SESSION_NODE_TIME_STATIC {

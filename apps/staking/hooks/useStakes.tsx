@@ -1,6 +1,6 @@
 import { STAKE_STATE, parseStakeState } from '@/components/StakedNode/state';
 import { parseStakes } from '@/hooks/parseStakes';
-import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE_TIME } from '@/lib/constants';
+import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE } from '@/lib/constants';
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
@@ -21,7 +21,7 @@ import type { Address } from 'viem';
  * @returns The stakes and related data for the connected wallet.
  */
 export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?: number) {
-  const { address: connectedAddress, chainId } = useWallet();
+  const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
   const { getItem } = usePreferences();
   const enabled = !!address;
@@ -95,11 +95,10 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     if (contractsErr) logger.error(contractsErr);
 
     //Minimum time in seconds that a node can go from "joining" to "exited"
-    const nodeMinLifespan = SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS;
+    const nodeMinLifespan = SESSION_NODE.INITIAL_DOWNTIME_CREDITS_HOURS * 60 * 60 * 1000;
     // Minimum time in blocks that a node can go from "joining" to "exited"
     const nodeMinLifespanArbBlocks =
-      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) -
-      (nodeMinLifespan * 1000) / BLOCK_TIME_MS.ARBITRUM;
+      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) - nodeMinLifespan / BLOCK_TIME_MS.ARBITRUM;
 
     return {
       ...parseStakes({
@@ -114,7 +113,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
       network,
       networkTime,
     };
-  }, [data, address, chainId, arbBlock]);
+  }, [data, address, arbBlock]);
 
   const notFoundJoiningNodes = useMemo(
     () =>
