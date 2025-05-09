@@ -1,5 +1,6 @@
 import { ActionModuleRow } from '@/components/ActionModule';
-import EthereumAddressField, {
+import {
+  EthereumAddressField,
   getEthereumAddressFormFieldSchema,
 } from '@/components/Form/EthereumAddressField';
 import { TextWithInlineEnder } from '@/components/TextWithInlineEnder';

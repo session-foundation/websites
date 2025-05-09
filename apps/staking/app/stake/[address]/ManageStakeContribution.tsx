@@ -5,8 +5,8 @@ import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFun
 import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
 import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
-import EthereumAddressField from '@/components/Form/EthereumAddressField';
-import StakeAmountField from '@/components/Form/StakeAmountField';
+import { EthereumAddressField } from '@/components/Form/EthereumAddressField';
+import { StakeAmountField } from '@/components/Form/StakeAmountField';
 import { WizardSectionDescription } from '@/components/Wizard';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
@@ -40,7 +40,7 @@ import { safeTrySync } from '@session/util-js/try';
 import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
-import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
+import { type Dispatch, type Ref, type SetStateAction, useMemo, useState } from 'react';
 import { usePreferences } from 'usepref';
 import { type Address, isAddress } from 'viem';
 import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
@@ -97,11 +97,15 @@ export function ManageStakeContribution({
   isSubmitting,
   setIsSubmitting,
   refetch,
+  stakeAmountRef,
+  rewardsAddressRef,
 }: {
   contract: ContributionContract;
   isSubmitting: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
   refetch: () => void;
+  stakeAmountRef: Ref<HTMLInputElement>;
+  rewardsAddressRef: Ref<HTMLInputElement>;
 }) {
   const { getItem } = usePreferences();
   const [acceptedTopUpNotice, setAcceptedTopUpNotice] = useState<boolean>(
@@ -316,6 +320,7 @@ export function ManageStakeContribution({
             name="stakeAmount"
             render={({ field }) => (
               <StakeAmountField
+                ref={stakeAmountRef}
                 minStake={minStake}
                 maxStake={maxStake}
                 watchedStakeAmount={form.watch('stakeAmount')}
@@ -340,6 +345,7 @@ export function ManageStakeContribution({
             name="rewardsAddress"
             render={({ field }) => (
               <EthereumAddressField
+                ref={rewardsAddressRef}
                 // @ts-expect-error -- TODO: type this
                 field={field}
                 label={dictionaryShared('rewardsAddress')}

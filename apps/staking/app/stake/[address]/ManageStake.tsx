@@ -10,7 +10,7 @@ import type { ContributionContract } from '@session/staking-api-js/schema';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 enum EditableStakeGroup {
   Contribution = 'contribution',
@@ -35,12 +35,25 @@ export function ManageStake({
 
   const haveOtherContributorsContributed = contract.contributors.length > 1;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stakeAmountRef = useRef<HTMLInputElement>(null);
+  const rewardsAddressRef = useRef<HTMLInputElement>(null);
+
+  const editField = useCallback((field: EditableStakeGroup, postScrollCallback?: () => void) => {
+    setEditableStakeGroup(field);
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView({ block: 'end', inline: 'end', behavior: 'smooth' });
+      postScrollCallback?.();
+    }, 25);
+  }, []);
+
   const editableFields = useMemo(() => {
     const fields: StakeInfoProps['editableFields'] = {};
 
     fields.stakeAmount = !isFinalized
       ? {
-          editOnClick: () => setEditableStakeGroup(EditableStakeGroup.Contribution),
+          editOnClick: () =>
+            editField(EditableStakeGroup.Contribution, () => stakeAmountRef.current?.focus()),
         }
       : {
           disabled: true,
@@ -49,7 +62,8 @@ export function ManageStake({
 
     fields.rewardsAddress = !isFinalized
       ? {
-          editOnClick: () => setEditableStakeGroup(EditableStakeGroup.Contribution),
+          editOnClick: () =>
+            editField(EditableStakeGroup.Contribution, () => rewardsAddressRef.current?.focus()),
         }
       : {
           disabled: true,
@@ -59,7 +73,7 @@ export function ManageStake({
     if (isOperator) {
       fields.operatorFee = !haveOtherContributorsContributed
         ? {
-            editOnClick: () => setEditableStakeGroup(EditableStakeGroup.OperatorFee),
+            editOnClick: () => editField(EditableStakeGroup.OperatorFee),
           }
         : {
             disabled: true,
@@ -68,7 +82,7 @@ export function ManageStake({
 
       fields.autoActivate = !isFinalized
         ? {
-            editOnClick: () => setEditableStakeGroup(EditableStakeGroup.AutoActivate),
+            editOnClick: () => editField(EditableStakeGroup.AutoActivate),
           }
         : {
             disabled: true,
@@ -77,10 +91,15 @@ export function ManageStake({
     }
 
     return fields;
-  }, [isFinalized, haveOtherContributorsContributed, isOperator, dictionary]);
+  }, [isFinalized, haveOtherContributorsContributed, isOperator, dictionary, editField]);
 
   return (
-    <StakeInfo contract={contract} isSubmitting={isSubmitting} editableFields={editableFields}>
+    <StakeInfo
+      contract={contract}
+      isSubmitting={isSubmitting}
+      editableFields={editableFields}
+      ref={containerRef}
+    >
       <ErrorBoundary errorComponent={ErrorStake}>
         {/** There is a race condition if we don't make sure vesting contracts have loaded
          before mounting the component */}
@@ -90,6 +109,8 @@ export function ManageStake({
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
             refetch={refetch}
+            stakeAmountRef={stakeAmountRef}
+            rewardsAddressRef={rewardsAddressRef}
           />
         ) : null}
         {!isLoading && isOperator ? (

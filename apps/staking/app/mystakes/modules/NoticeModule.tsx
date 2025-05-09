@@ -3,6 +3,7 @@
 import { URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleHeader, ModuleText } from '@session/ui/components/Module';
+import Typography from '@session/ui/components/Typography';
 import { useTranslations } from 'next-intl';
 
 export default function NoticeModule() {
@@ -10,14 +11,14 @@ export default function NoticeModule() {
 
   return (
     <Module size="lg" className="flex flex-grow">
-      <ModuleHeader>
+      <ModuleHeader className="overflow-auto">
         <ModuleText>{dict('title')}</ModuleText>
-        <br />
-        <br />
-        {dict.rich('description', {
-          link: externalLink(URL.DOCS),
-          'bridge-link': externalLink('https://getsession.org/'),
-        })}
+        <Typography variant="p" className="mt-6">
+          {dict.rich('description', {
+            link: externalLink(URL.DOCS),
+            'bridge-link': externalLink('https://getsession.org/'),
+          })}
+        </Typography>
       </ModuleHeader>
     </Module>
   );

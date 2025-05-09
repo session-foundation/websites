@@ -212,11 +212,8 @@ const ReadyForExitNotification = ({
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
-          ? dictionary.rich(isDeregistered ? 'liquidationNotification' : 'exitTimerNotificationNow')
-          : dictionary.rich(
-              isDeregistered ? 'deregistrationTimerDescription' : 'exitTimerNotification',
-              { relativeTime }
-            )}
+          ? dictionary.rich('exitTimerNotificationNow')
+          : dictionary.rich('exitTimerNotification', { relativeTime })}
       </NodeNotification>
     </Tooltip>
   );
@@ -614,7 +611,7 @@ const StakedNodeCard = forwardRef<
               </Tooltip>
             </CollapsableContent>
           ) : null}
-          {lastUptimeProofSeconds || state === STAKE_STATE.RUNNING ? (
+          {lastUptimeProofSeconds ? (
             <CollapsableContent size="xs">
               <Tooltip
                 tooltipContent={dictionary('lastUptimeDescription', {

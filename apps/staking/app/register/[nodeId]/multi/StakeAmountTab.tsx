@@ -3,7 +3,7 @@ import {
   useRegistrationWizard,
 } from '@/app/register/[nodeId]/Registration';
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
-import StakeAmountField from '@/components/Form/StakeAmountField';
+import { StakeAmountField } from '@/components/Form/StakeAmountField';
 import {
   SESSION_NODE_FULL_STAKE_AMOUNT,
   SESSION_NODE_MIN_STAKE_MULTI_OPERATOR,
