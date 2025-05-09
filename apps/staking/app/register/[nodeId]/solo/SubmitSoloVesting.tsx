@@ -69,21 +69,21 @@ export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams })
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: We don't want to re-trigger on function updates
   useEffect(() => {
-    if (addBLSStatus === PROGRESS_STATUS.SUCCESS) {
+    if (addBLSStatus === PROGRESS_STATUS.SUCCESS && vestingContractAddress) {
       const staker = params.contributors[0].staker;
       const confirmedTimestamp = Date.now() + SESSION_NODE.NETWORK_CONFIRMATION_TIME_AVG_MS;
       addConfirmingNode({
         pubkeyEd25519: params.nodePubKey as Ed25519PublicKey,
         pubkeyBls: params.blsPubKey,
         rewardsAddress: staker.beneficiary,
-        operatorAddress: staker.addr,
+        operatorAddress: vestingContractAddress,
         confirmationType: CONFIRMATION_TYPE.REGISTRATION,
         estimatedConfirmationTimestampMs: confirmedTimestamp,
-        confirmationOwner: staker.addr,
+        confirmationOwner: vestingContractAddress,
       });
       setConfirmTimestampMs(confirmedTimestamp);
     }
-  }, [addBLSStatus, params]);
+  }, [addBLSStatus, params, vestingContractAddress]);
 
   return (
     <div>
