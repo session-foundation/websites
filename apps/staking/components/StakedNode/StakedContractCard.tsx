@@ -1,12 +1,22 @@
+import {
+  type UseConfirmationProgressReturn,
+  useConfirmationProgress,
+} from '@/app/register/[nodeId]/solo/SubmitSoloTab';
 import { ActionModuleDivider } from '@/components/ActionModule';
 import { CollapsableContent, NodeContributorList, RowLabel } from '@/components/NodeCard';
 import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
+import { NotificationJoiningNetwork } from '@/components/StakedNode/Notification/NotificationJoiningNetwork';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
 import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
 import { getTotalStakedAmountForAddress } from '@/components/getTotalStakedAmountForAddress';
+import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { formatPercentage } from '@/lib/locale-client';
+import {
+  type VolatileStorageNodeConfirming,
+  useNodesWithConfirmations,
+} from '@/lib/volatile-storage';
 import {
   ButtonDataTestId,
   NodeCardDataTestId,
@@ -14,6 +24,7 @@ import {
 } from '@/testing/data-test-ids';
 import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
+import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type {
   ContributionContract,
   ContributionContractNotReady,
@@ -29,7 +40,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
-import type { Address } from 'viem';
+import { type Address, zeroAddress } from 'viem';
 
 function getContractStatusColor(
   state: STAKE_CONTRACT_STATE
@@ -47,30 +58,48 @@ function getContractStatusColor(
 }
 
 type ContractSummaryProps = {
+  confirmationProgress: UseConfirmationProgressReturn;
   contract: ContributionContract | ContributionContractNotReady;
-  state: STAKE_CONTRACT_STATE;
   isOperator?: boolean;
+  state: STAKE_CONTRACT_STATE;
 };
 
-const ContractSummary = ({ contract, state, isOperator }: ContractSummaryProps) => {
-  if (state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION) {
-    return (
-      <>
-        <NodeContributorList
-          contributors={contract.contributors}
-          data-testid={StakedNodeDataTestId.Contributor_List}
-        />
-        {isOperator ? <ContractStartButton contractAddress={contract.address} /> : null}
-      </>
-    );
-  }
-
-  return (
+const ContractSummary = ({
+  contract,
+  state,
+  isOperator,
+  confirmationProgress,
+}: ContractSummaryProps) => {
+  const contributorList = (
     <NodeContributorList
       contributors={contract.contributors}
       data-testid={StakedNodeDataTestId.Contributor_List}
     />
   );
+
+  if (state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION) {
+    return (
+      <>
+        {contributorList}
+        {isOperator ? <ContractStartButton contractAddress={contract.address} /> : null}
+      </>
+    );
+  }
+
+  if (state === STAKE_CONTRACT_STATE.JOINING) {
+    return (
+      <>
+        {contributorList}
+        <NotificationJoiningNetwork
+          confirmations={confirmationProgress.confirmations}
+          enabled={confirmationProgress.enabled}
+          remainingTimeEst={confirmationProgress.remainingTimeEst}
+        />
+      </>
+    );
+  }
+
+  return contributorList;
 };
 
 const StakedContractCard = forwardRef<
@@ -87,6 +116,19 @@ const StakedContractCard = forwardRef<
   const stakingNodeDictionary = useTranslations('sessionNodes.staking');
   const titleFormat = useTranslations('modules.title');
   const notFoundString = generalDictionary('notFound');
+  const {
+    nodes: { nodesConfirmingRegistration },
+  } = useNodesWithConfirmations();
+
+  const estimateConfirmationTime = useMemo(() => {
+    const node = nodesConfirmingRegistration.find((m) =>
+      areHexesEqual(m.pubkeyEd25519, contract.service_node_pubkey)
+    );
+    if (!node) return null;
+    return node.estimatedConfirmationTimestampMs;
+  }, [contract, nodesConfirmingRegistration]);
+
+  const confirmationProgress = useConfirmationProgress(estimateConfirmationTime);
 
   const { address: connectedAddress } = useWallet();
 
@@ -127,7 +169,14 @@ const StakedContractCard = forwardRef<
       statusIndicatorColor={getContractStatusColor(state)}
       publicKey={contract.service_node_pubkey}
       isOperator={isOperator}
-      summary={<ContractSummary contract={contract} state={state} isOperator={isOperator} />}
+      summary={
+        <ContractSummary
+          contract={contract}
+          state={state}
+          isOperator={isOperator}
+          confirmationProgress={confirmationProgress}
+        />
+      }
       collapsableLastChildren={
         <>
           <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
@@ -232,5 +281,28 @@ function StakedContractCardButton({
     </CollapsableContent>
   );
 }
+
+export const getStakedContractCardContractFromConfirmation = (
+  node: VolatileStorageNodeConfirming
+): ContributionContract | ContributionContractNotReady => {
+  return {
+    service_node_pubkey: node.pubkeyEd25519,
+    pubkey_bls: node.pubkeyBls,
+    operator_address: node.operatorAddress,
+    fee: 0,
+    manual_finalize: false,
+    status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
+    address: zeroAddress,
+    contributors: [
+      {
+        address: node.operatorAddress,
+        amount: SESSION_NODE_FULL_STAKE_AMOUNT,
+        beneficiary_address: node.rewardsAddress,
+        reserved: SESSION_NODE_FULL_STAKE_AMOUNT,
+      },
+    ],
+    events: [],
+  } satisfies ContributionContract;
+};
 
 export { StakedContractCard };

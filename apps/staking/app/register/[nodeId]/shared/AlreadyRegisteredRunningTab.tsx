@@ -1,4 +1,8 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
+import {
+  StakedContractCard,
+  getStakedContractCardContractFromConfirmation,
+} from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
 import { useStakes } from '@/hooks/useStakes';
@@ -13,10 +17,18 @@ import { useEffect } from 'react';
 export function AlreadyRegisteredRunningTab() {
   const { props } = useRegistrationWizard();
 
-  const dict = useTranslations('actionModules.registration.alreadyRegisteredMulti');
+  const dict = useTranslations('actionModules.registration.alreadyRegisteredRunning');
   const dictShared = useTranslations('actionModules.registration.shared');
 
-  const { stakes, blockHeight, networkTime, refetch } = useStakes();
+  const { stakes, joiningContracts, notFoundJoiningNodes, blockHeight, networkTime, refetch } =
+    useStakes();
+
+  const joiningContract = joiningContracts.find(({ service_node_pubkey }) =>
+    areHexesEqual(service_node_pubkey, props.ed25519PubKey)
+  );
+  const joiningFromConfirmation = notFoundJoiningNodes.find(({ pubkeyEd25519 }) =>
+    areHexesEqual(pubkeyEd25519, props.ed25519PubKey)
+  );
 
   const stake = stakes.find((stake) =>
     areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
@@ -33,7 +45,14 @@ export function AlreadyRegisteredRunningTab() {
         <WizardSectionTitle title={dict('specialTitle')} />
         <WizardSectionDescription description={dict('specialDescription')} />
       </div>
-      {stake ? (
+      {joiningContract ? (
+        <StakedContractCard id={joiningContract.service_node_pubkey} contract={joiningContract} />
+      ) : joiningFromConfirmation ? (
+        <StakedContractCard
+          id={joiningFromConfirmation.pubkeyEd25519}
+          contract={getStakedContractCardContractFromConfirmation(joiningFromConfirmation)}
+        />
+      ) : stake ? (
         <StakedNodeCard
           className="text-start"
           id={stake.contract_id.toString()}

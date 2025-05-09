@@ -1,9 +1,14 @@
+import { STAKE_STATE, parseStakeState } from '@/components/StakedNode/state';
 import { parseStakes } from '@/hooks/parseStakes';
-import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE_TIME } from '@/lib/constants';
+import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE } from '@/lib/constants';
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import { bigIntToNumber } from '@session/util-crypto/maths';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
+import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
@@ -16,12 +21,17 @@ import type { Address } from 'viem';
  * @returns The stakes and related data for the connected wallet.
  */
 export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?: number) {
-  const { address: connectedAddress, chainId } = useWallet();
+  const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
   const { getItem } = usePreferences();
-
   const enabled = !!address;
   const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+
+  const { data: arbBlock } = useBlockNumber({
+    query: {
+      gcTime: autoUpdateIntervalOverride ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
+    },
+  });
 
   const { data, isLoading, isFetching, refetch, isError, status } =
     useStakingBackendQueryWithParams(
@@ -36,6 +46,10 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
           : undefined,
       }
     );
+
+  const {
+    nodes: { nodesConfirmingRegistration },
+  } = useNodesWithConfirmations();
 
   const {
     stakes,
@@ -81,9 +95,10 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     if (contractsErr) logger.error(contractsErr);
 
     //Minimum time in seconds that a node can go from "joining" to "exited"
-    const nodeMinLifespan = SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS;
+    const nodeMinLifespan = SESSION_NODE.INITIAL_DOWNTIME_CREDITS_HOURS * 60 * 60 * 1000;
     // Minimum time in blocks that a node can go from "joining" to "exited"
-    const nodeMinLifespanArbBlocks = (nodeMinLifespan * 1000) / BLOCK_TIME_MS.ARBITRUM;
+    const nodeMinLifespanArbBlocks =
+      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) - nodeMinLifespan / BLOCK_TIME_MS.ARBITRUM;
 
     return {
       ...parseStakes({
@@ -98,12 +113,37 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
       network,
       networkTime,
     };
-  }, [data, address, chainId]);
+  }, [data, address, arbBlock]);
+
+  const notFoundJoiningNodes = useMemo(
+    () =>
+      nodesConfirmingRegistration.filter((node) => {
+        return (
+          areHexesEqual(node.confirmationOwner, address) &&
+          !joiningContracts.some(
+            ({ pubkey_bls, service_node_pubkey }) =>
+              pubkey_bls === node.pubkeyBls ||
+              areHexesEqual(service_node_pubkey, node.pubkeyEd25519)
+          ) &&
+          !stakes.some((stake) => {
+            const state = parseStakeState(stake, blockHeight);
+            if (state === STAKE_STATE.DEREGISTERED) {
+              return false;
+            }
+            return (
+              stake.pubkey_bls === node.pubkeyBls || stake.pubkey_ed25519 === node.pubkeyEd25519
+            );
+          })
+        );
+      }),
+    [nodesConfirmingRegistration, stakes, joiningContracts, blockHeight, address]
+  );
 
   return {
     stakes,
     visibleContracts,
     joiningContracts,
+    notFoundJoiningNodes,
     awaitingOperatorContracts,
     vesting,
     hiddenContractsWithStakes,
