@@ -1,0 +1,30 @@
+{
+  "name": "@session/util-react",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./*.ts",
+    "./hooks/*": "./hooks/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@session/testing": "workspace:*",
+    "@session/typescript-config": "workspace:*",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10",
+    "yarn": "use pnpm",
+    "npm": "use pnpm"
+  }
+}

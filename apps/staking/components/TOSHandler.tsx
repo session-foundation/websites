@@ -77,7 +77,7 @@ export function TOSHandler() {
     }
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't need to worry about setters changing
+  // biome-ignore lint/correctness/useExhaustiveDependencies(acceptTOS): Don't need to worry about setters changing
   useEffect(() => {
     if (clearAcceptTOSFlag) {
       acceptTOS(false);

@@ -16,6 +16,7 @@ import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
@@ -72,15 +73,14 @@ export default function NodeRegistrations() {
       });
   }, [networkBlsKeys, data, showNoNodes, isLoadingStakes]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     if (isConnected) {
       setNetworkStatusVisible(true);
     }
     return () => {
       setNetworkStatusVisible(false);
     };
-  }, []);
+  });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: On connected state change
   useEffect(() => {

@@ -43,3 +43,9 @@ yarn-error.log*
 *.db
 
 rss.xml
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/codeStyles/Project.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/prettier.xml
+/.idea/vcs.xml

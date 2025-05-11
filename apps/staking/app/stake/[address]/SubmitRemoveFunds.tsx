@@ -85,21 +85,21 @@ export function SubmitRemoveFunds({
     resetContract();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On simulate status change
+  // biome-ignore lint/correctness/useExhaustiveDependencies(withdrawContribution): On simulate status change
   useEffect(() => {
     if (!simulateEnabled) {
       withdrawContribution();
     }
   }, [simulateEnabled]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
+  // biome-ignore lint/correctness/useExhaustiveDependencies(handleError): On error
   useEffect(() => {
     if (isError) {
       handleError();
     }
   }, [isError]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
+  // biome-ignore lint/correctness/useExhaustiveDependencies(refetch): On success
   useEffect(() => {
     if (status === PROGRESS_STATUS.SUCCESS) {
       refetch();

@@ -13,6 +13,7 @@ import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { useToasterHistory } from '@session/ui/ui/sonner';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
@@ -325,4 +326,14 @@ export function useNetworkStatus(params?: UseNetworkStatusParams) {
   }, [refetch, context.setRefetch]);
 
   return context;
+}
+
+export function useStatusBarVisible(params?: UseNetworkStatusParams) {
+  const { setNetworkStatusVisible } = useNetworkStatus(params);
+  useMount(() => {
+    setNetworkStatusVisible(true);
+    return () => {
+      setNetworkStatusVisible(false);
+    };
+  });
 }

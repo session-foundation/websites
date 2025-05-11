@@ -4,6 +4,7 @@ import { useConfirmationProgress } from '@/app/register/[nodeId]/solo/SubmitSolo
 import { REG_TAB } from '@/app/register/[nodeId]/types';
 import { SESSION_NODE } from '@/lib/constants';
 import { getContractErrorName } from '@session/contracts';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useEffect } from 'react';
 
 type SubmitSoloProps = {
@@ -61,15 +62,14 @@ export function useSubmitSolo({
     registerAndStake();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     if (!enabled) {
       setIsSubmitting(true);
       registerAndStake();
     }
-  }, []);
+  });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On status change
+  // biome-ignore lint/correctness/useExhaustiveDependencies(startConfirmationTracking): On status change
   useEffect(() => {
     if (beginConfirmationTracking) {
       startConfirmationTracking();

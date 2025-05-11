@@ -29,6 +29,7 @@ import {
   useFormatDate,
 } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
+import logger from '@/lib/logger';
 import {
   ButtonDataTestId,
   NodeCardDataTestId,
@@ -45,10 +46,11 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { safeTrySync } from '@session/util-js/try';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
-import { type HTMLAttributes, forwardRef, useMemo } from 'react';
+import { Fragment, type HTMLAttributes, type ReactNode, forwardRef, useMemo } from 'react';
 import type { Address } from 'viem';
 import { CollapsableContent, NodeContributorList, RowLabel } from './NodeCard';
 
@@ -404,6 +406,137 @@ const NodeSummary = ({
   return contributors;
 };
 
+function KVRow({
+  keyToDisplay,
+  valueToDisplay,
+  depth,
+  prefix,
+  suffix,
+}: {
+  keyToDisplay?: string;
+  valueToDisplay?: string;
+  depth: number;
+  prefix?: ReactNode;
+  suffix?: ReactNode;
+}) {
+  return (
+    <CollapsableContent
+      size="xs"
+      className={cn(
+        'hidden peer-checked:block',
+        valueToDisplay && valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
+      )}
+      style={{
+        paddingInlineStart: `${depth * 4}px`,
+      }}
+    >
+      {prefix ? <span>{prefix}</span> : null}
+      {keyToDisplay ? <RowLabel>{`${keyToDisplay}: `}</RowLabel> : null}
+      {valueToDisplay ? <span>{valueToDisplay},</span> : null}
+      {suffix ? <span>{suffix}</span> : null}
+    </CollapsableContent>
+  );
+}
+
+function ObjectRows({
+  obj,
+  parentKey,
+  depth,
+}: { obj?: object | null; parentKey: string; depth: number }) {
+  return Object.entries(obj).map(([key, value], i) => {
+    const reactKey = `${parentKey}_${key}_${i}`;
+    const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
+    if (valueToDisplay.charAt(0) === '[') {
+      const [err, arr] = safeTrySync(() => JSON.parse(valueToDisplay));
+      if (err) {
+        logger.error(err);
+      } else if (!Array.isArray(arr)) {
+        logger.error(`${key} is not an Array!`);
+      } else {
+        return (
+          <Fragment key={`${reactKey}_fragment`}>
+            <KVRow key={`${reactKey}_start`} keyToDisplay={key} suffix="[" depth={depth + 1} />
+            <ArrayRows key={reactKey} parentKey={reactKey} arr={arr} depth={depth + 1} />
+            <KVRow key={`${reactKey}_end`} suffix="]," depth={depth + 1} />
+          </Fragment>
+        );
+      }
+    }
+
+    return (
+      <KVRow key={reactKey} keyToDisplay={key} valueToDisplay={valueToDisplay} depth={depth + 1} />
+    );
+  });
+}
+
+function ArrayRows({
+  parentKey,
+  arr,
+  depth,
+}: { parentKey: string; arr: Array<unknown>; depth: number }) {
+  return arr.map((item, i) => {
+    const reactKey = `${parentKey}_${i}`;
+    if (typeof item !== 'object') {
+      return 'NAO';
+    }
+    if (Object.keys(item).length > 1) {
+      return (
+        <>
+          <KVRow key={`${reactKey}_start`} suffix="{" depth={depth + 1} />
+          <ObjectRows key={reactKey} parentKey={reactKey} obj={item} depth={depth + 1} />
+          <KVRow key={`${reactKey}_end`} suffix="}," depth={depth + 1} />
+        </>
+      );
+    }
+    return (
+      <CollapsableContent key={reactKey} size="xs" className={cn('hidden peer-checked:block')}>
+        <span className="ms-2">{JSON.stringify(item, jsonBigIntReplacer)}</span>
+      </CollapsableContent>
+    );
+  });
+}
+
+function RawStakeData({ stake }: { stake: Stake }) {
+  const generalNodeDictionary = useTranslations('sessionNodes.general');
+  const titleFormat = useTranslations('modules.title');
+
+  const stringToCopy = useMemo(() => JSON.stringify(stake, jsonBigIntReplacer), [stake]);
+  const rows = useMemo(
+    () => (
+      <ObjectRows
+        key={stake.service_node_pubkey}
+        parentKey={stake.service_node_pubkey}
+        obj={stake}
+        depth={0}
+      />
+    ),
+    [stake]
+  );
+
+  return (
+    <>
+      <CollapsableContent className="hidden peer-checked:block">
+        <RowLabel>{titleFormat('format', { title: generalNodeDictionary('rawData') })}</RowLabel>
+      </CollapsableContent>
+      <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
+        <ActionModuleDivider className="h-0.5" />
+      </CollapsableContent>
+
+      <CollapsableContent className="hidden peer-checked:block peer-checked:h-8" size="buttonMd">
+        <CopyToClipboardButton
+          textToCopy={stringToCopy}
+          data-testid={'button:copy-raw-stake-data'}
+        />
+      </CollapsableContent>
+      {rows}
+      <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs" />
+      <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
+        <ActionModuleDivider className="h-0.5" />
+      </CollapsableContent>
+    </>
+  );
+}
+
 const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) => {
   const { chainId } = useWallet();
   const blockTime = new BlockTimeManager(networkTime, currentBlock);
@@ -665,34 +798,7 @@ const StakedNodeCard = forwardRef<
               {fee !== null ? formatPercentage(fee / 1_000_000) : notFoundString}
             </CollapsableContent>
           ) : null}
-          {showRawNodeData ? (
-            <>
-              <CollapsableContent className="hidden peer-checked:block">
-                <RowLabel>
-                  {titleFormat('format', { title: generalNodeDictionary('rawData') })}
-                </RowLabel>
-              </CollapsableContent>
-              <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
-                <ActionModuleDivider className="h-0.5" />
-              </CollapsableContent>
-              {Object.entries(stake).map(([key, value]) => {
-                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
-                return (
-                  <CollapsableContent
-                    size="xs"
-                    key={key}
-                    className={cn(
-                      'hidden peer-checked:block',
-                      valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
-                    )}
-                  >
-                    <RowLabel>{`${key}: `}</RowLabel>
-                    <span>{valueToDisplay}</span>
-                  </CollapsableContent>
-                );
-              })}
-            </>
-          ) : null}
+          {showRawNodeData ? <RawStakeData stake={stake} /> : null}
           {!hideButton ? (
             <StakeNodeCardButton
               stake={stake}

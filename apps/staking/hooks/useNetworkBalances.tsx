@@ -55,7 +55,7 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
 
       // TODO: implement network claim period data once available from backend
       networkClaimRemainingInCurrentPeriod = 1_000_000_000000000n;
-      networkClaimCurrentPeriodEnd = Date.now() + 10_000;
+      networkClaimCurrentPeriodEnd = Date.now() + 12 * 60 * 60 * 1000;
     }
 
     const unclaimed = claimableRewards + claimableStakes;
