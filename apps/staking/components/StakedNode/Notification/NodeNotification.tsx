@@ -10,17 +10,17 @@ export const NodeNotification = forwardRef<HTMLSpanElement, NodeNotificationProp
     <span
       ref={ref}
       className={cn(
-        'flex w-3/4 flex-row gap-2 font-normal text-xs sm:w-max md:text-base',
+        'flex w-3/4 flex-row gap-1 font-normal text-xs sm:w-max md:text-base',
         level === 'warning'
           ? 'text-warning'
           : level === 'error'
             ? 'text-destructive'
-            : 'text-indicator-blue',
+            : 'text-session-text',
         className
       )}
       {...props}
     >
-      <span>•</span>
+      <span className="mr-1">•</span>
       {children}
     </span>
   )
