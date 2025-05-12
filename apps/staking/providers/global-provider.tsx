@@ -9,6 +9,7 @@ import PreferencesProvider from '@/providers/preferences-provider';
 import QueryProvider from '@/providers/query-provider';
 import TOSProvider from '@/providers/tos-provider';
 import VestingProvider from '@/providers/vesting-provider';
+import VolatileStorageProvider from '@/providers/volatile-storage-provider';
 import Web3WalletProvider from '@/providers/web3wallet-provider';
 import ToasterProvider from '@session/ui/ui/sonner';
 import { WalletButtonProvider } from '@session/wallet/providers/wallet-button-provider';
@@ -23,26 +24,28 @@ type GlobalProviderParams = Omit<Web3WalletProviderProps, 'projectId'> &
 export function GlobalProvider({ children, wagmiCookie, messages, locale }: GlobalProviderParams) {
   return (
     <ToasterProvider>
-      <PreferencesProvider>
-        <QueryProvider>
-          <FeatureFlagProvider>
-            <LocalizationProvider messages={messages} locale={locale}>
-              <WalletButtonProvider>
-                <Web3WalletProvider
-                  wagmiCookie={wagmiCookie}
-                  projectId={NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
-                >
-                  <VestingProvider>
-                    <StatusBarProvider>
-                      <TOSProvider>{children}</TOSProvider>
-                    </StatusBarProvider>
-                  </VestingProvider>
-                </Web3WalletProvider>
-              </WalletButtonProvider>
-            </LocalizationProvider>
-          </FeatureFlagProvider>
-        </QueryProvider>
-      </PreferencesProvider>
+      <VolatileStorageProvider>
+        <PreferencesProvider>
+          <QueryProvider>
+            <FeatureFlagProvider>
+              <LocalizationProvider messages={messages} locale={locale}>
+                <WalletButtonProvider>
+                  <Web3WalletProvider
+                    wagmiCookie={wagmiCookie}
+                    projectId={NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
+                  >
+                    <VestingProvider>
+                      <StatusBarProvider>
+                        <TOSProvider>{children}</TOSProvider>
+                      </StatusBarProvider>
+                    </VestingProvider>
+                  </Web3WalletProvider>
+                </WalletButtonProvider>
+              </LocalizationProvider>
+            </FeatureFlagProvider>
+          </QueryProvider>
+        </PreferencesProvider>
+      </VolatileStorageProvider>
     </ToasterProvider>
   );
 }
