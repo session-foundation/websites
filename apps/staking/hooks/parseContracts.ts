@@ -129,11 +129,7 @@ export function parseContracts({
   for (const contract of _contracts) {
     const { pubkey_bls, status, events, contributors } = contract;
 
-    if (
-      networkBlsKeys.has(pubkey_bls) ||
-      added.has(pubkey_bls) ||
-      runningStakesBlsKeysSet.has(pubkey_bls)
-    ) {
+    if (added.has(pubkey_bls) || runningStakesBlsKeysSet.has(pubkey_bls)) {
       if (
         status !== CONTRIBUTION_CONTRACT_STATUS.Finalized &&
         address &&
@@ -153,9 +149,9 @@ export function parseContracts({
       const lastFinalized = events.filter((event) => event.name === 'Finalized')[0];
       if (!lastFinalized) {
         logger.warn(`Contract is finalized, but no Finalized event, showing: ${pubkey_bls}`);
-      } else if (lastFinalized.block < nodeMinLifespanArbBlocks) {
+      } else if (lastFinalized.block > nodeMinLifespanArbBlocks) {
         logger.debug(
-          `Contract was finalized at block ${lastFinalized.block}, this is less than the lifespan limit (${nodeMinLifespanArbBlocks}), showing: ${pubkey_bls}`
+          `Contract was finalized at block ${lastFinalized.block}, this is within the minimum lifespan (${nodeMinLifespanArbBlocks}), showing: ${pubkey_bls}`
         );
         joiningContracts.push(contract);
         added.add(pubkey_bls);

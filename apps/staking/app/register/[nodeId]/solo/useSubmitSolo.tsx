@@ -2,9 +2,12 @@ import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { useConfirmationProgress } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE } from '@/lib/constants';
+import { useNodesWithConfirmations } from '@/lib/volatile-storage';
 import { getContractErrorName } from '@session/contracts';
-import { useEffect } from 'react';
+import { areHexesEqual } from '@session/util-crypto/string';
+import { useEffect, useMemo, useState } from 'react';
 
 type SubmitSoloProps = {
   error?: Error | null;
@@ -12,7 +15,6 @@ type SubmitSoloProps = {
   isError: boolean;
   registerAndStake: () => void;
   resetRegisterAndStake: () => void;
-  beginConfirmationTracking: boolean;
 };
 
 export function useSubmitSolo({
@@ -21,15 +23,27 @@ export function useSubmitSolo({
   isError,
   resetRegisterAndStake,
   registerAndStake,
-  beginConfirmationTracking,
 }: SubmitSoloProps) {
-  const { setIsSubmitting, setIsSuccess, changeTab, setIsError } = useRegistrationWizard();
-
+  const { setIsSubmitting, setIsSuccess, changeTab, setIsError, props } = useRegistrationWizard();
+  const currentActor = useCurrentActor();
   const {
-    confirmations,
-    remainingTimeEst,
-    start: startConfirmationTracking,
-  } = useConfirmationProgress();
+    nodes: { nodesConfirmingRegistration },
+  } = useNodesWithConfirmations();
+
+  const [confirmTimestampMs, setConfirmTimestampMs] = useState<number | null>(null);
+
+  const confirmingNode = useMemo(
+    () =>
+      nodesConfirmingRegistration.find(
+        (m) =>
+          m.pubkeyEd25519 === props.ed25519PubKey && areHexesEqual(m.operatorAddress, currentActor)
+      ),
+    [props.ed25519PubKey, nodesConfirmingRegistration, currentActor]
+  );
+
+  const { confirmations, remainingTimeEst } = useConfirmationProgress(
+    confirmingNode?.estimatedConfirmationTimestampMs ?? confirmTimestampMs
+  );
 
   /**
    * If an error is thrown by this function that error is caught by the ErrorBoundary and handled there.
@@ -69,16 +83,9 @@ export function useSubmitSolo({
     }
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On status change
-  useEffect(() => {
-    if (beginConfirmationTracking) {
-      startConfirmationTracking();
-    }
-  }, [beginConfirmationTracking]);
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: On confirmation change
   useEffect(() => {
-    if (confirmations >= SESSION_NODE.GOAL_REGISTRATION_CONFIRMATIONS) {
+    if (confirmations >= SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS) {
       setIsSubmitting(false);
       setIsSuccess(true);
       changeTab(REG_TAB.SUCCESS_SOLO);
@@ -96,5 +103,6 @@ export function useSubmitSolo({
     remainingTimeEst,
     confirmations,
     handleRetry,
+    setConfirmTimestampMs,
   };
 }
