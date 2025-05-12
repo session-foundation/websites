@@ -6,13 +6,15 @@ import { SubmitContributeFunds } from '@/app/stake/[address]/SubmitContributeFun
 import { SubmitContributeFundsVesting } from '@/app/stake/[address]/SubmitContributeFundsVesting';
 import { ActionModuleRow } from '@/components/ActionModule';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
-import EthereumAddressField, {
-  getEthereumAddressFormFieldSchema,
+import {
+  EthereumAddressField,
   type GetEthereumAddressFormFieldSchemaArgs,
+  getEthereumAddressFormFieldSchema,
 } from '@/components/Form/EthereumAddressField';
-import StakeAmountField, {
-  getStakeAmountFormFieldSchema,
+import {
   type GetStakeAmountFormFieldSchemaArgs,
+  StakeAmountField,
+  getStakeAmountFormFieldSchema,
 } from '@/components/Form/StakeAmountField';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
