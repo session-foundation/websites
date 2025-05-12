@@ -118,7 +118,9 @@ export const ExitUnlockTimerNotification = ({
                 relativeTime,
               }
             )
-          : dictionary.rich(isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing')}
+          : dictionary.rich(
+              isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing'
+            )}
       </NodeNotification>
     </Tooltip>
   );
