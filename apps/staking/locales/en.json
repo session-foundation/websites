@@ -691,18 +691,18 @@
         "addBlsPubKeyCost": "Add BLS Public Key Cost:",
         "approve": {
           "idle": "Requesting permission to stake {tokenSymbol}",
-          "pending": "Requesting permission to stake {fullStateAmount} waiting for user approval",
+          "pending": "Requesting permission to stake {fullStateAmount}. Waiting for user approval",
           "success": "Permission to stake {tokenSymbol} granted",
-          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
+          "errorTemplate": "Wallet failed to grant permission to stake {tokenSymbol}, {reason}. Please try again",
           "errors": {}
         },
         "arbitrum": {
-          "idle": "Registering node on Arbitrum & Staking {tokenSymbol}",
-          "pending": "Registering node on Arbitrum & Staking {tokenSymbol}",
-          "success": "Registered node on Arbitrum & Staked {tokenSymbol}",
+          "idle": "Registering node and staking {tokenSymbol} on Arbitrum",
+          "pending": "Registering node and staking {tokenSymbol} on Arbitrum",
+          "success": "Registered node and staked {tokenSymbol} on Arbitrum",
           "errorTemplate": "Arbitrum registration failed, {reason}",
           "errors": {
-            "MaxContributorsExceeded": "max contributors exceeded",
+            "MaxContributorsExceeded": "maximum contributors exceeded",
             "ContributionTotalMismatch": "stake does not match required amount",
             "BLSPubkeyAlreadyExists": "node already registered with the same SN Key",
             "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
@@ -712,10 +712,10 @@
         },
         "network": {
           "idle": "Registering node on {sessionNetwork}",
-          "pending": "Registering node on {sessionNetwork} ({progress} confirmations) estimated time remaining: {remainingTime}",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations, approximately {remainingTime} remaining",
           "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Registering node on {sessionNetwork} failed, {reason}, please try again later"
+            "template": "Registration of node on {sessionNetwork} failed, {reason}, please try again later"
           }
         }
       },
@@ -845,6 +845,8 @@
       "deregisteredTimerDescription": "Time left until the stake is unlocked and the node is available for liquidation. ({date})",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
+      "joiningNetworkNotification": "Node joining in ~{relativeTime}",
+      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)",
       "finalize": {
         "buttonText": "Activate",
         "buttonAria": "Activate the node on the network",

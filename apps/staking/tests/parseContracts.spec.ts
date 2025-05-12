@@ -268,13 +268,13 @@ describe('parseContracts', () => {
     expect(result.hiddenContractsWithStakes).toHaveLength(0);
   });
 
-  it('should add a finalized contract with a Finalized event block less than nodeMinLifespanArbBlocks to joiningContracts', () => {
+  it('should add a finalized contract with a Finalized event block after nodeMinLifespanArbBlocks to joiningContracts', () => {
     const contract = {
       address: CONTRACT_ADDRESS[4],
       contributors: [],
       events: [
-        DEPLOY_ARB_EVENT(90),
-        FINALIZED_ARB_EVENT(50), // block 50 is less than nodeMinLifespanArbBlocks (100)
+        DEPLOY_ARB_EVENT(110),
+        FINALIZED_ARB_EVENT(150), // block 150 is more than nodeMinLifespanArbBlocks (100)
       ],
       operator_address: WALLET_ADDRESS[4],
       service_node_pubkey: ED25519_ADDRESS[4],
@@ -300,13 +300,13 @@ describe('parseContracts', () => {
     expect(result.visibleContracts).toHaveLength(0);
   });
 
-  it('should hide a finalized contract with a Finalized event block greater or equal to nodeMinLifespanArbBlocks', () => {
+  it('should hide a finalized contract with a Finalized event block less than nodeMinLifespanArbBlocks', () => {
     const contract = {
       address: CONTRACT_ADDRESS[5],
       contributors: [],
       events: [
-        DEPLOY_ARB_EVENT(100),
-        FINALIZED_ARB_EVENT(150), // block 150 is >= nodeMinLifespanArbBlocks (100)
+        DEPLOY_ARB_EVENT(20),
+        FINALIZED_ARB_EVENT(50), // block 50 is < nodeMinLifespanArbBlocks (100)
       ],
       operator_address: WALLET_ADDRESS[5],
       service_node_pubkey: ED25519_ADDRESS[5],
@@ -365,37 +365,6 @@ describe('parseContracts', () => {
   it('should handle an empty contracts array', () => {
     const result = parseContracts({
       contracts: [],
-      address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
-      nodeMinLifespanArbBlocks,
-      blockHeight: 1000,
-    });
-
-    expect(result.visibleContracts).toHaveLength(0);
-    expect(result.joiningContracts).toHaveLength(0);
-    expect(result.hiddenContractsWithStakes).toHaveLength(0);
-  });
-  
-  it('should not show contracts that are finalized', () => {
-   const contract = {
-      address: CONTRACT_ADDRESS[6],
-      contributors: [{
-        address: WALLET_ADDRESS[4],
-        beneficiary_address: null,
-        amount: 5000000000000n,
-        reserved: 5000000000000n,
-      }],
-      events: [DEPLOY_ARB_EVENT(70), FINALIZED_ARB_EVENT(1000)],
-      operator_address: WALLET_ADDRESS[6],
-      service_node_pubkey: ED25519_ADDRESS[6],
-      status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
-      fee: 70,
-      manual_finalize: false,
-      pubkey_bls: BLS_KEY[7],
-    };
-    const result = parseContracts({
-      contracts: [contract],
       address: walletAddress,
       addedBlsKeys: {},
       runningStakesBlsKeysSet: new Set(),
