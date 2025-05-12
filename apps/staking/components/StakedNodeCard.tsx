@@ -4,9 +4,10 @@ import { ActionModuleDivider } from '@/components/ActionModule';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
 import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
 import {
-  NodeRequestExitButton,
   NodeRequestExitButtonWithDialog,
 } from '@/components/StakedNode/NodeRequestExitButtonWithDialog';
+import { NodeRequestExitButton } from '@/components/StakedNode/NodeRequestExitButton';
+import { ExitUnlockTimerNotification, NodeSummary } from '@/components/StakedNode/NodeSummary';
 import { StakeCard } from '@/components/StakedNode/StakeCard';
 import {
   STAKE_EVENT_STATE,
@@ -19,7 +20,7 @@ import { WizardSectionDescription } from '@/components/Wizard';
 import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { useStakes } from '@/hooks/useStakes';
-import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
+import { SESSION_NODE, SESSION_NODE_TIME } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import {
@@ -36,6 +37,9 @@ import {
 } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { Stake, StakeContributor } from '@session/staking-api-js/schema';
+import { formatNumber, formatPercentage, useFormatDate } from '@/lib/locale-client';
+import { ButtonDataTestId, NodeCardDataTestId } from '@/testing/data-test-ids';
+import type { Stake } from '@session/staking-api-js/schema';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
@@ -50,7 +54,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
 import type { Address } from 'viem';
-import { CollapsableContent, NodeContributorList, RowLabel } from './NodeCard';
+import { CollapsableContent, RowLabel } from './NodeCard';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.

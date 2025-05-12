@@ -705,7 +705,7 @@
           "success": "Registered node and staked {tokenSymbol} on Arbitrum",
           "errorTemplate": "Arbitrum registration failed, {reason}",
           "errors": {
-            "MaxContributorsExceeded": "max contributors exceeded",
+            "MaxContributorsExceeded": "maximum contributors exceeded",
             "ContributionTotalMismatch": "stake does not match required amount",
             "BLSPubkeyAlreadyExists": "node already registered with the same SN Key",
             "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
@@ -715,10 +715,10 @@
         },
         "network": {
           "idle": "Registering node on {sessionNetwork}",
-          "pending": "Registering node on {sessionNetwork} ({progress} confirmations, approximately {remainingTime} remaining)",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations, approximately {remainingTime} remaining",
           "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Registering node on {sessionNetwork} failed, {reason}. Please try again later."
+            "template": "Registration of node on {sessionNetwork} failed, {reason}, please try again later"
           }
         }
       },
@@ -848,6 +848,8 @@
       "deregisteredTimerDescription": "Time left until the stake is unlocked ({date}).",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
+      "joiningNetworkNotification": "Node joining in ~{relativeTime}",
+      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)",
       "finalize": {
         "buttonText": "Activate",
         "buttonAria": "Activate the node on the network",

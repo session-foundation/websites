@@ -143,10 +143,10 @@ export enum BLOCK_TIME_MS {
 export enum SESSION_NODE {
   /** Average millisecond per block (~2 minutes per block) */
   MS_PER_BLOCK = 2 * 60 * 1000,
-  /** The number of confirmations required to register a node */
-  GOAL_REGISTRATION_CONFIRMATIONS = 5,
-  /** 5 minutes */
-  REGISTRATION_MS_PER_CONFIRMATION_ESTIMATE = 5 * 60 * 1000,
+  /** The number of confirmations required for a session network action */
+  NETWORK_REQUIRED_CONFIRMATIONS = 5,
+  /** Average network confirmation time. Time to get all confirmations. */
+  NETWORK_CONFIRMATION_TIME_AVG_MS = 12 * 60 * 1000,
   /** Min Operator Fee */
   MIN_OPERATOR_FEE = 0,
   /** Max Operator Fee */
@@ -155,6 +155,8 @@ export enum SESSION_NODE {
   MAX_CONTRIBUTORS = 10,
   /** A small contributor is one who contributes less than 1/DIVISOR of the total */
   SMALL_CONTRIBUTOR_DIVISOR = 4,
+  /** 2 Hours in ms */
+  INITIAL_DOWNTIME_CREDITS_MS = 2 * 60 * 60 * 1000,
 }
 
 /** 20,000 SESH  */
@@ -221,6 +223,7 @@ export const HANDRAIL_THRESHOLDS = NEXT_PUBLIC_TESTNET
   : HANDRAIL_THRESHOLD_MAINNET;
 
 export const preferenceStorageKey = 'stake_settings';
+export const volatileStorageKey = 'volatile_storage';
 
 export enum PREFERENCE {
   BACKEND_URL = 'backendUrl',
@@ -310,6 +313,10 @@ export const customSettings = Object.entries(prefDetails)
     key,
   }))
   .filter(({ key }) => !hiddenPreferences.includes(key as PREFERENCE));
+
+export enum VOLATILE_STORAGE {
+  NODES_CONFIRMING = 'nodesConfirming',
+}
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
   [REG_TAB.START]:

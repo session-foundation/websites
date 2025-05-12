@@ -2,7 +2,10 @@
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeListModuleContent, NodesListSkeleton } from '@/components/NodesListModule';
-import { StakedContractCard } from '@/components/StakedNode/StakedContractCard';
+import {
+  StakedContractCard,
+  getStakedContractCardContractFromConfirmation,
+} from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useNetworkStatus } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
@@ -35,6 +38,8 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     stakes,
     hiddenContractsWithStakes,
     visibleContracts,
+    joiningContracts,
+    notFoundJoiningNodes,
     network,
     blockHeight,
     networkTime,
@@ -53,6 +58,12 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     };
   }, []);
 
+  const hasStakes =
+    stakes?.length ||
+    hiddenContractsWithStakes?.length ||
+    visibleContracts?.length ||
+    notFoundJoiningNodes?.length;
+
   return (
     <NodeListModuleContent>
       {isError ? (
@@ -64,11 +75,28 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
         />
       ) : isLoading ? (
         <NodesListSkeleton />
-      ) : (stakes?.length || hiddenContractsWithStakes?.length || visibleContracts?.length) &&
-        blockHeight &&
-        networkTime ? (
+      ) : hasStakes && blockHeight && networkTime ? (
         <>
+          {notFoundJoiningNodes.map((node) => {
+            return (
+              <StakedContractCard
+                key={node.pubkeyEd25519}
+                id={node.pubkeyEd25519}
+                contract={getStakedContractCardContractFromConfirmation(node)}
+              />
+            );
+          })}
           {hiddenContractsWithStakes.map((contract) => {
+            return (
+              <StakedContractCard
+                key={contract.address}
+                id={contract.address}
+                contract={contract}
+                targetWalletAddress={address}
+              />
+            );
+          })}
+          {joiningContracts.map((contract) => {
             return (
               <StakedContractCard
                 key={contract.address}
