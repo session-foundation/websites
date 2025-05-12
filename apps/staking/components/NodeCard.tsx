@@ -1,4 +1,5 @@
-import { type ButtonDataTestId, StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import {
   type ContributionContractContributor,
@@ -9,11 +10,8 @@ import { Loading } from '@session/ui/components/loading';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
 import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { bigIntSortDesc } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
@@ -120,23 +118,32 @@ const ContributorIcon = ({
   className,
   contributor,
   isUser,
+  isOperator,
 }: {
   className?: string;
   contributor?: StakeContributor | ContributionContractContributor;
   isUser?: boolean;
+  isOperator?: boolean;
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: kinda has to be
 }) => {
   const dictionary = useTranslations('general');
+  const dictStaked = useTranslations('nodeCard.staked');
   return (
     <Tooltip
       tooltipContent={
         contributor ? (
           <div className="flex flex-col gap-1">
-            <span>{isUser ? dictionary('you') : contributor.address}</span>
+            <span>
+              {isUser
+                ? `${dictionary('you')}${isOperator ? ` (${dictStaked('operator')})` : ''}`
+                : contributor.address}
+            </span>
             <span>
               {`${formatSENTBigInt(contributor.amount)} ${dictionary('staked')}`}
               {isContributionContractContributor(contributor) && contributor.reserved
                 ? ` (${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')})`
                 : ''}
+              {!isUser && isOperator ? ` (${dictStaked('operator')})` : ''}
             </span>
           </div>
         ) : (
@@ -145,8 +152,20 @@ const ContributorIcon = ({
       }
     >
       <HumanIcon
-        className={cn('h-4 w-4 cursor-pointer fill-text-primary', className)}
-        full={Boolean(contributor)}
+        className={cn(
+          'h-4 w-4 cursor-pointer',
+          contributor
+            ? contributor.amount
+              ? isUser
+                ? 'fill-session-green'
+                : 'fill-text-primary'
+              : isContributionContractContributor(contributor) && contributor.reserved
+                ? 'fill-warning'
+                : 'fill-text-primary'
+            : 'fill-text-primary',
+          className
+        )}
+        full={!!contributor?.amount}
       />
     </Tooltip>
   );
@@ -160,24 +179,16 @@ type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
 
 const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorListProps>(
   ({ className, contributors = [], showEmptySlots, forceExpand, ...props }, ref) => {
-    const { address: userAddress } = useWallet();
+    const userAddress = useCurrentActor();
 
     const dictionary = useTranslations('maths');
 
-    const [mainContributor, ...otherContributors] = useMemo(() => {
-      const userContributor = contributors.find(({ address }) =>
-        areHexesEqual(address, userAddress)
-      );
-      const otherContributors = contributors
-        .filter(({ address }) => !areHexesEqual(address, userAddress))
-        .sort((a, b) => {
-          const aAmount = isContributionContractContributor(a) ? a.amount || a.reserved : a.amount;
-          const bAmount = isContributionContractContributor(b) ? b.amount || b.reserved : b.amount;
-          return bigIntSortDesc(bAmount, aAmount);
-        });
+    const userContributor = useMemo(
+      () => contributors.find(({ address }) => areHexesEqual(address, userAddress)),
+      [contributors, userAddress]
+    );
 
-      return userContributor ? [userContributor, ...otherContributors] : otherContributors;
-    }, [contributors, userAddress]);
+    const operator = contributors[0];
 
     const emptyContributorSlots = useMemo(
       () =>
@@ -194,11 +205,14 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
 
     return (
       <>
-        <ContributorIcon
-          className="-mr-1"
-          contributor={mainContributor}
-          isUser={areHexesEqual(mainContributor?.address, userAddress)}
-        />
+        {!forceExpand ? (
+          <ContributorIcon
+            className={cn('-mr-1 fill-text-primary peer-checked:hidden peer-checked:opacity-0')}
+            contributor={userContributor}
+            isOperator={areHexesEqual(userContributor?.address, operator?.address)}
+            isUser
+          />
+        ) : null}
         <div
           className={cn(
             'flex w-min flex-row items-center overflow-x-hidden align-middle',
@@ -210,24 +224,16 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
           ref={ref}
           {...props}
         >
-          {otherContributors.map((contributor) => (
+          {contributors.map((contributor) => (
             <ContributorIcon
               key={contributor.address}
               contributor={contributor}
-              className={cn(
-                'h-4',
-                contributor.amount
-                  ? 'fill-text-primary'
-                  : isContributionContractContributor(contributor) && contributor.reserved
-                    ? 'fill-warning'
-                    : ''
-              )}
+              isUser={areHexesEqual(contributor.address, userAddress)}
+              isOperator={areHexesEqual(contributor.address, operator?.address)}
             />
           ))}
           {showEmptySlots
-            ? emptyContributorSlots.map((key) => (
-                <ContributorIcon key={key} className="h-4 fill-text-primary" />
-              ))
+            ? emptyContributorSlots.map((key) => <ContributorIcon key={key} className="h-4" />)
             : null}
           <span
             className={cn(
@@ -277,7 +283,7 @@ export const ToggleCardExpansionButton = forwardRef<
       </span>
       <ArrowDownIcon
         className={cn(
-          'ms-1 h-4 w-4 transform fill-session-text stroke-session-text transition-all duration-300 ease-in-out motion-reduce:transition-none'
+          'ms-2 h-4 w-4 transform fill-session-text stroke-session-text transition-all duration-300 ease-in-out motion-reduce:transition-none'
         )}
       />
     </label>
@@ -322,35 +328,6 @@ export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContent
     />
   )
 );
-
-export const CollapsableButton = forwardRef<
-  HTMLButtonElement,
-  HTMLAttributes<HTMLButtonElement> & {
-    ariaLabel: string;
-    dataTestId: ButtonDataTestId;
-    disabled?: boolean;
-    mobileChildren?: ReactNode;
-  }
->(({ ariaLabel, dataTestId, disabled, children, ...props }, ref) => (
-  <CollapsableContent
-    className="end-6 bottom-4 flex w-max items-end min-[500px]:absolute"
-    size="buttonSm"
-  >
-    <Button
-      data-testid={dataTestId}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      rounded="md"
-      size="sm"
-      variant="destructive-outline"
-      className="uppercase"
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </Button>
-  </CollapsableContent>
-));
 
 export {
   ContributorIcon,

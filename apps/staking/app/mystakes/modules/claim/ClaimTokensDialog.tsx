@@ -1,5 +1,6 @@
 import type { ClaimDict } from '@/app/mystakes/modules/ClaimTokensModule';
 import { ClaimTokens } from '@/app/mystakes/modules/claim/ClaimTokens';
+import { ClaimTokensOverLimit } from '@/app/mystakes/modules/claim/ClaimTokensOverLimit';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { QUERY } from '@/lib/constants';
@@ -14,13 +15,13 @@ export function ClaimTokensDialog({
   dictionary,
   refetchBalance,
 }: { address: Address; dictionary: ClaimDict; refetchBalance?: () => void }) {
-  const { canClaim, refetch } = useNetworkBalances({ addressOverride: address });
+  const { canClaim, isClaimOverLimit, refetch } = useNetworkBalances({ addressOverride: address });
 
   const { data: claimData, isError } = useStakingBackendQueryWithParams(
     getRewardsClaimSignature,
     { address },
     {
-      enabled: !!address && canClaim,
+      enabled: !!address && canClaim && !isClaimOverLimit,
       staleTime: QUERY.STALE_TIME_CLAIM_REWARDS,
     }
   );
@@ -41,6 +42,8 @@ export function ClaimTokensDialog({
           dictionary={dictionary}
           refetchBalance={refetchBalance}
         />
+      ) : isClaimOverLimit ? (
+        <ClaimTokensOverLimit address={address} />
       ) : (
         <Loading />
       )}

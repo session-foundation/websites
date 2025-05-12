@@ -20,7 +20,7 @@ export default function UnclaimedStakesModule({
   const titleFormat = useTranslations('modules.title');
   const title = titleOverride ?? dictionary('title');
 
-  const { claimableStakes, status, refetch } = useNetworkBalances({
+  const { claimableStakes, status, refetch, enabled } = useNetworkBalances({
     addressOverride,
   });
 
@@ -35,7 +35,7 @@ export default function UnclaimedStakesModule({
       <ModuleDynamicQueryText
         status={status as QUERY_STATUS}
         fallback={0}
-        enabled
+        enabled={enabled}
         errorFallback={dictionaryShared('error')}
         errorToast={{
           messages: {

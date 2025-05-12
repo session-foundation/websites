@@ -31,35 +31,34 @@
     },
     "notFound": {
       "title": "Page Not Found",
-      "description": "Sorry! We couldn't find the page you were looking for."
+      "description": "Sorry! The page you are looking for could not be found."
     },
     "stake": {
       "title": "Stake Now",
-      "description": "Browse open Session Nodes to stake to."
+      "description": "Browse available Session Nodes to stake to."
     },
     "register": {
-      "title": "Register Session Node",
+      "title": "Register a Session Node",
       "description": "Register a Session Node and stake to it."
     },
     "myStakes": {
       "title": "My Stakes",
-      "description": "View your Session stakes and claim rewards."
+      "description": "View your stakes and claim rewards."
     },
     "vestedStakes": {
       "title": "Vested Stakes",
-      "description": "View your Session vesting contract stakes."
+      "description": "View your vesting contract stakes."
     }
   },
   "maintenance": {
     "title": "Maintenance Notice",
-    "description": "Sorry! The staking portal is under maintenance. Please check back later."
+    "description": "Sorry! The Staking Portal is under maintenance. Please check back later."
   },
   "fee": {
     "networkFee": "Network Fee",
     "networkFeeTooltip": "The estimated amount of {gasTokenSymbol} it will cost to process this transaction on the {mainNetworkChain} network. <link>Learn more</link>",
-    "networkFeeTooltipWithFormula": "This is the estimated amount of {gasTokenSymbol} it will cost to process this transaction on {mainNetworkChain}. <link>Learn more</link> <br></br> <formula></formula>",
-    "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate may be inaccurate",
-    "gasHigh": "The network fee is higher than usual, the price of Gas is higher than normal on {mainNetworkChain} due to high demand. <link>Learn more</link>"
+    "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate may be inaccurate.",
+    "gasHigh": "The price of gas is higher than usual on {mainNetworkChain} due to high demand. <link>Learn more</link>"
   },
   "maths": {
     "outOf": "{count}/{max}"
@@ -78,7 +77,7 @@
     "support": "Support",
     "register": "Register",
     "faucet": "Faucet",
-    "explorer": "Explorer",
+    "explorer": "Appchain Explorer",
     "leaderboard": "Leaderboard",
     "hamburgerDropdown": {
       "ariaLabel": "Open navigation menu",
@@ -88,10 +87,12 @@
       "ariaSupport": "Go to support page",
       "faucet": "Faucet",
       "ariaFaucet": "Go to faucet page",
-      "explorer": "Explorer",
-      "ariaExplorer": "Go to node explorer"
+      "explorer": "Appchain Explorer",
+      "ariaExplorer": "Go to appchain explorer"
     },
-    "managedBy": ""
+    "managedBy": "",
+    "swap": "Swap",
+    "bridgeArbitrum": "Arbitrum Bridge"
   },
   "wallet": {
     "modalButton": {
@@ -107,11 +108,11 @@
     },
     "watchTokenButton": {
       "importText": "Import Token",
-      "ariaImport": "Import {tokenSymbol} information to your wallet watch list",
+      "ariaImport": "Import {tokenSymbol} to your wallet",
       "changeNetwork": "Change Network",
       "ariaChangeNetwork": "Switch to a supported network",
       "pending": "Pending",
-      "ariaPending": "Adding {tokenSymbol} to your wallet watch list",
+      "ariaPending": "Importing {tokenSymbol} to your wallet",
       "failError": "Your wallet does not support importing tokens"
     },
     "walletInteractionButton": {
@@ -128,15 +129,15 @@
   },
   "notFound": {
     "title": "Page Not Found",
-    "description": "Sorry! We couldn't find the page you were looking for.",
+    "description": "Sorry! The page you are looking for could not be found.",
     "homeButton": "Return Home"
   },
   "home": {
     "title": "Stake <text-semibold>{tokenSymbol}</text-semibold>",
     "titleDescription": "Secure the Network",
     "buttons": {
-      "primary": "Participate in Incentivised Testnet",
-      "secondary": "Join Bug Bounty"
+      "primary": "Stake Now",
+      "secondary": "How to run a Session Node"
     },
     "heroImageAlt": "Glass cube with green highlights"
   },
@@ -196,10 +197,10 @@
       "error": {
         "invalidAddress": "Wallet address is not valid. It must be a valid {ethTokenSymbol} address: {example}",
         "insufficientEth": "It looks like you don't have enough test {gasTokenSymbol} on {testNetworkChain}, go to <recommended-gas-faucet-link></recommended-gas-faucet-link> to get some. You have {gasAmount} test {gasTokenSymbol}",
-        "insufficientEthTextOnly": "It looks like you don't have enough test {gasTokenSymbol} on {testNetworkChain}. You have {gasAmount} test {gasTokenSymbol}",
+        "insufficientEthTextOnly": "It looks like you don't have enough test {gasTokenSymbol} on {testNetworkChain}. You have {gasAmount} test {gasTokenSymbol}.",
         "incorrectChain": "Faucet only works on {testnetName}, switch to {testNetworkChain} network to use the faucet.",
-        "faucetOutOfTokens": "Faucet is out of {tokenSymbol}, Please <contact-support-link></contact-support-link> for assistance.",
-        "faucetOutOfTokensTextOnly": "Faucet is out of {tokenSymbol}, Please contact support for assistance.",
+        "faucetOutOfTokens": "Faucet is out of {tokenSymbol}. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
+        "faucetOutOfTokensTextOnly": "Faucet is out of {tokenSymbol}. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
         "invalidService": "The {service} account you connected was not part of the community snapshot on {snapshotDate} and is not eligible for testnet access.",
         "invalidOxenAddress": "This wallet address was not registered for the {oxenProgram} on {oxenRegistrationDate} and is not eligible for testnet access.",
         "alreadyUsedService": "The connected {service} account has already been used to claim testnet {tokenSymbol} for another wallet address.",
@@ -225,8 +226,8 @@
     "testnet": "You are currently on {testnetName}."
   },
   "banner": {
-    "registrationPaused": "Stagenet node registration is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable registrations soon. For updates, visit the <link>Session Token discord</link>.",
-    "claimRewardsDisabled": "Stagenet rewards claim is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable rewards claiming soon. For updates, visit the <link>Session Token discord</link>.",
+    "registrationPaused": "Stagenet node registration is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable registrations soon. For updates, visit the <discord-link>Session Token Discord</discord-link>.",
+    "claimRewardsDisabled": "Stagenet rewards claim is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable rewards claiming soon. For updates, visit the <link>Session Token Discord</link>.",
     "newTokenContract": "The Session Token contract has been updated. <remove-token-link>Remove the old token</remove-token-link> and <watch-token>add the new token contract</watch-token> to your wallet watch list to continue using the Staking Portal. If you have any questions, visit the <link>Session Token Discord</link>."
   },
   "modules": {
@@ -251,9 +252,9 @@
       "learnMoreButtonText": "Learn More",
       "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
       "showHiddenPendingNodesText": "Show Pending Nodes",
-      "error": "An error occurred while fetching available nodes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "error": "An error occurred while fetching available nodes. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
       "errorButton": "Retry",
-      "stakingDisabled": "Multicontributor node staking is temporarily paused. Apologies for any inconvenience, we expect to be able to re-enable multicontributor staking soon. For updates, visit the <link>Session Token discord</link>."
+      "stakingDisabled": "Multicontributor node staking is temporarily disabled. Apologies for any inconvenience. For updates, visit the <discord-link>Session Token Discord</discord-link>."
     },
     "nodeRegistrations": {
       "title": "Your Prepared Registrations",
@@ -264,7 +265,7 @@
       "noNodesP2": "Learn how to prepare registration for your Session Node <link>here</link>.",
       "learnMoreButtonText": "Learn More",
       "learnMoreButtonAria": "Navigate to the Session Node documentation page.",
-      "error": "An error occurred while fetching your prepared registrations. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "error": "An error occurred while fetching your prepared registrations. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
       "errorButton": "Retry"
     },
     "stakedNodes": {
@@ -276,7 +277,7 @@
       "noNodesP2": "Click the <link>Stake Now</link> button to stake to an available node or register a new Session node.",
       "stakeNowButtonText": "Stake Now",
       "stakeNowButtonAria": "Navigate to the staking page to stake to an available node.",
-      "error": "An error occurred while fetching your stakes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "error": "An error occurred while fetching your stakes. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
       "errorButton": "Retry"
     },
     "toast": {
@@ -297,28 +298,28 @@
     "totalRewards": {
       "title": "Total Rewards Earned",
       "titleShort": "Total Rewards",
-      "description": "The total amount of lifetime rewards earned from staking. <link>Learn more</link>"
+      "description": "The total amount of lifetime rewards earned from staking."
     },
     "unlockingStakes": {
       "title": "Unlocking Stakes",
       "titleShort": "Unlocking Stakes",
-      "description": "The total amount of unlocking stakes from node that have been exited or deregistered. <link>Learn more</link>"
+      "description": "The total amount of unlocking stakes from nodes that have been exited or deregistered."
     },
     "unclaimedTokens": {
       "title": "Unclaimed Tokens",
-      "description": "The total amount of rewards that have not been claimed yet. <link>Learn more</link>"
+      "description": "The total amount of rewards that have not been claimed yet."
     },
     "unclaimedStakes": {
       "title": "Unclaimed Stakes",
-      "description": "The total amount of stakes that have not been claimed yet. <link>Learn more</link>"
+      "description": "The total amount of stakes that have not been claimed yet."
     },
     "unclaimedRewards": {
       "title": "Unclaimed Rewards",
-      "description": "The total amount of rewards that have not been claimed yet. <link>Learn more</link>"
+      "description": "The total amount of rewards that have not been claimed yet."
     },
     "totalNodes": {
       "title": "Total Nodes",
-      "description": "The total number of nodes you are currently staked to. <link>Learn more</link>"
+      "description": "The total number of nodes you are currently staked to."
     },
     "claim": {
       "title": "Claim",
@@ -336,11 +337,11 @@
         "alert": {
           "gasFetchFailedUpdateBalance": "Failed to fetch fee estimate for updating rewards balance. Fee estimate may be inaccurate.",
           "gasFetchFailedClaimRewards": "Failed to fetch fee estimate for claiming rewards. Fee estimate may be inaccurate.",
-          "highGas": "The price of Gas is higher than usual."
+          "highGas": "The price of gas is higher than usual."
         },
         "successToast": "Claimed {tokenAmount} on Arbitrum"
       },
-      "error": "An error occurred while fetching the signature for your unclaimed rewards. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+      "error": "An error occurred while fetching the signature for your unclaimed rewards. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
       "errorButton": "Retry",
       "stage": {
         "balance": {
@@ -377,8 +378,8 @@
       "description": "Coming Soon"
     },
     "notice": {
-      "title": "Landing Hardfork!",
-      "description": "The date of the Landing Hardfork activation, which coincides with TGE, will be announced following the successful completion of the Anchor Hardfork and further development of launch partnerships. <br></br> Because new nodes cannot be registered to the Oxen Service Node Network after the Anchor Hardfork, TGE and the Landing Hardfork activation are planned to take place within a few weeks of the Anchor Hardfork to ensure the stability of the network. "
+      "title": "Welcome to the Session Network",
+      "description": "The Session Network is a decentralized physical infrastructure network, custom-built to support the Session messenger. By running or staking to a node, you're helping to secure the network and route and store messages. <link>Learn more</link>\n<br></br><br></br>\nOperators and stakers transitioning to the Session Network can swap remaining tokens for {tokenSymbol} <bridge-link>here</bridge-link>"
     },
     "referral": {
       "title": "Referral Program",
@@ -393,9 +394,9 @@
     "general": {
       "publicKeyShort": "SN Key",
       "publicKeyLong": "Session Node Public Key",
-      "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}",
+      "publicKeyDescription": "This node's unique public identifier on the {sessionNetwork}.",
       "blsKey": "BLS Key",
-      "blsKeyDescription": "This node’s public cryptographic key for interacting with Session smart contracts",
+      "blsKeyDescription": "This node’s public cryptographic key for interacting with Session smart contracts.",
       "operatorAddress": "Operator Address",
       "operatorAddressTooltip": "The wallet address of the node operator.",
       "beneficiaryAddress": "Beneficiary Address",
@@ -407,7 +408,7 @@
     },
     "staking": {
       "stakedBalance": "Staked Balance",
-      "stakedBalanceDescription": "Your total staked {tokenSymbol} in the node.",
+      "stakedBalanceDescription": "The total amount of {tokenSymbol} you have staked to this node.",
       "minimumContribution": "Minimum Contribution",
       "minimumContributionDescription": "Minimum amount of {tokenSymbol} that can be staked to this node.",
       "maximumContribution": "Maximum Contribution",
@@ -420,22 +421,22 @@
   },
   "actionModules": {
     "shared": {
-      "notEnoughTokensAlert": "It looks like you don't have enough {tokenSymbol} to stake to this node. It looks like your wallet has {walletAmount}, please make sure you have at least {tokenAmount} in your wallet before staking.",
+      "notEnoughTokensAlert": "You don't have enough {tokenSymbol} to stake to this node. Your wallet has {walletAmount}. Please make sure you have at least {tokenAmount} in your wallet before staking.",
       "stakeAmount": "Stake Amount",
-      "stakeAmountDescription": "Amount of {tokenSymbol} you are staking to this node",
+      "stakeAmountDescription": "Amount of {tokenSymbol} you are staking to this node.",
       "totalStaked": "Total Staked",
-      "totalStakedDescription": "The amount of {tokenSymbol} staked to this node, including your stake",
+      "totalStakedDescription": "The amount of {tokenSymbol} staked to this node, including your stake.",
       "yourStake": "Your Stake",
-      "yourStakeDescription": "The amount of {tokenSymbol} you have staked to this node",
+      "yourStakeDescription": "The amount of {tokenSymbol} you have staked to this node.",
       "operatorAddress": "Operator Address",
       "operatorAddressTooltip": "The address of the node operator.",
       "operatorAddressDescription": "The wallet address of the node operator",
       "autoActivate": "Automatic Activation",
-      "autoActivateDescription": "If enabled, this node will automatically join the network once fully staked",
+      "autoActivateDescription": "If enabled, this node will automatically join the network once fully staked.",
       "rewardsAddress": "Rewards Address",
-      "rewardsAddressDescription": "The wallet address that you will claim rewards to",
+      "rewardsAddressDescription": "The wallet address that you will claim rewards to.",
       "operatorFee": "Operator Fee",
-      "operatorFeeDescription": "Percentage of node rewards taken as a fee by the operator, with remaining rewards distributed to contributors, proportional to stake amount",
+      "operatorFeeDescription": "Percentage of node rewards taken as a fee by the operator, with remaining rewards distributed to contributors, proportional to stake amount.",
       "reserveSlots": "Reserved Stakes",
       "reserveSlotsDescription": "You can reserve stakes for specific contributors to your node.",
       "buttonEditField": {
@@ -471,18 +472,18 @@
     },
     "rewardsAddress": {
       "validation": {
-        "invalidAddress": "Invalid rewards address, please re-enter the value",
-        "bannedSessionContract": "Invalid rewards address, this Session smart contract can't receive rewards",
-        "bannedVestingContract": "Invalid rewards address, vesting contracts can't receive rewards"
+        "invalidAddress": "Invalid rewards address. Please re-enter the address.",
+        "bannedSessionContract": "Invalid rewards address. This Session smart contract can't receive rewards.",
+        "bannedVestingContract": "Invalid rewards address. Vesting contracts can't receive rewards."
       }
     },
     "staking": {
       "titleNewStake": "Stake to a Node",
       "titleManageStake": "Manage Stake",
       "rewardsAddress": "Add Separate Rewards Address (Optional)",
-      "rewardsAddressDescription": "Rewards will be claimable to the wallet you are registering with, or you can specify a different wallet address",
+      "rewardsAddressDescription": "Rewards will be claimable to the wallet you are registering with, or you can specify a different wallet address.",
       "rewardsAddressVesting": "Rewards Address",
-      "rewardsAddressVestingDescription": "Rewards will be claimable to the wallet you you specify here",
+      "rewardsAddressVestingDescription": "Rewards will be claimable to the wallet you you specify here.",
       "manage": {
         "stakeAmountAdditional": "Additional Stake Amount",
         "stakeAmountAdditionalDescription": "Additional stake amount to add to the existing stake.",
@@ -496,6 +497,10 @@
           "success": "Withdrawing {tokenSymbol} from Multicontributor Contract",
           "errorTemplate": "Failed to withdraw {tokenSymbol} from Multicontributor Contract, {reason}",
           "errors": {}
+        },
+        "buttonRemoveStakeAndRegistration": {
+          "text": "Remove Stake and Registration",
+          "aria": "Remove stake from the node and delete the registration"
         }
       },
       "buttonStake": {
@@ -504,12 +509,12 @@
       },
       "error": {
         "specialTitle": "Something went wrong",
-        "specialDescription": "Something went wrong when trying to stake to the node, <please-contract-support-link></please-contract-support-link>"
+        "specialDescription": "Something went wrong when trying to stake to the node. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
       },
       "disabledReason": {
-        "alreadyFinalized": "The node details are already finalized and can't be edited.",
-        "alreadyContributedOperatorFee": "The operator fee can't be edited once another address has contributed to the node.",
-        "alreadyContributedReservedSlots": "The reserved stakes can't be edited once another address has contributed to the node.",
+        "alreadyFinalized": "The node details are already finalized and can't be changed.",
+        "alreadyContributedOperatorFee": "The operator fee can't be changed once another address has contributed to the node.",
+        "alreadyContributedReservedSlots": "The reserved stakes can't be changed once another address has contributed to the node.",
         "pastTimeLimitStakeAmountRemove": "You can't remove your stake from a node after {timeLimitAmount} from your previous stake to that node."
       }
     },
@@ -550,20 +555,18 @@
           "copyToClipboardButtonAria": "Copy error message to clipboard"
         },
         "nodeNotFound": "This node registration could not be found. Please check to make sure you're connected to the right wallet.",
-        "registrationDisabled": "Registration is currently disabled. Please contact support for assistance."
+        "registrationDisabled": "Registration is currently disabled. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
       },
       "loading": {
         "title": "Checking for existing registrations",
-        "error": "Something went wrong",
-        "foundRunning": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network.",
-        "foundOpen": "A multicontributor node was found with the same key, you need to delete the node before creating a new one."
+        "error": "Something went wrong"
       },
       "start": {
         "title": "Do you want to stake by yourself or with others?",
         "description": "To stake by yourself, you need to stake {minStakeSolo}.",
         "description2": "To operate a node and stake with others, you need to stake at least {minStakeMulti}.",
-        "registrationDisabledSolo": "Solo registration is currently disabled. Please contact support for assistance.",
-        "registrationDisabledMulti": "Multicontributor registration is currently disabled. Please contact support for assistance.",
+        "registrationDisabledSolo": "Single contributor node registration is currently disabled. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
+        "registrationDisabledMulti": "Multicontributor node registration is currently disabled. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
         "buttonSolo": {
           "text": "Stake by myself",
           "aria": "Continue the registration process by staking the full {minStakeSolo} yourself."
@@ -576,11 +579,11 @@
           "title": "Choose your setup mode:",
           "express": {
             "text": "Express",
-            "tooltip": "Skip detailed setup and use default settings (you can edit specific settings later)"
+            "tooltip": "Skip detailed setup and use default settings (you can edit specific settings later)."
           },
           "guided": {
             "text": "Guided (recommended for new users)",
-            "tooltip": "Configure your node settings step-by-step"
+            "tooltip": "Configure your node settings step-by-step."
           }
         }
       },
@@ -589,7 +592,7 @@
         "description": "As the node operator, you must stake at least {minStakeMulti}.",
         "min": "Min: {min}",
         "max": "Max: {max}",
-        "errorUnderMin": "You cannot stake under the minimum of {min}"
+        "errorUnderMin": "You cannot stake under the minimum of {min}."
       },
       "operatorFee": {
         "title": "Set your operator fee",
@@ -597,14 +600,14 @@
       },
       "rewardsAddress": {
         "title": "Where do you want your rewards to go?",
-        "description": "Your rewards address can be the wallet you are registering with, or a different address",
+        "description": "Your rewards address can be the wallet you are registering with, or a different address.",
         "buttonSame": {
           "text": "Same as the wallet",
-          "aria": "Use the same wallet address as the one you are registering with"
+          "aria": "Use the same wallet address as the one you are registering with."
         },
         "buttonDifferent": {
           "text": "Different address",
-          "aria": "Use a different wallet address"
+          "aria": "Use a different wallet address."
         }
       },
       "rewardsAddressInputSolo": {
@@ -614,7 +617,7 @@
       },
       "rewardsAddressInputMulti": {
         "title": "Which address do you want your rewards to go to?",
-        "description": "Claimed rewards will be sent to this address, as well as {tokenSymbol} earned from your operator fee",
+        "description": "Claimed rewards will be sent to this address, as well as {tokenSymbol} earned from your operator fee.",
         "errorInvalidAddress": "Invalid Ethereum Address"
       },
       "reserveSlots": {
@@ -627,16 +630,16 @@
         "buttonReserve": {
           "text": "Reserve",
           "aria": "Reserve stakes for specific contributors",
-          "disabledTooltip": "Reserved slots is currently disabled. Please contact support for assistance."
+          "disabledTooltip": "Reserving stakes is currently disabled. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
         }
       },
       "reserveSlotsInput": {
         "title": "Which addresses do you want to reserve stakes for?",
         "description": "Reserve stakes for 1-9 other contributors.",
         "address": "Address",
-        "addressDescription": "The wallet address of the contributor you want to reserve a stake for",
+        "addressDescription": "The wallet address of the contributor you want to reserve a stake for.",
         "stakeAmount": "Stake Amount",
-        "stakeAmountDescription": "The amount you want to reserve for this contributor",
+        "stakeAmountDescription": "The amount you want to reserve for this contributor.",
         "percentage": "Percentage",
         "remainingStake": "Remaining Stake",
         "remainingStakeNone": "This node is fully reserved",
@@ -691,9 +694,9 @@
         "addBlsPubKeyCost": "Add BLS Public Key Cost:",
         "approve": {
           "idle": "Requesting permission to stake {tokenSymbol}",
-          "pending": "Requesting permission to stake {fullStateAmount}. Waiting for user approval",
-          "success": "Permission to stake {tokenSymbol} granted",
-          "errorTemplate": "Wallet failed to grant permission to stake {tokenSymbol}, {reason}. Please try again",
+          "pending": "Requesting permission to stake {fullStateAmount}. Waiting for user approval.",
+          "success": "Permission to stake {tokenSymbol} granted.",
+          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}. Please try again.",
           "errors": {}
         },
         "arbitrum": {
@@ -706,8 +709,8 @@
             "ContributionTotalMismatch": "stake does not match required amount",
             "BLSPubkeyAlreadyExists": "node already registered with the same SN Key",
             "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
-            "MaxPubkeyAggregationsExceeded": "block registration limit exceeded, please try again later",
-            "SafeERC20FailedOperation": "failed to stake {tokenSymbol}, please try again later"
+            "MaxPubkeyAggregationsExceeded": "block registration limit exceeded. Please try again later.",
+            "SafeERC20FailedOperation": "failed to stake {tokenSymbol}. Please try again later."
           }
         },
         "network": {
@@ -721,7 +724,7 @@
       },
       "errorSolo": {
         "specialTitle": "Something went wrong",
-        "specialDescription": "Something went wrong when trying to register the solo node, <please-contract-support-link></please-contract-support-link>"
+        "specialDescription": "Something went wrong when trying to register this single contributor node. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
       },
       "successSolo": {
         "specialTitle": "Single Contributor Node Created!",
@@ -739,34 +742,34 @@
           "idle": "Creating Multicontributor Contract",
           "pending": "Creating Multicontributor Contract",
           "success": "Created Multicontributor Contract",
-          "errorTemplate": "Failed to create Multicontributor Contract, {reason}",
+          "errorTemplate": "Failed to create Multicontributor contract, {reason}",
           "errors": {}
         },
         "address": {
-          "idle": "Finalising Multicontributor Contract address",
-          "pending": "Finalising Multicontributor Contract address",
-          "success": " Finalised Multicontributor Contract address. <link>View on Arbiscan</link>",
-          "errorTemplate": "Failed to finalise Multicontributor Contract address, {reason}",
+          "idle": "Finalizing Multicontributor contract address",
+          "pending": "Finalizing Multicontributor contract address",
+          "success": "Finalised Multicontributor contract address. <link>View on Arbiscan</link>.",
+          "errorTemplate": "Failed to finalise Multicontributor contract address, {reason}",
           "errors": {}
         },
         "approve": {
           "idle": "Requesting permission to stake {tokenSymbol}",
-          "pending": "Requesting permission to stake {tokenSymbol} waiting for user approval",
+          "pending": "Requesting permission to stake {tokenSymbol}, waiting for user approval",
           "success": "Permission to stake {tokenSymbol} granted",
-          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}, please try again",
+          "errorTemplate": "Wallet permission to stake {tokenSymbol} failed, {reason}. Please try again.",
           "errors": {}
         },
         "contribute": {
-          "idle": "Contributing {tokenSymbol} to Multicontributor Contract",
-          "pending": "Contributing {tokenSymbol} to Multicontributor Contract",
-          "success": "Contributed {tokenSymbol} to Multicontributor Contract",
-          "errorTemplate": "Failed to contribute {tokenSymbol} to Multicontributor Contract, {reason}",
+          "idle": "Contributing {tokenSymbol} to Multicontributor contract",
+          "pending": "Contributing {tokenSymbol} to Multicontributor contract",
+          "success": "Contributed {tokenSymbol} to Multicontributor contract",
+          "errorTemplate": "Failed to contribute {tokenSymbol} to Multicontributor contract, {reason}",
           "errors": {}
         }
       },
       "errorMulti": {
         "specialTitle": "Something went wrong",
-        "specialDescription": "Something went wrong when trying to create the multicontributor node, <please-contract-support-link></please-contract-support-link>"
+        "specialDescription": "Something went wrong when trying to create the multicontributor node. Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
       },
       "successMulti": {
         "specialTitle": "Multicontributor node created!",
@@ -774,7 +777,7 @@
       },
       "alreadyRegisteredMulti": {
         "specialTitle": "Already Registered!",
-        "specialDescription": "A multicontributor node was found with the same key, you can continue using this registration or if you want to create a new registration you will need to reset your node's keys."
+        "specialDescription": "A multicontributor node was found with the same key. You can continue using this registration. If you want to create a new registration, please reset your node's keys."
       },
       "alreadyRegisteredRunning": {
         "specialTitle": "Already Registered!",
@@ -784,7 +787,7 @@
     "node": {
       "title": "Stake to a Node",
       "contributors": "Contributors",
-      "contributorsTooltip": "The number of contributors to this node ",
+      "contributorsTooltip": "The number of contributors to this node",
       "feeEstimate": "Fee Estimate",
       "feeEstimateTooltip": "An estimate of the amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link> <br></br> {formula}",
       "button": {
@@ -807,11 +810,11 @@
         "text": "View",
         "ariaLabel": "View the node details in the side panel"
       },
-      "youOperatorNotStaked": "You are the operator of this multicontributor node, but haven't staked yet. It won’t be listed as an available node until you stake",
+      "youOperatorNotStaked": "You are the operator of this multicontributor node, but haven't staked yet. It won’t be listed as an available node until you stake.",
       "youReservedNotContributed": "{tokenAmount} has been reserved for you to stake to this node",
-      "stakedTo": "Staked",
+      "stakedTo": "Your Stake",
       "stakedToTooltip": "You have staked {tokenAmount}",
-      "errorStakedButAlreadyRunning": "This registration can't finalize because it's for an already running node. You may want to remove your stake."
+      "errorStakedButAlreadyRunning": "This registration can't be finalized as this node is already running as a single contributor node. You may want to withdraw your stake."
     },
     "pending": {
       "registerButton": {
@@ -832,17 +835,17 @@
       "lastReward": "Last Reward: {relativeTime}",
       "lastRewardDescription": "The last time the node received rewards. Block {blockNumber} ({date})",
       "exitUnlockTimerProcessing": "Exit request is being processed",
-      "exitUnlockTimerNotification": "Exit available {relativeTime}",
-      "exitUnlockTimerDescription": "Time left until the node is available for exit. Return {relativeTime} ({date}) to exit the node.",
-      "exitTimerNotification": "Exit available. Exit {relativeTime} to avoid penalty.",
+      "exitUnlockTimerNotification": "Exit available <text-bold>{relativeTime}</text-bold>",
+      "exitUnlockTimerDescription": "Time left until the node is available for exit. Return <text-bold>{relativeTime}</text-bold> ({date}) to exit the node.",
+      "exitTimerNotification": "Exit available. Exit <text-bold>{relativeTime}</text-bold> to avoid penalty.",
       "exitTimerNotificationNow": "Exit now to avoid penalty.",
-      "exitTimerDescription": "Node is ready for exit. If you don't exit within {relativeTime}, you may be subject to a small penalty. <link>Learn more</link>",
+      "exitTimerDescription": "Node is ready for exit. If you don't exit <text-bold>{relativeTime}</text-bold>, you may be subject to a small penalty. <link>Learn more</link>",
       "exitTimerDescriptionNow": "Node is ready for exit. If you don't exit now, you may be subject to a small penalty. <link>Learn more</link>",
-      "deregistrationTimerNotification": "Deregistration {relativeTime}",
-      "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered {relativeTime} ({date})",
+      "deregistrationTimerNotification": "Deregistration <text-bold>{relativeTime}</text-bold>",
+      "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered <text-bold>{relativeTime}</text-bold> ({date}).",
       "deregisteredProcessing": "Deregistration is being processed",
-      "deregisteredTimerNotification": "Stake will unlock {relativeTime}",
-      "deregisteredTimerDescription": "Time left until the stake is unlocked and the node is available for liquidation. ({date})",
+      "deregisteredTimerNotification": "Stake will unlock <text-bold>{relativeTime}</text-bold>",
+      "deregisteredTimerDescription": "Time left until the stake is unlocked ({date}).",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
       "joiningNetworkNotification": "Node joining in ~{relativeTime}",
@@ -850,34 +853,34 @@
       "finalize": {
         "buttonText": "Activate",
         "buttonAria": "Activate the node on the network",
-        "successToast": "Node activation success, node will be registered in a few minutes"
+        "successToast": "Node activated successfully! Node will be registered in a few minutes."
       },
       "exit": {
         "buttonText": "Exit",
         "buttonAria": "Exit the node from the network",
-        "disabledButtonTooltipContent": "Return {relativeTime} ({date}) to exit the node.",
-        "disabledInfo": "Stagenet node exits are temporarily paused. Apologies for any inconvenience, we expect to be re-enable exits soon. For updates, visit the <link>Session Token discord</link>.",
+        "disabledButtonTooltipContent": "Return <text-bold>{relativeTime}</text-bold> ({date}) to exit the node.",
+        "disabledInfo": "Node exits are temporarily disabled. Apologies for any inconvenience. For updates, visit the <discord-link>Session Token Discord</discord-link>.",
         "dialog": {
           "title": "Exit Node",
           "requestFee": "Exit Fee",
           "requestFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link>",
           "amountStaked": "Amount Staked",
-          "amountStakedTooltip": "Amount of {tokenSymbol} staked by you in this node.",
+          "amountStakedTooltip": "Amount of {tokenSymbol} you are staking to this node.",
           "buttons": {
             "submit": "Exit Node",
             "submitAria": "Exit the node from the network"
           },
           "alert": {
             "gasFetchFailed": "Failed to fetch fee estimate exiting the node. Fee estimate may be inaccurate.",
-            "highGas": "The price of Gas is higher than usual."
+            "highGas": "The price of gas is higher than usual."
           }
         },
-        "error": "An error occurred while fetching the signature to exit the node. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+        "error": "An error occurred while fetching the signature to exit the node. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
         "errorButton": "Retry",
         "stage": {
           "arbitrum": {
-            "idle": "Session node exit on Arbitrum submitting",
-            "pending": "Session node exit on Arbitrum submitting",
+            "idle": "Submitting node exit on Arbitrum",
+            "pending": "Submitting node exit on Arbitrum",
             "success": "Session node exit on Arbitrum submitted",
             "errorTemplate": "Failed to submit node exit on Arbitrum, {reason}",
             "errors": {
@@ -890,7 +893,7 @@
             "success": "Session node network exit confirmed",
             "errorTemplate": "Failed to confirm the node exit with the {sessionNetwork}, {reason}",
             "errors": {
-              "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
+              "UnableToReachNetwork": "unable to reach the {sessionNetwork}."
             }
           }
         }
@@ -898,7 +901,7 @@
       "requestExit": {
         "buttonText": "Request Exit",
         "buttonAria": "Request for the node to be exited",
-        "disabledInfo": "Stagenet node exit requests are temporarily paused. Apologies for any inconvenience, we expect to be re-enable exit requests soon. For updates, visit the <link>Session Token discord</link>.",
+        "disabledInfo": "Node exit requests are temporarily paused. Apologies for any inconvenience. For updates, visit the <discord-link>Session Token Discord</discord-link>.",
         "dialog": {
           "title": "Request Exit",
           "submitAria": "Request exit for the node {pubKey}",
@@ -923,25 +926,25 @@
             },
             "alert": {
               "gasFetchFailed": "Failed to fetch fee estimate for requesting node exit. Fee estimate may be inaccurate.",
-              "highGas": "The price of Gas is higher than usual."
+              "highGas": "The price of gas is higher than usual."
             }
           },
           "stage": {
             "arbitrum": {
-              "idle": "Session node exit request on Arbitrum submitting",
-              "pending": "Session node exit request on Arbitrum submitting",
-              "success": "Session node exit request on Arbitrum submitted",
+              "idle": "Submitting node exit request on Arbitrum",
+              "pending": "Submitting node exit request on Arbitrum",
+              "success": "Submitted node exit request on Arbitrum",
               "errorTemplate": "Failed to submit node exit request on Arbitrum, {reason}",
               "errors": {
                 "CallerNotContributor": "caller not a node contributor",
-                "EarlierLeaveRequestMade": "leave request already made for this node",
-                "SmallContributorLeaveTooEarly": "small contributors can only initiate exit requests after the node has been running for {smallContributorLeaveRequestDelay} days"
+                "EarlierLeaveRequestMade": "exit request was already made for this node",
+                "SmallContributorLeaveTooEarly": "small contributors can only initiate exit requests after the node has been running for 30 days."
               }
             },
             "network": {
-              "idle": "Session node exit request confirming",
-              "pending": "Session node exit request confirming",
-              "success": "Session node exit request confirmed",
+              "idle": "Confirming node exit request",
+              "pending": "Confirming node exit request",
+              "success": "Confirmed node exit request",
               "errorTemplate": "Failed to confirm the submission of the node exit request to the {sessionNetwork}, {reason}",
               "errors": {
                 "UnableToReachNetwork": "unable to reach the {sessionNetwork}"
@@ -956,16 +959,16 @@
     "network": {
       "loading": "Block loading...",
       "unreachable": "Unreachable",
-      "infoTooltip": "Block {blockNumber} was {blockRelativeTime}",
-      "warningTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
-      "errorTooltip": "Block {blockNumber} was {blockRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "infoTooltip": "Block {blockNumber} was <text-bold>{blockRelativeTime}</text-bold>",
+      "warningTooltip": "Block {blockNumber} was <text-bold>{blockRelativeTime}</text-bold>. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "Block {blockNumber} was <text-bold>{blockRelativeTime}</text-bold>. <clickable-text>Click to refresh</clickable-text>",
       "unreachableTooltip": "Unable to reach the network. <clickable-text>Click to refresh</clickable-text>"
     },
     "l2": {
       "loading": "L2 Height loading...",
-      "infoTooltip": "L2 Height {height} was {heightRelativeTime}",
-      "warningTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
-      "errorTooltip": "L2 Height {height} was {heightRelativeTime}. <clickable-text>Click to refresh</clickable-text>",
+      "infoTooltip": "L2 Height {height} was <text-bold>{heightRelativeTime}</text-bold>",
+      "warningTooltip": "L2 Height {height} was <text-bold>{heightRelativeTime}</text-bold>. <clickable-text>Click to refresh</clickable-text>",
+      "errorTooltip": "L2 Height {height} was <text-bold>{heightRelativeTime}</text-bold>. <clickable-text>Click to refresh</clickable-text>",
       "unreachableTooltip": "Unable to reach Arbitrum. <clickable-text>Click to refresh</clickable-text>"
     }
   },
@@ -979,7 +982,7 @@
     },
     "startDialog": {
       "title": "Vesting Contract",
-      "description": "We noticed your wallet is connected to one or more vesting contracts. Select one to use otherwise skip this modal",
+      "description": "We noticed your wallet is connected to one or more vesting contracts. Select one to use, or skip.",
       "descriptionSheet": "Select a vesting contract to use",
       "continueButton": {
         "label": "Continue",
@@ -993,9 +996,9 @@
     "infoDialog": {
       "title": "Vesting Contract Info",
       "address": "Contract Address",
-      "addressDescription": "Arbitrum Contract address for the vesting contract",
+      "addressDescription": "The Arbitrum contract address for the vesting contract.",
       "initialBalance": "Initial Balance",
-      "initialBalanceDescription": "The initial amount of time-locked tokens in the contract",
+      "initialBalanceDescription": "The initial amount of time-locked tokens in the contract.",
       "beneficiary": "Owner",
       "beneficiaryDescription": "The wallet address that is the owner of the vesting contract",
       "editBeneficiaryDisabledDescription": "This vesting contract does not allow changing the owner.",
@@ -1035,10 +1038,10 @@
         "idle": "Transferring ownership of the vesting contract to {newBeneficiary}",
         "pending": "Transferring ownership of the vesting contract to {newBeneficiary}",
         "success": "Transferred ownership of the vesting contract to {newBeneficiary}",
-        "errorTemplate": "Ownership transfer failed, {reason}, please try again.",
+        "errorTemplate": "Ownership transfer failed, {reason}. Please try again.",
         "errors": {}
       },
-      "successToast": "Ownership of the vesting contract transfered! Exiting vesting mode!"
+      "successToast": "Ownership of the vesting contract transferred successfully! Now exiting vesting mode."
     },
     "headerSwitch": {
       "label": "Vesting Mode",
@@ -1047,23 +1050,23 @@
     "modules": {
       "stakedBalance": {
         "title": "Staked Balance",
-        "description": "The portion of your time-locked tokens that are currently staked"
+        "description": "The portion of your time-locked tokens that are currently staked."
       },
       "unstakedBalance": {
         "title": "Unstaked Balance",
-        "description": "The portion of your time-locked tokens that are currently unstaked"
+        "description": "The portion of your time-locked tokens that are currently unstaked."
       },
       "withdrawableBalance": {
         "title": "Withdrawable Balance",
-        "description": "The portion of your time-locked tokens that are currently unstaked and withdrawable"
+        "description": "The portion of your time-locked tokens that are currently unstaked and withdrawable."
       },
       "endTime": {
         "title": "Time to Unlock",
-        "description": "The remaining time until your time-locked tokens fully vest and become withdrawable. ({date})"
+        "description": "The remaining time until your time-locked tokens fully vest and become withdrawable ({date})."
       },
       "unclaimedStakes": {
         "title": "Unclaimed Stakes",
-        "description": "Tokens that were previously staked from your vesting contract, have been unstaked, and need to be claimed to return them to your vesting balance"
+        "description": "Tokens that were previously staked from your vesting contract, have been unstaked, and need to be claimed to return them to your vesting balance."
       },
       "returnStakes": {
         "title": "Return Stakes",
@@ -1082,11 +1085,11 @@
           "alert": {
             "gasFetchFailedUpdateBalance": "Failed to fetch fee estimate for updating returned stakes amount. Fee estimate may be inaccurate.",
             "gasFetchFailedClaimRewards": "Failed to fetch fee estimate for returning stakes. Fee estimate may be inaccurate.",
-            "highGas": "The price of Gas is higher than usual."
+            "highGas": "The price of gas is higher than usual."
           },
           "successToast": "Returned {tokenAmount} to your vesting contract on Arbitrum"
         },
-        "error": "An error occurred while fetching the signature for your unreturned stakes. Please try again. If the problem persists, please <contact-support-link></contact-support-link>",
+        "error": "An error occurred while fetching the signature for your unreturned stakes. Please try again. If the problem persists, submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance.",
         "errorButton": "Retry",
         "stage": {
           "balance": {
@@ -1115,7 +1118,7 @@
         "description": "Withdraw Principal",
         "claimablePrincipal": {
           "title": "Withdrawable Principal",
-          "description": "Current unlocked and unstaked principal available to withdraw"
+          "description": "Current unlocked and unstaked principal available to withdraw."
         },
         "warningSomeTokensStaked": "Some of your time-locked tokens are currently staked and unclaimed. You will only be able to claim your unstaked principal balance. Your staked principal balance will be withdrawable once those tokens are unstaked and returned to the vesting contract.",
         "noPrincipalClaimableButtonTooltip": "All of this vesting contract's principal is currenty staked or locked by the network. These tokens need to be exited from their stakes, unlocked, and returned to the vesting contract.",
@@ -1147,5 +1150,25 @@
         "stakeNowButtonAria": "Navigate to the staking page to stake to an available node."
       }
     }
+  },
+  "infoNotice": {
+    "register": "Before you proceed, make sure you're familiar with best practices for node operation. If your node fails to meet requirements, it may be voted off the network and penalties may apply. {linkOut}",
+    "dontShowAgain": "Don’t show this message again",
+    "stake": "Before you proceed, make sure you're familiar with best practices for staking. If the node you’re contributing to fails to meet requirements, it may be voted off the network and penalties may apply. {linkOut}",
+    "confirm": "Okay",
+    "withdrawOperator": {
+      "text": "If you remove your stake and registration, contributors will not be able to stake to your node and your registration will be deleted. Existing stakes will be returned to contributors.",
+      "confirm": "Remove Stake and Registration",
+      "cancel": "Cancel"
+    },
+    "withdrawContributorTooSoon": "You can’t remove your stake from this node yet. Please return <text-bold>{relativeTime}</text-bold>. If this node is registered within <text-bold>{relativeTimeNoSuffix}</text-bold>, you will need to wait {unlockWaitTime} to remove your stake. {linkOut}",
+    "confirmStake": "You won’t be able to remove your stake from this node for 24 hours, or until it is registered. Once the node is registered, you can remove your stake after {unlockWaitTime}. {linkOut}",
+    "stakeSmallWarning": "Contributors staking less than {amount} cannot request to exit a node during the first {smallContributorLeaveRequestDelay} of its operation. {linkOut}",
+    "smallContributorExitTooSoon": "Contributors staking less than {amount} cannot request to exit a node during the first {smallContributorLeaveRequestDelay} of its operation. Please return <text-bold>{relativeTime}</text-bold> to request an exit. {linkOut}",
+    "exitRejectedRecently": "Error: Exit request was rejected by the Network. Please retry <text-bold>{relativeTime}</text-bold>.",
+    "requestExit": "Exiting your stake will cause stakes for ALL contributors and the operator to be exited, not just your own. Once confirmed, this node will be ready to exit the network {relativeRequestTime}.\n<br></br><br></br>\nAfter this {requestTime} waiting period, the operator or contributors have a {exitTime} window to confirm the exit. If the exit is not confirmed within this {exitTime} window, the operator may be subject to a small penalty. <link>Learn more</link>\n<br></br><br></br>\nOnce the node has exited the network, you can reclaim your stake via the Staking Portal.",
+    "cancel": "Cancel",
+    "claimLimitInfo": "To keep the Session Network secure, there is a network-wide limit on how much {tokenSymbol} can be claimed within a 12 hour period. The limit has been reached. {linkOut}",
+    "claimLimitCountdown": "You can claim your {tokenSymbol} <text-bold>{relativeTime}</text-bold>."
   }
 }

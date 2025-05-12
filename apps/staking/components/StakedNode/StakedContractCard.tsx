@@ -74,6 +74,7 @@ const ContractSummary = ({
     <NodeContributorList
       contributors={contract.contributors}
       data-testid={StakedNodeDataTestId.Contributor_List}
+      showEmptySlots
     />
   );
 

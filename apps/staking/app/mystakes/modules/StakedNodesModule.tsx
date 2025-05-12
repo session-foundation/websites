@@ -1,9 +1,7 @@
 'use client';
-
-import Loading from '@/app/loading';
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { NodeListModuleContent } from '@/components/NodesListModule';
+import { NodeListModuleContent, NodesListSkeleton } from '@/components/NodesListModule';
 import {
   StakedContractCard,
   getStakedContractCardContractFromConfirmation,
@@ -76,7 +74,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
           buttonDataTestId={ButtonDataTestId.Staked_Node_Error_Retry}
         />
       ) : isLoading ? (
-        <Loading />
+        <NodesListSkeleton />
       ) : hasStakes && blockHeight && networkTime ? (
         <>
           {notFoundJoiningNodes.map((node) => {

@@ -15,6 +15,7 @@ import { StakeAmountTab } from '@/app/register/[nodeId]/multi/StakeAmountTab';
 import { SubmitMultiTab } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import { SuccessMultiTab } from '@/app/register/[nodeId]/multi/SuccessMultiTab';
 import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
+import { RegistrationNotice } from '@/app/register/[nodeId]/shared/RegistrationNotice';
 import { type RegistrationStartFormSchema, StartTab } from '@/app/register/[nodeId]/shared/Start';
 import { RewardsAddressInputSoloTab } from '@/app/register/[nodeId]/solo/RewardsAddressInputSoloTab';
 import { SubmitSoloTab } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
@@ -108,6 +109,8 @@ type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
   tabHistory: Array<REG_TAB>;
   isVestingMode: boolean;
   vestingContract: VestingContract | null;
+  acceptedNotice: boolean;
+  setAcceptedNotice: Dispatch<SetStateAction<boolean>>;
 };
 
 const RegistrationContext = createContext<RegistrationContext | undefined>(undefined);
@@ -147,6 +150,10 @@ function RegistrationProvider({
   const dictOperatorFee = useTranslations('actionModules.operatorFee.validation');
   const decimalDelimiter = useDecimalDelimiter();
   const bannedRewardsAddresses = useBannedRewardsAddresses();
+
+  const [acceptedNotice, setAcceptedNotice] = useState<boolean>(
+    !!getItem(PREFERENCE.INFO_NOTICE_DONT_SHOW_REGISTER)
+  );
 
   const formMultiSchema = getRegistrationMultiFormSchema({
     stakeAmount: {
@@ -385,6 +392,8 @@ function RegistrationProvider({
         clearQueryParams,
         isVestingMode,
         vestingContract,
+        acceptedNotice,
+        setAcceptedNotice,
       }}
     >
       {children}
@@ -533,6 +542,7 @@ export function RegistrationWizard() {
     tab,
     tabHistory,
     formMulti,
+    acceptedNotice,
   } = useRegistrationWizard();
 
   const { setIsBalanceVisible } = useWalletButton();
@@ -568,7 +578,7 @@ export function RegistrationWizard() {
     return () => setIsBalanceVisible(false);
   }, [setIsBalanceVisible]);
 
-  return (
+  return acceptedNotice ? (
     <WizardContent
       title={title}
       section={{
@@ -588,6 +598,10 @@ export function RegistrationWizard() {
       }}
     >
       {getTab(tab)}
+    </WizardContent>
+  ) : (
+    <WizardContent title={title}>
+      <RegistrationNotice />
     </WizardContent>
   );
 }
