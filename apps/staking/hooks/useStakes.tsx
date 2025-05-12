@@ -17,10 +17,9 @@ import type { Address } from 'viem';
 /**
  * Hook to get the stakes and related data for the connected wallet.
  * @param overrideAddress - override address, this overrides the connected address
- * @param autoUpdateIntervalOverride - override the auto update interval
  * @returns The stakes and related data for the connected wallet.
  */
-export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?: number) {
+export function useStakes(overrideAddress?: Address) {
   const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
   const { getItem } = usePreferences();
@@ -29,7 +28,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
 
   const { data: arbBlock } = useBlockNumber({
     query: {
-      gcTime: autoUpdateIntervalOverride ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
+      gcTime: BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
     },
   });
 
@@ -42,7 +41,7 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
       {
         enabled,
         refetchInterval: autoRefresh
-          ? (autoUpdateIntervalOverride ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000)
+          ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000
           : undefined,
       }
     );
@@ -94,11 +93,10 @@ export function useStakes(overrideAddress?: Address, autoUpdateIntervalOverride?
     const [contractsErr, contracts] = safeTrySyncWithFallback(() => data?.contracts ?? [], []);
     if (contractsErr) logger.error(contractsErr);
 
-    //Minimum time in seconds that a node can go from "joining" to "exited"
-    const nodeMinLifespan = SESSION_NODE.INITIAL_DOWNTIME_CREDITS_HOURS * 60 * 60 * 1000;
     // Minimum time in blocks that a node can go from "joining" to "exited"
     const nodeMinLifespanArbBlocks =
-      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) - nodeMinLifespan / BLOCK_TIME_MS.ARBITRUM;
+      (arbBlock ? bigIntToNumber(arbBlock, 0) : 0) -
+      SESSION_NODE.INITIAL_DOWNTIME_CREDITS_MS / BLOCK_TIME_MS.ARBITRUM;
 
     return {
       ...parseStakes({

@@ -151,7 +151,7 @@ export function parseContracts({
         logger.warn(`Contract is finalized, but no Finalized event, showing: ${pubkey_bls}`);
       } else if (lastFinalized.block > nodeMinLifespanArbBlocks) {
         logger.debug(
-          `Contract was finalized at block ${lastFinalized.block}, this is less than the lifespan limit (${nodeMinLifespanArbBlocks}), showing: ${pubkey_bls}`
+          `Contract was finalized at block ${lastFinalized.block}, this is within the minimum lifespan (${nodeMinLifespanArbBlocks}), showing: ${pubkey_bls}`
         );
         joiningContracts.push(contract);
         added.add(pubkey_bls);
