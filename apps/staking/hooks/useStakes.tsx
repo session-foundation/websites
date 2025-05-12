@@ -17,9 +17,10 @@ import type { Address } from 'viem';
 /**
  * Hook to get the stakes and related data for the connected wallet.
  * @param overrideAddress - override address, this overrides the connected address
+ * @param overrideRefetchIntervalMs - override refetch interval
  * @returns The stakes and related data for the connected wallet.
  */
-export function useStakes(overrideAddress?: Address) {
+export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?: number) {
   const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
   const { getItem } = usePreferences();
@@ -28,7 +29,7 @@ export function useStakes(overrideAddress?: Address) {
 
   const { data: arbBlock } = useBlockNumber({
     query: {
-      gcTime: BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
+      gcTime: overrideRefetchIntervalMs ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
     },
   });
 
@@ -41,7 +42,7 @@ export function useStakes(overrideAddress?: Address) {
       {
         enabled,
         refetchInterval: autoRefresh
-          ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000
+          ? (overrideRefetchIntervalMs ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000)
           : undefined,
       }
     );
