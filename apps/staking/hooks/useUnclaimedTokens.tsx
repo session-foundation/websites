@@ -34,7 +34,6 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
     getRewardsInfo,
     {
       address: address!,
-      v2: false,
     },
     {
       enabled,

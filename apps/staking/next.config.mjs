@@ -2,11 +2,12 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./lib/locale-server.ts');
 
-const getSENTStakingApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_SENT_STAKING_API_URL;
-  if (!url) {
-    throw new Error('NEXT_PUBLIC_SENT_STAKING_API_URL is not set');
-  }
+const isTestnet = process.env.NEXT_PUBLIC_TESTNET === 'true';
+if (isTestnet) console.log('Building staking portal in TESTNET mode!');
+
+const getBackendApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+  if (!url) throw new Error('NEXT_PUBLIC_BACKEND_API_URL is not set');
 
   if (url.endsWith('/')) {
     url = url.substring(0, url.length - 1);
@@ -48,19 +49,25 @@ const nextConfig = {
   redirects: async () => {
     return [
       {
-        source: '/explorer/:path*',
-        destination: 'https://sepolia.arbiscan.io/:path*',
+        source: '/explorer/arbitrum/:path*',
+        destination: `https://${isTestnet ? 'sepolia.': ''}arbiscan.io/:path*`,
         permanent: false,
       },
       {
         source: '/support',
-        destination: 'https://discord.com/invite/J5BTQdCfXN',
+        destination: 'https://discord.gg/sessiontoken',
         permanent: false,
       },
       {
-        source: '/bridge',
+        source: '/bridge/arbitrum',
         destination:
-          'https://bridge.arbitrum.io/?destinationChain=arbitrum-sepolia&sourceChain=sepolia',
+          `https://bridge.arbitrum.io/?destinationChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}&sourceChain=${isTestnet ? 'sepolia' : 'ethereum'}`,
+        permanent: false,
+      },
+      {
+        source: '/bridge/ethereum',
+        destination:
+          `https://bridge.arbitrum.io/?destinationChain=${isTestnet ? 'sepolia':'ethereum'}&sourceChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}`,
         permanent: false,
       },
     ];
@@ -69,7 +76,7 @@ const nextConfig = {
     return [
       {
         source: '/api/ssb/:path*',
-        destination: `${getSENTStakingApiUrl()}/:path*`,
+        destination: `${getBackendApiUrl()}/:path*`,
       },
     ];
   },

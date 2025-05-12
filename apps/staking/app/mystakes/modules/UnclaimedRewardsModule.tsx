@@ -1,16 +1,14 @@
 'use client';
 
-import TestnetPointsModule from '@/app/mystakes/modules/TestnetPointsModule';
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
 import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
-import { DYNAMIC_MODULE, PREFERENCE, URL } from '@/lib/constants';
+import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import type { QUERY_STATUS } from '@/lib/query';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { usePreferences } from 'usepref';
 
 export default function UnclaimedRewardsModule({
   addressOverride,
@@ -25,12 +23,6 @@ export default function UnclaimedRewardsModule({
   const { claimableRewards, status, refetch } = useNetworkBalances({
     addressOverride,
   });
-
-  const { getItem } = usePreferences();
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
-  if (!v2Rewards) {
-    return <TestnetPointsModule />;
-  }
 
   const formattedAmount = formatSENTBigInt(claimableRewards, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
 

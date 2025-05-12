@@ -1,17 +1,11 @@
 import type { ClaimDict } from '@/app/mystakes/modules/ClaimTokensModule';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import useClaimRewards from '@/hooks/useClaimRewards';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
-import { useUnclaimedTokens } from '@/hooks/useUnclaimedTokens';
-import {
-  DYNAMIC_MODULE,
-  HANDRAIL_THRESHOLD_DYNAMIC,
-  PREFERENCE,
-  SIGNIFICANT_FIGURES,
-  URL,
-} from '@/lib/constants';
+import { DYNAMIC_MODULE, HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
@@ -19,14 +13,10 @@ import type { BlsRewardsSignatureResponse } from '@session/staking-api-js/schema
 import { toast } from '@session/ui/lib/toast';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { AlertDialogFooter } from '@session/ui/ui/alert-dialog';
-import { Button } from '@session/ui/ui/button';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
-import { usePreferences } from 'usepref';
 import type { Address } from 'viem';
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is because of the v1 logic, will be removed once v2 is stable
 export function ClaimTokens({
   address,
   claimData,
@@ -40,21 +30,9 @@ export function ClaimTokens({
 }) {
   const dictionaryFee = useTranslations('fee');
   const [overrideFormattedUnclaimed, setOverrideFormattedUnclaimed] = useState<string | null>(null);
-  const { chainId } = useWallet();
-  const { refetch: refetchV2, unclaimed } = useNetworkBalances({ addressOverride: address });
+  const { refetch, unclaimed } = useNetworkBalances({ addressOverride: address });
 
-  const formattedUnclaimedV2 = formatSENTBigInt(unclaimed, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
-  // TODO: remove this v1 logic once v2 is stable
-  const { getItem } = usePreferences();
-  const v2Rewards = !!getItem<boolean>(PREFERENCE.V2_Rewards);
-  const { refetch: refetchV1, formattedUnclaimedRewardsAmount: formattedUnclaimedRewardsAmountV1 } =
-    useUnclaimedTokens({
-      addressOverride: address,
-    });
-
-  const formattedUnclaimed = v2Rewards ? formattedUnclaimedV2 : formattedUnclaimedRewardsAmountV1;
-  const refetch = v2Rewards ? refetchV2 : refetchV1;
-
+  const formattedUnclaimed = formatSENTBigInt(unclaimed, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS);
   const unclaimedRewardsAmount = overrideFormattedUnclaimed ?? formattedUnclaimed;
 
   const claimRewardsArgs = useMemo(
@@ -109,9 +87,7 @@ export function ClaimTokens({
 
   const gasPrice = updateBalanceGasPrice ?? claimGasPrice;
 
-  const gasHighShowTooltip = !!(
-    gasPrice && gasPrice > HANDRAIL_THRESHOLD_DYNAMIC(chainId).GAS_PRICE
-  );
+  const gasHighShowTooltip = !!(gasPrice && gasPrice > HANDRAIL_THRESHOLDS.GAS_PRICE);
 
   const handleClick = () => {
     setOverrideFormattedUnclaimed(formattedUnclaimed);
@@ -172,7 +148,7 @@ export function ClaimTokens({
         />
       </div>
       <AlertDialogFooter className="mt-4 flex flex-col gap-6 sm:flex-col">
-        <Button
+        <WalletInteractionButtonWithLocales
           variant="outline"
           rounded="md"
           size="lg"
@@ -186,7 +162,7 @@ export function ClaimTokens({
           onClick={handleClick}
         >
           {dictionary('dialog.buttons.submit')}
-        </Button>
+        </WalletInteractionButtonWithLocales>
         {enabled ? (
           <Progress
             steps={[

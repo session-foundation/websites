@@ -1,7 +1,6 @@
 'use client';
 
 import ActionModule from '@/components/ActionModule';
-import { WalletAddTokenWithLocales } from '@/components/WalletAddTokenWithLocales';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
@@ -438,18 +437,6 @@ export const AuthModule = ({ code }: { code?: string }) => {
           })}
         </p>
       ) : null} */}
-
-      {transactionHistory.length > 0 ? (
-        <>
-          <p>{dictionary('watchSENTInfo')}</p>
-          <WalletAddTokenWithLocales
-            rounded="md"
-            size="md"
-            variant="outline"
-            tokenIcon={`${BASE_URL}/images/token_logo.svg`}
-          />
-        </>
-      ) : null}
     </ActionModule>
   );
 };

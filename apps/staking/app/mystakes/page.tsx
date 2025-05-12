@@ -1,4 +1,4 @@
-import PriceModule from '@/app/mystakes/modules/PriceModule';
+import NoticeModule from '@/app/mystakes/modules/NoticeModule';
 import UnclaimedRewardsModule from '@/app/mystakes/modules/UnclaimedRewardsModule';
 import UnclaimedStakesModule from '@/app/mystakes/modules/UnclaimedStakesModule';
 import UnlockingStakesModule from '@/app/mystakes/modules/UnlockingStakesModule';
@@ -34,7 +34,7 @@ export default function Page() {
           <UnclaimedStakesModule />
           <ClaimTokensModule />
         </ModuleGrid>
-        <PriceModule />
+        <NoticeModule />
       </div>
       <div className="col-span-2 mt-6 h-full pb-8 md:mt-0 md:max-h-screen-without-header">
         <ModuleGrid variant="section" colSpan={2} className="h-full">

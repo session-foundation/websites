@@ -1,13 +1,13 @@
 import 'server-only';
 
-import { NEXT_PUBLIC_SENT_STAKING_API_URL, isProduction } from '@/lib/env';
+import { NEXT_PUBLIC_BACKEND_API_URL, isProduction } from '@/lib/env';
 import { createQueryClient } from '@/lib/query';
 import { type StakingBackendQuery, getStakingBackendQueryArgs } from '@/lib/staking-api';
 import { createSessionStakingClient } from '@session/staking-api-js/client';
 
 export const createSessionStakingServerClient = () =>
   createSessionStakingClient({
-    baseUrl: NEXT_PUBLIC_SENT_STAKING_API_URL,
+    baseUrl: NEXT_PUBLIC_BACKEND_API_URL,
     debug: !isProduction,
     errorOn404: !isProduction,
   });

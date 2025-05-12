@@ -3,7 +3,6 @@
 import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import DynamicHeaderNavLinks from '@/components/DynamicHeaderNavLinks';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
-import { WalletNetworkDropdownWithLocales } from '@/components/WalletNetworkDropdownWithLocales';
 import { cn } from '@session/ui/lib/utils';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
@@ -24,7 +23,6 @@ export default function HeaderClient({ children }: { children?: ReactNode }) {
       </div>
       <div className="flex flex-row justify-end gap-3">
         <DynamicWalletButton />
-        <WalletNetworkDropdownWithLocales className="hidden lg:flex" />
         <DropdownHamburgerMenu />
       </div>
     </>

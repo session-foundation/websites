@@ -4,7 +4,7 @@ import LocalizationProvider, {
 } from '@/providers/localization-provider';
 import '@session/ui/styles';
 import StatusBarProvider from '@/components/StatusBar';
-import { NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
+import { NEXT_PUBLIC_TESTNET, NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } from '@/lib/env';
 import PreferencesProvider from '@/providers/preferences-provider';
 import QueryProvider from '@/providers/query-provider';
 import TOSProvider from '@/providers/tos-provider';
@@ -33,6 +33,7 @@ export function GlobalProvider({ children, wagmiCookie, messages, locale }: Glob
                   <Web3WalletProvider
                     wagmiCookie={wagmiCookie}
                     projectId={NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
+                    testnet={NEXT_PUBLIC_TESTNET}
                   >
                     <VestingProvider>
                       <StatusBarProvider>

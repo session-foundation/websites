@@ -8,7 +8,7 @@ import {
 import { Social, type SocialLink } from '@session/ui/components/SocialLinkList';
 import { getEnvironmentTaggedDomain } from '@session/util-js/env';
 import type { WalletSheetSettingDetails } from '@session/wallet/components/WalletUserSheet';
-import { arbitrumSepolia, sepolia } from 'viem/chains';
+import { NEXT_PUBLIC_TESTNET } from './env';
 import type { LocaleKey } from './locale-util';
 
 export const BASE_URL = `https://${getEnvironmentTaggedDomain('stake')}.getsession.org`;
@@ -38,7 +38,7 @@ export const LANDING_BUTTON_URL = {
   SECONDARY: URL.BUG_BOUNTY_PROGRAM,
 };
 
-export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register', '/faucet'];
+export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register'];
 export const VESTING_PATHS = ['/stake', '/mystakes', '/register'];
 
 export enum COMMUNITY_DATE {
@@ -47,7 +47,7 @@ export enum COMMUNITY_DATE {
 }
 
 export const SOCIALS = {
-  [Social.Discord]: { name: Social.Discord, link: 'https://discord.com/invite/J5BTQdCfXN' },
+  [Social.Discord]: { name: Social.Discord, link: 'https://discord.gg/sessiontoken' },
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
@@ -63,7 +63,6 @@ export enum FAUCET {
 export enum FAUCET_ERROR {
   INVALID_ADDRESS = 'invalidAddress',
   INCORRECT_CHAIN = 'incorrectChain',
-  // INSUFFICIENT_ETH = 'insufficientEth',
   FAUCET_OUT_OF_TOKENS = 'faucetOutOfTokens',
   INVALID_SERVICE = 'invalidService',
   INVALID_OXEN_ADDRESS = 'invalidOxenAddress',
@@ -161,9 +160,9 @@ export enum SESSION_NODE {
 }
 
 export enum SESSION_NODE_TIME_STATIC {
-  /** 2 days in days */
-  SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS = 2,
-  /** isSoon amount in seconds for time based notifications (2 minutes) */
+  /** 30 days in days */
+  SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_DAYS = 30,
+  /** isSoon amount in seconds for time-based notifications (2 minutes) */
   SOON_TIME = 120_000,
   /** 24 hours in ms */
   NON_FINALIZED_TIME_TO_REMOVE_STAKE_MS = 24 * 60 * 60 * 1000,
@@ -187,16 +186,9 @@ enum SESSION_NODE_TIME_MAINNET {
   DEREGISTRATION_LOCKED_STAKE_SECONDS = 30 * 24 * 60 * 60,
 }
 
-export const SESSION_NODE_TIME = (chainId?: number) => {
-  switch (chainId) {
-    case arbitrumSepolia.id:
-    case sepolia.id:
-      return SESSION_NODE_TIME_TESTNET;
-
-    default:
-      return SESSION_NODE_TIME_MAINNET;
-  }
-};
+// biome-ignore lint/correctness/noUnusedFunctionParameters lint/correctness/noUnusedVariables: TODO: remove chainId usage. kept here for now. change after confirmation pr merged.
+export const SESSION_NODE_TIME = (chainId?: number) =>
+  NEXT_PUBLIC_TESTNET ? SESSION_NODE_TIME_TESTNET : SESSION_NODE_TIME_MAINNET;
 
 export enum DYNAMIC_MODULE {
   /** The number of decimal places to round SENT values to */
@@ -219,16 +211,9 @@ export const HANDRAIL_THRESHOLD_MAINNET = {
   GAS_PRICE: MEDIAN_GAS_PRICE_ARBITRUM_ONE_2024,
 };
 
-export const HANDRAIL_THRESHOLD_DYNAMIC = (chainId?: number) => {
-  switch (chainId) {
-    case arbitrumSepolia.id:
-    case sepolia.id:
-      return HANDRAIL_THRESHOLD_TESTNET;
-
-    default:
-      return HANDRAIL_THRESHOLD_MAINNET;
-  }
-};
+export const HANDRAIL_THRESHOLDS = NEXT_PUBLIC_TESTNET
+  ? HANDRAIL_THRESHOLD_TESTNET
+  : HANDRAIL_THRESHOLD_MAINNET;
 
 export const preferenceStorageKey = 'stake_settings';
 export const volatileStorageKey = 'volatile_storage';
@@ -241,7 +226,6 @@ export enum PREFERENCE {
   ANONYMIZE_UI = 'anonymizeUI',
   AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
   OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
-  V2_Rewards = 'v2Rewards',
 }
 
 export const preferenceStorageDefaultItems = {} as const;
@@ -289,12 +273,6 @@ export const prefDetails = {
     type: 'boolean',
     defaultValue: false,
     description: 'Show awaiting operator contracts in the open nodes page',
-  },
-  [PREFERENCE.V2_Rewards]: {
-    label: 'Use V2 Rewards Endpoint',
-    type: 'boolean',
-    defaultValue: false,
-    description: 'Use the V2 rewards endpoint',
   },
 } as const satisfies WalletSheetSettingDetailsGenerator;
 

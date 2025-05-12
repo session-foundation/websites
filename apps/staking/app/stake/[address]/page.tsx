@@ -1,5 +1,8 @@
 import ActionModule from '@/components/ActionModule';
-import { BlockExplorerLink, BlockExplorerLinkText } from '@/components/BlockExplorerLink';
+import {
+  ArbitrumBlockExplorerLink,
+  ArbitrumBlockExplorerLinkText,
+} from '@/components/ArbitrumBlockExplorerLink';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { stakingBackendPrefetchQuery } from '@/lib/staking-api-server';
 import { MODULE_GRID_ALIGNMENT } from '@session/ui/components/ModuleGrid';
@@ -33,8 +36,8 @@ export default function NodePage(props: NodePageParams) {
       contentAlignment={MODULE_GRID_ALIGNMENT.TOP}
       headerAction={
         <HydrationBoundary state={dehydrate(queryClient)}>
-          <Suspense fallback={<BlockExplorerLinkText />}>
-            <BlockExplorerLink address={address} />
+          <Suspense fallback={<ArbitrumBlockExplorerLinkText />}>
+            <ArbitrumBlockExplorerLink address={address} />
           </Suspense>
         </HydrationBoundary>
       }
