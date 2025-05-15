@@ -104,7 +104,7 @@ function TokenActionButton({ href, children }: { href: string; children: ReactNo
 }
 
 const tokenDetailsArbitrum: DynamicTokenRowProps = {
-  tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
+  tokenAddress: '0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
   name: 'Session Token',
   iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
   showAddTokenButton: true,
@@ -131,7 +131,7 @@ const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
 };
 
 const tokenDetailsEthereum: DynamicTokenRowProps = {
-  tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
+  tokenAddress: '0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
   name: 'Session Token',
   iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
   showAddTokenButton: true,
