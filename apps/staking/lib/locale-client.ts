@@ -83,3 +83,21 @@ export const useDecimalDelimiter = (): DecimalDelimiter => {
   if (decimal) return decimal as DecimalDelimiter;
   return (1.1).toLocaleString().substring(1, 2) as DecimalDelimiter;
 };
+
+export function formatEnglishTimeDistance(
+  seconds: number,
+  delimiter = ' ',
+  addPluralSuffix = false
+) {
+  const days = Math.floor(seconds / 86400);
+  if (days > 0) return `${days}${delimiter}day${days > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const hours = Math.floor((seconds % 86400) / 3600);
+  if (hours > 0) return `${hours}${delimiter}hour${hours > 1 && addPluralSuffix ? 's' : ''}`;
+
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (minutes > 0)
+    return `${minutes}${delimiter}minute${minutes > 1 && addPluralSuffix ? 's' : ''}`;
+
+  return `${Math.floor(seconds)}${delimiter}second${seconds > 1 && addPluralSuffix ? 's' : ''}`;
+}

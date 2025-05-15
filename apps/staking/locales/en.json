@@ -1168,7 +1168,7 @@
     "exitRejectedRecently": "Error: Exit request was rejected by the Network. Please retry <text-bold>{relativeTime}</text-bold>.",
     "requestExit": "Exiting your stake will cause stakes for ALL contributors and the operator to be exited, not just your own. Once confirmed, this node will be ready to exit the network {relativeRequestTime}.\n<br></br><br></br>\nAfter this {requestTime} waiting period, the operator or contributors have a {exitTime} window to confirm the exit. If the exit is not confirmed within this {exitTime} window, the operator may be subject to a small penalty. <link>Learn more</link>\n<br></br><br></br>\nOnce the node has exited the network, you can reclaim your stake via the Staking Portal.",
     "cancel": "Cancel",
-    "claimLimitInfo": "To keep the Session Network secure, there is a network-wide limit on how much {tokenSymbol} can be claimed within a 12 hour period. The limit has been reached. {linkOut}",
+    "claimLimitInfo": "To keep the Session Network secure, there is a network-wide limit on how much {tokenSymbol} can be claimed within a {claimCycleTime} period. The limit has been reached. {linkOut}",
     "claimLimitCountdown": "You can claim your {tokenSymbol} <text-bold>{relativeTime}</text-bold>."
   }
 }

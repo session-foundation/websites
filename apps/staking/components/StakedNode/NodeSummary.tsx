@@ -147,7 +147,7 @@ export const DeregisteringNotification = ({
 
   return (
     <Tooltip
-      tooltipContent={dictionary('deregistrationTimerDescription', {
+      tooltipContent={dictionary.rich('deregistrationTimerDescription', {
         lockedStakeTime: formatLocalizedTimeFromSeconds(
           SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS,
           { unit: 'day' }
