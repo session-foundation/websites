@@ -12,7 +12,7 @@ import {
   encodeED25519PubKey,
   encodeED25519Signature,
 } from '../util';
-import { type ContractReadQueryProps, useContractReadQuery } from './useContractReadQuery';
+import { type ContractReadQueryProps, mergeContractReadStatuses, useContractReadQuery } from './useContractReadQuery';
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useEstimateContractFee } from './useEstimateContractFee';
 
@@ -293,4 +293,84 @@ export function useGetRecipients({ address }: { address: Address }) {
     claimed,
     ...rest,
   };
+}
+
+export function useClaimThreshold({ enabled }: { enabled?: boolean }) {
+  const { data: claimThreshold, ...rest } = useContractReadQuery({
+    contract: 'ServiceNodeRewards',
+    functionName: 'claimThreshold',
+    enabled,
+  });
+
+  return {
+    claimThreshold,
+    ...rest,
+  };
+}
+
+
+export function useClaimCycle({ enabled }: { enabled?: boolean }) {
+  const { data: claimCycle, ...rest } = useContractReadQuery({
+    contract: 'ServiceNodeRewards',
+    functionName: 'claimCycle',
+    enabled,
+  });
+
+  return {
+    claimCycle,
+    ...rest,
+  };
+}
+
+export function useCurrentClaimTotal({ enabled }: { enabled?: boolean }) {
+  const { data: currentClaimTotal, ...rest } = useContractReadQuery({
+    contract: 'ServiceNodeRewards',
+    functionName: 'currentClaimTotal',
+    enabled,
+  });
+
+  return {
+    currentClaimTotal,
+    ...rest,
+  };
+}
+
+export function useCurrentClaimCycle({ enabled }: { enabled?: boolean }) {
+  const { data: currentClaimCycle, ...rest } = useContractReadQuery({
+    contract: 'ServiceNodeRewards',
+    functionName: 'currentClaimCycle',
+    enabled,
+  });
+
+  return {
+    currentClaimCycle,
+    ...rest,
+  };
+}
+
+export function useClaimCycleDetails({enabled}: {enabled?: boolean}) {
+  const claimThresholdHook = useClaimThreshold({enabled});
+  const claimCycleHook = useClaimCycle({enabled});
+  const currentClaimTotalHook = useCurrentClaimTotal({enabled});
+
+  const status =mergeContractReadStatuses(mergeContractReadStatuses(
+    claimThresholdHook.status,
+    claimCycleHook.status),
+    currentClaimTotalHook.status,
+  )
+
+  const refetch = () => {
+    claimThresholdHook.refetch();
+    claimCycleHook.refetch();
+    currentClaimTotalHook.refetch();
+  }
+
+  return {
+    claimThreshold: claimThresholdHook.claimThreshold,
+    claimCycle: claimCycleHook.claimCycle,
+    currentClaimTotal: currentClaimTotalHook.currentClaimTotal,
+    refetch,
+    status,
+    enabled
+  }
 }

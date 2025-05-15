@@ -1,7 +1,11 @@
 import { BACKEND, HANDRAIL_THRESHOLD, PREFERENCE } from '@/lib/constants';
+import { FEATURE_FLAG } from '@/lib/feature-flags';
+import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
+import { useClaimCycleDetails } from '@session/contracts/hooks/ServiceNodeRewards';
 import { rewardsInfoSchema } from '@session/staking-api-js/schema';
+import { bigIntToNumber } from '@session/util-crypto/maths';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
@@ -9,6 +13,7 @@ import type { Address } from 'viem';
 
 export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
   const { address: connectedAddress } = useWallet();
+  const forceClaimOverThreshold = useFeatureFlag(FEATURE_FLAG.FORCE_CLAIM_OVER_THRESHOLD);
   const { getItem } = usePreferences();
   const address = params?.addressOverride ?? connectedAddress;
 
@@ -16,7 +21,11 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
 
   const enabled = !!address;
 
-  const { data, status, refetch } = useStakingBackendQueryWithParams(
+  const {
+    data,
+    status,
+    refetch: refetchRewardsInfo,
+  } = useStakingBackendQueryWithParams(
     getRewardsInfo,
     {
       address: address!,
@@ -26,6 +35,19 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
       refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
     }
   );
+
+  const {
+    claimThreshold,
+    claimCycle,
+    currentClaimTotal,
+    status: claimCycleStatus,
+    refetch: refetchClaimCycleDetails,
+  } = useClaimCycleDetails({ enabled });
+
+  const refetch = () => {
+    refetchRewardsInfo();
+    refetchClaimCycleDetails();
+  };
 
   const parsedData = useMemo(() => {
     let lifetimeLiquidated = 0n;
@@ -38,9 +60,6 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
     let claimableStakes = 0n;
     let claimableRewards = 0n;
 
-    let networkClaimRemainingInCurrentPeriod = 0n;
-    let networkClaimCurrentPeriodEnd = 0;
-
     if (data) {
       const rewards = rewardsInfoSchema.parse(data.rewards);
       lifetimeLiquidated = rewards.lifetime_liquidated_stakes;
@@ -52,10 +71,6 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
 
       claimableStakes = lifetimeUnlockedStakes - lifetimeLiquidated - rewards.claimed_stakes;
       claimableRewards = lifetimeRewards - rewards.claimed_rewards;
-
-      // TODO: implement network claim period data once available from backend
-      networkClaimRemainingInCurrentPeriod = 1_000_000_000000000n;
-      networkClaimCurrentPeriodEnd = Date.now() + 10_000;
     }
 
     const unclaimed = claimableRewards + claimableStakes;
@@ -68,20 +83,45 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
       lockedStakes,
       claimableRewards,
       claimableStakes,
-      networkClaimRemainingInCurrentPeriod,
-      networkClaimPeriodEnd: networkClaimCurrentPeriodEnd,
     };
   }, [data]);
 
   const canClaim =
     status === 'success' && parsedData.unclaimed >= BigInt(HANDRAIL_THRESHOLD.CLAIM_REWARDS_AMOUNT);
 
-  const isClaimOverLimit = parsedData.unclaimed > parsedData.networkClaimRemainingInCurrentPeriod;
+  const claimPeriodData = useMemo(() => {
+    let isClaimOverLimit = false;
+    let networkClaimPeriodEnd: number | null = null;
+
+    if (claimCycleStatus === 'success' && canClaim) {
+      const networkCycleTotalAfterClaim = currentClaimTotal + parsedData.unclaimed;
+      if (networkCycleTotalAfterClaim > claimThreshold || forceClaimOverThreshold) {
+        isClaimOverLimit = true;
+        const now = Math.trunc(Date.now() / 1000);
+        const cc = bigIntToNumber(claimCycle, 0);
+        networkClaimPeriodEnd = (Math.trunc(now / cc) + 1) * cc * 1000;
+      }
+    }
+
+    return {
+      isClaimOverLimit,
+      networkClaimPeriodEnd,
+    };
+  }, [
+    canClaim,
+    claimThreshold,
+    claimCycle,
+    currentClaimTotal,
+    claimCycleStatus,
+    parsedData,
+    forceClaimOverThreshold,
+  ]);
 
   return {
     ...parsedData,
+    ...claimPeriodData,
+    claimCycle,
     canClaim,
-    isClaimOverLimit,
     refetch,
     status,
     enabled,
