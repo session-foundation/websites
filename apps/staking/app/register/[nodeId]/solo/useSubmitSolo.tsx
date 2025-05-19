@@ -7,7 +7,9 @@ import { SESSION_NODE } from '@/lib/constants';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
 import { getContractErrorName } from '@session/contracts';
 import { areHexesEqual } from '@session/util-crypto/string';
-import { useEffect, useMemo, useState } from 'react';
+import { useMount } from '@session/util-react/hooks/useMount';
+import { useMemo, useState } from 'react';
+import { useEffect } from 'react';
 
 type SubmitSoloProps = {
   error?: Error | null;
@@ -75,13 +77,12 @@ export function useSubmitSolo({
     registerAndStake();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     if (!enabled) {
       setIsSubmitting(true);
       registerAndStake();
     }
-  }, []);
+  });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: On confirmation change
   useEffect(() => {

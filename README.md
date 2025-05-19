@@ -43,6 +43,7 @@ This repository contains the following apps and packages:
 - `@session/util-js`: A JS utility library for common functions. [Read more](packages/util-js/README.md).
 - `@session/util-logger`: A logger utility library for initializing the pino logger with @session/logger as a
   wrapper. [Read more](packages/util-logger/README.md).
+- `@session/util-react`: A react utility library.
 - `@session/wallet`: A wallet library for interacting with the Session Token. [Read more](packages/wallet/README.md).
 
 ### Utilities

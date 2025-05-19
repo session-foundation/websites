@@ -66,6 +66,7 @@ import { useForm } from '@session/ui/ui/form';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
@@ -76,7 +77,6 @@ import {
   type SetStateAction,
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -572,11 +572,10 @@ export function RegistrationWizard() {
     : null;
   const sectionDescription2 = dict.has('description2') ? dict.rich('description2') : null;
 
-  /** While the component is mounted, show the balance */
-  useEffect(() => {
+  useMount(() => {
     setIsBalanceVisible(true);
     return () => setIsBalanceVisible(false);
-  }, [setIsBalanceVisible]);
+  });
 
   return acceptedNotice ? (
     <WizardContent

@@ -80,21 +80,21 @@ export function SubmitContributeFunds({
     resetContributeStake();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On simulate status change
+  // biome-ignore lint/correctness/useExhaustiveDependencies(contributeStake): On simulate status change
   useEffect(() => {
     if (!isContributeStakeEnabled) {
       contributeStake();
     }
   }, [isContributeStakeEnabled]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
+  // biome-ignore lint/correctness/useExhaustiveDependencies(handleError): On error
   useEffect(() => {
     if (isError) {
       handleError();
     }
   }, [isError]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
+  // biome-ignore lint/correctness/useExhaustiveDependencies(refetch): On success
   useEffect(() => {
     if (contributeFundsStatus === PROGRESS_STATUS.SUCCESS) {
       refetch();

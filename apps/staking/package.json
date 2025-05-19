@@ -28,6 +28,7 @@
     "@session/util-crypto": "workspace:*",
     "@session/util-js": "workspace:*",
     "@session/util-logger": "workspace:*",
+    "@session/util-react": "workspace:*",
     "@session/wallet": "workspace:*",
     "@session/testing": "workspace:*",
     "@tanstack/react-query": "5.61.5",

@@ -10,9 +10,9 @@ import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Loading } from '@session/ui/components/loading';
 import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 export function AlreadyRegisteredRunningTab() {
   const { props } = useRegistrationWizard();
@@ -34,10 +34,9 @@ export function AlreadyRegisteredRunningTab() {
     areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     if (!stake) void refetch();
-  }, []);
+  });
 
   return (
     <div className="flex w-full flex-col items-center gap-6">

@@ -4,8 +4,9 @@ import { EthereumAddressField } from '@/components/Form/EthereumAddressField';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 export function RewardsAddressInputSoloTab() {
   const { formSolo, changeTab, setBackButtonClickCallback } = useRegistrationWizard();
@@ -19,11 +20,10 @@ export function RewardsAddressInputSoloTab() {
     formSolo.setValue('rewardsAddress', initialRewardsAddress.current);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
-  }, []);
+  });
 
   return (
     <div className="flex w-full flex-col gap-6">
