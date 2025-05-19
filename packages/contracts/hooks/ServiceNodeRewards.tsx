@@ -12,7 +12,11 @@ import {
   encodeED25519PubKey,
   encodeED25519Signature,
 } from '../util';
-import { type ContractReadQueryProps, mergeContractReadStatuses, useContractReadQuery } from './useContractReadQuery';
+import {
+  type ContractReadQueryProps,
+  mergeContractReadStatuses,
+  useContractReadQuery,
+} from './useContractReadQuery';
 import { type ContractWriteQueryProps, useContractWriteQuery } from './useContractWriteQuery';
 import { useEstimateContractFee } from './useEstimateContractFee';
 
@@ -308,7 +312,6 @@ export function useClaimThreshold({ enabled }: { enabled?: boolean }) {
   };
 }
 
-
 export function useClaimCycle({ enabled }: { enabled?: boolean }) {
   const { data: claimCycle, ...rest } = useContractReadQuery({
     contract: 'ServiceNodeRewards',
@@ -348,22 +351,21 @@ export function useCurrentClaimCycle({ enabled }: { enabled?: boolean }) {
   };
 }
 
-export function useClaimCycleDetails({enabled}: {enabled?: boolean}) {
-  const claimThresholdHook = useClaimThreshold({enabled});
-  const claimCycleHook = useClaimCycle({enabled});
-  const currentClaimTotalHook = useCurrentClaimTotal({enabled});
+export function useClaimCycleDetails({ enabled }: { enabled?: boolean }) {
+  const claimThresholdHook = useClaimThreshold({ enabled });
+  const claimCycleHook = useClaimCycle({ enabled });
+  const currentClaimTotalHook = useCurrentClaimTotal({ enabled });
 
-  const status =mergeContractReadStatuses(mergeContractReadStatuses(
-    claimThresholdHook.status,
-    claimCycleHook.status),
-    currentClaimTotalHook.status,
-  )
+  const status = mergeContractReadStatuses(
+    mergeContractReadStatuses(claimThresholdHook.status, claimCycleHook.status),
+    currentClaimTotalHook.status
+  );
 
   const refetch = () => {
     claimThresholdHook.refetch();
     claimCycleHook.refetch();
     currentClaimTotalHook.refetch();
-  }
+  };
 
   return {
     claimThreshold: claimThresholdHook.claimThreshold,
@@ -371,6 +373,6 @@ export function useClaimCycleDetails({enabled}: {enabled?: boolean}) {
     currentClaimTotal: currentClaimTotalHook.currentClaimTotal,
     refetch,
     status,
-    enabled
-  }
+    enabled,
+  };
 }
