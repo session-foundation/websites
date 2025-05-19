@@ -132,6 +132,10 @@ export async function transferTestTokens({
   // telegramId,
   code,
 }: FaucetFormSchema) {
+  if (process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() !== 'true') {
+    return;
+  }
+
   const dictionary = await getTranslations('faucet.form.error');
   const locale = await getLocale();
 

@@ -45,6 +45,17 @@ export const formatNumber = (num: number, options?: Intl.NumberFormatOptions) =>
   return new Intl.NumberFormat(undefined, options).format(num);
 };
 
+export const formatUSD = (num: number, options?: Intl.NumberFormatOptions) => {
+  const maximumFractionDigits = num >= 0.1 ? 2 : num >= 0.01 ? 3 : 4;
+  return formatNumber(num, {
+    currency: 'USD',
+    style: 'currency',
+    currencySign: 'standard',
+    maximumFractionDigits: maximumFractionDigits,
+    ...options,
+  });
+};
+
 export const formatPercentage = (num: number, options?: Intl.NumberFormatOptions) => {
   return formatNumber(num, {
     style: 'percent',

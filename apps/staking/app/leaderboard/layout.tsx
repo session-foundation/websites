@@ -1,4 +1,5 @@
 import { siteMetadata } from '@/lib/metadata';
+import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 export function generateMetadata() {
@@ -10,5 +11,8 @@ export function generateMetadata() {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  if (process.env.NEXT_PUBLIC_ENABLE_LEADERBOARD?.toLowerCase() !== 'true') {
+    return notFound();
+  }
   return children;
 }
