@@ -1,6 +1,7 @@
 import { BACKEND, HANDRAIL_THRESHOLD, PREFERENCE } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
+import logger from '@/lib/logger';
 import { getRewardsInfo } from '@/lib/queries/getRewardsInfo';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { useClaimCycleDetails } from '@session/contracts/hooks/ServiceNodeRewards';
@@ -95,9 +96,15 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
     if (claimCycleStatus === 'success' && canClaim) {
       const networkCycleTotalAfterClaim = currentClaimTotal + parsedData.unclaimed;
       if (networkCycleTotalAfterClaim > claimThreshold || forceClaimOverThreshold) {
+        if (claimCycle === 0n) {
+          logger.warn('Claim cycle is 0, either the claim limit is off or something went wrong!');
+          return;
+        }
+
         isClaimOverLimit = true;
         const now = Math.trunc(Date.now() / 1000);
         const cc = bigIntToNumber(claimCycle, 0);
+
         networkClaimPeriodEnd = (Math.trunc(now / cc) + 1) * cc * 1000;
       }
     }
