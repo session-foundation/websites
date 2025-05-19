@@ -361,10 +361,12 @@ export function useClaimCycleDetails({ enabled }: { enabled?: boolean }) {
     currentClaimTotalHook.status
   );
 
-  const refetch = () => {
-    claimThresholdHook.refetch();
-    claimCycleHook.refetch();
-    currentClaimTotalHook.refetch();
+  const refetch = async () => {
+    return await Promise.allSettled([
+      claimThresholdHook.refetch(),
+      claimCycleHook.refetch(),
+      currentClaimTotalHook.refetch(),
+    ]);
   };
 
   return {

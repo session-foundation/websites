@@ -44,9 +44,8 @@ export const useNetworkBalances = (params?: { addressOverride?: Address }) => {
     refetch: refetchClaimCycleDetails,
   } = useClaimCycleDetails({ enabled });
 
-  const refetch = () => {
-    refetchRewardsInfo();
-    refetchClaimCycleDetails();
+  const refetch = async () => {
+    return await Promise.allSettled([refetchRewardsInfo(), refetchClaimCycleDetails()]);
   };
 
   const parsedData = useMemo(() => {
