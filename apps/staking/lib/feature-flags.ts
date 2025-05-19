@@ -113,6 +113,7 @@ export enum FEATURE_FLAG {
   SHOW_NODE_RAW_DATA = 'showNodeRawData',
   THROW_TESTING_ERROR = 'throwTestingError',
   THROW_TESTING_ERROR_LONG = 'throwTestingErrorLong',
+  FORCE_CLAIM_OVER_THRESHOLD = 'forceClaimOverThreshold',
 }
 
 export const FEATURE_FLAG_DESCRIPTION = {
@@ -132,6 +133,8 @@ export const FEATURE_FLAG_DESCRIPTION = {
   [FEATURE_FLAG.SHOW_NODE_RAW_DATA]: 'Show raw data for staked nodes',
   [FEATURE_FLAG.THROW_TESTING_ERROR]: 'Throw a testing error',
   [FEATURE_FLAG.THROW_TESTING_ERROR_LONG]: 'Throw a long testing error',
+  [FEATURE_FLAG.FORCE_CLAIM_OVER_THRESHOLD]:
+    'Force the client to think the claim threshold will be hit',
 };
 
 export const validFeatureFlags = Object.values(FEATURE_FLAG);
@@ -142,6 +145,7 @@ export const pageFeatureFlags: Record<string, Array<FEATURE_FLAG>> = {
     FEATURE_FLAG.MOCK_NO_STAKED_NODES,
     FEATURE_FLAG.SHOW_ALL_TIMERS,
     FEATURE_FLAG.SHOW_NODE_RAW_DATA,
+    FEATURE_FLAG.FORCE_CLAIM_OVER_THRESHOLD,
   ],
   vestedStakes: [FEATURE_FLAG.SHOW_ALL_TIMERS, FEATURE_FLAG.SHOW_NODE_RAW_DATA],
   address: [

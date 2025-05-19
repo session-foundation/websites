@@ -63,11 +63,8 @@ export const ReadyForExitNotification = ({
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon
-          ? dictionary(isDeregistered ? 'liquidationNotification' : 'exitTimerNotificationNow')
-          : dictionary(
-              isDeregistered ? 'deregistrationTimerDescription' : 'exitTimerNotification',
-              { relativeTime }
-            )}
+          ? dictionary.rich('exitTimerNotificationNow')
+          : dictionary.rich('exitTimerNotification', { relativeTime })}
       </NodeNotification>
     </Tooltip>
   );
@@ -105,7 +102,7 @@ export const ExitUnlockTimerNotification = ({
 
   return (
     <Tooltip
-      tooltipContent={dictionary(
+      tooltipContent={dictionary.rich(
         isDeregistered ? 'deregisteredTimerDescription' : 'exitUnlockTimerDescription',
         {
           relativeTime,
@@ -115,13 +112,15 @@ export const ExitUnlockTimerNotification = ({
     >
       <NodeNotification level="warning" className={className}>
         {relativeTime
-          ? dictionary(
+          ? dictionary.rich(
               isDeregistered ? 'deregisteredTimerNotification' : 'exitUnlockTimerNotification',
               {
                 relativeTime,
               }
             )
-          : dictionary(isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing')}
+          : dictionary.rich(
+              isDeregistered ? 'deregisteredProcessing' : 'exitUnlockTimerProcessing'
+            )}
       </NodeNotification>
     </Tooltip>
   );
@@ -148,7 +147,7 @@ export const DeregisteringNotification = ({
 
   return (
     <Tooltip
-      tooltipContent={dictionary('deregistrationTimerDescription', {
+      tooltipContent={dictionary.rich('deregistrationTimerDescription', {
         lockedStakeTime: formatLocalizedTimeFromSeconds(
           SESSION_NODE_TIME(chainId).DEREGISTRATION_LOCKED_STAKE_SECONDS,
           { unit: 'day' }
@@ -158,7 +157,7 @@ export const DeregisteringNotification = ({
       })}
     >
       <NodeNotification level="error">
-        {dictionary('deregistrationTimerNotification', { relativeTime })}
+        {dictionary.rich('deregistrationTimerNotification', { relativeTime })}
       </NodeNotification>
     </Tooltip>
   );

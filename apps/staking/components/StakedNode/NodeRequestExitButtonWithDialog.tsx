@@ -5,7 +5,7 @@ import useRequestNodeExit from '@/hooks/useRequestNodeExit';
 import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
-import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
+import { formatEnglishTimeDistance, formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
 import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/schema';
@@ -127,20 +127,6 @@ function RequestNodeExitDisabled() {
       })}
     </p>
   );
-}
-
-function formatEnglishTimeDistance(seconds: number, delimiter = ' ', addPluralSuffix = false) {
-  const days = Math.floor(seconds / 86400);
-  if (days > 0) return `${days}${delimiter}day${days > 1 && addPluralSuffix ? 's' : ''}`;
-
-  const hours = Math.floor((seconds % 86400) / 3600);
-  if (hours > 0) return `${hours}${delimiter}hour${hours > 1 && addPluralSuffix ? 's' : ''}`;
-
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (minutes > 0)
-    return `${minutes}${delimiter}minute${minutes > 1 && addPluralSuffix ? 's' : ''}`;
-
-  return `${Math.floor(seconds)}${delimiter}second${seconds > 1 && addPluralSuffix ? 's' : ''}`;
 }
 
 function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () => void }) {
