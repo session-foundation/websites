@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin('./lib/locale-server.ts');
 const isTestnet = process.env.NEXT_PUBLIC_TESTNET === 'true';
 if (isTestnet) console.log('Building staking portal in TESTNET mode!');
 
+if (process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true') console.log('Faucet Enabled!')
+if (process.env.NEXT_PUBLIC_ENABLE_LEADERBOARD?.toLowerCase() === 'true') console.log('Leaderboard Enabled!');
+
 const getBackendApiUrl = () => {
   let url = process.env.NEXT_PUBLIC_BACKEND_API_URL;
   if (!url) throw new Error('NEXT_PUBLIC_BACKEND_API_URL is not set');
@@ -17,6 +20,18 @@ const getBackendApiUrl = () => {
 
   return url;
 };
+
+const getNetworkApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_NETWORK_API_URL;
+  if (!url) throw new Error('Network API URL is not set');
+  if (url.endsWith('/')) {
+    url = url.substring(0, url.length - 1);
+  }
+
+  console.log('Network API URL:', url);
+
+  return url;
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -77,6 +92,10 @@ const nextConfig = {
       {
         source: '/api/ssb/:path*',
         destination: `${getBackendApiUrl()}/:path*`,
+      },
+      {
+        source: '/api/network/:path*',
+        destination: `${getNetworkApiUrl()}/:path*`,
       },
     ];
   },

@@ -312,6 +312,21 @@ export const blsRewardsSignatureResponseSchema = z.object({
 
 export type BlsRewardsSignatureResponse = z.infer<typeof blsRewardsSignatureResponseSchema>;
 
+export const dailyRewardInfo = z.object({
+  block: z.number(),
+  lifetime_rewards: z.number(),
+  timestamp: z.number(),
+});
+
+export type DailyRewardInfo = z.infer<typeof dailyRewardInfo>;
+
+export const dailyRewardsResponseSchema = z.object({
+  network: networkInfoSchema,
+  rewards: z.array(dailyRewardInfo),
+});
+
+export type DailyRewardsResponse = z.infer<typeof dailyRewardsResponseSchema>;
+
 //////////////////////////////////////////////////////////////
 //                                                          //
 //                  Exits & Liquidations                    //

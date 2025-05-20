@@ -6,6 +6,7 @@ import type {
   BlsRewardsSignatureResponse,
   ContributionContractByKeyResponse,
   ContributionContractResponse,
+  DailyRewardsResponse,
   ExitLiquidationListResponse,
   NetworkInfoResponse,
   NodesBlsKeysResponse,
@@ -168,6 +169,24 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return await this.request<BlsRewardsResponse>(options);
+  }
+
+  /**
+   * Fetches the daily rewards information for a given address.
+   *
+   * @param address The address to fetch daily rewards information for.
+   * @returns daily rewards info.
+   */
+  public async getDailyRewardsInfo({
+    address,
+  }: {
+    address: string;
+  }): Promise<StakingBackendResponse<DailyRewardsResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/daily-rewards/${address}`,
+      method: 'GET',
+    };
+    return await this.request<DailyRewardsResponse>(options);
   }
 
   public async getRewardsClaimSignature({

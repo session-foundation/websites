@@ -95,6 +95,12 @@
     --indicator-blue: rgb(0, 163, 247);
     --indicator-yellow: rgb(247, 222, 0);
     --indicator-red: rgb(239 68 68);
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 

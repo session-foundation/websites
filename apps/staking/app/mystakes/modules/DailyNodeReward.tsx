@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 
 export default function DailyNodeReward() {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();
-  const dictionary = useTranslations('modules.dailyRewards');
+  const dictionary = useTranslations('modules.networkDailyRewards');
   const dictionaryShared = useTranslations('modules.shared');
   const toastDictionary = useTranslations('modules.toast');
   const titleFormat = useTranslations('modules.title');
