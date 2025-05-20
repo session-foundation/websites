@@ -372,7 +372,7 @@
     },
     "price": {
       "title": "{tokenSymbol} Price",
-      "description": "Price data powered by CoinGecko<br></br>Accurate at {date_time}"
+      "description": "Price data powered by CoinGecko<br></br>Last updated at {date_time}"
     },
     "points": {
       "title": "Testnet Points",
