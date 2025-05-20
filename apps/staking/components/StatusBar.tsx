@@ -328,7 +328,11 @@ export function useNetworkStatus(params?: UseNetworkStatusParams) {
   return context;
 }
 
-export function useStatusBarVisible(params?: UseNetworkStatusParams) {
+/**
+ * Display the status bar while the hook is mounted
+ * @param params network status info
+ */
+export function useDisplayStatusBar(params?: UseNetworkStatusParams) {
   const { setNetworkStatusVisible } = useNetworkStatus(params);
   useMount(() => {
     setNetworkStatusVisible(true);

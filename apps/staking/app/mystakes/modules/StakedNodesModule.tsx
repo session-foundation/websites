@@ -7,7 +7,7 @@ import {
   getStakedContractCardContractFromConfirmation,
 } from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
-import { useStatusBarVisible } from '@/components/StatusBar';
+import { useDisplayStatusBar } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { useStakes } from '@/hooks/useStakes';
 import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
@@ -47,7 +47,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     refetch,
     isError,
   } = useStakes(address);
-  useStatusBarVisible({ network, isLoading, isFetching, refetch });
+  useDisplayStatusBar({ network, isLoading, isFetching, refetch });
 
   const hasStakes =
     stakes?.length ||

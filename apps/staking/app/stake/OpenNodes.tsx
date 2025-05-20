@@ -7,7 +7,7 @@ import {
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { OpenNodeCard } from '@/components/OpenNodeCard';
-import { useStatusBarVisible } from '@/components/StatusBar';
+import { useDisplayStatusBar } from '@/components/StatusBar';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
 import { useStakes } from '@/hooks/useStakes';
@@ -31,7 +31,7 @@ export default function OpenNodes() {
   const address = useCurrentActor();
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts(address);
-  useStatusBarVisible({ network, isFetching, refetch });
+  useDisplayStatusBar({ network, isFetching, refetch });
   const { hiddenContractsWithStakes, awaitingOperatorContracts } = useStakes(address);
 
   const { enabled: isStakingDisabled } = useRemoteFeatureFlagQuery(
