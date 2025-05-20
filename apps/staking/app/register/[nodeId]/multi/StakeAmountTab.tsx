@@ -14,8 +14,9 @@ import { TOKEN } from '@session/contracts';
 import { Form, FormField } from '@session/ui/components/ui/form';
 import { Button } from '@session/ui/ui/button';
 import { stringToBigInt } from '@session/util-crypto/maths';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 const FIELD_NAME = 'stakeAmount';
 
@@ -63,11 +64,10 @@ export function StakeAmountTab() {
     changeTab(mode === REG_MODE.EDIT ? REG_TAB.SUBMIT_MULTI : REG_TAB.OPERATOR_FEE);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
-  }, []);
+  });
 
   return (
     <div className="flex w-full flex-col gap-6">

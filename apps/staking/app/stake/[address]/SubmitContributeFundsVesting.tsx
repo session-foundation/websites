@@ -8,6 +8,7 @@ import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { Button } from '@session/ui/ui/button';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useEffect } from 'react';
 
@@ -72,20 +73,19 @@ export function SubmitContributeFundsVesting({
     resetContributeStake();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On simulate status change
-  useEffect(() => {
+  useMount(() => {
     if (!stakingParams.contractAddress) throw new Error('Contract address is not defined');
     contributeStake(stakingParams.contractAddress);
-  }, []);
+  });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On error
+  // biome-ignore lint/correctness/useExhaustiveDependencies(handleError): On error
   useEffect(() => {
     if (isError) {
       handleError();
     }
   }, [isError]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On success
+  // biome-ignore lint/correctness/useExhaustiveDependencies(refetch): On success
   useEffect(() => {
     if (contributeFundsStatus === PROGRESS_STATUS.SUCCESS) {
       refetch();

@@ -5,8 +5,9 @@ import {
 import { REG_MODE, REG_TAB } from '@/app/register/[nodeId]/types';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Button } from '@session/ui/ui/button';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 export function AutoActivateTab() {
   const { mode, changeTab, formMulti, setBackButtonClickCallback, pushQueryParam } =
@@ -28,11 +29,10 @@ export function AutoActivateTab() {
     changeTab(REG_TAB.SUBMIT_MULTI);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
-  }, []);
+  });
 
   return (
     <div className="flex w-full flex-col gap-4">

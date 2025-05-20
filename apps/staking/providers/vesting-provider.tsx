@@ -92,7 +92,10 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     [pathname, router]
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't re-trigger when pathname changes or pref changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies(pathname.startsWith): Don't re-trigger when pathname changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies(router.push): Don't re-trigger when router changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies(getItem): Don't re-trigger getItem changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies(skipped): Don't re-trigger when skip changes
   useEffect(() => {
     if (stakesLoaded) {
       if (

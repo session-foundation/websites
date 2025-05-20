@@ -7,7 +7,7 @@ import {
   getStakedContractCardContractFromConfirmation,
 } from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
-import { useNetworkStatus } from '@/components/StatusBar';
+import { useDisplayStatusBar } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { useStakes } from '@/hooks/useStakes';
 import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
@@ -28,7 +28,6 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import Link from 'next/link';
-import { useEffect } from 'react';
 import type { Address } from 'viem';
 
 export function StakedNodesWithAddress({ address }: { address: Address }) {
@@ -48,15 +47,7 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
     refetch,
     isError,
   } = useStakes(address);
-  const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
-    setNetworkStatusVisible(true);
-    return () => {
-      setNetworkStatusVisible(false);
-    };
-  }, []);
+  useDisplayStatusBar({ network, isLoading, isFetching, refetch });
 
   const hasStakes =
     stakes?.length ||

@@ -29,8 +29,9 @@ import { Form, FormField, useForm } from '@session/ui/ui/form';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
@@ -259,11 +260,10 @@ export function ReserveSlotsInputTab() {
     setIsNewSlotFormVisible(true);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
-  }, []);
+  });
 
   const canReserveSlots =
     reservedStakes.length < SESSION_NODE.MAX_CONTRIBUTORS &&

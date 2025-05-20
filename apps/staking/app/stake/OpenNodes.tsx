@@ -7,7 +7,7 @@ import {
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { OpenNodeCard } from '@/components/OpenNodeCard';
-import { useNetworkStatus } from '@/components/StatusBar';
+import { useDisplayStatusBar } from '@/components/StatusBar';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
 import { useStakes } from '@/hooks/useStakes';
@@ -22,7 +22,7 @@ import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { type ReactNode, useEffect, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { usePreferences } from 'usepref';
 
 export default function OpenNodes() {
@@ -31,8 +31,8 @@ export default function OpenNodes() {
   const address = useCurrentActor();
   const { contracts, network, isFetching, refetch, isError, isLoading } =
     useOpenContributorContracts(address);
+  useDisplayStatusBar({ network, isFetching, refetch });
   const { hiddenContractsWithStakes, awaitingOperatorContracts } = useStakes(address);
-  const { setNetworkStatusVisible } = useNetworkStatus({ network, isFetching, refetch });
 
   const { enabled: isStakingDisabled } = useRemoteFeatureFlagQuery(
     REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI
@@ -61,14 +61,6 @@ export default function OpenNodes() {
       return contributor || reserved || minStakeCalculated > 0n || maxStakeCalculated > 0n;
     });
   }, [contracts, address]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
-    setNetworkStatusVisible(true);
-    return () => {
-      setNetworkStatusVisible(false);
-    };
-  }, []);
 
   return isStakingDisabled ? (
     <StakingDisabled />

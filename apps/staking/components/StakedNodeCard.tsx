@@ -23,8 +23,12 @@ import { useStakes } from '@/hooks/useStakes';
 import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
-import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
-import { formatNumber, formatPercentage, useFormatDate } from '@/lib/locale-client';
+import {
+  formatLocalizedTimeFromSeconds,
+  formatNumber,
+  formatPercentage,
+  useFormatDate,
+} from '@/lib/locale-client';
 import { ButtonDataTestId, NodeCardDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { StakeContributor } from '@session/staking-api-js/schema';

@@ -237,7 +237,7 @@ function ContractActions() {
     approveWrite();
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Don't need to worry about refetch changing
+  // biome-ignore lint/correctness/useExhaustiveDependencies(refetch): Don't need to worry about refetch changing
   useEffect(() => {
     if (status === 'success') void refetch();
   }, [status]);

@@ -22,6 +22,7 @@ import { AlertDialogFooter } from '@session/ui/ui/alert-dialog';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormField, useForm } from '@session/ui/ui/form';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { type Address, isAddress } from 'viem';
@@ -133,10 +134,9 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
     }
   }, [contractCallStatus]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: On mount
-  useEffect(() => {
+  useMount(() => {
     estimateContractWriteFee();
-  }, []);
+  });
 
   return (
     <>
