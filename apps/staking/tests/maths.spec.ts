@@ -23,7 +23,7 @@ function createContributor(amount: bigint): Contributor {
 }
 
 const operatorContributorAmounts = [
-  5000_000000000n,
+  6250_000000000n,
   10000_000000000n,
   15000_000000000n,
   17500_000000000n,
@@ -131,7 +131,7 @@ describe('parseContributorDetails', () => {
   });
   describe('Full node resolves stakes properly', () => {
     const fullContributorList = [
-      createContributor(11000_000000000n),
+      createContributor(FULL_STAKE_AMOUNT - 9000_000000000n),
       ...Array.from({ length: MAX_CONTRIBUTORS - 1 }, () => createContributor(1000_000000000n)),
     ];
 
