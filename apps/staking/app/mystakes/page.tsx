@@ -38,7 +38,9 @@ export default function Page() {
       </div>
       <div className="col-span-2 mt-6 h-full pb-8 md:mt-0 md:max-h-screen-without-header">
         <ModuleGrid variant="section" colSpan={2} className="h-full">
-          <ErrorBoundary errorComponent={ErrorBox}>{<StakedNodesModule />}</ErrorBoundary>
+          <ErrorBoundary errorComponent={ErrorBox}>
+            <StakedNodesModule />
+          </ErrorBoundary>
         </ModuleGrid>
       </div>
     </ModuleGrid>

@@ -20,4 +20,3 @@ export const initLogger = () => {
 };
 
 export const logger = initLogger();
-// logger.level = 'debug';
