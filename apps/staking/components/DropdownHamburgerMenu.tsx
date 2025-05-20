@@ -31,7 +31,7 @@ export function DropdownHamburgerMenu() {
       dictionaryKey === 'faucet' &&
       !(process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true')
     ) {
-      return;
+      continue;
     }
     routes.push({ dictionaryKey, href });
   }
