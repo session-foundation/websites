@@ -3,9 +3,9 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { cn } from "../../lib/utils";
 
-// Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
 
 export type ChartConfig = {
@@ -52,6 +52,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
+          // biome-ignore lint/nursery/useSortedClasses: DO NOT SORT, it breaks the shadcn magic
           "flex w-full h-full justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className
         )}
@@ -78,6 +79,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
   return (
     <style
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: from shadcn
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
@@ -111,7 +113,7 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed"
       nameKey?: string
       labelKey?: string
-      valueFormatter?: (value: string) => string
+      valueFormatter?: (value: ValueType) => string
     }
 >(
   (
@@ -187,6 +189,7 @@ const ChartTooltipContent = React.forwardRef<
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
+          {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: from shadcn, it works */}
           {payload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
@@ -241,7 +244,7 @@ const ChartTooltipContent = React.forwardRef<
                         </span>
                       </div>
                       {item.value && (
-                        <span className="font-mono font-medium tabular-nums text-foreground">
+                        <span className='font-medium font-mono text-foreground tabular-nums'>
                           {valueFormatter ? valueFormatter(item.value) : item.value.toLocaleString()}
                         </span>
                       )}

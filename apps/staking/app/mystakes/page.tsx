@@ -1,5 +1,6 @@
 import DailyRewardModule from '@/app/mystakes/modules/DailyRewardModule';
 import PriceModule from '@/app/mystakes/modules/PriceModule';
+import StakedNodesModule from '@/app/mystakes/modules/StakedNodesModule';
 import UnclaimedRewardsModule from '@/app/mystakes/modules/UnclaimedRewardsModule';
 import UnclaimedStakesModule from '@/app/mystakes/modules/UnclaimedStakesModule';
 import UnlockingStakesModule from '@/app/mystakes/modules/UnlockingStakesModule';
@@ -33,12 +34,11 @@ export default function Page() {
           <UnclaimedStakesModule />
           <ClaimTokensModule />
         </ModuleGrid>
-        {/*<NoticeModule />*/}
         <PriceModule />
       </div>
       <div className="col-span-2 mt-6 h-full pb-8 md:mt-0 md:max-h-screen-without-header">
         <ModuleGrid variant="section" colSpan={2} className="h-full">
-          <ErrorBoundary errorComponent={ErrorBox}>{/*<StakedNodesModule />*/}</ErrorBoundary>
+          <ErrorBoundary errorComponent={ErrorBox}>{<StakedNodesModule />}</ErrorBoundary>
         </ModuleGrid>
       </div>
     </ModuleGrid>

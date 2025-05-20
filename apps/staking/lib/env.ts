@@ -11,6 +11,11 @@ if (!NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID) {
   throw new Error('NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID is required');
 }
 
+export const NEXT_PUBLIC_PRICE_TOKEN = process.env.NEXT_PUBLIC_PRICE_TOKEN!;
+if (!NEXT_PUBLIC_PRICE_TOKEN) {
+  throw new Error('NEXT_PUBLIC_PRICE_TOKEN is required');
+}
+
 export const NEXT_PUBLIC_TESTNET = process.env.NEXT_PUBLIC_TESTNET === 'true';
 
 export const isProduction = isProductionEnv();

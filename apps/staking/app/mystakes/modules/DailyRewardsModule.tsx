@@ -11,6 +11,9 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
+const formatDateTime = (unixSeconds: number) =>
+  formatDate(new Date(unixSeconds * 1000), { dateStyle: 'medium', timeStyle: 'medium' });
+
 export default function DailyRewardsModule(params?: AddressModuleProps) {
   const dictionary = useTranslations('modules.addressDailyRewards');
   const dictionaryShared = useTranslations('modules.shared');
@@ -36,17 +39,11 @@ export default function DailyRewardsModule(params?: AddressModuleProps) {
   );
 
   const formattedStartDate = useMemo(
-    () =>
-      dailyRewardFrom
-        ? formatDate(new Date(dailyRewardFrom * 1000), { dateStyle: 'long', timeStyle: 'long' })
-        : null,
+    () => (dailyRewardFrom ? formatDateTime(dailyRewardFrom) : null),
     [dailyRewardFrom]
   );
   const formattedEndDate = useMemo(
-    () =>
-      dailyRewardTo
-        ? formatDate(new Date(dailyRewardTo * 1000), { dateStyle: 'long', timeStyle: 'long' })
-        : null,
+    () => (dailyRewardTo ? formatDateTime(dailyRewardTo) : null),
     [dailyRewardTo]
   );
 

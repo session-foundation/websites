@@ -8,25 +8,14 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from '@session/ui/lib/re
 import { CardContent } from '@session/ui/components/ui/card';
 
 import { BACKEND, PREFERENCE } from '@/lib/constants';
+import { NEXT_PUBLIC_PRICE_TOKEN } from '@/lib/env';
 import { formatDate, formatUSD } from '@/lib/locale-client';
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@session/ui/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@session/ui/components/ui/chart';
 import { toast } from '@session/ui/lib/toast';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
 import { z } from 'zod';
-
-const chartConfig = {
-  price: {
-    label: 'Price',
-    color: 'var(--session-green)',
-  },
-} satisfies ChartConfig;
 
 const pricesSchema = z.object({
   prices: z.array(
@@ -37,26 +26,13 @@ const pricesSchema = z.object({
   ),
 });
 
-const formatPriceTimeMedium = (unixSeconds: number) =>
-  formatDate(new Date(unixSeconds * 1000), { dateStyle: 'medium', timeStyle: 'short' });
-const formatPriceTimeShort = (unixSeconds: number) =>
-  formatDate(new Date(unixSeconds * 1000), { dateStyle: 'short', timeStyle: 'short' });
-
-export default function PriceModule() {
-  const showAxis = false;
-  const dictionary = useTranslations('modules.price');
-  const titleFormat = useTranslations('modules.title');
-  const title = dictionary('title');
-
+const useHistoricalPriceQuery = () => {
   const { getItem } = usePreferences();
-
   const autoRefresh = getItem(PREFERENCE.AUTO_REFRESH_BACKEND);
-
-  const { data } = useQuery({
+  return useQuery({
     queryKey: ['prices'],
     queryFn: async () => {
-      const oneWeekAgo = Math.trunc(Date.now() / 1000) - 7 * 24 * 60 * 60;
-      const res = await fetch(`/api/network/prices/chainflip/${oneWeekAgo}`);
+      const res = await fetch(`/api/network/prices/${NEXT_PUBLIC_PRICE_TOKEN}/7d`);
 
       if (!res.ok) {
         toast.error('Failed to fetch price data.');
@@ -83,6 +59,20 @@ export default function PriceModule() {
     },
     refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : false,
   });
+};
+
+const formatPriceTimeMedium = (unixSeconds: number) =>
+  formatDate(new Date(unixSeconds * 1000), { dateStyle: 'medium', timeStyle: 'short' });
+
+const formatPriceDateShort = (unixSeconds: number) =>
+  formatDate(new Date(unixSeconds * 1000), { month: 'numeric', day: 'numeric' });
+
+export default function PriceModule() {
+  const dictionary = useTranslations('modules.price');
+  const titleFormat = useTranslations('modules.title');
+  const title = dictionary('title');
+
+  const { data } = useHistoricalPriceQuery();
 
   const price = data?.length ? data[data.length - 1] : undefined;
   const usdFormatted = formatUSD(price?.price ?? 0);
@@ -90,25 +80,27 @@ export default function PriceModule() {
 
   return (
     <Module size="lg" className="flex max-h-52 flex-grow md:max-h-full" noPadding>
-      <CardContent
-        className="p-0"
-        style={{
-          maxHeight: '100%',
-        }}
-      >
+      <CardContent className="max-h-full p-0">
         <ModuleTitle className="p-4">
           {titleFormat('format', { title })} {usdFormatted}
         </ModuleTitle>
         <ModuleTooltip>{dictionary.rich('description', { date_time: date })}</ModuleTooltip>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer
+          config={{
+            price: {
+              label: 'Price',
+              color: 'var(--session-green)',
+            },
+          }}
+        >
           <LineChart
             accessibilityLayer
             data={data}
             margin={{
-              left: showAxis ? -10 : 12,
+              left: -10,
               right: 12,
-              top: 8,
-              bottom: showAxis ? 60 : 72,
+              top: 12,
+              bottom: 62,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -117,23 +109,23 @@ export default function PriceModule() {
               tickLine={false}
               axisLine={false}
               tickMargin={4}
-              tickFormatter={(value) => formatPriceTimeShort(value)}
+              tickFormatter={(value) => formatPriceDateShort(value)}
               fontSize={10}
-              hide={!showAxis}
             />
             <YAxis
               dataKey="price"
               domain={['dataMin', 'dataMax']}
               tickFormatter={(v) => formatUSD(v)}
               fontSize={10}
-              hide={!showAxis}
             />
             <ChartTooltip
               cursor={true}
               content={
                 <ChartTooltipContent
                   labelFormatter={(_, payload) => formatPriceTimeMedium(payload[0]?.payload.t)}
-                  valueFormatter={(v) => formatUSD(v)}
+                  valueFormatter={(v) =>
+                    typeof v === 'number' ? formatUSD(v) : v.toLocaleString()
+                  }
                 />
               }
             />
@@ -143,7 +135,6 @@ export default function PriceModule() {
               stroke="var(--color-price)"
               strokeWidth={2}
               dot={{
-                fill: 'var(--color-price)',
                 r: 0,
               }}
               activeDot={{
