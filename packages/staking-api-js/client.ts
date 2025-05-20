@@ -171,6 +171,12 @@ export class SessionStakingClient {
     return await this.request<BlsRewardsResponse>(options);
   }
 
+  /**
+   * Fetches the daily rewards information for a given address.
+   *
+   * @param address The address to fetch daily rewards information for.
+   * @returns daily rewards info.
+   */
   public async getDailyRewardsInfo({
     address,
   }: {
