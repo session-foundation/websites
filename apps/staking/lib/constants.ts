@@ -23,7 +23,7 @@ export enum URL {
   LEARN_MORE_UNCLAIMED_REWARDS = 'https://docs.getsession.org/staking-reward-pool#claiming-rewards',
   OXEN_SERVICE_NODE_BONUS_PROGRAM = 'https://swap.oxen.io/',
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = 'https://token.getsession.org/testnet-incentive-program',
-  INCENTIVE_PROGRAM_TOS = 'https://token.getsession.org/incentive-program-terms',
+  TERMS_AND_CONDITIONS = ' https://token.getsession.org/staking-terms-conditions',
   BUG_BOUNTY_PROGRAM = 'https://token.getsession.org/bug-bounty-program',
   TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
   TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
@@ -36,7 +36,7 @@ export enum URL {
 
 export const LANDING_BUTTON_URL = {
   PRIMARY: '/stake',
-  SECONDARY: URL.DOCS,
+  SECONDARY: 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
 };
 
 export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register'];
@@ -112,7 +112,7 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
   { dictionaryKey: 'explorer', href: 'https://session.observer', linkType: 'external' },
   { dictionaryKey: 'bridgeArbitrum', href: '/bridge/arbitrum', linkType: 'external' },
-  { dictionaryKey: 'swap', href: 'https://bridge.oxen.io', linkType: 'external' },
+  { dictionaryKey: 'swap', href: 'https://claim.oxen.io', linkType: 'external' },
 ] as const;
 
 export enum QUERY {
@@ -159,8 +159,8 @@ export enum SESSION_NODE {
   INITIAL_DOWNTIME_CREDITS_MS = 2 * 60 * 60 * 1000,
 }
 
-/** 20,000 SESH  */
-export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+/** 25,000 SESH  */
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 25_000_000000000n;
 export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
 export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
 export const SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT =

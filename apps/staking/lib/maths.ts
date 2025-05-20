@@ -7,7 +7,7 @@ import {
 import { areHexesEqual } from '@session/util-crypto/string';
 import type { Address } from 'viem';
 
-const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+const SESSION_NODE_FULL_STAKE_AMOUNT = 25_000_000000000n;
 
 export const parseContributorDetails = (contributors: Array<ReservedContributorStruct> = []) => {
   let totalStaked = 0n;

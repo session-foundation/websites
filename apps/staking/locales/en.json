@@ -56,9 +56,9 @@
   },
   "fee": {
     "networkFee": "Network Fee",
-    "networkFeeTooltip": "The estimated amount of {gasTokenSymbol} it will cost to process this transaction on the {mainNetworkChain} network. <link>Learn more</link>",
+    "networkFeeTooltip": "The estimated amount of {gasTokenSymbol} it will cost to process this transaction on the {mainNetworkChain} network. {linkOut}",
     "missingFees": "Unable to fetch fee estimates for all transactions. Fee estimate may be inaccurate.",
-    "gasHigh": "The price of gas is higher than usual on {mainNetworkChain} due to high demand. <link>Learn more</link>"
+    "gasHigh": "The price of gas is higher than usual on {mainNetworkChain} due to high demand. {linkOut}"
   },
   "maths": {
     "outOf": "{count}/{max}"
@@ -91,7 +91,7 @@
       "ariaExplorer": "Go to appchain explorer"
     },
     "managedBy": "",
-    "swap": "Swap",
+    "swap": "Migrate",
     "bridgeArbitrum": "Arbitrum Bridge"
   },
   "wallet": {
@@ -242,7 +242,7 @@
     },
     "openNodes": {
       "title": "Available Nodes",
-      "description": "Nodes that are available for staking. <link>Learn more</link>",
+      "description": "Nodes that are available for staking.",
       "noNodesP1": "There are currently no Session Nodes available to stake to.",
       "noNodesP2": "Check out the <link>docs</link> to learn about setting up and registering your own Session Node.",
       "landingP1": "Stake your {tokenSymbol} to multicontributor nodes and help secure the network. ",
@@ -289,16 +289,6 @@
     "balance": {
       "title": "Total Staked",
       "description": "Total {tokenSymbol} you have staked to nodes."
-    },
-    "networkDailyRewards": {
-      "title": "Estimated Daily Reward",
-      "titleShort": "Est. Daily Reward",
-      "description": "Estimated reward for one node based on latest information. Actual protocol rewards vary. <link>Learn more</link>"
-    },
-    "addressDailyRewards": {
-      "title": "24h Rewards",
-      "titleShort": "24h Rewards",
-      "description": "Rewards earned over the past 24 hours. From {startDate} to {endDate}"
     },
     "totalRewards": {
       "title": "Total Rewards Earned",
@@ -376,7 +366,7 @@
     },
     "points": {
       "title": "Testnet Points",
-      "description": "These points determine your eventual share of Session Tokens as part of the Testnet Incentive Program. <link>Learn more</link>."
+      "description": "These points determine your eventual share of Session Tokens as part of the Testnet Incentive Program. {linkOut}"
     },
     "comingSoon": {
       "title": "Coming Soon",
@@ -384,7 +374,8 @@
     },
     "notice": {
       "title": "Welcome to the Session Network",
-      "description": "The Session Network is a decentralized physical infrastructure network, custom-built to support the Session messenger. By running or staking to a node, you're helping to secure the network and route and store messages. <link>Learn more</link>\n<br></br><br></br>\nOperators and stakers transitioning to the Session Network can swap remaining tokens for {tokenSymbol} <bridge-link>here</bridge-link>"
+      "description": "The Session Network is a decentralized physical infrastructure network, custom-built to support the Session messenger. By running or staking to a node, you're helping to secure the network and route and store messages. {linkOut}",
+      "description2": "Operators and stakers transitioning to the Session Network can migrate remaining tokens for {tokenSymbol} <bridge-link>here</bridge-link>"
     },
     "referral": {
       "title": "Referral Program",
@@ -393,6 +384,16 @@
       "description3": "By participating in the Testnet Referral Program, you agree to these <link>terms and conditions</link>.",
       "description4": "This code has been used <text-medium>{uses}</text-medium> times and has <text-medium>{remainingUses}</text-medium> remaining uses. Each use gives <text-medium>{drip}</text-medium>",
       "showButton": "Show referral link"
+    },
+    "networkDailyRewards": {
+      "title": "Estimated Daily Reward",
+      "titleShort": "Est. Daily Reward",
+      "description": "Estimated reward for one node based on latest information. Actual protocol rewards vary. {linkOut}"
+    },
+    "addressDailyRewards": {
+      "titleShort": "24h Rewards",
+      "title": "24h Rewards",
+      "description": "Rewards earned over the past 24 hours. From {startDate} to {endDate}"
     }
   },
   "sessionNodes": {
@@ -710,7 +711,7 @@
           "success": "Registered node and staked {tokenSymbol} on Arbitrum",
           "errorTemplate": "Arbitrum registration failed, {reason}",
           "errors": {
-            "MaxContributorsExceeded": "maximum contributors exceeded",
+            "MaxContributorsExceeded": "max contributors exceeded",
             "ContributionTotalMismatch": "stake does not match required amount",
             "BLSPubkeyAlreadyExists": "node already registered with the same SN Key",
             "InvalidBLSProofOfPossession": "BLS proof of possession is invalid",
@@ -720,10 +721,10 @@
         },
         "network": {
           "idle": "Registering node on {sessionNetwork}",
-          "pending": "Registering node on {sessionNetwork} ({progress} confirmations, approximately {remainingTime} remaining",
+          "pending": "Registering node on {sessionNetwork} ({progress} confirmations, approximately {remainingTime} remaining)",
           "success": "Registering node on {sessionNetwork} confirmed",
           "errors": {
-            "template": "Registration of node on {sessionNetwork} failed, {reason}, please try again later"
+            "template": "Registering node on {sessionNetwork} failed, {reason}. Please try again later."
           }
         }
       },
@@ -794,7 +795,7 @@
       "contributors": "Contributors",
       "contributorsTooltip": "The number of contributors to this node",
       "feeEstimate": "Fee Estimate",
-      "feeEstimateTooltip": "An estimate of the amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link> <br></br> {formula}",
+      "feeEstimateTooltip": "An estimate of the amount of {gasTokenSymbol} this transaction will use. {linkOut}",
       "button": {
         "submit": "Stake {amount}",
         "submitting": "Staking {amount}...",
@@ -844,8 +845,8 @@
       "exitUnlockTimerDescription": "Time left until the node is available for exit. Return <text-bold>{relativeTime}</text-bold> ({date}) to exit the node.",
       "exitTimerNotification": "Exit available. Exit <text-bold>{relativeTime}</text-bold> to avoid penalty.",
       "exitTimerNotificationNow": "Exit now to avoid penalty.",
-      "exitTimerDescription": "Node is ready for exit. If you don't exit <text-bold>{relativeTime}</text-bold>, you may be subject to a small penalty. <link>Learn more</link>",
-      "exitTimerDescriptionNow": "Node is ready for exit. If you don't exit now, you may be subject to a small penalty. <link>Learn more</link>",
+      "exitTimerDescription": "Node is ready for exit. If you don't exit <text-bold>{relativeTime}</text-bold>, you may be subject to a small penalty. {linkOut}",
+      "exitTimerDescriptionNow": "Node is ready for exit. If you don't exit now, you may be subject to a small penalty. {linkOut}",
       "deregistrationTimerNotification": "Deregistration <text-bold>{relativeTime}</text-bold>",
       "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered <text-bold>{relativeTime}</text-bold> ({date}).",
       "deregisteredProcessing": "Deregistration is being processed",
@@ -853,8 +854,6 @@
       "deregisteredTimerDescription": "Time left until the stake is unlocked ({date}).",
       "liquidationNotification": "Awaiting liquidation",
       "liquidationDescription": "The node is inactive and waiting to be removed by the network.",
-      "joiningNetworkNotification": "Node joining in ~{relativeTime}",
-      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)",
       "finalize": {
         "buttonText": "Activate",
         "buttonAria": "Activate the node on the network",
@@ -868,7 +867,7 @@
         "dialog": {
           "title": "Exit Node",
           "requestFee": "Exit Fee",
-          "requestFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link>",
+          "requestFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. {linkOut}",
           "amountStaked": "Amount Staked",
           "amountStakedTooltip": "Amount of {tokenSymbol} you are staking to this node.",
           "buttons": {
@@ -912,7 +911,8 @@
           "submitAria": "Request exit for the node {pubKey}",
           "description": {
             "title": "Are you sure?",
-            "content": "Your node will be ready to exit the network {request_time}.<br></br><br></br>After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. <link>Learn more</link><br></br><br></br>Once the node has exited the network, you can reclaim your stake via the Staking Portal."
+            "content2": "Once the node has exited the network, you can reclaim your stake via the Staking Portal.",
+            "content1": "Your node will be ready to exit the network {request_time}.<br></br><br></br>After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. {linkOut}"
           },
           "buttons": {
             "submit": "Request Exit",
@@ -922,7 +922,7 @@
           },
           "write": {
             "requestFee": "Exit request Fee",
-            "requestFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. <link>Learn more</link>",
+            "requestFeeTooltip": "The amount of {gasTokenSymbol} this transaction will use. {linkOut}",
             "amountStaked": "Amount Staked",
             "amountStakedTooltip": "Amount of {tokenSymbol} staked by you in this node.",
             "buttons": {
@@ -1171,9 +1171,18 @@
     "stakeSmallWarning": "Contributors staking less than {amount} cannot request to exit a node during the first {smallContributorLeaveRequestDelay} of its operation. {linkOut}",
     "smallContributorExitTooSoon": "Contributors staking less than {amount} cannot request to exit a node during the first {smallContributorLeaveRequestDelay} of its operation. Please return <text-bold>{relativeTime}</text-bold> to request an exit. {linkOut}",
     "exitRejectedRecently": "Error: Exit request was rejected by the Network. Please retry <text-bold>{relativeTime}</text-bold>.",
-    "requestExit": "Exiting your stake will cause stakes for ALL contributors and the operator to be exited, not just your own. Once confirmed, this node will be ready to exit the network {relativeRequestTime}.\n<br></br><br></br>\nAfter this {requestTime} waiting period, the operator or contributors have a {exitTime} window to confirm the exit. If the exit is not confirmed within this {exitTime} window, the operator may be subject to a small penalty. <link>Learn more</link>\n<br></br><br></br>\nOnce the node has exited the network, you can reclaim your stake via the Staking Portal.",
     "cancel": "Cancel",
     "claimLimitInfo": "To keep the Session Network secure, there is a network-wide limit on how much {tokenSymbol} can be claimed within a {claimCycleTime} period. The limit has been reached. {linkOut}",
-    "claimLimitCountdown": "You can claim your {tokenSymbol} <text-bold>{relativeTime}</text-bold>."
+    "claimLimitCountdown": "You can claim your {tokenSymbol} <text-bold>{relativeTime}</text-bold>.",
+    "requestExit2": "Once the node has exited the network, you can reclaim your stake via the Staking Portal.",
+    "requestExit1": "Exiting your stake will cause stakes for ALL contributors and the operator to be exited, not just your own. Once confirmed, this node will be ready to exit the network {relativeRequestTime}.\n<br></br><br></br>\nAfter this {requestTime} waiting period, the operator or contributors have a {exitTime} window to confirm the exit. If the exit is not confirmed within this {exitTime} window, the operator may be subject to a small penalty. {linkOut}"
+  },
+  "terms": {
+    "title": "Staking Portal Terms",
+    "description": "By accessing or using the Session Staking Portal, you agree to comply with and be bound by the <link>Terms and Conditions</link>. Please read these Terms carefully. If you do not agree to these terms, you must not use the Software. ",
+    "agree": "I have read, understand, and agree to the <link>Terms and Conditions</link>, including any additional guidelines and future modifications outlined therein. ",
+    "button": "Continue",
+    "mustAccept": "You must accept the <link>Terms and Conditions</link> to participate",
+    "accepted": "You have accepted the <link>Terms and Conditions</link>"
   }
 }

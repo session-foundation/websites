@@ -279,7 +279,7 @@ export function ManageStakeContribution({
               ),
               linkOut: '',
             })}
-            href="https://docs.getsession.org/"
+            href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#unlock-stake-before-registration"
           />
         }
       >

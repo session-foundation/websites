@@ -3,6 +3,7 @@ import { WizardSectionDescription } from '@/components/Wizard';
 import {
   PREFERENCE,
   SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT,
+  SESSION_NODE_TIME,
   SESSION_NODE_TIME_STATIC,
 } from '@/lib/constants';
 import { formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
@@ -34,7 +35,18 @@ export function StakeNotice({
     >
       <WizardSectionDescription
         description={dict.rich('stake', { linkOut: '' })}
-        href="https://docs.getsession.org"
+        href="https://docs.getsession.org/session-network/session-nodes/deregistration"
+      />
+      <WizardSectionDescription
+        description={dict.rich('confirmStake', {
+          linkOut: '',
+          unlockWaitTime: formatLocalizedTimeFromSeconds(
+            isSmallContributor
+              ? SESSION_NODE_TIME_STATIC.SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_SECONDS
+              : SESSION_NODE_TIME().EXIT_REQUEST_TIME_SECONDS
+          ),
+        })}
+        href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#unlock-stake-before-registration"
       />
       {isSmallContributor ? (
         <WizardSectionDescription
@@ -45,7 +57,7 @@ export function StakeNotice({
             ),
             amount: formatSENTBigInt(SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT, 0),
           })}
-          href="https://docs.getsession.org/"
+          href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#unlock-stake-while-operating"
         />
       ) : null}
     </Notice>

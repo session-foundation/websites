@@ -12,7 +12,7 @@ const address = '0x63528ae9247165fd89f093a591238009720fb422';
 const RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC_URL;
 const isCI = process.env.CI === 'true';
 
-const FULL_STAKE_AMOUNT = 20_000_000000000n;
+const FULL_STAKE_AMOUNT = 25_000_000000000n;
 const MAX_CONTRIBUTORS = 10;
 
 function createContributor(amount: bigint): Contributor {

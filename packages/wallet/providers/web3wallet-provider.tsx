@@ -170,7 +170,7 @@ const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
     className: 'bg-session-white',
   },
   hideIfZero: true,
-  children: <TokenActionButton href="https://ethereum.oxen.io">Swap</TokenActionButton>,
+  children: <TokenActionButton href="https://claim.oxen.io">Migrate</TokenActionButton>,
 };
 
 const createConfig = (projectId: string, testnet: boolean) => {
