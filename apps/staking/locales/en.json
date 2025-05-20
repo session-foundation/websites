@@ -957,7 +957,9 @@
             }
           }
         }
-      }
+      },
+      "joiningNetworkNotification": "Node joining in ~{relativeTime}",
+      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)"
     }
   },
   "statusBar": {

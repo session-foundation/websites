@@ -3,6 +3,7 @@
 import { TOS_LOCKED_PATHS, URL } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { externalLink } from '@/lib/locale-defaults';
 import { useSetTOS, useTOS } from '@/providers/tos-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,13 +25,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@session/ui/ui/dialog';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useTranslations } from 'next-intl';
-import { externalLink } from '@/lib/locale-defaults';
 
 const FormSchema = z.object({
   accept: z
@@ -47,7 +47,7 @@ export function TOSHandler() {
   const accepted = useTOS();
   const { acceptTOS } = useSetTOS();
 
-  const dict = useTranslations('terms')
+  const dict = useTranslations('terms');
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
@@ -58,13 +58,9 @@ export function TOSHandler() {
 
   function onSubmit(data: FormSchemaType) {
     if (!data.accept) {
-      toast.error(
-       dict.rich('mustAccept', {link: externalLink(URL.TERMS_AND_CONDITIONS)})
-      );
+      toast.error(dict.rich('mustAccept', { link: externalLink(URL.TERMS_AND_CONDITIONS) }));
     } else {
-      toast.success(
-       dict.rich('accepted', {link: externalLink(URL.TERMS_AND_CONDITIONS)})
-      );
+      toast.success(dict.rich('accepted', { link: externalLink(URL.TERMS_AND_CONDITIONS) }));
       acceptTOS(true);
     }
   }
@@ -92,7 +88,7 @@ export function TOSHandler() {
             </Link>
           </DialogTitle>
           <DialogDescription className="text-session-white">
-            {dict.rich('description', {link: externalLink(URL.TERMS_AND_CONDITIONS)})}
+            {dict.rich('description', { link: externalLink(URL.TERMS_AND_CONDITIONS) })}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -106,12 +102,14 @@ export function TOSHandler() {
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <FormLabel className="leading-none">
-                    {dict.rich('agree', {link: externalLink(URL.TERMS_AND_CONDITIONS)})}
+                    {dict.rich('agree', { link: externalLink(URL.TERMS_AND_CONDITIONS) })}
                   </FormLabel>
                 </FormItem>
               )}
             />
-            <FormSubmitButton data-testid={ButtonDataTestId.Agree_TOS}>{dict('button')}</FormSubmitButton>
+            <FormSubmitButton data-testid={ButtonDataTestId.Agree_TOS}>
+              {dict('button')}
+            </FormSubmitButton>
           </form>
         </Form>
       </DialogContent>

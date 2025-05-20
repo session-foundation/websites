@@ -320,23 +320,23 @@ export enum VOLATILE_STORAGE {
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
   [REG_TAB.START]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
   [REG_TAB.STAKE_AMOUNT]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-session-tokens',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-sesh',
   [REG_TAB.OPERATOR_FEE]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee',
   [REG_TAB.REWARDS_ADDRESS]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr',
   [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
   [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
   [REG_TAB.RESERVE_SLOTS]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node',
   [REG_TAB.RESERVE_SLOTS_INPUT]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node',
   [REG_TAB.AUTO_ACTIVATE]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
 } as const;
 
 export enum BACKEND {
