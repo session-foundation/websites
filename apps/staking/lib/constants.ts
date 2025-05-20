@@ -23,7 +23,7 @@ export enum URL {
   LEARN_MORE_UNCLAIMED_REWARDS = 'https://docs.getsession.org/staking-reward-pool#claiming-rewards',
   OXEN_SERVICE_NODE_BONUS_PROGRAM = 'https://swap.oxen.io/',
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = 'https://token.getsession.org/testnet-incentive-program',
-  TERMS_AND_CONDITIONS = ' https://token.getsession.org/staking-terms-conditions',
+  TERMS_AND_CONDITIONS = 'https://token.getsession.org/staking-terms-conditions',
   BUG_BOUNTY_PROGRAM = 'https://token.getsession.org/bug-bounty-program',
   TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
   TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
