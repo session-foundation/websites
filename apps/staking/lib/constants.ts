@@ -32,7 +32,7 @@ export enum URL {
   SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
-  TOKEN_UNISWAP_POOL_ARB= 'https://app.uniswap.org/explore/pools/arbitrum/0x249afd31a49d9bd44259b8f03dd74030d7d41153bc891d12f469c5cb94b03729'
+  TOKEN_UNISWAP_POOL_ARB = 'https://app.uniswap.org/explore/pools/arbitrum/0x249afd31a49d9bd44259b8f03dd74030d7d41153bc891d12f469c5cb94b03729',
 }
 
 export const LANDING_BUTTON_URL = {
