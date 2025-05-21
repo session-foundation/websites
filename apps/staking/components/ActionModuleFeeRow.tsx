@@ -1,7 +1,7 @@
 import { ActionModuleRow } from '@/components/ActionModule';
+import { WizardSectionDescription } from '@/components/Wizard';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
 import { LoadingText } from '@session/ui/components/loading-text';
 import { AlertTooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
@@ -35,16 +35,30 @@ export default function ActionModuleFeeRow({
   return typeof feeEstimate !== 'undefined' ? (
     <ActionModuleRow
       label={dictionaryFee('networkFee')}
-      tooltip={dictionaryFee.rich('networkFeeTooltip', {
-        link: externalLink(URL.GAS_INFO),
-      })}
+      tooltip={
+        <WizardSectionDescription
+          className="text-base md:text-base"
+          description={dictionaryFee.rich('networkFeeTooltip', {
+            linkOut: '',
+          })}
+          href={URL.GAS_INFO}
+        />
+      }
       containerClassName={className}
       last={last}
     >
       <span className="inline-flex flex-row items-center gap-1.5 align-middle">
         {gasHighShowTooltip ? (
           <AlertTooltip
-            tooltipContent={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+            tooltipContent={
+              <WizardSectionDescription
+                className="text-base md:text-base"
+                description={dictionaryFee.rich('gasHigh', {
+                  linkOut: '',
+                })}
+                href={URL.GAS_INFO}
+              />
+            }
           />
         ) : null}
         {feeEstimate ? feeEstimate : <LoadingText className="mr-8 scale-x-75 scale-y-50" />}

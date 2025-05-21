@@ -23,20 +23,20 @@ export enum URL {
   LEARN_MORE_UNCLAIMED_REWARDS = 'https://docs.getsession.org/staking-reward-pool#claiming-rewards',
   OXEN_SERVICE_NODE_BONUS_PROGRAM = 'https://swap.oxen.io/',
   SESSION_TOKEN_COMMUNITY_SNAPSHOT = 'https://token.getsession.org/testnet-incentive-program',
-  INCENTIVE_PROGRAM_TOS = 'https://token.getsession.org/incentive-program-terms',
+  TERMS_AND_CONDITIONS = 'https://token.getsession.org/staking-terms-conditions',
   BUG_BOUNTY_PROGRAM = 'https://token.getsession.org/bug-bounty-program',
   TESTNET_REFERRALS = 'https://token.getsession.org/blog/testnet-referrals',
   TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
   BUG_BOUNTY_TOS = 'https://token.getsession.org/bug-bounty-terms',
   DOCS = 'https://docs.getsession.org/',
-  SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup',
+  SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
 }
 
 export const LANDING_BUTTON_URL = {
   PRIMARY: '/stake',
-  SECONDARY: URL.DOCS,
+  SECONDARY: 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
 };
 
 export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register'];
@@ -112,7 +112,7 @@ export const EXTERNAL_ROUTES: LinkItem[] = [
   { dictionaryKey: 'docs', href: 'https://docs.getsession.org', linkType: 'external' },
   { dictionaryKey: 'explorer', href: 'https://session.observer', linkType: 'external' },
   { dictionaryKey: 'bridgeArbitrum', href: '/bridge/arbitrum', linkType: 'external' },
-  { dictionaryKey: 'swap', href: 'https://bridge.oxen.io', linkType: 'external' },
+  { dictionaryKey: 'swap', href: 'https://claim.oxen.io', linkType: 'external' },
 ] as const;
 
 export enum QUERY {
@@ -159,8 +159,8 @@ export enum SESSION_NODE {
   INITIAL_DOWNTIME_CREDITS_MS = 2 * 60 * 60 * 1000,
 }
 
-/** 20,000 SESH  */
-export const SESSION_NODE_FULL_STAKE_AMOUNT = 20_000_000000000n;
+/** 25,000 SESH  */
+export const SESSION_NODE_FULL_STAKE_AMOUNT = 25_000_000000000n;
 export const SESSION_NODE_MIN_STAKE_MULTI_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT / 4n;
 export const SESSION_NODE_MIN_STAKE_SOLO_OPERATOR = SESSION_NODE_FULL_STAKE_AMOUNT;
 export const SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT =
@@ -320,23 +320,23 @@ export enum VOLATILE_STORAGE {
 
 export const REGISTRATION_LINKS: Partial<Record<REG_TAB, string>> = {
   [REG_TAB.START]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#what-is-the-minimum-and-maximum-i-can-stake-to-a-session-node-as-an-operator',
   [REG_TAB.STAKE_AMOUNT]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-session-tokens',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#if-i-am-running-a-multicontributor-node-do-i-also-have-to-stake-sesh',
   [REG_TAB.OPERATOR_FEE]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#what-is-the-multicontributor-operator-fee',
   [REG_TAB.REWARDS_ADDRESS]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#can-i-specify-a-separate-rewards-address-from-the-wallet-i-am-registering-my-node-with-or-staking-fr',
   [REG_TAB.REWARDS_ADDRESS_INPUT_MULTI]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
   [REG_TAB.REWARDS_ADDRESS_INPUT_SOLO]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-staking-rewards-and-operator-fees-get-sent-to-my-wallet-address',
   [REG_TAB.RESERVE_SLOTS]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-i-reserve-a-stake-for-specific-contributors-to-my-multicontributor-node',
   [REG_TAB.RESERVE_SLOTS_INPUT]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node ',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-many-contributors-can-i-reserve-stakes-for-on-my-multicontributor-node',
   [REG_TAB.AUTO_ACTIVATE]:
-    'https://docs.getsession.org/user-guides/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
+    'https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#how-do-i-activate-my-node-once-it-is-fully-staked',
 } as const;
 
 export enum BACKEND {

@@ -1,7 +1,6 @@
 import { WizardSectionDescription } from '@/components/Wizard';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import useRelativeTime from '@/hooks/useRelativeTime';
-import { URL } from '@/lib/constants';
 import { formatEnglishTimeDistance } from '@/lib/locale-client';
 import { bigIntToNumber } from '@session/util-crypto/maths';
 import { useTranslations } from 'next-intl';
@@ -25,7 +24,7 @@ export function ClaimTokensOverLimit({ address }: { address: Address }) {
           linkOut: '',
           claimCycleTime: formatEnglishTimeDistance(bigIntToNumber(claimCycle, 0), ' ', false),
         })}
-        href={URL.DOCS}
+        href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#network-claims-limit"
       />
       <br />
       {dict.rich('claimLimitCountdown', {

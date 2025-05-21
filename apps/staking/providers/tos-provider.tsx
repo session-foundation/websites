@@ -7,7 +7,7 @@ type TOSContext = {
   setAcceptedTOS: (accepted: boolean) => void;
 };
 
-const localStorageTOSKey = 'tosAccepted';
+const localStorageTOSKey = 'termsAndConditionsAccepted';
 
 function saveAcceptedTOSToStorage(accepted: boolean) {
   localStorage.setItem(localStorageTOSKey, `${accepted}`);

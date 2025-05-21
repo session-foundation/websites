@@ -12,6 +12,7 @@ import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordi
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import { useNetworkStatus } from '@/components/StatusBar';
+import { WizardSectionDescription } from '@/components/Wizard';
 import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
 } from '@/hooks/useContributeStakeToOpenNode';
@@ -354,9 +355,15 @@ export function SubmitMultiTab() {
       </ActionModuleRow>
       <ActionModuleFeeAccordionRow
         label={dictFee('networkFee')}
-        tooltip={dictFee.rich('networkFeeTooltip', {
-          link: externalLink(URL.GAS_INFO),
-        })}
+        tooltip={
+          <WizardSectionDescription
+            className="text-base md:text-base"
+            description={dictFee.rich('networkFeeTooltip', {
+              linkOut: '',
+            })}
+            href={URL.GAS_INFO}
+          />
+        }
         fees={[
           {
             label: dictSubmit('deployCost'),
@@ -379,7 +386,15 @@ export function SubmitMultiTab() {
         totalFee={feeFormattedDeploy}
         hasMissingEstimatesTooltipContent={dictFee('missingFees')}
         gasHighShowTooltip={gasHighShowTooltip}
-        gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+        gasHighTooltip={
+          <WizardSectionDescription
+            className="text-base md:text-base"
+            description={dictFee.rich('gasHigh', {
+              linkOut: '',
+            })}
+            href={URL.GAS_INFO}
+          />
+        }
       />
       <Form {...formMulti}>
         <form

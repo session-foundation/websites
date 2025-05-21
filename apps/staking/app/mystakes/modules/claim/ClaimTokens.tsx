@@ -2,11 +2,11 @@ import type { ClaimDict } from '@/app/mystakes/modules/ClaimTokensModule';
 import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
+import { WizardSectionDescription } from '@/components/Wizard';
 import useClaimRewards from '@/hooks/useClaimRewards';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { DYNAMIC_MODULE, HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { BlsRewardsSignatureResponse } from '@session/staking-api-js/schema';
@@ -123,9 +123,15 @@ export function ClaimTokens({
         </ActionModuleRow>
         <ActionModuleFeeAccordionRow
           label={dictionaryFee('networkFee')}
-          tooltip={dictionaryFee.rich('networkFeeTooltip', {
-            link: externalLink(URL.GAS_INFO),
-          })}
+          tooltip={
+            <WizardSectionDescription
+              className="text-base md:text-base"
+              description={dictionaryFee.rich('networkFeeTooltip', {
+                linkOut: '',
+              })}
+              href={URL.GAS_INFO}
+            />
+          }
           fees={[
             {
               label: dictionary('dialog.updateBalanceCost'),
@@ -141,7 +147,15 @@ export function ClaimTokens({
             },
           ]}
           hasMissingEstimatesTooltipContent={dictionaryFee('missingFees')}
-          gasHighTooltip={dictionaryFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+          gasHighTooltip={
+            <WizardSectionDescription
+              className="text-base md:text-base"
+              description={dictionaryFee.rich('gasHigh', {
+                linkOut: '',
+              })}
+              href={URL.GAS_INFO}
+            />
+          }
           gasHighShowTooltip={gasHighShowTooltip}
           totalFee={feeEstimate}
         />

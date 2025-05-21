@@ -7,9 +7,9 @@ import {
   parseStakeEventState,
 } from '@/components/StakedNode/state';
 import { isReadyToExitByUnlock } from '@/components/StakedNodeCard';
-import { SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC, URL } from '@/lib/constants';
+import { WizardSectionDescription } from '@/components/Wizard';
+import { SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC } from '@/lib/constants';
 import { formatLocalizedTimeFromSeconds, useFormatDate } from '@/lib/locale-client';
-import { externalLink } from '@/lib/locale-defaults';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/schema';
 import { Tooltip } from '@session/ui/ui/tooltip';
@@ -49,17 +49,23 @@ export const ReadyForExitNotification = ({
 
   return (
     <Tooltip
-      tooltipContent={dictionary.rich(
-        isDeregistered
-          ? 'liquidationDescription'
-          : isLiquidationSoon
-            ? 'exitTimerDescriptionNow'
-            : 'exitTimerDescription',
-        {
-          relativeTime,
-          link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
-        }
-      )}
+      tooltipContent={
+        <WizardSectionDescription
+          className="text-base md:text-base"
+          description={dictionary.rich(
+            isDeregistered
+              ? 'liquidationDescription'
+              : isLiquidationSoon
+                ? 'exitTimerDescriptionNow'
+                : 'exitTimerDescription',
+            {
+              relativeTime,
+              linkOut: '',
+            }
+          )}
+          href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#liquidation-penalty "
+        />
+      }
     >
       <NodeNotification level={isLiquidationSoon ? 'error' : 'warning'} className={className}>
         {isLiquidationSoon

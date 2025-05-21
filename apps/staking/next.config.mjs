@@ -85,6 +85,11 @@ const nextConfig = {
           `https://bridge.arbitrum.io/?destinationChain=${isTestnet ? 'sepolia':'ethereum'}&sourceChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}`,
         permanent: false,
       },
+      {
+        source: '/claim/oxen',
+        destination: 'https://claim.oxen.io',
+        permanent: false,
+      }
     ];
   },
   rewrites: async () => {

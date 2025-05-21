@@ -16,6 +16,7 @@ export enum REMOTE_FEATURE_FLAG {
   DISABLE_NODE_STAKING_MULTI = 'remote_disableNodeStakingMulti',
   ENABLE_MAINTENANCE_MODE = 'remote_enableMaintenanceMode',
   ENABLE_APP_MAINTENANCE_MODE = 'remote_enableAppMaintenanceMode',
+  DISABLE_PRICE_MODULE = 'remote_disablePriceModule',
 }
 
 export const remoteFeatureFlagsInfo: Record<
@@ -65,6 +66,10 @@ export const remoteFeatureFlagsInfo: Record<
   [REMOTE_FEATURE_FLAG.ENABLE_APP_MAINTENANCE_MODE]: {
     name: 'Enable App Maintenance Mode',
     description: 'Enable the app maintenance mode.',
+  },
+  [REMOTE_FEATURE_FLAG.DISABLE_PRICE_MODULE]: {
+    name: 'Disable Price Module',
+    description: 'Disable the price module and use the notice module.',
   },
 };
 

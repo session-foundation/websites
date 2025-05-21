@@ -1,9 +1,9 @@
 'use client';
 
 import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
+import { WizardSectionDescription } from '@/components/Wizard';
 import useDailyNodeReward from '@/hooks/useDailyNodeReward';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
@@ -27,7 +27,13 @@ export default function DailyNodeReward() {
   return (
     <Module>
       <ModuleTooltip>
-        {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_DAILY_REWARDS) })}
+        <WizardSectionDescription
+          className="text-base md:text-base"
+          description={dictionary.rich('description', {
+            linkOut: '',
+          })}
+          href={URL.LEARN_MORE_DAILY_REWARDS}
+        />
       </ModuleTooltip>
       <ModuleTitleDynamic
         longText={titleFormat('format', { title })}

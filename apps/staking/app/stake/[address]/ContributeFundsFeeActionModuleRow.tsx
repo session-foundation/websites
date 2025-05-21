@@ -1,7 +1,7 @@
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
+import { WizardSectionDescription } from '@/components/Wizard';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import { HANDRAIL_THRESHOLDS, SIGNIFICANT_FIGURES, URL } from '@/lib/constants';
-import { externalLink } from '@/lib/locale-defaults';
 import { useContributeFundsFeeEstimate } from '@session/contracts/hooks/ServiceNodeContribution';
 import {
   formatSENTBigInt,
@@ -91,9 +91,15 @@ export function ContributeFundsFeeActionModuleRow({
   return (
     <ActionModuleFeeAccordionRow
       label={dictFee('networkFee')}
-      tooltip={dictFee.rich('networkFeeTooltip', {
-        link: externalLink(URL.GAS_INFO),
-      })}
+      tooltip={
+        <WizardSectionDescription
+          className="text-base md:text-base"
+          description={dictFee.rich('networkFeeTooltip', {
+            linkOut: '',
+          })}
+          href={URL.GAS_INFO}
+        />
+      }
       fees={[
         {
           label: dictShared('proxyApprovalCost'),
@@ -114,7 +120,15 @@ export function ContributeFundsFeeActionModuleRow({
       totalFee={needsApproval ? feeEstimate : feeFormattedContributeFunds}
       hasMissingEstimatesTooltipContent={dictFee('missingFees')}
       gasHighShowTooltip={gasHighShowTooltip}
-      gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+      gasHighTooltip={
+        <WizardSectionDescription
+          className="text-base md:text-base"
+          description={dictFee.rich('gasHigh', {
+            linkOut: '',
+          })}
+          href={URL.GAS_INFO}
+        />
+      }
     />
   );
 }

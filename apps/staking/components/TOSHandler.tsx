@@ -3,6 +3,7 @@
 import { TOS_LOCKED_PATHS, URL } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
+import { externalLink } from '@/lib/locale-defaults';
 import { useSetTOS, useTOS } from '@/providers/tos-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@session/ui/ui/dialog';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
@@ -45,6 +47,8 @@ export function TOSHandler() {
   const accepted = useTOS();
   const { acceptTOS } = useSetTOS();
 
+  const dict = useTranslations('terms');
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -54,25 +58,9 @@ export function TOSHandler() {
 
   function onSubmit(data: FormSchemaType) {
     if (!data.accept) {
-      toast.error(
-        <span>
-          You must accept the{' '}
-          <Link href={URL.INCENTIVE_PROGRAM_TOS} className="underline" target="_blank" prefetch>
-            Terms and Conditions
-          </Link>{' '}
-          to participate
-        </span>
-      );
+      toast.error(dict.rich('mustAccept', { link: externalLink(URL.TERMS_AND_CONDITIONS) }));
     } else {
-      toast.success(
-        <span>
-          You have accepted the Testnet Incentive Program{' '}
-          <Link href={URL.INCENTIVE_PROGRAM_TOS} className="underline" target="_blank" prefetch>
-            Terms and Conditions
-          </Link>
-          .
-        </span>
-      );
+      toast.success(dict.rich('accepted', { link: externalLink(URL.TERMS_AND_CONDITIONS) }));
       acceptTOS(true);
     }
   }
@@ -89,7 +77,7 @@ export function TOSHandler() {
       <DialogContent hideCloseButton className="bg-session-black text-session-white">
         <DialogHeader>
           <DialogTitle>
-            Incentivised Testnet Terms{' '}
+            {dict('title')}
             <Link
               href="/"
               prefetch
@@ -100,18 +88,7 @@ export function TOSHandler() {
             </Link>
           </DialogTitle>
           <DialogDescription className="text-session-white">
-            By accessing or using the Session Testnet Software, you agree to comply with and be
-            bound by the{' '}
-            <Link
-              href={URL.INCENTIVE_PROGRAM_TOS}
-              className="text-session-green"
-              target="_blank"
-              prefetch
-            >
-              Terms and Conditions
-            </Link>
-            . Please read these Terms carefully. If you do not agree to these Terms, you must not
-            use the Software or attempt to participate in the Program.
+            {dict.rich('description', { link: externalLink(URL.TERMS_AND_CONDITIONS) })}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -125,21 +102,14 @@ export function TOSHandler() {
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <FormLabel className="leading-none">
-                    I have read, understand, and agree to the{' '}
-                    <Link
-                      href={URL.INCENTIVE_PROGRAM_TOS}
-                      target="_blank"
-                      className="text-session-green"
-                      prefetch
-                    >
-                      Terms and Conditions
-                    </Link>
-                    , including any additional guidelines and future modifications outlined therein.
+                    {dict.rich('agree', { link: externalLink(URL.TERMS_AND_CONDITIONS) })}
                   </FormLabel>
                 </FormItem>
               )}
             />
-            <FormSubmitButton data-testid={ButtonDataTestId.Agree_TOS}>Continue</FormSubmitButton>
+            <FormSubmitButton data-testid={ButtonDataTestId.Agree_TOS}>
+              {dict('button')}
+            </FormSubmitButton>
           </form>
         </Form>
       </DialogContent>

@@ -18,7 +18,7 @@ export function RegistrationNotice() {
     >
       <WizardSectionDescription
         description={dict.rich('register', { linkOut: '' })}
-        href="https://docs.getsession.org/"
+        href="https://docs.getsession.org/session-network/session-nodes/deregistration"
       />
     </Notice>
   );

@@ -5,13 +5,12 @@ import { useTranslations } from 'next-intl';
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from '@session/ui/lib/recharts';
 
-import { CardContent } from '@session/ui/components/ui/card';
-
 import { BACKEND, PREFERENCE } from '@/lib/constants';
 import { NEXT_PUBLIC_PRICE_TOKEN } from '@/lib/env';
 import { formatDate, formatUSD } from '@/lib/locale-client';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@session/ui/components/ui/chart';
 import { toast } from '@session/ui/lib/toast';
+import { CardContent } from '@session/ui/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';

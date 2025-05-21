@@ -1,9 +1,8 @@
 'use client';
 
-import { URL } from '@/lib/constants';
+import { WizardSectionDescription } from '@/components/Wizard';
 import { externalLink } from '@/lib/locale-defaults';
 import { Module, ModuleHeader, ModuleText } from '@session/ui/components/Module';
-import Typography from '@session/ui/components/Typography';
 import { useTranslations } from 'next-intl';
 
 export default function NoticeModule() {
@@ -13,12 +12,15 @@ export default function NoticeModule() {
     <Module size="lg" className="flex flex-grow">
       <ModuleHeader className="overflow-auto">
         <ModuleText>{dict('title')}</ModuleText>
-        <Typography variant="p" className="mt-6">
-          {dict.rich('description', {
-            link: externalLink(URL.DOCS),
-            'bridge-link': externalLink('https://getsession.org/'),
-          })}
-        </Typography>
+        <WizardSectionDescription
+          className="mt-6 text-base md:text-base"
+          description={dict.rich('description', { linkOut: '' })}
+          href="https://docs.getsession.org/session-network"
+        />
+        <br />
+        {dict.rich('description2', {
+          'bridge-link': externalLink('/claim/oxen'),
+        })}
       </ModuleHeader>
     </Module>
   );

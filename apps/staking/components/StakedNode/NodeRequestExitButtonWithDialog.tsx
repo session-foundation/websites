@@ -1,12 +1,12 @@
 import { CollapsableContent } from '@/components/NodeCard';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
 import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
+import { WizardSectionDescription } from '@/components/Wizard';
 import useRequestNodeExit from '@/hooks/useRequestNodeExit';
-import { SESSION_NODE_TIME, SOCIALS, URL } from '@/lib/constants';
+import { SESSION_NODE_TIME, SOCIALS } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { formatEnglishTimeDistance, formatLocalizedTimeFromSeconds } from '@/lib/locale-client';
-import { externalLink } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/schema';
 import { Social } from '@session/ui/components/SocialLinkList';
@@ -136,8 +136,9 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
 
   return (
     <>
-      <p>
-        {dictInfoNotice.rich('requestExit', {
+      <WizardSectionDescription
+        className="text-base md:text-base"
+        description={dictInfoNotice.rich('requestExit1', {
           relativeRequestTime: formatLocalizedTimeFromSeconds(
             SESSION_NODE_TIME(chainId).EXIT_REQUEST_TIME_SECONDS,
             {
@@ -152,9 +153,12 @@ function RequestNodeExitDialog({ node, onSubmit }: { node: Stake; onSubmit: () =
             SESSION_NODE_TIME(chainId).EXIT_GRACE_TIME_SECONDS,
             '-'
           ),
-          link: externalLink(URL.NODE_LIQUIDATION_LEARN_MORE),
+          linkOut: '',
         })}
-      </p>
+        href="https://docs.getsession.org/contribute-to-the-session-network/frequently-asked-questions-faq#liquidation-penalty"
+      />
+      <br />
+      <p>{dictInfoNotice.rich('requestExit2')}</p>
       <AlertDialogFooter className="mt-4 flex w-full flex-col font-medium sm:flex-row">
         <Button
           variant="destructive-ghost"

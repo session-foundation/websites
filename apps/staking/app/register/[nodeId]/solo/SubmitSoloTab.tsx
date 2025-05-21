@@ -12,6 +12,7 @@ import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
+import { WizardSectionDescription } from '@/components/Wizard';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRelativeTime from '@/hooks/useRelativeTime';
@@ -23,7 +24,6 @@ import {
   URL,
 } from '@/lib/constants';
 import { formatLocalizedRelativeTimeToNowClient, useFormatDate } from '@/lib/locale-client';
-import { externalLink } from '@/lib/locale-defaults';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { addresses, isValidChainId } from '@session/contracts';
@@ -300,9 +300,15 @@ export function SubmitSoloTab() {
       ) : (
         <ActionModuleFeeAccordionRow
           label={dictFee('networkFee')}
-          tooltip={dictFee.rich('networkFeeTooltip', {
-            link: externalLink(URL.GAS_INFO),
-          })}
+          tooltip={
+            <WizardSectionDescription
+              className="text-base md:text-base"
+              description={dictFee.rich('networkFeeTooltip', {
+                linkOut: '',
+              })}
+              href={URL.GAS_INFO}
+            />
+          }
           fees={[
             {
               label: dictShared('proxyApprovalCost'),
@@ -322,7 +328,15 @@ export function SubmitSoloTab() {
           totalFee={needsApproval ? feeEstimate : feeFormattedAddBlsPubKey}
           hasMissingEstimatesTooltipContent={dictFee('missingFees')}
           gasHighShowTooltip={gasHighShowTooltip}
-          gasHighTooltip={dictFee.rich('gasHigh', { link: externalLink(URL.GAS_INFO) })}
+          gasHighTooltip={
+            <WizardSectionDescription
+              className="text-base md:text-base"
+              description={dictFee.rich('gasHigh', {
+                linkOut: '',
+              })}
+              href={URL.GAS_INFO}
+            />
+          }
         />
       )}
       <Form {...formSolo}>
