@@ -66,10 +66,7 @@ export function DropdownHamburgerMenu() {
         ))}
         <DropdownMenuItemNavLink
           href={URL.TOKEN_UNISWAP_POOL_ARB}
-          className={cn(
-            'inline-flex items-center gap-1.5',
-            'md:hidden'
-          )}
+          className={cn('inline-flex items-center gap-1.5', 'md:hidden')}
         >
           <SessionTokenIcon className={cn('h-4 w-4')} />
           {navDictionary('getToken')}
