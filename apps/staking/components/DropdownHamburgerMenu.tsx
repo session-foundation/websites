@@ -12,6 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
+import { URL } from '@/lib/constants';
+import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
+import { cn } from '@session/ui/lib/utils';
 
 function DropdownMenuItemNavLink({ label, children, ...props }: NavLinkProps) {
   return (
@@ -61,6 +64,16 @@ export function DropdownHamburgerMenu() {
         {EXTERNAL_ROUTES.map(({ dictionaryKey, href }) => (
           <DropdownMenuItemNavLink key={href} href={href} label={navDictionary(dictionaryKey)} />
         ))}
+        <DropdownMenuItemNavLink
+          href={URL.TOKEN_UNISWAP_POOL_ARB}
+          className={cn(
+            'inline-flex items-center gap-1.5',
+            'md:hidden'
+          )}
+        >
+          <SessionTokenIcon className={cn('h-4 w-4')} />
+          {navDictionary('getToken')}
+        </DropdownMenuItemNavLink>
       </DropdownMenuContent>
     </DropdownMenu>
   );
