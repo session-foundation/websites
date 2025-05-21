@@ -29,7 +29,7 @@ export enum URL {
   TESTNET_REFERRALS_TOS = 'https://token.getsession.org/referral-program-terms',
   BUG_BOUNTY_TOS = 'https://token.getsession.org/bug-bounty-terms',
   DOCS = 'https://docs.getsession.org/',
-  SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup',
+  SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
 }
