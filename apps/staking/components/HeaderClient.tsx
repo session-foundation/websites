@@ -6,6 +6,7 @@ import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { cn } from '@session/ui/lib/utils';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
+import { GetSeshButton } from '@/components/GetSeshButton';
 
 // TODO: implement dynamic imports for these hydration issue components and build skeletons for them
 // const DynamicHeaderNavLinks = dynamic(() => import('./DynamicHeaderNavLinks'), { ssr: false, loading: () => <LoadingText /> })
@@ -22,6 +23,7 @@ export default function HeaderClient({ children }: { children?: ReactNode }) {
         <DynamicHeaderNavLinks />
       </div>
       <div className="flex flex-row justify-end gap-3">
+        <GetSeshButton className={'hidden md:inline-flex'} />
         <DynamicWalletButton />
         <DropdownHamburgerMenu />
       </div>
