@@ -2,11 +2,11 @@
 
 import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
 import DynamicHeaderNavLinks from '@/components/DynamicHeaderNavLinks';
+import { GetSeshButton } from '@/components/GetSeshButton';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { cn } from '@session/ui/lib/utils';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
-import { GetSeshButton } from '@/components/GetSeshButton';
 
 // TODO: implement dynamic imports for these hydration issue components and build skeletons for them
 // const DynamicHeaderNavLinks = dynamic(() => import('./DynamicHeaderNavLinks'), { ssr: false, loading: () => <LoadingText /> })
