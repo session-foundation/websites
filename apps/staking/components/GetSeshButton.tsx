@@ -1,10 +1,10 @@
+import { URL } from '@/lib/constants';
+import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
+import { cn } from '@session/ui/lib/utils';
+import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { URL } from '@/lib/constants';
-import { Button } from '@session/ui/ui/button';
-import { ButtonDataTestId } from '@/testing/data-test-ids';
-import { cn } from '@session/ui/lib/utils';
-import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 
 export const GetSeshButton = ({ className }: { className?: string }) => {
   const dictionary = useTranslations('navigation');

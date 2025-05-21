@@ -2,8 +2,11 @@
 
 import { NavLink, type NavLinkProps } from '@/components/NavLink';
 import { DYNAMIC_LINKS, EXTERNAL_ROUTES, SSR_LINKS } from '@/lib/constants';
+import { URL } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
+import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
+import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import {
   DropdownMenu,
@@ -12,9 +15,6 @@ import {
   DropdownMenuTrigger,
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
-import { URL } from '@/lib/constants';
-import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
-import { cn } from '@session/ui/lib/utils';
 
 function DropdownMenuItemNavLink({ label, children, ...props }: NavLinkProps) {
   return (
