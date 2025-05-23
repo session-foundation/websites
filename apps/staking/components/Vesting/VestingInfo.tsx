@@ -6,6 +6,7 @@ import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { DYNAMIC_MODULE } from '@/lib/constants';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
@@ -15,7 +16,7 @@ import { useTranslations } from 'next-intl';
 export function useVestingInitialBalance() {
   const vestingContract = useActiveVestingContract();
   const balance = vestingContract?.initial_amount ?? 0n;
-  const formattedBalance = formatSENTBigInt(balance);
+  const formattedBalance = formatSENTBigInt(balance, SENT_DECIMALS);
   return { balance, formattedBalance };
 }
 
@@ -39,7 +40,7 @@ export function VestingInfo({
   const address = vestingContract?.address;
 
   const { totalStakedFormatted } = useTotalStaked(vestingContract?.address);
-  const { formattedAmount: vestingUnstakedBalance } = useVestingUnstakedBalance();
+  const { formattedAmountAccurate: vestingUnstakedBalance } = useVestingUnstakedBalance();
   const { unclaimed } = useNetworkBalances({ addressOverride: address });
   const formattedUnclaimedRewardsAmount = formatSENTBigInt(
     unclaimed,

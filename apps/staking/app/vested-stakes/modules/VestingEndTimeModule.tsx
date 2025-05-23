@@ -8,12 +8,19 @@ import { Module, ModuleText, ModuleTitle, ModuleTooltip } from '@session/ui/comp
 import { LoadingText } from '@session/ui/components/loading-text';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 export function useVestingEndTime() {
   const contract = useActiveVestingContract();
-  const date = contract ? new Date(contract?.time_end * 1000) : null;
+  const date = useMemo(() => (contract ? new Date(contract.time_end * 1000) : null), [contract]);
   const formattedDate = useFormatDate(date, { dateStyle: 'full', timeStyle: 'long' });
-  const relativeTime = useRelativeTime(date, { addSuffix: false });
+
+  const unit = useMemo(
+    () => (date && date.getTime() - Date.now() > 24 * 60 * 60 * 1000 ? 'day' : undefined),
+    [date]
+  );
+
+  const relativeTime = useRelativeTime(date, { addSuffix: false, unit });
   const isEnded = (date?.getTime() ?? 0) < Date.now();
   return { date, formattedDate, relativeTime, isEnded };
 }
