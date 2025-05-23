@@ -27,7 +27,7 @@ const pricesSchema = z.object({
 
 const useHistoricalPriceQuery = () => {
   const { getItem } = usePreferences();
-  const autoRefresh = getItem(PREFERENCE.AUTO_REFRESH_BACKEND);
+  const autoRefresh = !getItem(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
   return useQuery({
     queryKey: ['prices'],
     queryFn: async () => {
