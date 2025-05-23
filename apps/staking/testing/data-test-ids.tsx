@@ -144,6 +144,7 @@ export enum ButtonDataTestId {
   Stake_Notice_Continue = 'button:stake-notice-continue',
   Stake_Notice_Cancel = 'button:stake-notice-cancel',
   Unstake_Operator_Notice_Continue = 'button:unstake-operator-notice-continue',
+  Token_Uniswap_Pool_Arb = 'button:token-uniswap-pool-arb',
 }
 
 export enum InputDataTestId {

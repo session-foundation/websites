@@ -2,7 +2,7 @@
 
 import ActionModule from '@/components/ActionModule';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
-import { BASE_URL, FAUCET_ERROR } from '@/lib/constants';
+import { FAUCET_ERROR } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MODULE_GRID_ALIGNMENT, ModuleGridHeader } from '@session/ui/components/ModuleGrid';
