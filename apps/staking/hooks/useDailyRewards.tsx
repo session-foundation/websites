@@ -13,7 +13,7 @@ export const useDailyRewards = (params?: { addressOverride?: Address }) => {
   const { getItem } = usePreferences();
   const address = params?.addressOverride ?? connectedAddress;
 
-  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+  const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
   const enabled = !!address;
 

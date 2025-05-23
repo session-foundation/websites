@@ -231,7 +231,7 @@ export enum PREFERENCE {
   SHOW_L2_HEIGHT_ON_STATUS_BAR = 'showL2HeightOnStatusBar',
   SKIP_VESTING_POPUP_ON_STARTUP = 'skipVestingPopupOnStartup',
   ANONYMIZE_UI = 'anonymizeUI',
-  AUTO_REFRESH_BACKEND = 'autoRefreshBackend',
+  DISABLE_BACKEND_AUTO_REFRESH = 'disableBackendAutoRefresh',
   OPEN_NODES_SHOW_AWAITING_OPERATOR = 'openNodesShowAwaitingOperator',
   INFO_NOTICE_DONT_SHOW_REGISTER = 'infoNoticeDontShowRegister',
   INFO_NOTICE_DONT_SHOW_STAKE = 'infoNoticeDontShowStake',
@@ -246,10 +246,10 @@ type WalletSheetSettingDetailsGenerator = Record<
 >;
 
 export const prefDetails = {
-  [PREFERENCE.AUTO_REFRESH_BACKEND]: {
-    label: 'Auto Refresh',
+  [PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH]: {
+    label: 'Disable Auto Refresh',
     type: 'boolean',
-    defaultValue: true,
+    defaultValue: false,
   },
   [PREFERENCE.BACKEND_URL]: {
     label: 'Backend URL',

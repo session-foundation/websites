@@ -24,7 +24,7 @@ export const useUnclaimedTokens = (params?: { addressOverride?: Address }) => {
   const address = params?.addressOverride ?? connectedAddress;
 
   const enabled = !!address;
-  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+  const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
   const {
     data,

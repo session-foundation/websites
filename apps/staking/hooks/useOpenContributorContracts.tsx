@@ -19,7 +19,7 @@ import type { Address } from 'viem';
  */
 export function useOpenContributorContracts(overrideAddress?: Address) {
   const { getItem } = usePreferences();
-  const autoRefresh = !!getItem<boolean>(PREFERENCE.AUTO_REFRESH_BACKEND);
+  const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
   const { address: connectedAddress } = useWallet();
   const address = overrideAddress ?? connectedAddress;
 
