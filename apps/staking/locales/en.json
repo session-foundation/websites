@@ -788,6 +788,10 @@
       "alreadyRegisteredRunning": {
         "specialTitle": "Already Registered!",
         "specialDescription": "Another node with this key is already registered. Your registration cannot be finalized until the other node exits the network."
+      },
+      "problemContactSupport": {
+        "specialTitle": "Node configuration issue detected!",
+        "specialDescription": "Something went wrong with your node's registration! Please submit a ticket in the <discord-link>Session Token Discord</discord-link> for assistance."
       }
     },
     "node": {

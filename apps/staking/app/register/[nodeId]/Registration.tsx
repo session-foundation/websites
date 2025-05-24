@@ -15,6 +15,7 @@ import { StakeAmountTab } from '@/app/register/[nodeId]/multi/StakeAmountTab';
 import { SubmitMultiTab } from '@/app/register/[nodeId]/multi/SubmitMultiTab';
 import { SuccessMultiTab } from '@/app/register/[nodeId]/multi/SuccessMultiTab';
 import { AlreadyRegisteredRunningTab } from '@/app/register/[nodeId]/shared/AlreadyRegisteredRunningTab';
+import { ProblemContactSupport } from '@/app/register/[nodeId]/shared/ProblemContactSupport';
 import { RegistrationNotice } from '@/app/register/[nodeId]/shared/RegistrationNotice';
 import { type RegistrationStartFormSchema, StartTab } from '@/app/register/[nodeId]/shared/Start';
 import { RewardsAddressInputSoloTab } from '@/app/register/[nodeId]/solo/RewardsAddressInputSoloTab';
@@ -115,6 +116,7 @@ type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
 
 const RegistrationContext = createContext<RegistrationContext | undefined>(undefined);
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: its a very complex component
 function RegistrationProvider({
   blsKey,
   blsSignature,
@@ -270,17 +272,23 @@ function RegistrationProvider({
       };
     }, []);
 
+  const isBannedBlsKey =
+    blsKey ===
+    '0a8fbccd309ee68609524b979ccbb49eee8d59738b57736c5084d156d5da6fa810074def6fc38434952b1eaa7f627f421d8cd3f8ac06e12110178cf542841776';
+
   const alreadyRegisteredMulti =
     contract !== null &&
     (contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib ||
       contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib);
 
   const [_tab, setTab] = useState<REG_TAB>(
-    networkBlsKeys?.has(blsKey)
-      ? REG_TAB.ALREADY_REGISTERED_RUNNING
-      : alreadyRegisteredMulti
-        ? REG_TAB.ALREADY_REGISTERED_MULTI
-        : (queryParamStartTab ?? REG_TAB.START)
+    isBannedBlsKey
+      ? REG_TAB.PROBLEM_CONTACT_SUPPORT
+      : networkBlsKeys?.has(blsKey)
+        ? REG_TAB.ALREADY_REGISTERED_RUNNING
+        : alreadyRegisteredMulti
+          ? REG_TAB.ALREADY_REGISTERED_MULTI
+          : (queryParamStartTab ?? REG_TAB.START)
   );
 
   const tab = useMemo(() => {
@@ -461,6 +469,12 @@ function getTab(tab: REG_TAB) {
     case REG_TAB.ALREADY_REGISTERED_MULTI:
       return <AlreadyRegisteredMultiTab />;
 
+    /**
+     * Problem contact support
+     */
+    case REG_TAB.PROBLEM_CONTACT_SUPPORT:
+      return <ProblemContactSupport />;
+
     default:
       throw new Error(`Unknown tab: ${tab}`);
   }
@@ -558,7 +572,9 @@ export function RegistrationWizard() {
   );
 
   const titleKey =
-    tab === REG_TAB.START || tab === REG_TAB.ALREADY_REGISTERED_RUNNING
+    tab === REG_TAB.START ||
+    tab === REG_TAB.ALREADY_REGISTERED_RUNNING ||
+    tab === REG_TAB.PROBLEM_CONTACT_SUPPORT
       ? 'registerANewNode'
       : nodeType === NODE_TYPE.SOLO
         ? 'singleContributorNode'

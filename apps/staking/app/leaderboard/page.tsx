@@ -20,12 +20,6 @@ import Link from 'next/link';
 import { type Address, checksumAddress } from 'viem';
 
 // TODO: Delete route after testnet incentive program is over
-
-function smartFormatPercentage(decimalPercent: number) {
-  const maximumFractionDigits = decimalPercent > 0.01 ? 2 : 3;
-  return formatPercentage(decimalPercent, { maximumFractionDigits });
-}
-
 export default function PointsPage() {
   const { address } = useWallet();
   const { data, isLoading, isError } = useQuery({
@@ -102,11 +96,9 @@ export default function PointsPage() {
                     )}
                   />
                 </TableCell>
-                <TableCell className="text-end">
-                  {formatNumber(score, { maximumFractionDigits: 0 })}
-                </TableCell>
+                <TableCell className="text-end">{formatNumber(score)}</TableCell>
                 <TableCell className="p-0 py-4 ps-2 text-start">
-                  {smartFormatPercentage(percent / 100)}
+                  {formatPercentage(percent / 100)}
                 </TableCell>
               </TableRow>
             ))}

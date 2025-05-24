@@ -17,6 +17,9 @@ export enum REG_TAB {
   // Already Registered
   ALREADY_REGISTERED_RUNNING = 13,
   ALREADY_REGISTERED_MULTI = 14,
+
+  // Problem contact support
+  PROBLEM_CONTACT_SUPPORT = 15,
 }
 
 export function parseTab(tab: REG_TAB) {
@@ -54,6 +57,9 @@ export function parseTab(tab: REG_TAB) {
       return 'alreadyRegisteredRunning';
     case REG_TAB.ALREADY_REGISTERED_MULTI:
       return 'alreadyRegisteredMulti';
+    // Banned
+    case REG_TAB.PROBLEM_CONTACT_SUPPORT:
+      return 'problemContactSupport';
     default:
       throw new Error(`Unknown tab: ${tab}`);
   }
