@@ -13,13 +13,18 @@ import {
   type SessionStakingClient,
   createSessionStakingClient,
 } from '@session/staking-api-js/client';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
 
 export type QueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
   Parameters<typeof useQuery<Awaited<ReturnType<Q>>['data']>>[0],
   'queryFn' | 'queryKey'
+>;
+
+export type MutationQueryOptions<Q extends StakingBackendQueryWithParams> = Omit<
+  Parameters<typeof useMutation<Awaited<ReturnType<Q>>['data']>>[0],
+  'mutationFn'
 >;
 
 let client: SessionStakingClient | undefined;
@@ -109,6 +114,21 @@ export function useStakingBackendQueryWithParams<Q extends StakingBackendQueryWi
     ...getStakingBackendQueryWithParamsArgs(query, params),
     ...queryOptions,
     queryFn: async () => {
+      const res = await query(stakingBackendClient, params);
+      debugLogRequest(res);
+      return res.data;
+    },
+  });
+}
+
+export function useStakingBackendMutationQueryWithParams<Q extends StakingBackendQueryWithParams>(
+  query: Q,
+  queryOptions?: MutationQueryOptions<Q>
+) {
+  const stakingBackendClient = useStakingBackendBrowserClient();
+  return useMutation<Parameters<Q>[1]>({
+    ...queryOptions,
+    mutationFn: async (params: Parameters<Q>[1]) => {
       const res = await query(stakingBackendClient, params);
       debugLogRequest(res);
       return res.data;

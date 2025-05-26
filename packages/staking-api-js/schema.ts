@@ -250,6 +250,32 @@ export const registrationsResponseSchema = z.object({
 
 export type RegistrationsResponse = z.infer<typeof registrationsResponseSchema>;
 
+export const deleteNodeRegistrationSchema = z.object({
+  /** Ethereum address of the node operator */
+  operator: ethereumAddressSchema,
+  /** BLS public key of the node */
+  pubkey_bls: z.string(),
+  /** Ed25519 public key of the node. This is the node's "SN key" */
+  pubkey_ed25519: ed25519PublicKeySchema,
+  /** Timestamp of when the registration command was executed */
+  timestamp_registration: z.number(),
+  /** Signer of the message. This may differ from the operator if it's a registration for a vesting contract */
+  signer: ethereumAddressSchema,
+  /** Timestamp of the signature */
+  timestamp_signature: z.number(),
+  /** Signature of the delete request. All the other body data signed by the ethereum address */
+  signature: z.string(),
+});
+
+export type DeleteRegistrationBody = z.infer<typeof deleteNodeRegistrationSchema>;
+
+export const deleteResponseSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+export type DeleteResponse = z.infer<typeof deleteResponseSchema>;
+
 //////////////////////////////////////////////////////////////
 //                                                          //
 //                         Rewards                          //

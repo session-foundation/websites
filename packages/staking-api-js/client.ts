@@ -7,6 +7,8 @@ import type {
   ContributionContractByKeyResponse,
   ContributionContractResponse,
   DailyRewardsResponse,
+  DeleteRegistrationBody,
+  DeleteResponse,
   ExitLiquidationListResponse,
   NetworkInfoResponse,
   NodesBlsKeysResponse,
@@ -256,6 +258,16 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return await this.request<RegistrationsResponse>(options);
+  }
+
+  public async deleteNodeRegistration(
+    params: DeleteRegistrationBody
+  ): Promise<StakingBackendResponse<DeleteResponse>> {
+    const options: RequestOptions = {
+      endpoint: `/registration/${params.pubkey_ed25519}`,
+      method: 'DELETE',
+    };
+    return await this.request<DeleteResponse>(options);
   }
 }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRegistrationList } from '@/app/register/RegistrationListProvider';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeRegistrationCard } from '@/components/NodeRegistrationCard';
 import { NodesListSkeleton } from '@/components/NodesListModule';
@@ -25,15 +26,7 @@ export default function NodeRegistrations() {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.nodeRegistrations');
   const showNoNodes = useFeatureFlag(FEATURE_FLAG.MOCK_NO_PENDING_NODES);
-
-  // TODO: use once we have user preferences
-  /* const hideRegistrationsEnabled = useExperimentalFeatureFlag(
-     EXPERIMENTAL_FEATURE_FLAG.HIDE_REGISTRATIONS
-   );
-   const hiddenPreparedRegistrations = useUserPreference('hiddenPreparedRegistrations');
-   const forceShowPendingNodesModule = useUserPreference('forceShowPendingNodesModule');
-
-   const [showHidden, setShowHidden] = useState<boolean>(false); */
+  const { editing } = useRegistrationList();
 
   const { isConnected } = useWallet();
   const { data, isLoading, isError, refetch, isFetching } = useRegistrationsForCurrentActor();
@@ -101,7 +94,9 @@ export default function NodeRegistrations() {
     isLoading || isLoadingStakes ? (
       <NodesListSkeleton />
     ) : registrations?.length ? (
-      registrations.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
+      registrations.map((node) => (
+        <NodeRegistrationCard key={node.pubkey_ed25519} node={node} showDeleteButton={editing} />
+      ))
     ) : (
       <NoNodes />
     )
