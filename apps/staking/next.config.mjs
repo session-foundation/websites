@@ -76,13 +76,13 @@ const nextConfig = {
       {
         source: '/bridge/arbitrum',
         destination:
-          `https://bridge.arbitrum.io/?destinationChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}&sourceChain=${isTestnet ? 'sepolia' : 'ethereum'}`,
+          `https://bridge.arbitrum.io/?destinationChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}&sourceChain=${isTestnet ? 'sepolia' : 'ethereum'}&token=0x10ea9e5303670331bdddfa66a4cea47dae4fcf3b`,
         permanent: false,
       },
       {
         source: '/bridge/ethereum',
         destination:
-          `https://bridge.arbitrum.io/?destinationChain=${isTestnet ? 'sepolia':'ethereum'}&sourceChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}`,
+          `https://bridge.arbitrum.io/?destinationChain=${isTestnet ? 'sepolia':'ethereum'}&sourceChain=arbitrum-${isTestnet ? 'sepolia' : 'one'}&token=0x10ea9e5303670331bdddfa66a4cea47dae4fcf3b`,
         permanent: false,
       },
       {
