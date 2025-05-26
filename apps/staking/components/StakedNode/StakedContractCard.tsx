@@ -73,6 +73,7 @@ const ContractSummary = ({
   const contributorList = (
     <NodeContributorList
       contributors={contract.contributors}
+      operatorAddress={contract.operator_address}
       data-testid={StakedNodeDataTestId.Contributor_List}
       showEmptySlots
     />
