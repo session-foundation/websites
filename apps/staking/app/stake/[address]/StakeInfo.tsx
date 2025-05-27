@@ -124,7 +124,12 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
           tooltip={actionModuleDictionary('node.contributorsTooltip')}
         >
           <span className="flex flex-row flex-wrap items-center gap-2 align-middle">
-            <NodeContributorList contributors={contract.contributors} forceExpand showEmptySlots />
+            <NodeContributorList
+              contributors={contract.contributors}
+              operatorAddress={contract.operator_address}
+              forceExpand
+              showEmptySlots
+            />
           </span>
         </ActionModuleRow>
         {contributor ? (

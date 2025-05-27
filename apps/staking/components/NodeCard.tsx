@@ -15,6 +15,7 @@ import { areHexesEqual } from '@session/util-crypto/string';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
+import type { Address } from 'viem';
 
 export const outerNodeCardVariants = cva(
   'rounded-xl bg-module-outline p-px bg-blend-lighten shadow-md transition-all ease-in-out',
@@ -173,12 +174,16 @@ const ContributorIcon = ({
 
 type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
   contributors: Array<StakeContributor | ContributionContractContributor>;
+  operatorAddress: Address;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
 };
 
 const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorListProps>(
-  ({ className, contributors = [], showEmptySlots, forceExpand, ...props }, ref) => {
+  (
+    { className, contributors = [], operatorAddress, showEmptySlots, forceExpand, ...props },
+    ref
+  ) => {
     const userAddress = useCurrentActor();
 
     const dictionary = useTranslations('maths');
@@ -187,8 +192,6 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
       () => contributors.find(({ address }) => areHexesEqual(address, userAddress)),
       [contributors, userAddress]
     );
-
-    const operator = contributors[0];
 
     const emptyContributorSlots = useMemo(
       () =>
@@ -209,7 +212,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
           <ContributorIcon
             className={cn('-mr-1 fill-text-primary peer-checked:hidden peer-checked:opacity-0')}
             contributor={userContributor}
-            isOperator={areHexesEqual(userContributor?.address, operator?.address)}
+            isOperator={areHexesEqual(userContributor?.address, operatorAddress)}
             isUser
           />
         ) : null}
@@ -229,7 +232,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
               key={contributor.address}
               contributor={contributor}
               isUser={areHexesEqual(contributor.address, userAddress)}
-              isOperator={areHexesEqual(contributor.address, operator?.address)}
+              isOperator={areHexesEqual(contributor.address, operatorAddress)}
             />
           ))}
           {showEmptySlots

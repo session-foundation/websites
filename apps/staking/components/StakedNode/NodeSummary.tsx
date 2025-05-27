@@ -206,6 +206,7 @@ export const NodeSummary = ({
   const contributors = (
     <NodeContributorList
       contributors={node.contributors}
+      operatorAddress={node.operator_address}
       data-testid={StakedNodeDataTestId.Contributor_List}
     />
   );

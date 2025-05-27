@@ -31,7 +31,11 @@ export default function NodeActionModuleInfo({
         tooltip={dictionaryActionModulesNode('contributorsTooltip')}
       >
         <span className="flex flex-row flex-wrap items-center gap-2 align-middle">
-          <NodeContributorList contributors={node.contributors} forceExpand />
+          <NodeContributorList
+            contributors={node.contributors}
+            operatorAddress={node.operator_address}
+            forceExpand
+          />
         </span>
       </ActionModuleRow>
       <ActionModuleRow
