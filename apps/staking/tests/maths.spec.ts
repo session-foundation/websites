@@ -1,6 +1,8 @@
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { http, type Address, createPublicClient } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
+
 import { parseContributorDetails } from '../lib/maths';
 
 type Contributor = {
@@ -21,6 +23,8 @@ function createContributor(amount: bigint): Contributor {
     amount,
   };
 }
+
+const jsonStringify = (value:unknown) => JSON.stringify(value, jsonBigIntReplacer);
 
 const operatorContributorAmounts = [
   6250_000000000n,
@@ -207,7 +211,7 @@ describe(`parseContributorDetails fuzzing (fuzzAmount: ${fuzzAmount}`, () => {
       minStake = res.minStake;
       totalStaked = res.totalStaked;
     } catch (e) {
-      throw new Error(`Failed to get min stake for ${JSON.stringify(contributors)} ${e}`);
+      throw new Error(`Failed to get min stake for ${jsonStringify(contributors)} ${e}`);
     }
 
     const contribTest = new Promise((resolve) => {
