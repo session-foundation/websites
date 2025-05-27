@@ -4,7 +4,7 @@ import { useVestingEndTime } from '@/app/vested-stakes/modules/VestingEndTimeMod
 import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import type { QUERY_STATUS } from '@/lib/query';
 import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
-import { addresses, isValidChainId } from '@session/contracts';
+import { SENT_DECIMALS, addresses, isValidChainId } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitle, ModuleTooltip } from '@session/ui/components/Module';
 import { useERC20Balance } from '@session/wallet/hooks/useERC20Balance';
@@ -25,6 +25,7 @@ export function useVestingUnstakedBalance() {
 
   return {
     formattedAmount: formatSENTBigInt(amount),
+    formattedAmountAccurate: formatSENTBigInt(amount, SENT_DECIMALS),
     amount,
     status,
     refetch,

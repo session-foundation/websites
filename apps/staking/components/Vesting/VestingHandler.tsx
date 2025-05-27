@@ -6,6 +6,7 @@ import { NodeCard } from '@/components/NodeCard';
 import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { SENT_DECIMALS } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { PubKey } from '@session/ui/components/PubKey';
 import { Button } from '@session/ui/ui/button';
@@ -118,7 +119,7 @@ export function VestingHandler({
                           <NodeItem>
                             <NodeItemLabel>{dictCard('balance')}</NodeItemLabel>
                             <NodeItemValue>
-                              {formatSENTBigInt(contract.initial_amount)}
+                              {formatSENTBigInt(contract.initial_amount, SENT_DECIMALS)}
                             </NodeItemValue>
                           </NodeItem>
                         </FormLabel>
