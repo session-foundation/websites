@@ -1,0 +1,106 @@
+{
+  "general": {
+    "comingSoon": "Coming Soon",
+    "loading": "Loading...",
+    "or": "or",
+    "and": "and",
+    "unknownError": "unknown error",
+    "viewOnExplorer": "View on Explorer",
+    "viewOnExplorerShort": "View",
+    "you": "You",
+    "notFound": "Not Found",
+    "nodeNotFound": "Node Not Found",
+    "soon": "Soon",
+    "now": "now",
+    "none": "None"
+  },
+  "metadata": {
+    "root": {
+      "title": "Web3 Utils",
+      "description": "Utilities for web3 wallets"
+    },
+    "sign": {
+      "title": "Sign data",
+      "descrition": "Sign data with an Ethereum/Arbitrum wallet"
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "Sorry! The page you are looking for could not be found."
+    }
+  },
+  "clipboard": {
+    "copyToClipboard": "Copy to Clipboard",
+    "copyToClipboardSuccessToast": "Copied to clipboard!"
+  },
+  "navigation": {
+    "title": "Web3 Utils",
+    "home": "Home",
+    "docs": "Docs",
+    "tokenSite": "Session Token",
+    "stakingSite": "Staking",
+    "support": "Support",
+    "explorer": "Appchain Explorer",
+    "sign": "Sign",
+    "hamburgerDropdown": {
+      "ariaLabel": "Open navigation menu",
+      "language": "Change language",
+      "ariaLanguage": "Open language selection",
+      "support": "Support",
+      "ariaSupport": "Go to support page",
+      "explorer": "Appchain Explorer",
+      "ariaExplorer": "Go to appchain explorer"
+    },
+    "managedBy": "",
+    "bridgeArbitrum": "Arbitrum Bridge"
+  },
+  "wallet": {
+    "modalButton": {
+      "connect": "Connect Wallet",
+      "connected": "Open Wallet",
+      "connecting": "Connecting...",
+      "reconnecting": "Reconnecting...",
+      "ariaConnected": "Open wallet account modal",
+      "ariaDisconnected": "Open connect wallet modal",
+      "balance": "Balance",
+      "address": "Address",
+      "fallbackName": "No name"
+    },
+    "watchTokenButton": {
+      "importText": "Import Token",
+      "ariaImport": "Import {tokenSymbol} to your wallet",
+      "changeNetwork": "Change Network",
+      "ariaChangeNetwork": "Switch to a supported network",
+      "pending": "Pending",
+      "ariaPending": "Importing {tokenSymbol} to your wallet",
+      "failError": "Your wallet does not support importing tokens"
+    },
+    "walletInteractionButton": {
+      "connectWallet": "Connect Wallet",
+      "switchNetwork": "Switch Network"
+    },
+    "networkDropdown": {
+      "invalid": "Invalid network",
+      "ariaMainnet": "Switch to {mainnetName}",
+      "ariaTestnet": "Switch to {testnetName}",
+      "ariaDropdown": "Open network dropdown",
+      "errorNotSupported": "It looks like your wallet doesn't support the Arbitrum Sepolia test network. Try connecting with a different wallet."
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry! The page you are looking for could not be found.",
+    "homeButton": "Return Home"
+  },
+  "home": {
+    "title": "Web3 utilities",
+    "signLink": "Sign data with an Ethereum/Arbitrum wallet"
+  },
+  "sign": {
+    "title": "Sign data with your Ethereum/Arbitrum Wallet",
+    "signingWith": "Signing with:",
+    "dataToSign": "Data to sign:",
+    "buttonSignData": "Sign data with Connected Wallet",
+    "buttonAriaLabel": "Sign input data with connected wallet",
+    "generatedSignature": "Generated Signature:"
+  }
+}

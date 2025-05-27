@@ -1,0 +1,28 @@
+import 'server-only';
+
+import { getMessages, getRequestConfig as i18nGetRequestConfig } from 'next-intl/server';
+import { getLangDir } from 'rtl-detect';
+import { defaultTranslationValues } from './locale-defaults';
+import { DEFAULT_LOCALE } from './locale-util';
+
+export const getLocalizationData = async () => {
+  // TODO: remove when we add localized strings
+  // const locale = await getLocale();
+  const locale = DEFAULT_LOCALE;
+  const direction = getLangDir(locale);
+  const messages = await getMessages();
+  return { locale, direction, messages };
+};
+
+const getRequestConfig: ReturnType<typeof i18nGetRequestConfig> = i18nGetRequestConfig(async () => {
+  // TODO: remove when we add localized strings
+  // const locale = getServerSideLocale();
+  const locale = DEFAULT_LOCALE;
+  return {
+    locale,
+    messages: (await import(`../locales/${locale}.json`)).default,
+    defaultTranslationValues,
+  };
+});
+
+export default getRequestConfig;
