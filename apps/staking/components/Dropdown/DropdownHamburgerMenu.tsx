@@ -1,28 +1,15 @@
 'use client';
 
-import { NavLink, type NavLinkProps } from '@/components/NavLink';
 import { DYNAMIC_LINKS, EXTERNAL_ROUTES, SSR_LINKS } from '@/lib/constants';
-import { URL } from '@/lib/constants';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
-import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
-import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuContent, DropdownMenuTrigger
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
-
-function DropdownMenuItemNavLink({ label, children, ...props }: NavLinkProps) {
-  return (
-    <NavLink {...props}>
-      <DropdownMenuItem className={props.className}>{children ?? label}</DropdownMenuItem>
-    </NavLink>
-  );
-}
+import { DropdownMenuItemGetSesh, DropdownMenuItemNavLink } from './DropdownMenuItemNavLink';
 
 export function DropdownHamburgerMenu() {
   const dictionary = useTranslations('navigation.hamburgerDropdown');
@@ -64,13 +51,7 @@ export function DropdownHamburgerMenu() {
         {EXTERNAL_ROUTES.map(({ dictionaryKey, href }) => (
           <DropdownMenuItemNavLink key={href} href={href} label={navDictionary(dictionaryKey)} />
         ))}
-        <DropdownMenuItemNavLink
-          href={URL.TOKEN_UNISWAP_POOL_ARB}
-          className={cn('inline-flex items-center gap-1.5', 'md:hidden')}
-        >
-          <SessionTokenIcon className={cn('h-4 w-4')} />
-          {navDictionary('getToken')}
-        </DropdownMenuItemNavLink>
+       <DropdownMenuItemGetSesh network='eth' />
       </DropdownMenuContent>
     </DropdownMenu>
   );

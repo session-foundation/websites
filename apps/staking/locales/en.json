@@ -93,7 +93,7 @@
     "managedBy": "",
     "swap": "Migrate",
     "bridgeArbitrum": "Arbitrum Bridge",
-    "getToken": "Get SESH"
+    "getToken": "Get {tokenSymbol}"
   },
   "wallet": {
     "modalButton": {

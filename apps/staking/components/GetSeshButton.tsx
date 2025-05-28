@@ -6,13 +6,13 @@ import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-export const GetSeshButton = ({ className }: { className?: string }) => {
+export const GetSeshButton = ({ network, className }: { network: 'arb' | 'eth' ,className?: string }) => {
   const dictionary = useTranslations('navigation');
 
   return (
-    <Link href={URL.TOKEN_UNISWAP_POOL_ARB} target="_blank" prefetch className={className}>
+    <Link href={network === 'arb' ? URL.TOKEN_UNISWAP_POOL_ARB : URL.TOKEN_UNISWAP_POOL_ETH} target="_blank" rel="noreferrer" prefetch={false} className={className}>
       <Button
-        data-testid={ButtonDataTestId.Token_Uniswap_Pool_Arb}
+        data-testid={network === 'arb' ? ButtonDataTestId.Token_Uniswap_Pool_Arb : ButtonDataTestId.Token_Uniswap_Pool_Eth}
         variant="outline"
         className={cn(
           'group h-full w-full items-center justify-center gap-1.5 whitespace-nowrap',
