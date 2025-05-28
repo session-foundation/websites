@@ -34,7 +34,7 @@ export enum URL {
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
   TOKEN_UNISWAP_POOL_ETH = 'https://app.uniswap.org/explore/tokens/ethereum/0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
   TOKEN_UNISWAP_POOL_ARB = 'https://app.uniswap.org/explore/tokens/arbitrum/0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
-};
+}
 
 export const LANDING_BUTTON_URL = {
   PRIMARY: '/stake',

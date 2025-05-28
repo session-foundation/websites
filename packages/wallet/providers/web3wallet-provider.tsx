@@ -113,7 +113,11 @@ const tokenDetailsArbitrum: DynamicTokenRowProps = {
     name: 'Arbitrum One',
     iconSrc: '/images/arbitrum.svg',
   },
-  children: <TokenActionButton href="https://app.uniswap.org/explore/tokens/arbitrum/0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b">Get</TokenActionButton>,
+  children: (
+    <TokenActionButton href="https://app.uniswap.org/explore/tokens/arbitrum/0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b">
+      Get
+    </TokenActionButton>
+  ),
 };
 
 const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {

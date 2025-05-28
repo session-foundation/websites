@@ -23,7 +23,7 @@ export default function HeaderClient({ children }: { children?: ReactNode }) {
         <DynamicHeaderNavLinks />
       </div>
       <div className="flex flex-row justify-end gap-3">
-        <GetSeshButton network='eth' className='hidden md:inline-flex' />
+        <GetSeshButton network="eth" className="hidden md:inline-flex" />
         <DynamicWalletButton />
         <DropdownHamburgerMenu />
       </div>

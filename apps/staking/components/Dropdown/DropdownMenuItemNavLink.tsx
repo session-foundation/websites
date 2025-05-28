@@ -1,10 +1,10 @@
 import { URL } from '@/lib/constants';
+import { NavigationDataTestId } from '@/testing/data-test-ids';
 import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 import { cn } from '@session/ui/lib/utils';
 import { DropdownMenuItem } from '@session/ui/ui/dropdown-menu';
-import { NavLink, type NavLinkProps } from '../NavLink';
 import { useTranslations } from 'next-intl';
-import { NavigationDataTestId } from '@/testing/data-test-ids';
+import { NavLink, type NavLinkProps } from '../NavLink';
 
 export function DropdownMenuItemNavLink({ label, children, ...props }: NavLinkProps) {
   return (
@@ -26,7 +26,7 @@ export function DropdownMenuItemGetSesh({ network }: { network: 'arb' | 'eth' })
           : NavigationDataTestId.Token_Uniswap_Pool_Eth
       }
     >
-      <SessionTokenIcon className='h-4 w-4' />
+      <SessionTokenIcon className="h-4 w-4" />
       {navDictionary('getToken')}
     </DropdownMenuItemNavLink>
   );

@@ -6,7 +6,8 @@ import { HamburgerIcon } from '@session/ui/icons/HamburgerIcon';
 import { Button } from '@session/ui/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuTrigger
+  DropdownMenuContent,
+  DropdownMenuTrigger,
 } from '@session/ui/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
 import { DropdownMenuItemGetSesh, DropdownMenuItemNavLink } from './DropdownMenuItemNavLink';
@@ -51,7 +52,7 @@ export function DropdownHamburgerMenu() {
         {EXTERNAL_ROUTES.map(({ dictionaryKey, href }) => (
           <DropdownMenuItemNavLink key={href} href={href} label={navDictionary(dictionaryKey)} />
         ))}
-       <DropdownMenuItemGetSesh network='eth' />
+        <DropdownMenuItemGetSesh network="eth" />
       </DropdownMenuContent>
     </DropdownMenu>
   );
