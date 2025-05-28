@@ -1,7 +1,8 @@
 'use client';
 
-import { DropdownHamburgerMenu } from '@/components/DropdownHamburgerMenu';
+import { DropdownHamburgerMenu } from '@/components/Dropdown/DropdownHamburgerMenu';
 import DynamicHeaderNavLinks from '@/components/DynamicHeaderNavLinks';
+import { GetSeshButton } from '@/components/GetSeshButton';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { cn } from '@session/ui/lib/utils';
 import dynamic from 'next/dynamic';
@@ -22,6 +23,7 @@ export default function HeaderClient({ children }: { children?: ReactNode }) {
         <DynamicHeaderNavLinks />
       </div>
       <div className="flex flex-row justify-end gap-3">
+        <GetSeshButton network="eth" className="hidden md:inline-flex" />
         <DynamicWalletButton />
         <DropdownHamburgerMenu />
       </div>

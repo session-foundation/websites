@@ -144,6 +144,8 @@ export enum ButtonDataTestId {
   Stake_Notice_Continue = 'button:stake-notice-continue',
   Stake_Notice_Cancel = 'button:stake-notice-cancel',
   Unstake_Operator_Notice_Continue = 'button:unstake-operator-notice-continue',
+  Token_Uniswap_Pool_Eth = 'button:token-uniswap-pool-eth',
+  Token_Uniswap_Pool_Arb = 'button:token-uniswap-pool-arb',
 }
 
 export enum InputDataTestId {
@@ -205,4 +207,9 @@ export enum OpenNodeDataTestId {
   Open_Node_Card_Title = 'open-node-card:open-node-card-title',
   Open_Node_Card_Text = 'open-node-card:open-node-card-text',
   Open_Node_Card_Pub_Key = 'open-node-card:open-node-card-pub-key',
+}
+
+export enum NavigationDataTestId {
+  Token_Uniswap_Pool_Eth = 'nav:token-uniswap-pool-eth',
+  Token_Uniswap_Pool_Arb = 'nav:token-uniswap-pool-arb',
 }
