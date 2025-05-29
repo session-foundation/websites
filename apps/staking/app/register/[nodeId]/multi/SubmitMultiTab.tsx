@@ -12,6 +12,7 @@ import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordi
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import { useNetworkStatus } from '@/components/StatusBar';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { WizardSectionDescription } from '@/components/Wizard';
 import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
@@ -45,7 +46,6 @@ import { PubKey } from '@session/ui/components/PubKey';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { stringToBigInt } from '@session/util-crypto/maths';
@@ -401,14 +401,14 @@ export function SubmitMultiTab() {
           onSubmit={formMulti.handleSubmit(onSubmit)}
           className={cn(creationParams ? 'hidden' : '')}
         >
-          <Button
+          <WalletInteractionButtonWithLocales
             type="submit"
             className="w-full"
             data-testid={ButtonDataTestId.Registration_Submit_Multi_Confirm}
             aria-label={dictRegistrationShared('buttonConfirmAndStake.aria')}
           >
             {dictRegistrationShared('buttonConfirmAndStake.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
           <FormErrorMessage />
         </form>
       </Form>
@@ -757,7 +757,7 @@ function SubmitMulti({
           },
         ]}
       />
-      <Button
+      <WalletInteractionButtonWithLocales
         className={cn('w-full', !isError && 'hidden')}
         disabled={!isError}
         variant="outline"
@@ -765,7 +765,7 @@ function SubmitMulti({
         data-testid={ButtonDataTestId.Register_Submit_Multi_Retry}
       >
         {dictShared('retry')}
-      </Button>
+      </WalletInteractionButtonWithLocales>
     </div>
   );
 }

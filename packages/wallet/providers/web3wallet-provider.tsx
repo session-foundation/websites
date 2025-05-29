@@ -25,6 +25,7 @@ import {
 import type { DynamicTokenRowProps } from '@web3sheet/core/hooks/useWallet';
 import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
 import { type ReactNode, forwardRef, useState } from 'react';
+import { http } from 'viem';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -103,11 +104,15 @@ function TokenActionButton({ href, children }: { href: string; children: ReactNo
   );
 }
 
-const tokenDetailsArbitrum: DynamicTokenRowProps = {
-  tokenAddress: '0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
+const tokenOptions = {
   name: 'Session Token',
   iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
+  tokenAddress: '0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
   showAddTokenButton: true,
+} as const;
+
+const tokenDetailsArbitrum: DynamicTokenRowProps = {
+  ...tokenOptions,
   network: {
     id: arbitrum.id,
     name: 'Arbitrum One',
@@ -116,25 +121,8 @@ const tokenDetailsArbitrum: DynamicTokenRowProps = {
   children: <TokenActionButton href="/stake">Stake</TokenActionButton>,
 };
 
-const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
-  tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
-  name: 'Session Token',
-  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
-  symbolPrefix: 't',
-  showAddTokenButton: true,
-  network: {
-    id: arbitrumSepolia.id,
-    name: 'Arbitrum Sepolia',
-    iconSrc: '/images/arbitrum.svg',
-  },
-  children: <TokenActionButton href="/stake">Stake</TokenActionButton>,
-};
-
 const tokenDetailsEthereum: DynamicTokenRowProps = {
-  tokenAddress: '0x10Ea9E5303670331Bdddfa66A4cEA47dae4fcF3b',
-  name: 'Session Token',
-  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
-  showAddTokenButton: true,
+  ...tokenOptions,
   network: {
     id: mainnet.id,
     name: 'Ethereum',
@@ -144,12 +132,22 @@ const tokenDetailsEthereum: DynamicTokenRowProps = {
   children: <TokenActionButton href="/bridge/arbitrum">Bridge</TokenActionButton>,
 };
 
-const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
-  tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
-  name: 'Session Token',
-  iconSrc: 'https://stake.getsession.org/images/token_logo.svg',
+const tokenDetailsArbitrumSepolia: DynamicTokenRowProps = {
+  ...tokenOptions,
+  tokenAddress: '0x7D7fD4E91834A96cD9Fb2369E7f4EB72383bbdEd',
   symbolPrefix: 't',
-  showAddTokenButton: true,
+  network: {
+    id: arbitrumSepolia.id,
+    name: 'Arbitrum Sepolia',
+    iconSrc: '/images/arbitrum.svg',
+  },
+  children: <TokenActionButton href="/stake">Stake</TokenActionButton>,
+};
+
+const tokenDetailsEthereumSepolia: DynamicTokenRowProps = {
+  ...tokenOptions,
+  tokenAddress: '0x0DBD22764C6C77827B4D03482998CA2dd61b5294',
+  symbolPrefix: 't',
   network: {
     id: sepolia.id,
     name: 'Ethereum Sepolia',
@@ -173,12 +171,43 @@ const tokenDetailsWOXENEthereum: DynamicTokenRowProps = {
   children: <TokenActionButton href="https://claim.oxen.io">Migrate</TokenActionButton>,
 };
 
-const createConfig = (projectId: string, testnet: boolean) => {
-  const chains = testnet ? ([arbitrumSepolia, sepolia] as const) : ([arbitrum, mainnet] as const);
+export type ConfigParams = {
+  projectId: string;
+  testnet?: boolean;
+  arbRpcUrl?: string;
+  arbRpcBatchCalls?: boolean;
+  ethRpcUrl?: string;
+  ethRpcBatchCalls?: boolean;
+};
+
+const batchConfig = { batch: { batchSize: 100, wait: 500 } } as const;
+
+const createConfig = ({
+  ethRpcUrl,
+  arbRpcUrl,
+  ethRpcBatchCalls,
+  arbRpcBatchCalls,
+  testnet,
+  projectId,
+}: ConfigParams) => {
+  const arb = testnet ? arbitrumSepolia : arbitrum;
+  const eth = testnet ? sepolia : mainnet;
+
+  const transports = {
+    [arb.id]: http(
+      arbRpcUrl ?? arb.rpcUrls.default.http[0],
+      arbRpcBatchCalls ? batchConfig : undefined
+    ),
+    [eth.id]: http(
+      ethRpcUrl ?? eth.rpcUrls.default.http[0],
+      ethRpcBatchCalls ? batchConfig : undefined
+    ),
+  };
 
   const config = createWeb3WalletConfig({
     wagmiConfig: {
-      chains,
+      chains: [arb, eth],
+      transports,
     },
     walletConnectConfig: {
       projectId,
@@ -201,19 +230,17 @@ const createConfig = (projectId: string, testnet: boolean) => {
 };
 
 export type Web3WalletProviderProps = Omit<WalletProviderProps, 'config'> & {
-  projectId: string;
-  testnet?: boolean;
+  walletSheetConfig: ConfigParams;
   children: ReactNode;
 };
 
 export function Web3WalletProvider({
   children,
-  projectId,
   wagmiCookie,
   settingsPreferenceStorage,
-  testnet = false,
+  walletSheetConfig,
 }: Web3WalletProviderProps) {
-  const [config] = useState(createConfig(projectId, testnet));
+  const [config] = useState(createConfig(walletSheetConfig));
 
   return (
     <WalletProvider

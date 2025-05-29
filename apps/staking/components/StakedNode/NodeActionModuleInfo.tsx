@@ -5,6 +5,7 @@ import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalSt
 import { useCurrentActor } from '@/hooks/useCurrentActor';
 import type { Stake } from '@session/staking-api-js/schema';
 import { PubKey } from '@session/ui/components/PubKey';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useTranslations } from 'next-intl';
 
 export default function NodeActionModuleInfo({
@@ -33,6 +34,7 @@ export default function NodeActionModuleInfo({
         <span className="flex flex-row flex-wrap items-center gap-2 align-middle">
           <NodeContributorList
             contributors={node.contributors}
+            userAddress={address}
             operatorAddress={node.operator_address}
             forceExpand
           />
@@ -48,7 +50,7 @@ export default function NodeActionModuleInfo({
         label={sessionNodeDictionary('operatorAddress')}
         tooltip={sessionNodeDictionary('operatorAddressTooltip')}
       >
-        <PubKey pubKey={node.operator_address} force="collapse" alwaysShowCopyButton />
+        <PubkeyWithEns pubKey={node.operator_address} force="collapse" alwaysShowCopyButton />
       </ActionModuleRow>
       <ActionModuleRow
         label={dictionary('amountStaked')}

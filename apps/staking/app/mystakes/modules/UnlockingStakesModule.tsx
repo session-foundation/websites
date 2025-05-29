@@ -1,10 +1,11 @@
 'use client';
 
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
-import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
+import { ModuleDynamicQueryText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
+import type { QUERY_STATUS } from '@/lib/query';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useWallet } from '@session/wallet/hooks/useWallet';
@@ -43,8 +44,8 @@ export default function UnlockingStakesModule(params?: AddressModuleProps) {
         longText={titleFormat('format', { title })}
         shortText={titleFormat('format', { title: titleShort })}
       />
-      <ModuleDynamicContractReadText
-        status={status}
+      <ModuleDynamicQueryText
+        status={status as QUERY_STATUS}
         fallback={0}
         enabled={enabled}
         errorFallback={dictionaryShared('error')}
@@ -58,7 +59,7 @@ export default function UnlockingStakesModule(params?: AddressModuleProps) {
         }}
       >
         {formattedTotalRewardsAmount}
-      </ModuleDynamicContractReadText>
+      </ModuleDynamicQueryText>
     </Module>
   );
 }

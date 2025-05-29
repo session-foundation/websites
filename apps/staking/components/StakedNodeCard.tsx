@@ -34,7 +34,6 @@ import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { StakeContributor } from '@session/staking-api-js/schema';
 import type { Stake } from '@session/staking-api-js/schema';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
 import { cn } from '@session/ui/lib/utils';
@@ -42,6 +41,7 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
@@ -306,6 +306,7 @@ const StakedNodeCard = forwardRef<
         <NodeSummary
           node={stake}
           state={state}
+          userAddress={address}
           blockHeight={blockHeight}
           isInContractIdList={isInContractIdList}
           deregistrationDate={deregistrationDate}
@@ -371,14 +372,14 @@ const StakedNodeCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
-            <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
+            <PubkeyWithEns pubKey={operatorAddress} expandOnHoverDesktopOnly />
           </CollapsableContent>
           {beneficiaryAddress ? (
             <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
               <RowLabel>
                 {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
               </RowLabel>
-              <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+              <PubkeyWithEns pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
             </CollapsableContent>
           ) : null}
           <CollapsableContent>

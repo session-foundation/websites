@@ -1,64 +1,48 @@
 'use client';
 
+import DynamicModuleCard from '@/app/mystakes/modules/DynamicModuleCard';
 import type { AddressModuleProps } from '@/app/mystakes/modules/types';
-import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
 import { externalLink } from '@/lib/locale-defaults';
+import type { QUERY_STATUS } from '@/lib/query';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
-export default function TotalRewardsModule(params?: AddressModuleProps) {
-  const dictionary = useTranslations('modules.totalRewards');
-  const dictionaryShared = useTranslations('modules.shared');
-  const toastDictionary = useTranslations('modules.toast');
-  const titleFormat = useTranslations('modules.title');
-  const title = dictionary('title');
-  const titleShort = dictionary('titleShort');
+export default function TotalRewardsModule({
+  addressOverride,
+  titleOverride,
+  size,
+  variant,
+}: AddressModuleProps) {
+  const dict = useTranslations('modules.totalRewards');
 
   const { address: connectedAddress } = useWallet();
   const address = useMemo(
-    () => params?.addressOverride ?? connectedAddress,
-    [params?.addressOverride, connectedAddress]
+    () => addressOverride ?? connectedAddress,
+    [addressOverride, connectedAddress]
   );
 
   const { lifetimeRewards, refetch, status, enabled } = useNetworkBalances({
     addressOverride: address,
   });
 
-  const formattedTotalRewardsAmount = formatSENTBigInt(
-    lifetimeRewards,
-    DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS
-  );
-
   return (
-    <Module>
-      <ModuleTooltip>
-        {dictionary.rich('description', { link: externalLink(URL.LEARN_MORE_TOTAL_REWARDS) })}
-      </ModuleTooltip>
-      <ModuleTitleDynamic
-        longText={titleFormat('format', { title })}
-        shortText={titleFormat('format', { title: titleShort })}
-      />
-      <ModuleDynamicContractReadText
-        status={status}
-        fallback={0}
-        enabled={enabled}
-        errorFallback={dictionaryShared('error')}
-        errorToast={{
-          messages: {
-            error: toastDictionary('error', { module: title }),
-            refetching: toastDictionary('refetching'),
-            success: toastDictionary('refetchSuccess', { module: title }),
-          },
-          refetch,
-        }}
-      >
-        {formattedTotalRewardsAmount}
-      </ModuleDynamicContractReadText>
-    </Module>
+    <DynamicModuleCard
+      titleLong={titleOverride ?? dict('title')}
+      titleShort={dict('titleShort')}
+      tooltipContent={dict.rich('description', {
+        link: externalLink(URL.LEARN_MORE_TOTAL_REWARDS),
+      })}
+      status={status as QUERY_STATUS}
+      refetch={refetch}
+      enabled={enabled}
+      size={size}
+      variant={variant}
+    >
+      {formatSENTBigInt(lifetimeRewards, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS)}
+    </DynamicModuleCard>
   );
 }

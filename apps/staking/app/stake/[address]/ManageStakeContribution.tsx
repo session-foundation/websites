@@ -7,6 +7,7 @@ import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFund
 import { ActionModuleRow } from '@/components/ActionModule';
 import { EthereumAddressField } from '@/components/Form/EthereumAddressField';
 import { StakeAmountField } from '@/components/Form/StakeAmountField';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { WizardSectionDescription } from '@/components/Wizard';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
@@ -31,7 +32,6 @@ import { ARBITRUM_EVENT } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
@@ -251,7 +251,7 @@ export function ManageStakeContribution({
   const isSmallContributor = contributorStakeAmount < SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT;
 
   const removeStakeBaseButton = !isOperator ? (
-    <Button
+    <WalletInteractionButtonWithLocales
       type="button"
       variant="destructive"
       className="w-full"
@@ -261,7 +261,7 @@ export function ManageStakeContribution({
       onClick={handleRemoveStake}
     >
       {dictionary('buttonRemoveStake.text')}
-    </Button>
+    </WalletInteractionButtonWithLocales>
   ) : null;
 
   const removeStakeButton =
@@ -354,7 +354,7 @@ export function ManageStakeContribution({
               />
             )}
           />
-          <Button
+          <WalletInteractionButtonWithLocales
             type="submit"
             className="w-full"
             disabled={isRemoveStake || additionalStakeAmount < 1n}
@@ -362,7 +362,7 @@ export function ManageStakeContribution({
             aria-label={dictionaryRegistrationShared('buttonConfirmAndStake.aria')}
           >
             {dictionaryRegistrationShared('buttonConfirmAndStake.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
           <FormErrorMessage />
         </form>
       </Form>
