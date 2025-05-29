@@ -26,11 +26,11 @@ const TooltipContent = forwardRef<
     sideOffset={sideOffset}
     side="top"
     className={cn(
-      'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-w-[90svw] animate-in flex-wrap overflow-hidden text-wrap rounded-xl border border-[#1C2624] border-px bg-session-black bg-opacity-50 px-4 py-2 text-session-white text-sm shadow-xl outline-none focus-visible:outline-none data-[state=closed]:animate-out md:max-w-xl',
+      'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 m-1.5 max-w-[90svw] animate-in flex-wrap overflow-hidden text-wrap rounded-xl bg-session-black bg-opacity-50 px-4 py-2 text-session-white text-sm shadow-xl outline outline-1 outline-session-white data-[state=closed]:animate-out md:max-w-xl',
       className
     )}
     {...props}
-  ></PopoverPrimitive.Content>
+  />
 ));
 TooltipContent.displayName = PopoverPrimitive.Content.displayName;
 
