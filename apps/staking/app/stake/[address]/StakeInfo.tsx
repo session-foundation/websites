@@ -16,6 +16,7 @@ import { PubKey } from '@session/ui/components/PubKey';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { bigIntMax } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, forwardRef } from 'react';
 import { type Address, isAddress } from 'viem';
@@ -127,6 +128,7 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
             <NodeContributorList
               contributors={contract.contributors}
               operatorAddress={contract.operator_address}
+              userAddress={address}
               forceExpand
               showEmptySlots
             />
@@ -212,7 +214,7 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
           label={dictShared('operatorAddress')}
           tooltip={dictShared('operatorAddressDescription')}
         >
-          <PubKey
+          <PubkeyWithEns
             pubKey={contract.operator_address}
             force="collapse"
             alwaysShowCopyButton
@@ -256,7 +258,7 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
             label={dictShared('rewardsAddress')}
             tooltip={dictShared('rewardsAddressDescription')}
           >
-            <PubKey
+            <PubkeyWithEns
               pubKey={contributor.beneficiary_address ?? contributor.address ?? dictGeneral('none')}
               force="collapse"
               alwaysShowCopyButton

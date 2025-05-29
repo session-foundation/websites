@@ -24,6 +24,7 @@ import {
 } from '@session/ui/ui/table';
 import { bigIntToNumber } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useMemo } from 'react';
 
@@ -112,7 +113,7 @@ export function ReservedStakesTable({
                         <PubKey pubKey={addr} force="collapse" alwaysShowCopyButton />
                       </>
                     ) : (
-                      <PubKey pubKey={addr} force="collapse" alwaysShowCopyButton />
+                      <PubkeyWithEns pubKey={addr} force="collapse" alwaysShowCopyButton />
                     )}
                   </div>
                 </TableCell>

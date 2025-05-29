@@ -16,6 +16,7 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import type { Address } from 'viem';
 
 /**
  * Checks if a given date is in the past or `soon`
@@ -173,6 +174,7 @@ type NodeSummaryProps = {
   node: Stake;
   state: STAKE_STATE;
   blockHeight: number;
+  userAddress?: Address;
   deregistrationDate: Date | null;
   deregistrationTime: string | null;
   requestedUnlockDate: Date | null;
@@ -199,6 +201,7 @@ export const NodeSummary = ({
   liquidationDate,
   liquidationTime,
   isInContractIdList,
+  userAddress,
 }: NodeSummaryProps) => {
   const eventState = parseStakeEventState(node);
   const isExited = eventState === STAKE_EVENT_STATE.EXITED;
@@ -206,6 +209,7 @@ export const NodeSummary = ({
   const contributors = (
     <NodeContributorList
       contributors={node.contributors}
+      userAddress={userAddress}
       operatorAddress={node.operator_address}
       data-testid={StakedNodeDataTestId.Contributor_List}
     />

@@ -1,4 +1,4 @@
-import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import {
@@ -9,11 +9,14 @@ import {
 import { Loading } from '@session/ui/components/loading';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
+import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
 import type { Address } from 'viem';
 
@@ -115,57 +118,81 @@ const NodeCardText = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>
 );
 NodeCardText.displayName = 'NodeCardText';
 
-const ContributorIcon = ({
-  className,
-  contributor,
-  isUser,
-  isOperator,
-}: {
+type ContributorIconProps = {
   className?: string;
   contributor?: StakeContributor | ContributionContractContributor;
   isUser?: boolean;
   isOperator?: boolean;
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: kinda has to be
-}) => {
+};
+
+const humanIconClassName = (
+  contributor?: StakeContributor | ContributionContractContributor,
+  isUser?: boolean,
+  className?: string
+) =>
+  cn(
+    'mt-1 h-4 w-4',
+    contributor
+      ? contributor.amount
+        ? isUser
+          ? 'fill-session-green'
+          : 'fill-text-primary'
+        : isContributionContractContributor(contributor) && contributor.reserved
+          ? 'fill-warning'
+          : 'fill-text-primary'
+      : 'fill-text-primary',
+    className
+  );
+
+function ContributorTooltipCard({
+  contributor,
+  isUser,
+  isOperator,
+}: ContributorIconProps & Required<Pick<ContributorIconProps, 'contributor'>>) {
   const dictionary = useTranslations('general');
-  const dictStaked = useTranslations('nodeCard.staked');
+  return (
+    <div className="flex flex-row gap-3">
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row gap-2">
+          <HumanIcon
+            className={humanIconClassName(contributor, isUser)}
+            full={!!contributor?.amount}
+          />
+          <PubkeyWithEns pubKey={contributor.address} />
+        </div>
+        <span className="flex flex-row gap-2">
+          {isOperator ? <NodeOperatorIndicator /> : null}
+          {`${formatSENTBigInt(contributor.amount)} ${dictionary('staked')}`}
+        </span>
+        {isContributionContractContributor(contributor) && contributor.reserved
+          ? `${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')}`
+          : ''}
+      </div>
+      <Link href={`/address/${contributor.address}`}>
+        <LinkOutIcon className="h-5 w-5 hover:stroke-session-green" />
+      </Link>
+    </div>
+  );
+}
+
+const ContributorIcon = ({ className, contributor, isUser, isOperator }: ContributorIconProps) => {
+  const dictionary = useTranslations('general');
   return (
     <Tooltip
       tooltipContent={
         contributor ? (
-          <div className="flex flex-col gap-1">
-            <span>
-              {isUser
-                ? `${dictionary('you')}${isOperator ? ` (${dictStaked('operator')})` : ''}`
-                : contributor.address}
-            </span>
-            <span>
-              {`${formatSENTBigInt(contributor.amount)} ${dictionary('staked')}`}
-              {isContributionContractContributor(contributor) && contributor.reserved
-                ? ` (${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')})`
-                : ''}
-              {!isUser && isOperator ? ` (${dictStaked('operator')})` : ''}
-            </span>
-          </div>
+          <ContributorTooltipCard
+            contributor={contributor}
+            isUser={isUser}
+            isOperator={isOperator}
+          />
         ) : (
           dictionary('emptySlot')
         )
       }
     >
       <HumanIcon
-        className={cn(
-          'h-4 w-4 cursor-pointer',
-          contributor
-            ? contributor.amount
-              ? isUser
-                ? 'fill-session-green'
-                : 'fill-text-primary'
-              : isContributionContractContributor(contributor) && contributor.reserved
-                ? 'fill-warning'
-                : 'fill-text-primary'
-            : 'fill-text-primary',
-          className
-        )}
+        className={humanIconClassName(contributor, isUser, className)}
         full={!!contributor?.amount}
       />
     </Tooltip>
@@ -174,6 +201,7 @@ const ContributorIcon = ({
 
 type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
   contributors: Array<StakeContributor | ContributionContractContributor>;
+  userAddress?: Address;
   operatorAddress: Address;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
@@ -181,11 +209,17 @@ type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
 
 const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorListProps>(
   (
-    { className, contributors = [], operatorAddress, showEmptySlots, forceExpand, ...props },
+    {
+      className,
+      contributors = [],
+      operatorAddress,
+      userAddress,
+      showEmptySlots,
+      forceExpand,
+      ...props
+    },
     ref
   ) => {
-    const userAddress = useCurrentActor();
-
     const dictionary = useTranslations('maths');
 
     const userContributor = useMemo(
