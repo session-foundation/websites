@@ -32,7 +32,7 @@ import type { Address } from 'viem';
 
 export function StakedNodesWithAddress({
   address,
-  scopeId,
+  scopeId = 'none',
 }: { address: Address; scopeId?: string }) {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');

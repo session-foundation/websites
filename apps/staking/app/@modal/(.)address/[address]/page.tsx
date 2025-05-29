@@ -8,7 +8,7 @@ export default async function Page(props: { params: Promise<{ address: string }>
   return <AddressModal address={params.address} />;
 }
 
-export function AddressModal({ address }: { address: string }) {
+function AddressModal({ address }: { address: string }) {
   return (
     <Modal
       navigation
