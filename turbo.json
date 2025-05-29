@@ -41,7 +41,11 @@
         "NEXT_PUBLIC_TESTNET",
         "CI",
         "NEXT_PUBLIC_SALT",
-        "NEXT_PUBLIC_PEPPER"
+        "NEXT_PUBLIC_PEPPER",
+        "NEXT_PUBLIC_RPC_URL_ETH",
+        "NEXT_PUBLIC_RPC_BATCH_ETH",
+        "NEXT_PUBLIC_RPC_URL_ARB",
+        "NEXT_PUBLIC_RPC_BATCH_ARB"
       ]
     },
     "dev": {
