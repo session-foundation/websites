@@ -4,6 +4,7 @@ import {
   getEthereumAddressFormFieldSchema,
 } from '@/components/Form/EthereumAddressField';
 import { TextWithInlineEnder } from '@/components/TextWithInlineEnder';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import {
   formatAndHandleLocalizedContractErrorMessages,
   parseContractStatusToProgressStatus,
@@ -19,7 +20,6 @@ import { toast } from '@session/ui/lib/toast';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { AlertDialogFooter } from '@session/ui/ui/alert-dialog';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormField, useForm } from '@session/ui/ui/form';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { useMount } from '@session/util-react/hooks/useMount';
@@ -236,7 +236,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
         </div>
       ) : null}
       <AlertDialogFooter className="mt-4 flex flex-col gap-6 sm:flex-col">
-        <Button
+        <WalletInteractionButtonWithLocales
           variant="destructive-outline"
           rounded="md"
           size="lg"
@@ -250,8 +250,8 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
           onClick={form.handleSubmit(handleSubmit)}
         >
           {dict('transferButton.label')}
-        </Button>
-        <Button
+        </WalletInteractionButtonWithLocales>
+        <WalletInteractionButtonWithLocales
           variant="destructive"
           rounded="md"
           size="lg"
@@ -262,7 +262,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
           disabled={isButtonDisabled}
         >
           {dict('transferButton.label')}
-        </Button>
+        </WalletInteractionButtonWithLocales>
         {contractCallStatus !== 'idle' ? (
           <>
             <Progress
@@ -279,7 +279,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
                 },
               ]}
             />
-            <Button
+            <WalletInteractionButtonWithLocales
               className={cn('w-full', !isError && 'hidden')}
               disabled={!isError}
               variant="outline"
@@ -287,7 +287,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
               data-testid={ButtonDataTestId.Register_Submit_Solo_Retry}
             >
               {dictShared('retry')}
-            </Button>
+            </WalletInteractionButtonWithLocales>
           </>
         ) : null}
       </AlertDialogFooter>

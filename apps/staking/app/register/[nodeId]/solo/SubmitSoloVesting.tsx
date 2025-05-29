@@ -1,4 +1,5 @@
 import { useSubmitSolo } from '@/app/register/[nodeId]/solo/useSubmitSolo';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
 import useRegisterNodeVesting from '@/hooks/useRegisterNodeVesting';
 import { SESSION_NODE } from '@/lib/constants';
@@ -9,7 +10,6 @@ import type { Ed25519PublicKey } from '@session/staking-api-js/refine';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
-import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 import { isAddress } from 'viem';
@@ -118,7 +118,7 @@ export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams })
           },
         ]}
       />
-      <Button
+      <WalletInteractionButtonWithLocales
         className={cn('w-full', !isError && 'hidden')}
         disabled={!isError}
         variant="outline"
@@ -126,7 +126,7 @@ export function SubmitSoloVesting({ params }: { params: UseRegisterNodeParams })
         data-testid={ButtonDataTestId.Register_Submit_Solo_Retry}
       >
         {dictShared('retry')}
-      </Button>
+      </WalletInteractionButtonWithLocales>
     </div>
   );
 }
