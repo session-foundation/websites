@@ -11,6 +11,7 @@ import { getLangDir } from 'rtl-detect';
 import { SanityTiles } from '@session/sanity-cms/components/SanityTiles';
 import { SanityCryptoAddressDisplay } from '@session/sanity-cms/components/SanityCryptoAddressDisplay';
 import { getCryptoAddressById } from '@session/sanity-cms/queries/getCryptoAddress';
+import { SanityDonorbox } from '@session/sanity-cms/components/SanityDonorbox';
 
 const { marks, block } = basicComponents;
 export const components = {
@@ -53,5 +54,6 @@ export const components = {
 
       return <SanityCryptoAddressDisplay {...props} variant="light" />;
     },
+    donorbox: (props) => <SanityDonorbox {...props} />,
   },
 } satisfies SanityPortableTextProps['components'];
