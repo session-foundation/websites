@@ -7,7 +7,7 @@ export const donorboxFields = [
     name: 'showDonorbox',
     title: 'Show Donorbox',
     type: 'boolean',
-    description: 'Show a the Donorbox component',
+    description: 'Show the Donorbox component',
     initialValue: false,
   }),
   defineField({
