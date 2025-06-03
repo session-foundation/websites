@@ -1,10 +1,11 @@
 import { defineArrayMember, type PortableTextBlock } from 'sanity';
-import { SplitVerticalIcon, TokenIcon, BillIcon } from '@sanity/icons';
+import { SplitVerticalIcon, TokenIcon, BillIcon, UnlinkIcon } from '@sanity/icons';
 import { pickLinkField } from '../basic/links';
 import { tilesFields } from '../component/tiles';
 import { imageField } from '../basic/image';
 import { cryptoAddressDisplayFields } from '../component/crypto-address-display';
 import { donorboxFields } from '../component/donorbox';
+import { anchorFields } from '../component/anchor';
 
 export const copyFieldOf = [
   defineArrayMember({
@@ -64,6 +65,12 @@ export const copyFieldOf = [
     icon: BillIcon,
     fields: donorboxFields,
   }),
+  defineArrayMember({
+    type: 'object',
+    name: 'anchor',
+    icon: UnlinkIcon,
+    fields: anchorFields,
+  })
 ];
 
 export type CopyFieldOfType = Array<PortableTextBlock>;

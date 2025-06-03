@@ -12,6 +12,7 @@ import { SanityTiles } from '@session/sanity-cms/components/SanityTiles';
 import { SanityCryptoAddressDisplay } from '@session/sanity-cms/components/SanityCryptoAddressDisplay';
 import { getCryptoAddressById } from '@session/sanity-cms/queries/getCryptoAddress';
 import { SanityDonorbox } from '@session/sanity-cms/components/SanityDonorbox';
+import { SanityAnchor } from '@session/sanity-cms/components/SanityAnchor';
 
 const { marks, block } = basicComponents;
 export const components = {
@@ -55,5 +56,6 @@ export const components = {
       return <SanityCryptoAddressDisplay {...props} variant="light" />;
     },
     donorbox: (props) => <SanityDonorbox {...props} />,
+    anchor: (props) => <SanityAnchor {...props} />,
   },
 } satisfies SanityPortableTextProps['components'];
