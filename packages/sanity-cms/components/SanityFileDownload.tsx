@@ -1,9 +1,10 @@
 'use client';
 
 import SanityPdf from './SanityPdf';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cleanSanityString } from '../lib/string';
+import SanityAsc from './SanityAsc';
 
 type FileDownloadProps = {
   fileName: string;
@@ -14,8 +15,33 @@ type FileDownloadProps = {
     clickToDownloadAria: string;
     openPdfInNewTab: string;
     openPdfInNewTabAria: string;
+    openFileInNewTab: string;
+    openFileInNewTabAria: string;
   };
 };
+
+type DownloadFileButtonProps = {
+  href: string;
+  ariaLabel: string;
+  children: ReactNode;
+};
+
+export function DownloadFileButton({ href, ariaLabel, children }: DownloadFileButtonProps) {
+  return (
+    <a
+      href={href}
+      className="group"
+      target="_blank"
+      rel="noopener noreferrer"
+      download
+      aria-label={ariaLabel}
+    >
+      <button className="group-hover:decoration-session-green hover:decoration-session-green decoration-session-black mt-1 w-max text-sm underline group-hover:underline">
+        {children}
+      </button>
+    </a>
+  );
+}
 
 export default function FileDownload({ fileName, src, strings }: FileDownloadProps) {
   const [downloaded, setDownloaded] = useState(false);
@@ -26,8 +52,12 @@ export default function FileDownload({ fileName, src, strings }: FileDownloadPro
   const srcWithParams = new URL(src);
   srcWithParams.searchParams.set('dl', name);
 
-  if (src.includes('.pdf')) {
+  if (src.endsWith('.pdf')) {
     return <SanityPdf src={src} url={srcWithParams} strings={strings} />;
+  }
+
+  if (src.endsWith('.asc')) {
+    return <SanityAsc src={src} url={srcWithParams} strings={strings} />;
   }
 
   // Download file on mount
@@ -41,18 +71,9 @@ export default function FileDownload({ fileName, src, strings }: FileDownloadPro
   return (
     <div className="my-12 flex flex-col items-center justify-center gap-2">
       <p className="text-center text-sm">{strings.fetching.replace('{name}', fileName)}</p>
-      <a
-        href={srcWithParams.href}
-        className="group"
-        target="_blank"
-        rel="noopener noreferrer"
-        download
-        aria-label={strings.clickToDownloadAria}
-      >
-        <button className="group-hover:decoration-session-green hover:decoration-session-green decoration-session-black mt-1 w-max text-sm underline group-hover:underline">
-          {strings.clickToDownload}
-        </button>
-      </a>
+      <DownloadFileButton href={srcWithParams.href} ariaLabel={strings.clickToDownloadAria}>
+        {strings.clickToDownload}
+      </DownloadFileButton>
     </div>
   );
 }

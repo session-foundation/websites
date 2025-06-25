@@ -3,8 +3,15 @@ import { SanityImage } from './SanityImage';
 import type { SessionSanityClient } from '../lib/client';
 import { cn } from '@session/ui/lib/utils';
 import { TILES_VARIANT } from '../schemas/fields/component/tiles';
+import { cleanSanityString } from '../lib/string';
+import { resolveAmbiguousLink } from '../schemas/fields/basic/links';
+import { Button } from '@session/ui/ui/button';
+import Link from 'next/link';
+import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
+import { KeyIcon } from '@session/ui/icons/KeyIcon';
+import { safeTry } from '@session/util-js/try';
 
-export function SanityTile({
+export async function SanityTile({
   value,
   variant,
   client,
@@ -78,7 +85,49 @@ export function SanityTileTextOnTopOfImage({
   );
 }
 
-export function SanityTileTextUnderImage({
+type BadgeIconType = 'linkOut' | 'key';
+
+const isValidBadgeIcon = (val: string): val is BadgeIconType => {
+  const cleanVal = cleanSanityString(val);
+  return cleanVal === 'linkOut' || cleanVal === 'key';
+};
+
+type BadgeProps = {
+  client: SessionSanityClient;
+  icon: string;
+  link: unknown;
+};
+
+async function Badge({ client, link, icon }: BadgeProps) {
+  // @ts-expect-error -- These types are pretty rough, this is fine
+  const [err, res] = await safeTry(resolveAmbiguousLink(client, link));
+
+  if (err) {
+    console.error(err);
+    return null;
+  }
+
+  if (!res?.href) {
+    console.warn(`A Badge was set without a href! ${link}`)
+    return null;
+  }
+
+  return (
+    <Link href={res.href} title={res.label}>
+      <Button
+        data-testid="button:tile-badge"
+        size="icon"
+        variant="ghost"
+        className="h-5 w-5"
+        aria-label={res.label}
+      >
+        {icon === 'key' ? <KeyIcon className="h-3 w-3" /> : <LinkOutIcon className="h-3 w-3" />}
+      </Button>
+    </Link>
+  );
+}
+
+export async function SanityTileTextUnderImage({
   value,
   client,
 }: {
@@ -89,6 +138,7 @@ export function SanityTileTextUnderImage({
     console.warn('Missing image for tile');
     return null;
   }
+
   return (
     <div className="flex h-max w-full flex-col gap-1">
       <SanityImage
@@ -98,7 +148,12 @@ export function SanityTileTextUnderImage({
         isInline={false}
         className="h-60 w-full rounded-2xl border border-gray-200 shadow-md"
       />
-      <span className="ms-2 text-sm md:text-base">{value.title}</span>
+      <span className="ms-2 text-sm md:text-base">
+        {value.title}
+        {value.badge && value.badgeIcon && isValidBadgeIcon(value.badgeIcon) ? (
+          <Badge client={client} icon={value.badgeIcon} link={value.badge} />
+        ) : null}
+      </span>
       <span className="ms-2 text-xs font-light md:text-sm">{value.description ?? ' '}</span>
     </div>
   );
