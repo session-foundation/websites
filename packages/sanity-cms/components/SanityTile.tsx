@@ -121,7 +121,7 @@ async function Badge({ client, link, icon }: BadgeProps) {
         className="h-5 w-5"
         aria-label={res.label}
       >
-        {icon === 'key' ? <KeyIcon className="h-3 w-3" /> : <LinkOutIcon className="h-3 w-3" />}
+        {cleanSanityString(icon) === 'key' ? <KeyIcon className="h-3 w-3" /> : <LinkOutIcon className="h-3 w-3" />}
       </Button>
     </Link>
   );
