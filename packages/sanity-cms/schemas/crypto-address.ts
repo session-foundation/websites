@@ -21,9 +21,9 @@ export const cryptoAddressFields = [
   defineField({
     name: 'icon',
     title: 'Icon',
-    type: 'text',
+    type: 'string',
     options: {
-      list: ['Ethereum', 'Arbitrum', 'Bitcoin'],
+      list: ['Ethereum', 'Arbitrum', 'Bitcoin', 'BNB'],
     },
     validation: (Rule) => Rule.required(),
   }),
@@ -37,5 +37,6 @@ export const cryptoAddressSchema = {
   fields: cryptoAddressFields,
 };
 
+type IconType = 'Ethereum' | 'Arbitrum' | 'Bitcoin' | 'BNB';
 export type CryptoAddressSchemaType = DocumentFields<typeof cryptoAddressSchema> &
-  SchemaFieldsType<typeof cryptoAddressFields>;
+  SchemaFieldsType<typeof cryptoAddressFields> & {icon: IconType };

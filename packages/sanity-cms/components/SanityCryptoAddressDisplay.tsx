@@ -6,13 +6,22 @@ import { ButtonDataTestId } from '../testing/data-test-ids';
 import { CopyableInputDisplay } from '@session/ui/components/CopyableInputDisplay';
 import Typography from '@session/ui/components/Typography';
 import { EthIcon } from '@session/ui/icons/EthIcon';
+import { ArbitrumIcon } from '@session/ui/icons/ArbitrumIcon';
+import { BitcoinIcon } from '@session/ui/icons/BitcoinIcon';
+import { BNBIcon } from '@session/ui/icons/BNBIcon';
 
 function getIcon(value: CryptoAddressDisplaySchemaType) {
   if (!value.cryptoAddress?.icon) {
     return EthIcon;
   }
   switch (value.cryptoAddress.icon) {
-    // TODO: Support other icons
+    case 'Bitcoin':
+      return BitcoinIcon;
+    case 'BNB':
+      return BNBIcon;
+    case 'Arbitrum':
+      return ArbitrumIcon;
+    case 'Ethereum':
     default:
       return EthIcon;
   }
@@ -50,7 +59,8 @@ export function SanityCryptoAddressDisplay({
         copyToClipboardProps={{
           textToCopy: cleanSanityString(value.cryptoAddress.address),
           'data-testid': ButtonDataTestId.Crypto_Address_Copy_To_Clipboard,
-          className: 'hover:bg-transparent hover:stroke-session-green-link hover:text-session-green-link',
+          className:
+            'hover:bg-transparent hover:stroke-session-green-link hover:text-session-green-link',
         }}
         variant={variant}
       />
