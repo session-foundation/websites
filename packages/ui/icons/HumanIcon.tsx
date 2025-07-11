@@ -1,4 +1,5 @@
-import { forwardRef } from 'react';
+import { type ReactNode, forwardRef } from 'react';
+import { cn } from '../lib/utils';
 import type { SVGAttributes } from './types';
 
 type HumanIconAttributes = SVGAttributes & {

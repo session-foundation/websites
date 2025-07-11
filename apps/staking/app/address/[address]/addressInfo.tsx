@@ -12,7 +12,7 @@ export function AddressInfo({ address }: { address: string }) {
         <StakedBalanceModule addressOverride={address} size="default" variant="default" />
         <TotalRewardsModule addressOverride={address} size="default" />
       </ModuleGrid>
-      <StakedNodesWithAddress address={address} scopeId={`addressList.${address}`} />
+      <StakedNodesWithAddress address={address} scopeId={`addressList.${address}`} hideButtons />
     </div>
   ) : (
     notFound()

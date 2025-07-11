@@ -41,18 +41,18 @@ const innerModuleVariants = cva(
     variants: {
       variant: {
         default: cn(
-          'gap-1 bg-blend-lighten shadow-md',
+          'md:gap-1 bg-blend-lighten shadow-md',
           '[&>*>h3]:text-lg [&>h3]:text-lg',
           '[&>*>h3]:font-normal [&>*>span]:text-3xl [&>h3]:font-normal [&>span]:text-3xl'
         ),
         hero: cn(
-          'gap-3 hover:brightness-125 sm:gap-4',
+          'gap-3 hover:brightness-125 md:gap-4',
           '[&>*>h3]:font-normal [&>*>h3]:text-2xl [&>h3]:font-normal [&>h3]:text-3xl [&>h3]:text-session-white',
           '[&>*>span]:text-8xl [&>*>span]:text-session-white [&>span]:text-8xl [&>span]:text-session-white'
         ),
       },
       size: {
-        default: 'p-4 sm:p-6',
+        default: 'p-4 md:p-6',
         lg: 'p-8',
       },
     },
@@ -78,7 +78,7 @@ const Module = forwardRef<HTMLDivElement, ModuleProps>(
           className={cn(
             'relative',
             innerModuleVariants({ size, variant, className }),
-            noPadding && 'p-0 sm:p-0',
+            noPadding && 'p-0 sm:p-0 md:p-0 lg:p-0 xl:p-0',
             props.onClick && 'hover:cursor-pointer hover:bg-session-green hover:text-session-black'
           )}
           ref={ref}
@@ -224,7 +224,7 @@ const ModuleText = forwardRef<HTMLSpanElement, ModuleTextProps>(
       ref={ref}
       className={cn('overflow-hidden text-gradient-white', className)}
       {...props}
-      style={{ fontSize: isLarge ? 'clamp(24px, 12cqi, 48px)' : 'clamp(18px, 12cqi, 30px)' }}
+      style={{ fontSize: isLarge ? 'clamp(24px, 11cqi, 48px)' : 'clamp(18px, 12cqi, 30px)' }}
     />
   )
 );
@@ -272,7 +272,7 @@ const ModuleTooltip = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
   ({ className, children, ...props }, ref) => {
     return (
       <Tooltip ref={ref} tooltipContent={children} putContentInPortal>
-        <div className={cn('absolute top-4 right-5 cursor-pointer', className)} {...props}>
+        <div className={cn('absolute md:top-4 top-3 end-3 md:end-5 cursor-pointer', className)} {...props}>
           <QuestionIcon className='h-4 w-4 fill-session-text' />
         </div>
       </Tooltip>

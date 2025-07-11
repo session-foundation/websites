@@ -99,9 +99,7 @@ export function ReservedStakesTable({
                 <TableCell>
                   <div className="-me-3 ms-auto w-max">
                     {i === 0 ? (
-                      <NodeOperatorIndicator
-                        isOperatorConnectedWallet={areHexesEqual(address, addr)}
-                      />
+                      <NodeOperatorIndicator isConnectedWallet={areHexesEqual(address, addr)} />
                     ) : null}
                   </div>
                 </TableCell>

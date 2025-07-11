@@ -1,4 +1,5 @@
 import { ActionModuleRow } from '@/components/ActionModule';
+import { AddressLink } from '@/components/AddressLink';
 import { NodeContributorList } from '@/components/NodeCard';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
@@ -222,6 +223,7 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
             trailingChars={4}
             className="font-semibold"
           />
+          <AddressLink address={contract.operator_address} iconOnly />
         </ActionModuleRow>
         <ActionModuleRow
           label={dictShared('operatorFee')}

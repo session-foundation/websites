@@ -160,7 +160,6 @@ const StakedContractCard = forwardRef<
       : null;
   }, [contributors, address]);
 
-  const isSoloNode = contributors.length === 1;
   const isOperator = address ? areHexesEqual(contract.operator_address, address) : false;
 
   const state = parseStakeContractState(contract);
@@ -174,6 +173,7 @@ const StakedContractCard = forwardRef<
       statusIndicatorColor={getContractStatusColor(state)}
       publicKey={contract.service_node_pubkey}
       isOperator={isOperator}
+      operatorAddress={contract.operator_address}
       summary={
         <ContractSummary
           contract={contract}
@@ -209,14 +209,12 @@ const StakedContractCard = forwardRef<
             </RowLabel>
             {formattedStakeBalance}
           </CollapsableContent>
-          {!isSoloNode ? (
-            <CollapsableContent>
-              <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
-              </RowLabel>
-              {fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
-            </CollapsableContent>
-          ) : null}
+          <CollapsableContent>
+            <RowLabel>
+              {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
+            </RowLabel>
+            {fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
+          </CollapsableContent>
           {showRawNodeData ? (
             <>
               <CollapsableContent className="hidden peer-checked:block">

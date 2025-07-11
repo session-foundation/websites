@@ -1,4 +1,5 @@
-import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
+import { AddressLink } from '@/components/AddressLink';
+import { ExitRequestorIndicator, NodeOperatorIndicator } from '@/components/StakedNodeCard';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import {
@@ -9,14 +10,13 @@ import {
 import { Loading } from '@session/ui/components/loading';
 import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { HumanIcon } from '@session/ui/icons/HumanIcon';
-import { LinkOutIcon } from '@session/ui/icons/LinkOutIcon';
+import { KeyRoundIcon } from '@session/ui/icons/KeyRoundIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
 import type { Address } from 'viem';
 
@@ -35,7 +35,7 @@ export const outerNodeCardVariants = cva(
 );
 
 const innerNodeCardVariants = cva(
-  'flex h-full w-full flex-col rounded-xl bg-module px-6 py-5 align-middle',
+  'flex h-full w-full flex-col rounded-xl bg-module px-5 py-4 align-middle md:px-6 md:py-5',
   {
     variants: {
       variant: {
@@ -123,6 +123,7 @@ type ContributorIconProps = {
   contributor?: StakeContributor | ContributionContractContributor;
   isUser?: boolean;
   isOperator?: boolean;
+  isRequestingExit?: boolean;
 };
 
 const humanIconClassName = (
@@ -131,7 +132,7 @@ const humanIconClassName = (
   className?: string
 ) =>
   cn(
-    'mt-1 h-4 w-4',
+    'h-4 w-4',
     contributor
       ? contributor.amount
         ? isUser
@@ -148,17 +149,23 @@ function ContributorTooltipCard({
   contributor,
   isUser,
   isOperator,
+  isRequestingExit,
 }: ContributorIconProps & Required<Pick<ContributorIconProps, 'contributor'>>) {
   const dictionary = useTranslations('general');
+  const dictionaryStakedNode = useTranslations('nodeCard.staked');
   return (
     <div className="flex flex-row gap-3">
       <div className="flex flex-col gap-1">
         <div className="flex flex-row gap-2">
-          <HumanIcon
-            className={humanIconClassName(contributor, isUser)}
-            full={!!contributor?.amount}
+          <ContributorIcon
+            className="mt-0.5"
+            contributor={contributor}
+            isUser={isUser}
+            isOperator={isOperator}
+            isRequestingExit={isRequestingExit}
           />
           <PubkeyWithEns pubKey={contributor.address} />
+          <AddressLink address={contributor.address} />
         </div>
         <span className="flex flex-row gap-2">
           {isOperator ? <NodeOperatorIndicator /> : null}
@@ -167,15 +174,39 @@ function ContributorTooltipCard({
         {isContributionContractContributor(contributor) && contributor.reserved
           ? `${formatSENTBigInt(contributor.reserved)} ${dictionary('reserved')}`
           : ''}
+        {isRequestingExit ? (
+          <span className="flex flex-row gap-2">
+            <ExitRequestorIndicator isConnectedWallet={isUser} />
+            {dictionaryStakedNode('exitRequestor')}
+          </span>
+        ) : null}
       </div>
-      <Link href={`/address/${contributor.address}`}>
-        <LinkOutIcon className="h-5 w-5 hover:stroke-session-green" />
-      </Link>
     </div>
   );
 }
 
-const ContributorIcon = ({ className, contributor, isUser, isOperator }: ContributorIconProps) => {
+const ContributorIcon = forwardRef<
+  HTMLDivElement,
+  ContributorIconProps & HTMLAttributes<HTMLDivElement>
+>(({ className, contributor, isUser, isOperator, isRequestingExit, ...props }, ref) => (
+  <div ref={ref} {...props} className={cn('contrib-icon relative h-max', className)}>
+    <HumanIcon
+      className={humanIconClassName(contributor, isUser, className)}
+      full={!!contributor?.amount}
+    />
+    {isRequestingExit ? (
+      <KeyRoundIcon className="-bottom-0.5 -right-0.5 absolute h-3 w-3 fill-warning stroke-session-black" />
+    ) : null}
+  </div>
+));
+
+const ContributorIconWithTooltip = ({
+  className,
+  contributor,
+  isUser,
+  isOperator,
+  isRequestingExit,
+}: ContributorIconProps) => {
   const dictionary = useTranslations('general');
   return (
     <Tooltip
@@ -185,15 +216,19 @@ const ContributorIcon = ({ className, contributor, isUser, isOperator }: Contrib
             contributor={contributor}
             isUser={isUser}
             isOperator={isOperator}
+            isRequestingExit={isRequestingExit}
           />
         ) : (
           dictionary('emptySlot')
         )
       }
     >
-      <HumanIcon
-        className={humanIconClassName(contributor, isUser, className)}
-        full={!!contributor?.amount}
+      <ContributorIcon
+        className={className}
+        contributor={contributor}
+        isUser={isUser}
+        isOperator={isOperator}
+        isRequestingExit={isRequestingExit}
       />
     </Tooltip>
   );
@@ -203,6 +238,7 @@ type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
   contributors: Array<StakeContributor | ContributionContractContributor>;
   userAddress?: Address;
   operatorAddress: Address;
+  exitRequestAddress?: Address;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
 };
@@ -213,6 +249,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
       className,
       contributors = [],
       operatorAddress,
+      exitRequestAddress,
       userAddress,
       showEmptySlots,
       forceExpand,
@@ -243,45 +280,56 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
     return (
       <>
         {!forceExpand ? (
-          <ContributorIcon
-            className={cn('-mr-1 fill-text-primary peer-checked:hidden peer-checked:opacity-0')}
+          <ContributorIconWithTooltip
+            className={cn('fill-text-primary peer-checked:hidden peer-checked:opacity-0')}
             contributor={userContributor}
             isOperator={areHexesEqual(userContributor?.address, operatorAddress)}
+            isRequestingExit={
+              exitRequestAddress && areHexesEqual(userContributor?.address, exitRequestAddress)
+            }
             isUser
           />
         ) : null}
         <div
           className={cn(
-            'flex w-min flex-row items-center overflow-x-hidden align-middle',
+            'flex w-max flex-row items-center align-middle',
             forceExpand
-              ? 'md:gap-1 md:[&>span]:w-0 md:[&>span]:opacity-0 md:[&>svg]:w-4'
-              : 'md:peer-checked:gap-1 [&>span]:w-max [&>span]:opacity-100 md:peer-checked:[&>span]:w-0 md:peer-checked:[&>span]:opacity-0 [&>svg]:w-0 [&>svg]:transition-all [&>svg]:duration-300 [&>svg]:motion-reduce:transition-none md:peer-checked:[&>svg]:w-4',
+              ? 'gap-0.5 md:gap-1 [&>.contrib-icon]:w-4'
+              : 'peer-checked:gap-0.5 md:peer-checked:gap-1 [&>.contrib-icon>svg]:w-0 peer-checked:[&>.contrib-icon>svg]:w-4 [&>.contrib-icon]:w-0 [&>.contrib-icon]:opacity-0 [&>.contrib-icon]:transition-all [&>.contrib-icon]:duration-300 peer-checked:[&>.contrib-icon]:w-4 peer-checked:[&>.contrib-icon]:opacity-100 [&>.contrib-icon]:motion-reduce:transition-none',
             className
           )}
           ref={ref}
           {...props}
         >
           {contributors.map((contributor) => (
-            <ContributorIcon
+            <ContributorIconWithTooltip
               key={contributor.address}
               contributor={contributor}
               isUser={areHexesEqual(contributor.address, userAddress)}
               isOperator={areHexesEqual(contributor.address, operatorAddress)}
+              isRequestingExit={
+                exitRequestAddress && areHexesEqual(contributor.address, exitRequestAddress)
+              }
             />
           ))}
           {showEmptySlots
-            ? emptyContributorSlots.map((key) => <ContributorIcon key={key} className="h-4" />)
+            ? emptyContributorSlots.map((key) => (
+                <ContributorIconWithTooltip key={key} className="h-4" />
+              ))
             : null}
-          <span
-            className={cn(
-              'letter mt-0.5 block text-lg tracking-widest transition-all duration-300 ease-in-out'
-            )}
-          >
-            {showEmptySlots
-              ? dictionary('outOf', { count: contributors.length, max: 10 })
-              : contributors.length}
-          </span>
         </div>
+        <span
+          className={cn(
+            'letter -ms-2 mt-0.5 block text-lg tracking-widest transition-all duration-300 ease-in-out',
+            forceExpand
+              ? 'w-0 opacity-0'
+              : 'w-max opacity-100 peer-checked:w-0 peer-checked:opacity-0'
+          )}
+        >
+          {showEmptySlots
+            ? dictionary('outOf', { count: contributors.length, max: 10 })
+            : contributors.length}
+        </span>
       </>
     );
   }
@@ -327,8 +375,8 @@ export const ToggleCardExpansionButton = forwardRef<
   );
 });
 
-export const RowLabel = ({ children }: { children: ReactNode }) => (
-  <span className="font-semibold">{children} </span>
+export const RowLabel = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <span className={cn('font-semibold', className)}>{children} </span>
 );
 
 const collapsableContentVariants = cva(
@@ -367,7 +415,7 @@ export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContent
 );
 
 export {
-  ContributorIcon,
+  ContributorIconWithTooltip,
   NodeCard,
   NodeCardHeader,
   NodeCardText,
