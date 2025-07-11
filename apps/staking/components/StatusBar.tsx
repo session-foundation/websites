@@ -145,7 +145,7 @@ export function StatusBar() {
       <div
         className={cn(
           portalChildClassName,
-          'fixed bottom-2 mx-6 flex w-[90vw] flex-row items-end gap-2 md:right-6 md:w-auto'
+          'fixed bottom-2 mx-6 flex w-max flex-row items-end gap-2 rounded-lg px-2 py-1 backdrop-blur-sm md:right-6 md:w-auto md:px-0 md:py-0 md:backdrop-blur-none'
         )}
       >
         {toastHistory.length ? (

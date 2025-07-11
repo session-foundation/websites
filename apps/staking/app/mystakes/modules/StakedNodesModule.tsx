@@ -33,7 +33,8 @@ import type { Address } from 'viem';
 export function StakedNodesWithAddress({
   address,
   scopeId = 'none',
-}: { address: Address; scopeId?: string }) {
+  hideButtons = false,
+}: { address: Address; scopeId?: string; hideButtons: boolean }) {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');
   const {
@@ -77,6 +78,7 @@ export function StakedNodesWithAddress({
                 key={node.pubkeyEd25519}
                 id={`${scopeId}.${node.pubkeyEd25519}`}
                 contract={getStakedContractCardContractFromConfirmation(node)}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -87,6 +89,7 @@ export function StakedNodesWithAddress({
                 id={`${scopeId}.${contract.address}`}
                 contract={contract}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -97,6 +100,7 @@ export function StakedNodesWithAddress({
                 id={`${scopeId}.${contract.address}`}
                 contract={contract}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -109,6 +113,7 @@ export function StakedNodesWithAddress({
                   id={`${scopeId}.${contract.address}`}
                   contract={contract}
                   targetWalletAddress={address}
+                  hideButton={hideButtons}
                 />
               );
             })}
@@ -121,6 +126,7 @@ export function StakedNodesWithAddress({
                 blockHeight={blockHeight}
                 networkTime={networkTime}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}

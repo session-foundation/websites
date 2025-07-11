@@ -24,7 +24,7 @@ export async function generateMetadata() {
 export default function Page() {
   return (
     <ModuleGrid size="lg" className="h-full px-4 md:px-10 xl:auto-rows-auto">
-      <div className="col-span-1 flex h-full flex-col gap-4 pb-8 md:max-h-screen-without-header md:overflow-y-auto md:overflow-x-hidden">
+      <div className="col-span-1 flex h-full flex-col gap-1 pb-8 md:max-h-screen-without-header md:gap-2 md:overflow-y-auto md:overflow-x-hidden">
         <ModuleGrid className="mr-1">
           <StakedBalanceModule />
           <DailyRewardModule />
