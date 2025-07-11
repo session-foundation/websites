@@ -34,7 +34,7 @@ export function StakedNodesWithAddress({
   address,
   scopeId = 'none',
   hideButtons = false,
-}: { address: Address; scopeId?: string; hideButtons: boolean }) {
+}: { address: Address; scopeId?: string; hideButtons?: boolean }) {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');
   const {

@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import type { Address } from 'viem';
 
-export function AddressLink({ address, iconOnly }: { address: Address; iconOnly: boolean }) {
+export function AddressLink({ address, iconOnly }: { address: Address; iconOnly?: boolean }) {
   const dictionary = useTranslations('general');
   return (
     <Link
