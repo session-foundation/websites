@@ -121,12 +121,12 @@ export function NewStake({
     return {
       rewardsAddress: vestingContract ? (connectedAddress ?? '') : '',
       stakeAmount: bigIntToString(
-        balanceValue ? bigIntMin(minStake, balanceValue) : minStake,
+        balanceValue ? bigIntMin(maxStake, balanceValue) : maxStake,
         SENT_DECIMALS,
         decimalDelimiter
       ),
     };
-  }, [vestingContract, connectedAddress, balanceValue, minStake, decimalDelimiter]);
+  }, [vestingContract, connectedAddress, balanceValue, maxStake, decimalDelimiter]);
 
   const form = useForm<StakeFormSchema>({
     resolver: zodResolver(formSchema),
@@ -210,6 +210,11 @@ export function NewStake({
   useEffect(() => {
     if (!isLoading) {
       form.reset(defaultValues);
+      /**
+       * Trigger the form validation on load and on form reload. This means the user will see an
+       * error if they have insufficient balance outside the stake range.
+       */
+      void form.trigger('stakeAmount');
     }
   }, [isLoading, defaultValues, form]);
 
