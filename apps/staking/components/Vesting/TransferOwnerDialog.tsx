@@ -218,7 +218,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
                   }
                 />
                 <TextWithInlineEnder
-                  text={dict('confirmTextS2', { ethAddress: ' ' })}
+                  text={dict.rich('confirmTextS2', { ethAddress: ' ' })}
                   ender={
                     <PubKey
                       pubKey={newBeneficiary}
@@ -230,6 +230,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
                   }
                 />
                 {dict.rich('confirmTextS3')}
+                {dict.rich('confirmTextS4')}
               </div>
             </>
           ) : null}
