@@ -1032,7 +1032,8 @@
       "confirmHeading": "Are you sure?",
       "confirmTextS1": "This will remove the current owner {ethAddress}",
       "confirmTextS2": "and transfer ownership and control of this vesting contract to the new owner {ethAddress}",
-      "confirmTextS3": "<br></br>All funds will belong to the new address. This action is irreversible and cannot be undone.",
+      "confirmTextS3": "<br></br>By proceeding, you confirm that:<br></br>\nYou own the new wallet address<br></br>You are NOT selling, transferring, granting any participation in, or distributing tokens",
+      "confirmTextS4": "<br></br>All funds will belong to the new address. This action is irreversible and cannot be undone.",
       "transferButton": {
         "label": "Transfer Owner",
         "aria": "Transfer the owner of the vesting contract to another wallet."
