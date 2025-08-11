@@ -20,6 +20,7 @@ import {
   SESSION_NODE_TIME,
   SESSION_NODE_TIME_STATIC,
 } from '@/lib/constants';
+import { NEXT_PUBLIC_TESTNET } from '@/lib/env';
 import { formatLocalizedTimeFromSeconds, useDecimalDelimiter } from '@/lib/locale-client';
 import logger from '@/lib/logger';
 import { getContributionRangeFromContributors } from '@/lib/maths';
@@ -43,13 +44,16 @@ import { useTranslations } from 'next-intl';
 import { type Dispatch, type Ref, type SetStateAction, useMemo, useState } from 'react';
 import { usePreferences } from 'usepref';
 import { type Address, isAddress } from 'viem';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
 
 const useWithdrawableStake = ({
   contract,
   address,
 }: { contract: ContributionContract; address?: Address }) => {
-  const { data: blockNumber } = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber({
+    chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
+  });
   const withdrawableBlock = useMemo(() => {
     const contributionEvent = contract.events.find(
       (e) =>

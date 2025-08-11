@@ -1,6 +1,7 @@
 import { STAKE_STATE, parseStakeState } from '@/components/StakedNode/state';
 import { parseStakes } from '@/hooks/parseStakes';
 import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE } from '@/lib/constants';
+import { NEXT_PUBLIC_TESTNET } from '@/lib/env';
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
@@ -13,6 +14,7 @@ import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
 import type { Address } from 'viem';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 /**
  * Hook to get the stakes and related data for the connected wallet.
@@ -28,6 +30,7 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
   const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
   const { data: arbBlock } = useBlockNumber({
+    chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
     query: {
       gcTime: overrideRefetchIntervalMs ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
     },

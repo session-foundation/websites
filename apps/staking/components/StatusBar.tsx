@@ -2,6 +2,7 @@
 
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { LAST_UPDATED_BEHIND_TRIGGER, PREFERENCE } from '@/lib/constants';
+import { NEXT_PUBLIC_TESTNET } from '@/lib/env';
 import { clickableText } from '@/lib/locale-defaults';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { NetworkInfo } from '@session/staking-api-js/schema';
@@ -18,6 +19,7 @@ import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { usePreferences } from 'usepref';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 //biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex but readable
 export function StatusBar() {
@@ -248,7 +250,9 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
     /* Do nothing */
   });
 
-  const { data: l2BlockNumber, refetch: refetchL2BlockNumber } = useBlockNumber();
+  const { data: l2BlockNumber, refetch: refetchL2BlockNumber } = useBlockNumber({
+    chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
+  });
 
   const _refetch = () => {
     refetch();
