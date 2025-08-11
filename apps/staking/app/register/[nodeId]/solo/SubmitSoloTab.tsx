@@ -12,6 +12,7 @@ import { ActionModuleRow } from '@/components/ActionModule';
 import { ActionModuleFeeAccordionRow } from '@/components/ActionModuleFeeAccordionRow';
 import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { WizardSectionDescription } from '@/components/Wizard';
 import { useNetworkFeeFormula } from '@/hooks/useNetworkFeeFormula';
 import type { UseRegisterNodeParams } from '@/hooks/useRegisterNode';
@@ -43,7 +44,6 @@ import {
 } from '@session/contracts/hooks/TokenVestingStaking';
 import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
@@ -341,14 +341,14 @@ export function SubmitSoloTab() {
       )}
       <Form {...formSolo}>
         <form onSubmit={formSolo.handleSubmit(onSubmit)} className={cn(params ? 'hidden' : '')}>
-          <Button
+          <WalletInteractionButtonWithLocales
             type="submit"
             className="w-full"
             data-testid={ButtonDataTestId.Registration_Submit_Solo_Confirm}
             aria-label={dictRegistrationShared('buttonConfirmAndStake.aria')}
           >
             {dictRegistrationShared('buttonConfirmAndStake.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
           <FormErrorMessage />
         </form>
       </Form>

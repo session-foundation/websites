@@ -1,6 +1,7 @@
+import type { ModuleProps } from '@session/ui/components/Module';
 import type { Address } from 'viem';
 
-export type GenericModuleProps = {
+export type GenericModuleProps = ModuleProps & {
   titleOverride?: string;
 };
 

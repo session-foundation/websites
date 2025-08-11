@@ -29,12 +29,12 @@ import type {
   ContributionContract,
   ContributionContractNotReady,
 } from '@session/staking-api-js/schema';
-import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { jsonBigIntReplacer } from '@session/util-js/bigint';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
@@ -62,6 +62,7 @@ type ContractSummaryProps = {
   contract: ContributionContract | ContributionContractNotReady;
   isOperator?: boolean;
   state: STAKE_CONTRACT_STATE;
+  userAddress?: Address;
 };
 
 const ContractSummary = ({
@@ -69,11 +70,13 @@ const ContractSummary = ({
   state,
   isOperator,
   confirmationProgress,
+  userAddress,
 }: ContractSummaryProps) => {
   const contributorList = (
     <NodeContributorList
       contributors={contract.contributors}
       operatorAddress={contract.operator_address}
+      userAddress={userAddress}
       data-testid={StakedNodeDataTestId.Contributor_List}
       showEmptySlots
     />
@@ -157,7 +160,6 @@ const StakedContractCard = forwardRef<
       : null;
   }, [contributors, address]);
 
-  const isSoloNode = contributors.length === 1;
   const isOperator = address ? areHexesEqual(contract.operator_address, address) : false;
 
   const state = parseStakeContractState(contract);
@@ -171,10 +173,12 @@ const StakedContractCard = forwardRef<
       statusIndicatorColor={getContractStatusColor(state)}
       publicKey={contract.service_node_pubkey}
       isOperator={isOperator}
+      operatorAddress={contract.operator_address}
       summary={
         <ContractSummary
           contract={contract}
           state={state}
+          userAddress={address}
           isOperator={isOperator}
           confirmationProgress={confirmationProgress}
         />
@@ -185,7 +189,7 @@ const StakedContractCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
-            <PubKey
+            <PubkeyWithEns
               pubKey={operatorAddress}
               expandOnHoverDesktopOnly
               force={hideButton ? 'collapse' : undefined}
@@ -196,7 +200,7 @@ const StakedContractCard = forwardRef<
               <RowLabel>
                 {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
               </RowLabel>
-              <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+              <PubkeyWithEns pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
             </CollapsableContent>
           ) : null}
           <CollapsableContent>
@@ -205,14 +209,12 @@ const StakedContractCard = forwardRef<
             </RowLabel>
             {formattedStakeBalance}
           </CollapsableContent>
-          {!isSoloNode ? (
-            <CollapsableContent>
-              <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
-              </RowLabel>
-              {fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
-            </CollapsableContent>
-          ) : null}
+          <CollapsableContent>
+            <RowLabel>
+              {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
+            </RowLabel>
+            {fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
+          </CollapsableContent>
           {showRawNodeData ? (
             <>
               <CollapsableContent className="hidden peer-checked:block">

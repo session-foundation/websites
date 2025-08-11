@@ -16,6 +16,7 @@ import {
   StakeAmountField,
   getStakeAmountFormFieldSchema,
 } from '@/components/Form/StakeAmountField';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
 import { useCurrentActor } from '@/hooks/useCurrentActor';
@@ -30,7 +31,6 @@ import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
 import { areHexesEqual } from '@session/util-crypto/string';
@@ -121,12 +121,12 @@ export function NewStake({
     return {
       rewardsAddress: vestingContract ? (connectedAddress ?? '') : '',
       stakeAmount: bigIntToString(
-        balanceValue ? bigIntMin(minStake, balanceValue) : minStake,
+        balanceValue ? bigIntMin(maxStake, balanceValue) : maxStake,
         SENT_DECIMALS,
         decimalDelimiter
       ),
     };
-  }, [vestingContract, connectedAddress, balanceValue, minStake, decimalDelimiter]);
+  }, [vestingContract, connectedAddress, balanceValue, maxStake, decimalDelimiter]);
 
   const form = useForm<StakeFormSchema>({
     resolver: zodResolver(formSchema),
@@ -210,6 +210,11 @@ export function NewStake({
   useEffect(() => {
     if (!isLoading) {
       form.reset(defaultValues);
+      /**
+       * Trigger the form validation on load and on form reload. This means the user will see an
+       * error if they have insufficient balance outside the stake range.
+       */
+      void form.trigger('stakeAmount');
     }
   }, [isLoading, defaultValues, form]);
 
@@ -314,14 +319,14 @@ export function NewStake({
               )}
             />
           ) : null}
-          <Button
+          <WalletInteractionButtonWithLocales
             type="submit"
             className="w-full"
             data-testid={ButtonDataTestId.Stake_Submit_Confirm}
             aria-label={dictionary('buttonStake.aria')}
           >
             {dictionary('buttonStake.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
           <FormErrorMessage />
         </form>
       </Form>

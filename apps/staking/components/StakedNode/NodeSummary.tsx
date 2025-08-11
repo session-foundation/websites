@@ -11,11 +11,13 @@ import { WizardSectionDescription } from '@/components/Wizard';
 import { SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC } from '@/lib/constants';
 import { formatLocalizedTimeFromSeconds, useFormatDate } from '@/lib/locale-client';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
+import { ARBITRUM_EVENT } from '@session/staking-api-js/enums';
 import type { Stake } from '@session/staking-api-js/schema';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import { type Address, isAddress } from 'viem';
 
 /**
  * Checks if a given date is in the past or `soon`
@@ -40,11 +42,12 @@ export const ReadyForExitNotification = ({
   const dictionary = useTranslations('nodeCard.staked');
   const dictionaryGeneral = useTranslations('general');
   const soonString = dictionaryGeneral('soon');
+  const nowString = dictionaryGeneral('now');
 
   const isLiquidationSoon = useMemo(() => isDateSoonOrPast(date), [date]);
   const relativeTime = useMemo(
-    () => (!isLiquidationSoon ? timeString : soonString) ?? '',
-    [isLiquidationSoon, timeString, soonString]
+    () => (!isLiquidationSoon ? timeString : soonString) || nowString,
+    [isLiquidationSoon, timeString, soonString, nowString]
   );
 
   return (
@@ -173,6 +176,7 @@ type NodeSummaryProps = {
   node: Stake;
   state: STAKE_STATE;
   blockHeight: number;
+  userAddress?: Address;
   deregistrationDate: Date | null;
   deregistrationTime: string | null;
   requestedUnlockDate: Date | null;
@@ -199,14 +203,32 @@ export const NodeSummary = ({
   liquidationDate,
   liquidationTime,
   isInContractIdList,
+  userAddress,
 }: NodeSummaryProps) => {
   const eventState = parseStakeEventState(node);
   const isExited = eventState === STAKE_EVENT_STATE.EXITED;
 
+  const exitRequestEvent = node.events.find(
+    (event) => event.name === ARBITRUM_EVENT.ServiceNodeExitRequest
+  );
+
+  // TODO: add this info to the backend
+  const exitRequestAddress =
+    exitRequestEvent?.args &&
+    typeof exitRequestEvent.args === 'object' &&
+    'initiator' in exitRequestEvent.args &&
+    exitRequestEvent.args.initiator &&
+    typeof exitRequestEvent.args.initiator === 'string' &&
+    isAddress(exitRequestEvent.args.initiator)
+      ? exitRequestEvent.args.initiator
+      : undefined;
+
   const contributors = (
     <NodeContributorList
       contributors={node.contributors}
+      userAddress={userAddress}
       operatorAddress={node.operator_address}
+      exitRequestAddress={exitRequestAddress}
       data-testid={StakedNodeDataTestId.Contributor_List}
     />
   );

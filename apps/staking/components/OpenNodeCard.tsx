@@ -147,7 +147,7 @@ const OpenNodeCard = forwardRef<
     >
       {isOperator ? (
         <NodeItem className="-ms-0.5 mb-0.5 flex flex-row items-center gap-1.5 align-middle">
-          <NodeOperatorIndicator isOperatorConnectedWallet />
+          <NodeOperatorIndicator isConnectedWallet />
         </NodeItem>
       ) : null}
       {contributor ? (

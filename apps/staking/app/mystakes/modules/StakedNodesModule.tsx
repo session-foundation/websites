@@ -30,7 +30,11 @@ import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import Link from 'next/link';
 import type { Address } from 'viem';
 
-export function StakedNodesWithAddress({ address }: { address: Address }) {
+export function StakedNodesWithAddress({
+  address,
+  scopeId = 'none',
+  hideButtons = false,
+}: { address: Address; scopeId?: string; hideButtons?: boolean }) {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');
   const {
@@ -72,8 +76,9 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
             return (
               <StakedContractCard
                 key={node.pubkeyEd25519}
-                id={node.pubkeyEd25519}
+                id={`${scopeId}.${node.pubkeyEd25519}`}
                 contract={getStakedContractCardContractFromConfirmation(node)}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -81,9 +86,10 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
             return (
               <StakedContractCard
                 key={contract.address}
-                id={contract.address}
+                id={`${scopeId}.${contract.address}`}
                 contract={contract}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -91,9 +97,10 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
             return (
               <StakedContractCard
                 key={contract.address}
-                id={contract.address}
+                id={`${scopeId}.${contract.address}`}
                 contract={contract}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}
@@ -103,9 +110,10 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
               return (
                 <StakedContractCard
                   key={contract.address}
-                  id={contract.address}
+                  id={`${scopeId}.${contract.address}`}
                   contract={contract}
                   targetWalletAddress={address}
+                  hideButton={hideButtons}
                 />
               );
             })}
@@ -113,11 +121,12 @@ export function StakedNodesWithAddress({ address }: { address: Address }) {
             return (
               <StakedNodeCard
                 key={stake.contract_id}
-                id={stake.contract_id.toString()}
+                id={`${scopeId}.${stake.contract_id.toString()}`}
                 stake={stake}
                 blockHeight={blockHeight}
                 networkTime={networkTime}
                 targetWalletAddress={address}
+                hideButton={hideButtons}
               />
             );
           })}

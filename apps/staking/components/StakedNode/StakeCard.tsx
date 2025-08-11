@@ -6,6 +6,7 @@ import {
   ToggleCardExpansionButton,
 } from '@/components/NodeCard';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
+import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
 import { PubKey } from '@session/ui/components/PubKey';
 import {
@@ -13,8 +14,10 @@ import {
   type StatusIndicatorVariants,
 } from '@session/ui/components/StatusIndicator';
 import { cn } from '@session/ui/lib/utils';
+import { areHexesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
+import type { Address } from 'viem';
 
 type StakeCardProps = HTMLAttributes<HTMLDivElement> & {
   id: string;
@@ -24,6 +27,7 @@ type StakeCardProps = HTMLAttributes<HTMLDivElement> & {
   summary: ReactNode;
   publicKey?: string;
   isOperator?: boolean;
+  operatorAddress?: Address;
   collapsableFirstChildren?: ReactNode;
   collapsableLastChildren?: ReactNode;
 };
@@ -37,6 +41,7 @@ const StakeCard = forwardRef<HTMLDivElement, StakeCardProps>(
       statusIndicatorColor,
       title,
       isOperator,
+      operatorAddress,
       publicKey,
       collapsableFirstChildren,
       collapsableLastChildren,
@@ -46,6 +51,8 @@ const StakeCard = forwardRef<HTMLDivElement, StakeCardProps>(
   ) => {
     const generalNodeDictionary = useTranslations('sessionNodes.general');
     const titleFormat = useTranslations('modules.title');
+
+    const address = useCurrentActor();
 
     const toggleId = `toggle-${id}`;
 
@@ -70,12 +77,15 @@ const StakeCard = forwardRef<HTMLDivElement, StakeCardProps>(
         {collapsableFirstChildren}
         {/** NOTE - ensure any changes here still work with the pubkey component */}
         <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {isOperator ? (
-            <NodeOperatorIndicator className="me-0.5" isOperatorConnectedWallet />
-          ) : null}
           {publicKey ? (
             <span className="inline-flex flex-nowrap gap-1">
-              <RowLabel>
+              {isOperator ? (
+                <NodeOperatorIndicator
+                  className="me-0.5"
+                  isConnectedWallet={areHexesEqual(address, operatorAddress)}
+                />
+              ) : null}
+              <RowLabel className="self-center">
                 {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
               </RowLabel>
               <PubKey pubKey={publicKey} alwaysShowCopyButton leadingChars={8} trailingChars={4} />

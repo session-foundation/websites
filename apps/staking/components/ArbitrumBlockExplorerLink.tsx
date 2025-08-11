@@ -16,10 +16,10 @@ export const ArbitrumBlockExplorerLinkText = () => {
   const generalDictionary = useTranslations('general');
   return (
     <span className="inline-flex items-center gap-1 fill-session-green align-middle text-session-green">
-      <span className="hidden sm:inline-flex xl:hidden 2xl:inline-flex">
+      <span className="hidden md:inline-flex xl:hidden 2xl:inline-flex">
         {generalDictionary('viewOnExplorer')}
       </span>
-      <span className="inline-flex sm:hidden xl:inline-flex 2xl:hidden">
+      <span className="inline-flex md:hidden xl:inline-flex 2xl:hidden">
         {generalDictionary('viewOnExplorerShort')}
       </span>
       <LinkOutIcon className="h-4 w-4" />

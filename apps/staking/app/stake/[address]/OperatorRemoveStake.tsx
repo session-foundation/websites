@@ -1,10 +1,10 @@
 import { SubmitRemoveFunds } from '@/app/stake/[address]/SubmitRemoveFunds';
 import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFundsVesting';
 import { WithdrawStakeOperatorNotice } from '@/app/stake/[address]/WithdrawStakeOperatorNotice';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { ContributionContract } from '@session/staking-api-js/schema';
-import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useState } from 'react';
 
@@ -34,7 +34,7 @@ export function OperatorRemoveStake({
         userConfirmingRemoveStake ? (
           <WithdrawStakeOperatorNotice onContinue={() => setIsRemoveStake(true)} />
         ) : (
-          <Button
+          <WalletInteractionButtonWithLocales
             variant="destructive"
             className="w-full"
             data-testid={ButtonDataTestId.Stake_Manage_Remove_Stake}
@@ -42,7 +42,7 @@ export function OperatorRemoveStake({
             onClick={handleRemoveStake}
           >
             {dictionary('buttonRemoveStakeAndRegistration.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
         )
       ) : null}
       {isRemoveStake ? (

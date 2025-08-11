@@ -1,60 +1,37 @@
 'use client';
-
-import { ModuleDynamicContractReadText } from '@/components/ModuleDynamic';
+import DynamicModuleCard from '@/app/mystakes/modules/DynamicModuleCard';
 import { WizardSectionDescription } from '@/components/Wizard';
 import useDailyNodeReward from '@/hooks/useDailyNodeReward';
 import { DYNAMIC_MODULE, URL } from '@/lib/constants';
+import type { QUERY_STATUS } from '@/lib/query';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import { Module, ModuleTitleDynamic, ModuleTooltip } from '@session/ui/components/Module';
+import type { ModuleProps } from '@session/ui/components/Module';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
 
-export default function DailyNodeReward() {
+export default function DailyNodeReward({ size, variant }: ModuleProps) {
   const { dailyNodeReward, status, refetch } = useDailyNodeReward();
-  const dictionary = useTranslations('modules.networkDailyRewards');
-  const dictionaryShared = useTranslations('modules.shared');
-  const toastDictionary = useTranslations('modules.toast');
-  const titleFormat = useTranslations('modules.title');
-
-  const title = dictionary('title');
-  const titleShort = dictionary('titleShort');
-
-  const formattedDailyNodeRewardAmount = useMemo(
-    () => `${formatSENTBigInt(dailyNodeReward ?? BigInt(0), DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS)}`,
-    [dailyNodeReward]
-  );
+  const dict = useTranslations('modules.networkDailyRewards');
 
   return (
-    <Module>
-      <ModuleTooltip>
+    <DynamicModuleCard
+      titleLong={dict('title')}
+      titleShort={dict('titleShort')}
+      tooltipContent={
         <WizardSectionDescription
           className="text-base md:text-base"
-          description={dictionary.rich('description', {
+          description={dict.rich('description', {
             linkOut: '',
           })}
           href={URL.LEARN_MORE_DAILY_REWARDS}
         />
-      </ModuleTooltip>
-      <ModuleTitleDynamic
-        longText={titleFormat('format', { title })}
-        shortText={titleFormat('format', { title: titleShort })}
-      />
-      <ModuleDynamicContractReadText
-        status={status}
-        fallback={0}
-        enabled
-        errorFallback={dictionaryShared('error')}
-        errorToast={{
-          messages: {
-            error: toastDictionary('error', { module: title }),
-            refetching: toastDictionary('refetching'),
-            success: toastDictionary('refetchSuccess', { module: title }),
-          },
-          refetch,
-        }}
-      >
-        {formattedDailyNodeRewardAmount}
-      </ModuleDynamicContractReadText>
-    </Module>
+      }
+      status={status as QUERY_STATUS}
+      refetch={refetch}
+      enabled={true}
+      size={size}
+      variant={variant}
+    >
+      {formatSENTBigInt(dailyNodeReward ?? 0n, DYNAMIC_MODULE.SENT_ROUNDED_DECIMALS)}
+    </DynamicModuleCard>
   );
 }

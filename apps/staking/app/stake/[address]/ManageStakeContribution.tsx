@@ -7,6 +7,7 @@ import { SubmitRemoveFundsVesting } from '@/app/stake/[address]/SubmitRemoveFund
 import { ActionModuleRow } from '@/components/ActionModule';
 import { EthereumAddressField } from '@/components/Form/EthereumAddressField';
 import { StakeAmountField } from '@/components/Form/StakeAmountField';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { WizardSectionDescription } from '@/components/Wizard';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
@@ -19,6 +20,7 @@ import {
   SESSION_NODE_TIME,
   SESSION_NODE_TIME_STATIC,
 } from '@/lib/constants';
+import { NEXT_PUBLIC_TESTNET } from '@/lib/env';
 import { formatLocalizedTimeFromSeconds, useDecimalDelimiter } from '@/lib/locale-client';
 import logger from '@/lib/logger';
 import { getContributionRangeFromContributors } from '@/lib/maths';
@@ -31,7 +33,6 @@ import { ARBITRUM_EVENT } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
@@ -43,13 +44,16 @@ import { useTranslations } from 'next-intl';
 import { type Dispatch, type Ref, type SetStateAction, useMemo, useState } from 'react';
 import { usePreferences } from 'usepref';
 import { type Address, isAddress } from 'viem';
+import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import { SubmitContributeFundsVesting } from './SubmitContributeFundsVesting';
 
 const useWithdrawableStake = ({
   contract,
   address,
 }: { contract: ContributionContract; address?: Address }) => {
-  const { data: blockNumber } = useBlockNumber();
+  const { data: blockNumber } = useBlockNumber({
+    chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
+  });
   const withdrawableBlock = useMemo(() => {
     const contributionEvent = contract.events.find(
       (e) =>
@@ -251,7 +255,7 @@ export function ManageStakeContribution({
   const isSmallContributor = contributorStakeAmount < SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT;
 
   const removeStakeBaseButton = !isOperator ? (
-    <Button
+    <WalletInteractionButtonWithLocales
       type="button"
       variant="destructive"
       className="w-full"
@@ -261,7 +265,7 @@ export function ManageStakeContribution({
       onClick={handleRemoveStake}
     >
       {dictionary('buttonRemoveStake.text')}
-    </Button>
+    </WalletInteractionButtonWithLocales>
   ) : null;
 
   const removeStakeButton =
@@ -354,7 +358,7 @@ export function ManageStakeContribution({
               />
             )}
           />
-          <Button
+          <WalletInteractionButtonWithLocales
             type="submit"
             className="w-full"
             disabled={isRemoveStake || additionalStakeAmount < 1n}
@@ -362,7 +366,7 @@ export function ManageStakeContribution({
             aria-label={dictionaryRegistrationShared('buttonConfirmAndStake.aria')}
           >
             {dictionaryRegistrationShared('buttonConfirmAndStake.text')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
           <FormErrorMessage />
         </form>
       </Form>

@@ -37,24 +37,13 @@ const useHistoricalPriceQuery = () => {
         toast.error('Failed to fetch price data.');
       }
 
-      const rawData = pricesSchema
+      return pricesSchema
         .parse(await res.json())
         .prices.reverse()
         .map(({ price, t }) => ({
           price: Number(price.toFixed(3)),
           t: Math.trunc(t),
         }));
-
-      const filteredData = rawData.filter((_, i) => i % 20 === 0);
-
-      const latestPriceRaw = rawData[rawData.length - 1];
-      const latestPriceFiltered = filteredData[filteredData.length - 1];
-
-      if (latestPriceRaw && latestPriceFiltered && latestPriceRaw.t !== latestPriceFiltered.t) {
-        filteredData.push(latestPriceRaw);
-      }
-
-      return filteredData;
     },
     refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : false,
   });
@@ -77,6 +66,27 @@ export default function PriceModule() {
   const usdFormatted = formatUSD(price?.price ?? 0);
   const date = useMemo(() => (price ? formatPriceTimeMedium(price.t) : null), [price]);
 
+  const range = useMemo(() => {
+    const range = { min: 0, max: 0 };
+    if (data) {
+      range.min = Number.POSITIVE_INFINITY;
+      range.max = Number.NEGATIVE_INFINITY;
+      for (const p of data) {
+        if (p.price < range.min) {
+          range.min = p.price;
+        }
+        if (p.price > range.max) {
+          range.max = p.price;
+        }
+      }
+
+      const diff = range.max - range.min;
+      range.max = Math.ceil((range.max + diff * 0.25) * 100) / 100;
+      range.min = Math.floor((range.min - diff * 0.25) * 100) / 100;
+    }
+    return range;
+  }, [data]);
+
   return (
     <Module size="lg" className="flex max-h-52 flex-grow md:max-h-full" noPadding>
       <CardContent className="max-h-full p-0">
@@ -85,6 +95,7 @@ export default function PriceModule() {
         </ModuleTitle>
         <ModuleTooltip>{dictionary.rich('description', { date_time: date })}</ModuleTooltip>
         <ChartContainer
+          className="hidden md:block"
           config={{
             price: {
               label: 'Price',
@@ -113,8 +124,9 @@ export default function PriceModule() {
             />
             <YAxis
               dataKey="price"
-              domain={['dataMin', 'dataMax']}
+              domain={[range.min, range.max]}
               tickFormatter={(v) => formatUSD(v)}
+              tickCount={20}
               fontSize={10}
             />
             <ChartTooltip

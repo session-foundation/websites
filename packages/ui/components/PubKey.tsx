@@ -9,8 +9,9 @@ import { Tooltip } from './ui/tooltip';
 
 type CollapseStringsParams = Parameters<typeof collapseString>;
 
-type PubKeyType = HTMLAttributes<HTMLDivElement> & {
+export type PubKeyProps = HTMLAttributes<HTMLDivElement> & {
   pubKey: string;
+  pubKeyDisplayedOverride?: string;
   leadingChars?: CollapseStringsParams[1];
   trailingChars?: CollapseStringsParams[2];
   expandOnHover?: boolean;
@@ -21,12 +22,13 @@ type PubKeyType = HTMLAttributes<HTMLDivElement> & {
   copyToClipboardToastMessage?: string;
 };
 
-export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
+export const PubKey = forwardRef<HTMLDivElement, PubKeyProps>((props, ref) => {
   const {
     className,
     pubKey,
-    leadingChars,
-    trailingChars,
+    pubKeyDisplayedOverride,
+    leadingChars = 6,
+    trailingChars = 6,
     expandOnHover,
     expandOnHoverDesktopOnly,
     alwaysShowCopyButton,
@@ -37,9 +39,14 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
   } = props;
   const [isExpanded, setIsExpanded] = useState(force === 'expand');
   const collapsedPubKey = useMemo(
-    () => (pubKey ? collapseString(pubKey, leadingChars ?? 6, trailingChars ?? 6) : ''),
-    [pubKey]
+    () => (pubKey ? collapseString(pubKey, leadingChars, trailingChars) : ''),
+    [pubKey, leadingChars, trailingChars]
   );
+
+  const collapsedPubKeyOverride = useMemo(
+    () => (pubKeyDisplayedOverride ? collapseString(pubKeyDisplayedOverride, leadingChars, trailingChars) : ''),
+      [pubKeyDisplayedOverride, leadingChars, trailingChars]
+  )
 
   const handleSelectionChange = useCallback(() => {
     if (force === 'expand' || force === 'collapse') return;
@@ -56,10 +63,23 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
     };
   }, [handleSelectionChange]);
 
+  const tooltipContent = <div className='flex text-wrap break-all align-middle'>
+    {pubKey}
+    {pubKeyDisplayedOverride ? <CopyToClipboardButton
+    className={cn(
+      '-mt-0.5 mx-1 p-0.5 opacity-100 duration-0 hover:bg-session-green hover:text-session-black hover:opacity-100 *:hover:fill-session-black'
+    )}
+    textToCopy={pubKey}
+    data-testid={ButtonDataTestId.Copy_Pub_Key_To_Clipboard}
+    aria-label={copyToClipboardAriaLabel ?? 'Copy to Clipboard'}
+    copyToClipboardToastMessage={copyToClipboardToastMessage ?? 'Copied to clipboard!'}
+  /> : null}
+    </div>
+
   return (
     <span ref={ref} className={cn('group flex select-all items-center', className)} {...rest}>
       {!isExpanded ? (
-        <Tooltip tooltipContent={pubKey} triggerProps={{ disabled: expandOnHover }}>
+        <Tooltip tooltipContent={tooltipContent} triggerProps={{ disabled: expandOnHover }} >
           <span
             className={cn(
               'select-all break-all',
@@ -71,7 +91,7 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
                 : 'md:block'
             )}
           >
-            {collapsedPubKey}
+            {collapsedPubKeyOverride || collapsedPubKey}
           </span>
         </Tooltip>
       ) : null}
@@ -86,14 +106,14 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyType>((props, ref) => {
             : 'md:hidden'
         )}
       >
-        {pubKey}
+        {pubKeyDisplayedOverride || pubKey}
       </div>
       <CopyToClipboardButton
         className={cn(
           'mx-1 p-0.5 duration-0 group-hover:bg-session-green group-hover:text-session-black group-hover:opacity-100 *:group-hover:fill-session-black',
           alwaysShowCopyButton || isExpanded ? 'opacity-100' : 'opacity-0'
         )}
-        textToCopy={pubKey}
+        textToCopy={pubKeyDisplayedOverride || pubKey}
         data-testid={ButtonDataTestId.Copy_Pub_Key_To_Clipboard}
         aria-label={copyToClipboardAriaLabel ?? 'Copy to Clipboard'}
         copyToClipboardToastMessage={copyToClipboardToastMessage ?? 'Copied to clipboard!'}

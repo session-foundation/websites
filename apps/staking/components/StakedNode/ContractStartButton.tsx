@@ -1,6 +1,6 @@
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { useFinalizeContract } from '@session/contracts/hooks/ServiceNodeContribution';
-import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import type { Address } from 'viem';
 
@@ -9,13 +9,13 @@ export function ContractStartButton({ contractAddress }: { contractAddress: Addr
   const { finalizeContract, contractCallStatus } = useFinalizeContract({ contractAddress });
 
   return (
-    <Button
+    <WalletInteractionButtonWithLocales
       size="xs"
       disabled={contractCallStatus === 'pending' || contractCallStatus === 'success'}
       onClick={() => finalizeContract()}
       data-testid={ButtonDataTestId.Staked_Node_Start}
     >
       {contractCallStatus === 'pending' ? '...' : dict('buttonText')}
-    </Button>
+    </WalletInteractionButtonWithLocales>
   );
 }

@@ -1,4 +1,5 @@
 import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import useContributeStakeToOpenNode, {
   type UseContributeStakeToOpenNodeParams,
 } from '@/hooks/useContributeStakeToOpenNode';
@@ -7,7 +8,6 @@ import { getContractErrorName } from '@session/contracts';
 import Typography from '@session/ui/components/Typography';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
-import { Button } from '@session/ui/ui/button';
 import { useTranslations } from 'next-intl';
 import { type Dispatch, type SetStateAction, useEffect } from 'react';
 
@@ -132,7 +132,7 @@ export function SubmitContributeFunds({
           },
         ]}
       />
-      <Button
+      <WalletInteractionButtonWithLocales
         className={cn('w-full', !isError && 'hidden')}
         disabled={!isError}
         variant="outline"
@@ -140,7 +140,7 @@ export function SubmitContributeFunds({
         data-testid={ButtonDataTestId.Stake_Submit_Retry}
       >
         {dictShared('retry')}
-      </Button>
+      </WalletInteractionButtonWithLocales>
     </div>
   );
 }

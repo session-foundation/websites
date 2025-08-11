@@ -19,9 +19,10 @@ import {
   AlertDialogFooter,
   AlertDialogTrigger,
 } from '@session/ui/ui/alert-dialog';
+import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 export function NodeExitButtonDialog({ node }: { node: Stake }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
@@ -85,7 +86,7 @@ function NodeExitDialog({ node }: { node: Stake }) {
           excludedSigners={data.result.non_signer_indices}
         />
       ) : isLoading ? (
-        <Loading />
+        <ExitLoading />
       ) : isError ? (
         <ErrorMessage
           refetch={refetch}
@@ -190,5 +191,57 @@ function NodeExitContractWriteDialog({
         ) : null}
       </AlertDialogFooter>
     </>
+  );
+}
+
+// TODO: make this its own component once we have more intelligent data on step progress
+const estimatedTimeSeconds = 5;
+const steps = 3;
+const timePerStep = Math.ceil((estimatedTimeSeconds / steps) * 1000);
+
+const makeText = (text: string) => ({
+  [PROGRESS_STATUS.IDLE]: text,
+  [PROGRESS_STATUS.PENDING]: text,
+  [PROGRESS_STATUS.SUCCESS]: text,
+  [PROGRESS_STATUS.ERROR]: text,
+});
+
+function parseStatus(step: number, currentStep: number) {
+  if (currentStep > step) {
+    return PROGRESS_STATUS.SUCCESS;
+  }
+  if (currentStep === step) {
+    return PROGRESS_STATUS.PENDING;
+  }
+  return PROGRESS_STATUS.IDLE;
+}
+
+function ExitLoading() {
+  const [step, setStep] = useState<number>(0);
+
+  useMount(() => {
+    const id = setInterval(() => setStep((p) => p + 1), timePerStep);
+    return () => clearInterval(id);
+  });
+
+  return (
+    <div className="flex h-full min-h-40 w-full flex-col items-center align-middle">
+      <Progress
+        steps={[
+          {
+            status: parseStatus(0, step),
+            text: makeText('Requesting Exit Signature from the Session Network'),
+          },
+          {
+            status: parseStatus(1, step),
+            text: makeText('Waiting for Network Signature'),
+          },
+          {
+            status: step < 2 ? parseStatus(2, step) : PROGRESS_STATUS.PENDING,
+            text: makeText('Requesting Exit Transaction'),
+          },
+        ]}
+      />
+    </div>
   );
 }

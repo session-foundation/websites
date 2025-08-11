@@ -28,7 +28,10 @@ export async function generateMetadata() {
 
 const buildInfo = getBuildInfo();
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+  modal,
+}: { children: ReactNode; modal: ReactNode }) {
   const { locale, direction, messages } = await getLocalizationData();
   const wagmiCookie = (await headers()).get('cookie');
 
@@ -54,6 +57,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <RemoteBanner enabledFlags={enabledFlags} />
               <Header />
               <main>{children}</main>
+              {modal}
               <WalletUserSheet />
               {!isProduction ? <DevSheet buildInfo={buildInfo} /> : null}
               <TOSHandler />

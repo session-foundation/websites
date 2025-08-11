@@ -2,6 +2,7 @@ import { useTotalStaked } from '@/app/mystakes/modules/useTotalStaked';
 import { useVestingUnstakedBalance } from '@/app/vested-stakes/modules/VestingUnstakedBalanceModule';
 import ActionModuleFeeRow from '@/components/ActionModuleFeeRow';
 import { VestingInfo } from '@/components/Vesting/VestingInfo';
+import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { useNetworkBalances } from '@/hooks/useNetworkBalances';
 import {
   formatAndHandleLocalizedContractErrorMessages,
@@ -14,7 +15,6 @@ import { useVestingRelease } from '@session/contracts/hooks/TokenVestingStaking'
 import { toast } from '@session/ui/lib/toast';
 import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
-import { Button } from '@session/ui/ui/button';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
@@ -92,7 +92,7 @@ export function VestingClaimPrincipal() {
   );
 
   const button = (
-    <Button
+    <WalletInteractionButtonWithLocales
       className={cn('w-full uppercase', contractCallStatus !== 'idle' ? 'hidden' : '')}
       data-testid={ButtonDataTestId.Vesting_Claim_Principal_Confirm}
       aria-label={dict('confirmButton.aria')}
@@ -105,7 +105,7 @@ export function VestingClaimPrincipal() {
       }
     >
       {dict('confirmButton.label')}
-    </Button>
+    </WalletInteractionButtonWithLocales>
   );
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export function VestingClaimPrincipal() {
               },
             ]}
           />
-          <Button
+          <WalletInteractionButtonWithLocales
             className={cn('w-full', !isError && 'hidden')}
             disabled={!isError}
             variant="outline"
@@ -174,7 +174,7 @@ export function VestingClaimPrincipal() {
             data-testid={ButtonDataTestId.Register_Submit_Solo_Retry}
           >
             {dictShared('retry')}
-          </Button>
+          </WalletInteractionButtonWithLocales>
         </>
       ) : null}
     </>

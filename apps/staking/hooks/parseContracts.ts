@@ -42,16 +42,26 @@ export function sortContracts(a: ContributionContract, b: ContributionContract, 
   const reservedSort = sortingReservedContractsDesc(a, b, address);
 
   if (reservedSort !== 0) {
-    return reservedSort;
+    return -reservedSort;
   }
 
   const stakeSort = sortingTotalStakedDesc(a, b, address);
   if (stakeSort !== 0) {
-    return stakeSort;
+    return -stakeSort;
   }
 
-  // fee ascending
-  return (a.fee ?? 0) - (b.fee ?? 0);
+  if (a.fee !== b.fee) {
+    return a.fee - b.fee;
+  }
+
+  const openForContributionBlockA =
+    a.events.find(({ name }) => name === ARBITRUM_EVENT.OpenForPublicContribution)?.block ??
+    Number.POSITIVE_INFINITY;
+  const openForContributionBlockB =
+    b.events.find(({ name }) => name === ARBITRUM_EVENT.OpenForPublicContribution)?.block ??
+    Number.POSITIVE_INFINITY;
+
+  return openForContributionBlockA - openForContributionBlockB;
 }
 
 export type ParseStakesParams = {

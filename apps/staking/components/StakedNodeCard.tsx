@@ -34,14 +34,15 @@ import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { StakeContributor } from '@session/staking-api-js/schema';
 import type { Stake } from '@session/staking-api-js/schema';
 import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
-import { PubKey } from '@session/ui/components/PubKey';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
+import { KeyRoundIcon } from '@session/ui/icons/KeyRoundIcon';
 import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { areHexesEqual } from '@session/util-crypto/string';
 import { jsonBigIntReplacer } from '@session/util-js/bigint';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
+import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
@@ -108,19 +109,17 @@ class BlockTimeManager {
   }
 }
 
-type NodeOperatorIndicatorProps = HTMLAttributes<HTMLDivElement> & {
-  isOperatorConnectedWallet?: boolean;
+type NodeContributorIndicatorProps = HTMLAttributes<HTMLDivElement> & {
+  isConnectedWallet?: boolean;
 };
 
-export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeOperatorIndicatorProps>(
-  ({ className, isOperatorConnectedWallet, ...props }, ref) => {
+export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeContributorIndicatorProps>(
+  ({ className, isConnectedWallet, ...props }, ref) => {
     const dictionary = useTranslations('nodeCard.staked');
     return (
       <Tooltip
         tooltipContent={
-          isOperatorConnectedWallet
-            ? dictionary('operatorTooltip')
-            : dictionary('operatorTooltipOther')
+          isConnectedWallet ? dictionary('operatorTooltip') : dictionary('operatorTooltipOther')
         }
       >
         <div
@@ -132,6 +131,32 @@ export const NodeOperatorIndicator = forwardRef<HTMLDivElement, NodeOperatorIndi
           {...props}
         >
           <SpannerAndScrewdriverIcon className="h-3.5 w-3.5 fill-session-green" />
+        </div>
+      </Tooltip>
+    );
+  }
+);
+
+export const ExitRequestorIndicator = forwardRef<HTMLDivElement, NodeContributorIndicatorProps>(
+  ({ className, isConnectedWallet, ...props }, ref) => {
+    const dictionary = useTranslations('nodeCard.staked');
+    return (
+      <Tooltip
+        tooltipContent={
+          isConnectedWallet
+            ? dictionary('exitRequestorTooltip')
+            : dictionary('exitRequestorTooltipOther')
+        }
+      >
+        <div
+          ref={ref}
+          className={cn(
+            'flex flex-row items-center gap-1 align-middle font-normal text-session-green text-sm md:text-base',
+            className
+          )}
+          {...props}
+        >
+          <KeyRoundIcon className="h-3.5 w-3.5 stroke-warning" />
         </div>
       </Tooltip>
     );
@@ -301,11 +326,13 @@ const StakedNodeCard = forwardRef<
       title={state}
       statusIndicatorColor={getNodeStatus(state)}
       publicKey={stake.service_node_pubkey}
-      isOperator={areHexesEqual(stake.operator_address, address)}
+      isOperator={areHexesEqual(operatorAddress, address)}
+      operatorAddress={operatorAddress}
       summary={
         <NodeSummary
           node={stake}
           state={state}
+          userAddress={address}
           blockHeight={blockHeight}
           isInContractIdList={isInContractIdList}
           deregistrationDate={deregistrationDate}
@@ -371,14 +398,14 @@ const StakedNodeCard = forwardRef<
             <RowLabel>
               {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
             </RowLabel>
-            <PubKey pubKey={operatorAddress} expandOnHoverDesktopOnly />
+            <PubkeyWithEns pubKey={operatorAddress} expandOnHoverDesktopOnly />
           </CollapsableContent>
           {beneficiaryAddress ? (
             <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
               <RowLabel>
                 {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
               </RowLabel>
-              <PubKey pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
+              <PubkeyWithEns pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
             </CollapsableContent>
           ) : null}
           <CollapsableContent>
