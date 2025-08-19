@@ -1,23 +1,26 @@
 import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
-import { useStakes } from '@/hooks/useStakes';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import { useStakes, useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import type { Stake } from '@session/staking-api-js/schema';
 import { Loading } from '@session/ui/components/loading';
 import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
 import { Button } from '@session/ui/ui/button';
-import { areHexesEqual } from '@session/util-crypto/string';
+import {
+  areBLSKeysEqual,
+  areEd25519KeysEqual,
+  areEthereumAddressesEqual,
+} from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
 
 export function SuccessSoloTab() {
   const { props } = useRegistrationWizard();
-  const currentActor = useCurrentActor();
+  const { activeAddress } = useUser();
 
   const dict = useTranslations('actionModules.registration.successSolo');
   const dictShared = useTranslations('actionModules.registration.shared');
@@ -25,18 +28,21 @@ export function SuccessSoloTab() {
     nodes: { nodesConfirmingRegistration },
   } = useNodesWithConfirmations();
 
-  const { stakes, blockHeight, networkTime, refetch } = useStakes();
-  const stake = stakes.find((stake) =>
-    areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
+  const { stakes, refetch } = useStakes();
+  const stake = stakes.find(
+    (stake) =>
+      areEd25519KeysEqual(stake.service_node_pubkey, props.ed25519PubKey) ||
+      areBLSKeysEqual(stake.pubkey_bls, props.blsKey)
   );
 
   const confirmingNode = useMemo(
     () =>
       nodesConfirmingRegistration.find(
         (m) =>
-          m.pubkeyEd25519 === props.ed25519PubKey && areHexesEqual(m.operatorAddress, currentActor)
+          m.pubkeyEd25519 === props.ed25519PubKey &&
+          areEthereumAddressesEqual(m.operatorAddress, activeAddress)
       ),
-    [props.ed25519PubKey, nodesConfirmingRegistration, currentActor]
+    [props.ed25519PubKey, nodesConfirmingRegistration, activeAddress]
   );
 
   const optimisticStake = useMemo(() => {
@@ -45,11 +51,11 @@ export function SuccessSoloTab() {
       return {
         contributors: [
           {
-            addr: currentActor,
+            addr: activeAddress,
             amount: SESSION_NODE_FULL_STAKE_AMOUNT,
           },
         ],
-        operator_address: currentActor,
+        operator_address: activeAddress,
         pubkey_bls: props.blsKey,
         pubkey_ed25519: props.ed25519PubKey,
         service_node_pubkey: props.ed25519PubKey,
@@ -59,7 +65,7 @@ export function SuccessSoloTab() {
         total_contributed: SESSION_NODE_FULL_STAKE_AMOUNT,
         active: false,
       } as unknown as Stake;
-  }, [stake, confirmingNode, currentActor, props.blsKey, props.ed25519PubKey]);
+  }, [stake, confirmingNode, activeAddress, props.blsKey, props.ed25519PubKey]);
 
   useEffect(() => {
     if (!stake) void refetch();
@@ -75,10 +81,8 @@ export function SuccessSoloTab() {
       {optimisticStake ? (
         <StakedNodeCard
           className="text-start"
-          id={optimisticStake.pubkey_ed25519}
+          toggleId={optimisticStake.pubkey_ed25519}
           stake={optimisticStake}
-          blockHeight={blockHeight ?? 0}
-          networkTime={networkTime ?? Date.now()}
           hideButton
         />
       ) : (

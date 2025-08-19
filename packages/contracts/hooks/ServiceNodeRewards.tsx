@@ -1,5 +1,6 @@
 'use client';
 
+import type { BLSPublicKey, Ed25519PublicKey, EthereumAddress } from '@session/util-crypto/keys';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
@@ -123,14 +124,14 @@ export type UseAddBLSPubKeyReturn = ContractWriteQueryProps & {
 };
 
 export type RegisterNodeContributor = {
-  staker: { addr: Address; beneficiary: Address };
+  staker: { addr: EthereumAddress; beneficiary: EthereumAddress };
   stakedAmount: bigint;
 };
 
 export type UseAddBlsPubKeyParams = {
-  blsPubKey: string;
+  blsPubKey: BLSPublicKey;
   blsSignature: string;
-  nodePubKey: string;
+  nodePubKey: Ed25519PublicKey;
   userSignature: string;
   fee?: number;
   /** Contributors to the node, requires at least one contributor */

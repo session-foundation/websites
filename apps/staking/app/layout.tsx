@@ -1,17 +1,16 @@
 import { siteMetadata } from '@/lib/metadata';
 import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
 import '@session/ui/styles';
+import { AppBannerServer } from '@/components/Banner/AppBannerServer';
 import { DevSheet } from '@/components/DevSheet';
 import Header from '@/components/Header';
 import Maintenance from '@/components/Maintenance';
-import RemoteBanner from '@/components/RemoteBanner';
 import RouterListener from '@/components/RouterListener';
 import { StatusBar } from '@/components/StatusBar';
 import { TOSHandler } from '@/components/TOSHandler';
-import TestnetBanner from '@/components/TestnetBanner';
 import { VestingDialog } from '@/components/Vesting/VestingDialog';
 import { WalletUserSheet } from '@/components/WalletUserSheet';
-import { NEXT_PUBLIC_TESTNET, isProduction } from '@/lib/env';
+import { isProduction } from '@/lib/env';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { getRemoteFeatureFlags } from '@/lib/feature-flags-server';
 import { getLocalizationData } from '@/lib/locale-server';
@@ -53,8 +52,7 @@ export default async function RootLayout({
             <Maintenance />
           ) : (
             <>
-              {NEXT_PUBLIC_TESTNET ? <TestnetBanner /> : null}
-              <RemoteBanner enabledFlags={enabledFlags} />
+              <AppBannerServer enabledFlags={enabledFlags} />
               <Header />
               <main>{children}</main>
               {modal}

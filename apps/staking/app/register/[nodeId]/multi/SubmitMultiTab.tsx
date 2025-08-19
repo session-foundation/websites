@@ -48,6 +48,7 @@ import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { isEthereumAddress } from '@session/util-crypto/keys';
 import { stringToBigInt } from '@session/util-crypto/maths';
 import { safeTrySync, safeTrySyncWithFallback } from '@session/util-js/try';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
@@ -132,7 +133,12 @@ export function SubmitMultiTab() {
     try {
       setIsSubmitting(true);
 
-      if (!isAddress(data.rewardsAddress)) {
+      // TODO: this should not be required, the schema should infer the type properly but I cant seem to get it to work.
+      const rewardsAddress = isEthereumAddress(data.rewardsAddress)
+        ? data.rewardsAddress
+        : undefined;
+
+      if (!rewardsAddress) {
         formMulti.setError('root', {
           type: 'manual',
           message: 'Rewards Address is not a valid Ethereum Address',
@@ -192,7 +198,7 @@ export function SubmitMultiTab() {
 
       setStakingParams({
         stakeAmount,
-        beneficiary: data.rewardsAddress,
+        beneficiary: rewardsAddress,
       });
     } finally {
       setIsSubmitting(false);

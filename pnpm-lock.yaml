@@ -472,6 +472,9 @@ importers:
 
   packages/staking-api-js:
     dependencies:
+      '@session/util-crypto':
+        specifier: workspace:*
+        version: link:../util-crypto
       viem:
         specifier: 2.21.54
         version: 2.21.54(bufferutil@4.0.8)(typescript@5.8.2)(utf-8-validate@6.0.5)(zod@3.23.8)
@@ -4184,6 +4187,7 @@ packages:
 
   '@walletconnect/ethereum-provider@2.17.0':
     resolution: {integrity: sha512-b+KTAXOb6JjoxkwpgYQQKPUcTwENGmdEdZoIDLeRicUmZTn/IQKfkMoC2frClB4YxkyoVMtj1oMV2JAax+yu9A==}
+    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}

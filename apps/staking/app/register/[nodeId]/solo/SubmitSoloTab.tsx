@@ -46,12 +46,13 @@ import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
 import { Form, FormErrorMessage } from '@session/ui/ui/form';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
+import { type EthereumAddress, isEthereumAddress } from '@session/util-crypto/keys';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useMemo, useState } from 'react';
-import { type Address, isAddress } from 'viem';
+import type { Address } from 'viem';
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is a complex component
 export function SubmitSoloTab() {
@@ -103,7 +104,7 @@ export function SubmitSoloTab() {
       contributors: [
         {
           // This is fine, its to get the fee estimate
-          staker: { addr: address, beneficiary: rewardsAddress as Address },
+          staker: { addr: address, beneficiary: rewardsAddress as EthereumAddress },
           stakedAmount: SESSION_NODE_FULL_STAKE_AMOUNT,
         },
       ],
@@ -183,7 +184,11 @@ export function SubmitSoloTab() {
     try {
       setIsSubmitting(true);
 
-      if (!isAddress(data.rewardsAddress)) {
+      const rewardsAddress = isEthereumAddress(data.rewardsAddress)
+        ? data.rewardsAddress
+        : undefined;
+
+      if (!rewardsAddress) {
         formSolo.setError('root', {
           type: 'manual',
           message: 'Rewards Address is not a valid Ethereum Address',
@@ -191,7 +196,7 @@ export function SubmitSoloTab() {
         return;
       }
 
-      if (!isAddress(address)) {
+      if (!isEthereumAddress(address)) {
         formSolo.setError('root', {
           type: 'manual',
           message: 'Wallet Address is not a valid Ethereum Address',
@@ -203,7 +208,7 @@ export function SubmitSoloTab() {
         {
           staker: {
             addr: address,
-            beneficiary: data.rewardsAddress,
+            beneficiary: rewardsAddress,
           },
           stakedAmount: SESSION_NODE_FULL_STAKE_AMOUNT,
         },

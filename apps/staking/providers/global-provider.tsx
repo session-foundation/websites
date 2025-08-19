@@ -15,6 +15,7 @@ import {
 import PreferencesProvider from '@/providers/preferences-provider';
 import QueryProvider from '@/providers/query-provider';
 import TOSProvider from '@/providers/tos-provider';
+import UserProvider from '@/providers/user-provider';
 import VestingProvider from '@/providers/vesting-provider';
 import VolatileStorageProvider from '@/providers/volatile-storage-provider';
 import Web3WalletProvider from '@/providers/web3wallet-provider';
@@ -50,7 +51,9 @@ export function GlobalProvider({ children, wagmiCookie, messages, locale }: Glob
                   >
                     <VestingProvider>
                       <StatusBarProvider>
-                        <TOSProvider>{children}</TOSProvider>
+                        <TOSProvider>
+                          <UserProvider>{children}</UserProvider>
+                        </TOSProvider>
                       </StatusBarProvider>
                     </VestingProvider>
                   </Web3WalletProvider>

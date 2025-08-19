@@ -1,10 +1,14 @@
 import { ServiceNodeContributionAbi } from '@session/contracts/abis';
-import { http, type Address, createPublicClient } from 'viem';
+import { http, createPublicClient } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
 import { parseContributorDetails } from '../lib/maths';
+import { jsonBigIntReplacer } from '@session/util-js/bigint';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+
+const jsonStringify = (value:unknown) => JSON.stringify(value, jsonBigIntReplacer);
 
 type Contributor = {
-  addr: Address;
+  addr: EthereumAddress;
   amount: bigint;
 };
 
@@ -17,7 +21,7 @@ const MAX_CONTRIBUTORS = 10;
 
 function createContributor(amount: bigint): Contributor {
   return {
-    addr: '0x',
+    addr: '0x0101010101010101010101010101010101010101' as EthereumAddress,
     amount,
   };
 }
@@ -207,7 +211,7 @@ describe(`parseContributorDetails fuzzing (fuzzAmount: ${fuzzAmount}`, () => {
       minStake = res.minStake;
       totalStaked = res.totalStaked;
     } catch (e) {
-      throw new Error(`Failed to get min stake for ${JSON.stringify(contributors)} ${e}`);
+      throw new Error(`Failed to get min stake for ${jsonStringify(contributors)} ${e}`);
     }
 
     const contribTest = new Promise((resolve) => {

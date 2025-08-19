@@ -1,7 +1,11 @@
 import { VOLATILE_STORAGE } from '@/lib/constants';
 import logger from '@/lib/logger';
 import { useVolatileStorage } from '@/providers/volatile-storage-provider';
-import { ed25519PublicKeySchema, ethereumAddressSchema } from '@session/staking-api-js/schema';
+import {
+  blsPublicKeySchema,
+  ed25519PublicKeySchema,
+  ethereumAddressSchema,
+} from '@session/staking-api-js/schema';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
@@ -14,7 +18,7 @@ export enum CONFIRMATION_TYPE {
 
 const volatileStorageNodeConfirmingSchema = z.object({
   pubkeyEd25519: ed25519PublicKeySchema,
-  pubkeyBls: z.string(),
+  pubkeyBls: blsPublicKeySchema,
   operatorAddress: ethereumAddressSchema,
   rewardsAddress: ethereumAddressSchema.nullable(),
   estimatedConfirmationTimestampMs: z.coerce.number(),

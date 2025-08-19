@@ -2,7 +2,8 @@ import type {
   ContributionContractContributor,
   StakeContributor,
 } from '@session/staking-api-js/schema';
-import { areHexesEqual } from '@session/util-crypto/string';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 
 /**
  * Returns the total staked amount for a given address.
@@ -12,9 +13,9 @@ import { areHexesEqual } from '@session/util-crypto/string';
  */
 export const getTotalStakedAmountForAddress = (
   contributors: Array<StakeContributor | ContributionContractContributor>,
-  address: string
+  address: EthereumAddress
 ): bigint => {
   return contributors.reduce((acc, { amount, address: contributorAddress }) => {
-    return areHexesEqual(contributorAddress, address) ? acc + amount : acc;
+    return areEthereumAddressesEqual(contributorAddress, address) ? acc + amount : acc;
   }, 0n);
 };

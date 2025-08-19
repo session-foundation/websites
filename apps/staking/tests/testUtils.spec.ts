@@ -1,5 +1,5 @@
 import { CONTRACT_ADDRESS, ED25519_ADDRESS, WALLET_ADDRESS } from '../tests/testUtils';
-import { isEd25519PublicKey } from '@session/staking-api-js/refine';
+import { isEd25519PublicKey } from '@session/util-crypto/keys';
 import { isAddress } from 'viem';
 
 describe('address utils', () => {

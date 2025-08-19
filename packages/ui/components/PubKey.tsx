@@ -20,6 +20,7 @@ export type PubKeyProps = HTMLAttributes<HTMLDivElement> & {
   force?: 'expand' | 'collapse';
   copyToClipboardAriaLabel?: string;
   copyToClipboardToastMessage?: string;
+  side?: 'top' | 'bottom' | 'left' | 'right';
 };
 
 export const PubKey = forwardRef<HTMLDivElement, PubKeyProps>((props, ref) => {
@@ -35,6 +36,7 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyProps>((props, ref) => {
     copyToClipboardAriaLabel,
     copyToClipboardToastMessage,
     force,
+    side = 'top',
     ...rest
   } = props;
   const [isExpanded, setIsExpanded] = useState(force === 'expand');
@@ -79,7 +81,7 @@ export const PubKey = forwardRef<HTMLDivElement, PubKeyProps>((props, ref) => {
   return (
     <span ref={ref} className={cn('group flex select-all items-center', className)} {...rest}>
       {!isExpanded ? (
-        <Tooltip tooltipContent={tooltipContent} triggerProps={{ disabled: expandOnHover }} >
+        <Tooltip tooltipContent={tooltipContent} triggerProps={{ disabled: expandOnHover }} contentProps={{ side }} >
           <span
             className={cn(
               'select-all break-all',

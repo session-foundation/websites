@@ -43,7 +43,6 @@ import { WizardContent } from '@/components/Wizard';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
 import useQueryParams, { type UseQueryParamsReturn } from '@/hooks/useQueryParams';
-import { useStakes } from '@/hooks/useStakes';
 import {
   PREFERENCE,
   REGISTRATION_LINKS,
@@ -54,6 +53,7 @@ import {
   prefDetails,
 } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+import { useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,12 +63,17 @@ import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type { ContributionContract, VestingContract } from '@session/staking-api-js/schema';
 import { toast } from '@session/ui/lib/toast';
 import { useForm } from '@session/ui/ui/form';
+import {
+  type BLSPublicKey,
+  type Ed25519PublicKey,
+  type EthereumAddress,
+  isEthereumAddress,
+} from '@session/util-crypto/keys';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areBLSKeysEqual, areEd25519KeysEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useWalletButton } from '@session/wallet/providers/wallet-button-provider';
 import { useTranslations } from 'next-intl';
 import {
@@ -81,11 +86,10 @@ import {
   useState,
 } from 'react';
 import { usePreferences } from 'usepref';
-import { type Address, isAddress } from 'viem';
 import { z } from 'zod';
 
 type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
-  address: Address;
+  address: EthereumAddress;
   changeTab: (tab: REG_TAB) => void;
   contract: ContributionContract | null;
   dict: ReturnType<typeof useTranslations<`actionModules.registration`>>;
@@ -115,6 +119,7 @@ type RegistrationContext = UseQueryParamsReturn<REGISTRATION_QUERY_PARAM> & {
 
 const RegistrationContext = createContext<RegistrationContext | undefined>(undefined);
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This is fine, a lot is going on
 function RegistrationProvider({
   blsKey,
   blsSignature,
@@ -123,7 +128,7 @@ function RegistrationProvider({
   ed25519Signature,
   preparedAt,
 }: RegistrationProps & { children: ReactNode }) {
-  const { visibleContracts, networkBlsKeys, awaitingOperatorContracts } = useStakes();
+  const { contractNodes, stakes } = useUser();
   const { activeContract: vestingContract } = useVesting();
   const isVestingMode = !!vestingContract;
 
@@ -133,14 +138,20 @@ function RegistrationProvider({
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [tabHistory, setTabHistory] = useState<Array<REG_TAB>>([]);
   const [contract, setContract] = useState<ContributionContract | null>(
-    visibleContracts.find(({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)) ??
-      awaitingOperatorContracts.find(
-        ({ pubkey_bls }) => pubkey_bls && areHexesEqual(pubkey_bls, blsKey)
+    stakes.visibleContracts.find(
+      ({ pubkey_bls, service_node_pubkey }) =>
+        areEd25519KeysEqual(service_node_pubkey, ed25519PubKey) ||
+        areBLSKeysEqual(pubkey_bls, blsKey)
+    ) ??
+      stakes.awaitingOperatorContracts.find(
+        ({ pubkey_bls, service_node_pubkey }) =>
+          areEd25519KeysEqual(service_node_pubkey, ed25519PubKey) ||
+          areBLSKeysEqual(pubkey_bls, blsKey)
       ) ??
       null
   );
 
-  const { address } = useWallet();
+  const { connectedAddress } = useUser();
   const { value: balanceValue } = useWalletTokenBalance();
   const { getItem } = usePreferences();
   const { getQueryParams, pushQueryParam, clearQueryParams } = useQueryParams();
@@ -276,7 +287,7 @@ function RegistrationProvider({
       contract.status === CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib);
 
   const [_tab, setTab] = useState<REG_TAB>(
-    networkBlsKeys?.has(blsKey)
+    contractNodes.blsSet.has(blsKey) || contractNodes.ed25519Set.has(ed25519PubKey)
       ? REG_TAB.ALREADY_REGISTERED_RUNNING
       : alreadyRegisteredMulti
         ? REG_TAB.ALREADY_REGISTERED_MULTI
@@ -324,12 +335,12 @@ function RegistrationProvider({
     setBackButtonClickCallback(null);
   };
 
-  if (!address) throw new Error('Address is required to create a registration');
+  if (!connectedAddress) throw new Error('Address is required to create a registration');
 
   const formSolo = useForm<SoloRegistrationFormSchema>({
     resolver: zodResolver(getRegistrationSoloFormSchema({ bannedRewardsAddresses })),
     defaultValues: {
-      rewardsAddress: queryParamFields?.rewardsAddress ?? address,
+      rewardsAddress: queryParamFields?.rewardsAddress ?? connectedAddress,
     },
     reValidateMode: 'onChange',
     mode: 'onChange',
@@ -338,7 +349,7 @@ function RegistrationProvider({
   const formMulti = useForm<MultiRegistrationFormSchema>({
     resolver: zodResolver(formMultiSchema),
     defaultValues: {
-      rewardsAddress: queryParamFields?.rewardsAddress ?? address,
+      rewardsAddress: queryParamFields?.rewardsAddress ?? connectedAddress,
       stakeAmount:
         queryParamFields?.stakeAmount ??
         bigIntToString(
@@ -359,7 +370,7 @@ function RegistrationProvider({
   return (
     <RegistrationContext.Provider
       value={{
-        address,
+        address: connectedAddress,
         changeTab,
         contract,
         dict,
@@ -467,9 +478,9 @@ function getTab(tab: REG_TAB) {
 }
 
 type RegistrationProps = {
-  ed25519PubKey: string;
+  ed25519PubKey: Ed25519PublicKey;
   ed25519Signature: string;
-  blsKey: string;
+  blsKey: BLSPublicKey;
   blsSignature: string;
   preparedAt: Date;
 };
@@ -501,7 +512,10 @@ export const getRegistrationMultiFormSchema = ({
     stakeAmount: getStakeAmountFormFieldSchema(stakeAmount),
     operatorFee: getOperatorFeeFormFieldSchema(operatorFee),
     reservedContributors: z.array(
-      z.object({ addr: z.custom<Address>((value) => isAddress(value)), amount: z.bigint() })
+      z.object({
+        addr: z.custom<EthereumAddress>((value) => isEthereumAddress(value)),
+        amount: z.bigint(),
+      })
     ),
   });
 

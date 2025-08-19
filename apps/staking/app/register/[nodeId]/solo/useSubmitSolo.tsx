@@ -2,11 +2,11 @@ import { useRegistrationWizard } from '@/app/register/[nodeId]/Registration';
 import { recoverableErrors } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { useConfirmationProgress } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
 import { REG_TAB } from '@/app/register/[nodeId]/types';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE } from '@/lib/constants';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import { useUser } from '@/providers/user-provider';
 import { getContractErrorName } from '@session/contracts';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useMemo, useState } from 'react';
 import { useEffect } from 'react';
@@ -27,7 +27,7 @@ export function useSubmitSolo({
   registerAndStake,
 }: SubmitSoloProps) {
   const { setIsSubmitting, setIsSuccess, changeTab, setIsError, props } = useRegistrationWizard();
-  const currentActor = useCurrentActor();
+  const { activeAddress } = useUser();
   const {
     nodes: { nodesConfirmingRegistration },
   } = useNodesWithConfirmations();
@@ -38,9 +38,10 @@ export function useSubmitSolo({
     () =>
       nodesConfirmingRegistration.find(
         (m) =>
-          m.pubkeyEd25519 === props.ed25519PubKey && areHexesEqual(m.operatorAddress, currentActor)
+          m.pubkeyEd25519 === props.ed25519PubKey &&
+          areEthereumAddressesEqual(m.operatorAddress, activeAddress)
       ),
-    [props.ed25519PubKey, nodesConfirmingRegistration, currentActor]
+    [props.ed25519PubKey, nodesConfirmingRegistration, activeAddress]
   );
 
   const { confirmations, remainingTimeEst } = useConfirmationProgress(

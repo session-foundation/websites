@@ -2,12 +2,12 @@ import { ActionModuleTooltip } from '@/components/ActionModule';
 import type { InputDataTestId } from '@/testing/data-test-ids';
 import { FormControl, FormItem, FormLabel, FormMessage } from '@session/ui/ui/form';
 import { Input } from '@session/ui/ui/input';
+import { type EthereumAddress, isEthereumAddress } from '@session/util-crypto/keys';
 import { useTranslations } from 'next-intl';
 import { forwardRef } from 'react';
-import { isAddress } from 'viem';
 import { z } from 'zod';
 
-export type BannedAddress = { address: string; errorMessage: string };
+export type BannedAddress = { address: EthereumAddress; errorMessage: string };
 
 export type GetEthereumAddressFormFieldSchemaArgs = {
   required?: boolean;
@@ -26,7 +26,7 @@ export const getEthereumAddressFormFieldSchema = ({
     .refine(
       (value) => {
         if (!value) return !required;
-        return isAddress(value);
+        return isEthereumAddress(value);
       },
       { message: invalidAddressMessage ?? dictionary('invalidAddress') }
     )

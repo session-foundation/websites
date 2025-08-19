@@ -1,5 +1,5 @@
 import { type VariantProps, cva } from 'class-variance-authority';
-import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
+import { type HTMLAttributes, type ReactNode, type Ref, forwardRef } from 'react';
 import { cn } from '../lib/utils';
 import { Loading } from './loading';
 
@@ -98,6 +98,7 @@ type ModuleGridContentProps = HTMLAttributes<HTMLDivElement> & {
   containerClassName?: string;
   /** The alignment of the content Defaults to {@link MODULE_GRID_ALIGNMENT.TOP_1_3} */
   alignment?: MODULE_GRID_ALIGNMENT;
+  scrollableContainerRef?: Ref<HTMLDivElement>;
 };
 
 const ModuleGridContent = forwardRef<HTMLDivElement, ModuleGridContentProps>(
@@ -107,6 +108,7 @@ const ModuleGridContent = forwardRef<HTMLDivElement, ModuleGridContentProps>(
       className,
       containerClassName,
       children,
+      scrollableContainerRef,
       ...props
     },
     ref
@@ -126,6 +128,7 @@ const ModuleGridContent = forwardRef<HTMLDivElement, ModuleGridContentProps>(
           alignment === MODULE_GRID_ALIGNMENT.TOP_1_3 ? 'py-[20vh] xl:py-0 xl:pt-[20vh]' : '',
           className
         )}
+        ref={scrollableContainerRef}
       >
         {children}
       </div>
