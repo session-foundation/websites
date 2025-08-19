@@ -1,5 +1,8 @@
-import { CollapsableContent } from '@/components/NodeCard';
 import NodeActionModuleInfo from '@/components/StakedNode/NodeActionModuleInfo';
+import {
+  type ImplementedNodeCardActionButtonProps,
+  NodeCardActionButton,
+} from '@/components/StakedNode/NodeCardActionButton';
 import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { WizardSectionDescription } from '@/components/Wizard';
 import useRequestNodeExit from '@/hooks/useRequestNodeExit';
@@ -12,7 +15,6 @@ import type { Stake } from '@session/staking-api-js/schema';
 import { Social } from '@session/ui/components/SocialLinkList';
 import { Loading } from '@session/ui/components/loading';
 import { ChevronsDownIcon } from '@session/ui/icons/ChevronsDownIcon';
-import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import {
   AlertDialog,
@@ -25,7 +27,7 @@ import { Button } from '@session/ui/ui/button';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { type HTMLAttributes, type ReactNode, forwardRef, useState } from 'react';
+import { type ReactNode, forwardRef, useState } from 'react';
 
 enum EXIT_REQUEST_STATE {
   ALERT = 0,
@@ -34,38 +36,28 @@ enum EXIT_REQUEST_STATE {
 
 export const NodeRequestExitButton = forwardRef<
   HTMLSpanElement,
-  HTMLAttributes<HTMLSpanElement> & {
-    disabled?: boolean;
-  }
->(({ disabled, className, ...props }, ref) => {
+  ImplementedNodeCardActionButtonProps
+>((props, ref) => {
   const dictionary = useTranslations('nodeCard.staked.requestExit');
+
   return (
-    <CollapsableContent
-      className={cn('end-6 bottom-4 flex items-end min-[500px]:absolute', className)}
-      size="buttonSm"
-      width="w-max"
+    <NodeCardActionButton
       {...props}
       ref={ref}
+      variant="destructive-outline"
+      aria-label={dictionary('buttonAria')}
+      data-testid={ButtonDataTestId.Staked_Node_Request_Exit}
     >
-      <Button
-        aria-label={dictionary('buttonAria')}
-        data-testid={ButtonDataTestId.Staked_Node_Request_Exit}
-        disabled={disabled}
-        rounded="md"
-        size="sm"
-        variant="destructive-outline"
-        className="uppercase"
-      >
-        {dictionary('buttonText')}
-      </Button>
-    </CollapsableContent>
+      {dictionary('buttonText')}
+    </NodeCardActionButton>
   );
 });
 
 export function NodeRequestExitButtonWithDialog({
   node,
   disabled,
-}: { node: Stake; disabled?: boolean }) {
+  forceExpanded,
+}: { node: Stake; disabled?: boolean; forceExpanded?: boolean }) {
   const [exitRequestState, setExitRequestState] = useState<EXIT_REQUEST_STATE>(
     EXIT_REQUEST_STATE.ALERT
   );
@@ -76,7 +68,7 @@ export function NodeRequestExitButtonWithDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <NodeRequestExitButton disabled={disabled} />
+        <NodeRequestExitButton disabled={disabled} forceExpanded={forceExpanded} />
       </AlertDialogTrigger>
       <AlertDialogContent
         dialogTitle={

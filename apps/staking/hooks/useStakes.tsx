@@ -1,30 +1,31 @@
 import { STAKE_STATE, parseStakeState } from '@/components/StakedNode/state';
 import { parseStakes } from '@/hooks/parseStakes';
+import type { useContractNodes } from '@/hooks/useContractNodes';
 import { BACKEND, BLOCK_TIME_MS, PREFERENCE, SESSION_NODE } from '@/lib/constants';
 import { NEXT_PUBLIC_TESTNET } from '@/lib/env';
 import logger from '@/lib/logger';
 import { getStakedNodes } from '@/lib/queries/getStakedNodes';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import { useNodesWithConfirmations } from '@/lib/volatile-storage';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { bigIntToNumber } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEd25519KeysEqual, areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
-import type { Address } from 'viem';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
 /**
  * Hook to get the stakes and related data for the connected wallet.
- * @param overrideAddress - override address, this overrides the connected address
- * @param overrideRefetchIntervalMs - override refetch interval
+ * @param contractNodes - Return of useContractNodes
+ * @param address - Address to get stakes for
  * @returns The stakes and related data for the connected wallet.
  */
-export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?: number) {
-  const { address: connectedAddress } = useWallet();
-  const address = overrideAddress ?? connectedAddress;
+export function useAddressStakes(
+  contractNodes: ReturnType<typeof useContractNodes>,
+  address?: EthereumAddress
+) {
   const { getItem } = usePreferences();
   const enabled = !!address;
   const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
@@ -32,11 +33,11 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
   const { data: arbBlock } = useBlockNumber({
     chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
     query: {
-      gcTime: overrideRefetchIntervalMs ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
+      gcTime: BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000,
     },
   });
 
-  const { data, isLoading, isFetching, refetch, isError, status } =
+  const { data, isLoading, isFetching, refetch, isError, error, status } =
     useStakingBackendQueryWithParams(
       getStakedNodes,
       {
@@ -45,10 +46,14 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
       {
         enabled,
         refetchInterval: autoRefresh
-          ? (overrideRefetchIntervalMs ?? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000)
+          ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000
           : undefined,
       }
     );
+
+  if (isError) {
+    console.error(error);
+  }
 
   const {
     nodes: { nodesConfirmingRegistration },
@@ -56,17 +61,28 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
 
   const {
     stakes,
-    vesting,
     hiddenContractsWithStakes,
     awaitingOperatorContracts,
-    networkContractIds,
     visibleContracts,
-    networkBlsKeys,
     joiningContracts,
     network,
     blockHeight,
     networkTime,
+    // biome-ignore lint/correctness/useExhaustiveDependencies(arbBlock): we don't want to recompute if this changes, its used as a buffer so only needed when we calculate this.
   } = useMemo(() => {
+    if (contractNodes.isLoading || !data) {
+      return {
+        stakes: [],
+        hiddenContractsWithStakes: [],
+        awaitingOperatorContracts: [],
+        visibleContracts: [],
+        joiningContracts: [],
+        network: null,
+        blockHeight: 0,
+        networkTime: 0,
+      };
+    }
+
     const [networkError, network] = safeTrySyncWithFallback(() => data?.network ?? null, null);
     if (networkError) logger.error(networkError);
 
@@ -85,15 +101,6 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
     const [stakesError, stakes] = safeTrySyncWithFallback(() => data?.stakes ?? [], []);
     if (stakesError) logger.error(stakesError);
 
-    const [addedBlsKeysSetsError, addedBlsKeys] = safeTrySyncWithFallback(
-      () => data?.added_bls_keys ?? {},
-      {}
-    );
-    if (addedBlsKeysSetsError) logger.error(addedBlsKeysSetsError);
-
-    const [vestingErr, vesting] = safeTrySyncWithFallback(() => data?.vesting ?? [], []);
-    if (vestingErr) logger.error(vestingErr);
-
     const [contractsErr, contracts] = safeTrySyncWithFallback(() => data?.contracts ?? [], []);
     if (contractsErr) logger.error(contractsErr);
 
@@ -107,37 +114,39 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
         contracts,
         address,
         blockHeight,
-        addedBlsKeys,
         nodeMinLifespanArbBlocks,
         stakes,
-        vesting,
+        contractBlsKeys: contractNodes.blsSet,
+        contractEd25519Keys: contractNodes.ed25519Set,
       }),
       network,
       networkTime,
     };
-  }, [data, address, arbBlock]);
+  }, [data, address, contractNodes]);
 
   const notFoundJoiningNodes = useMemo(
     () =>
-      nodesConfirmingRegistration.filter((node) => {
-        return (
-          areHexesEqual(node.confirmationOwner, address) &&
-          !joiningContracts.some(
-            ({ pubkey_bls, service_node_pubkey }) =>
-              pubkey_bls === node.pubkeyBls ||
-              areHexesEqual(service_node_pubkey, node.pubkeyEd25519)
-          ) &&
-          !stakes.some((stake) => {
-            const state = parseStakeState(stake, blockHeight);
-            if (state === STAKE_STATE.DEREGISTERED) {
-              return false;
-            }
+      address
+        ? nodesConfirmingRegistration.filter((node) => {
             return (
-              stake.pubkey_bls === node.pubkeyBls || stake.pubkey_ed25519 === node.pubkeyEd25519
+              areEthereumAddressesEqual(node.confirmationOwner, address) &&
+              !joiningContracts.some(
+                ({ pubkey_bls, service_node_pubkey }) =>
+                  pubkey_bls === node.pubkeyBls ||
+                  areEd25519KeysEqual(service_node_pubkey, node.pubkeyEd25519)
+              ) &&
+              !stakes.some((stake) => {
+                const state = parseStakeState(stake, blockHeight);
+                if (state === STAKE_STATE.DEREGISTERED) {
+                  return false;
+                }
+                return (
+                  stake.pubkey_bls === node.pubkeyBls || stake.pubkey_ed25519 === node.pubkeyEd25519
+                );
+              })
             );
           })
-        );
-      }),
+        : [],
     [nodesConfirmingRegistration, stakes, joiningContracts, blockHeight, address]
   );
 
@@ -147,10 +156,7 @@ export function useStakes(overrideAddress?: Address, overrideRefetchIntervalMs?:
     joiningContracts,
     notFoundJoiningNodes,
     awaitingOperatorContracts,
-    vesting,
     hiddenContractsWithStakes,
-    networkBlsKeys,
-    networkContractIds,
     network,
     blockHeight,
     networkTime,

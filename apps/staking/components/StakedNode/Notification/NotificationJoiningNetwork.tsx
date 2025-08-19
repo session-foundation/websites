@@ -1,5 +1,5 @@
 import type { UseConfirmationProgressReturn } from '@/app/register/[nodeId]/solo/SubmitSoloTab';
-import { NodeNotification } from '@/components/StakedNode/Notification/NodeNotification';
+import { BaseNodeNotificationText } from '@/components/StakedNode/Notification/BaseNodeNotificationText';
 import { SESSION_NODE } from '@/lib/constants';
 import { Tooltip } from '@session/ui/ui/tooltip';
 import { useTranslations } from 'next-intl';
@@ -17,9 +17,9 @@ export const NotificationJoiningNetwork = ({
         requiredConfirmations: SESSION_NODE.NETWORK_REQUIRED_CONFIRMATIONS,
       })}
     >
-      <NodeNotification level="info">
+      <BaseNodeNotificationText level="info">
         {dictionary.rich('joiningNetworkNotification', { relativeTime: remainingTimeEst })}
-      </NodeNotification>
+      </BaseNodeNotificationText>
     </Tooltip>
   ) : null;
 };

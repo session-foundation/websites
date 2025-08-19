@@ -13,6 +13,7 @@ import {
   FINALIZED_ARB_EVENT,
   WALLET_ADDRESS,
 } from './testUtils';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 
 const fakePino = {
   info: jest.fn(),
@@ -53,8 +54,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -81,8 +84,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -134,8 +139,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract1, contract2, contract3],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -160,11 +167,16 @@ describe('parseContracts', () => {
       pubkey_bls: BLS_KEY[1],
     };
 
+    const contractBlsKeys = new Set<string>();
+    contractBlsKeys.add(BLS_KEY[1]);
+
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: { dupKey: 1 },
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys,
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -189,7 +201,7 @@ describe('parseContracts', () => {
 
   function hiddenWithStakeTestTemplate(
     contributorArray: Array<ContributionContractContributor>,
-    operatorAddress?: Address
+    operatorAddress?: EthereumAddress
   ) {
     const contract = {
       ...basicContract,
@@ -197,11 +209,16 @@ describe('parseContracts', () => {
       operator_address: operatorAddress ?? basicContract.operator_address,
     };
 
+    const runningAddedStakesBlsKeysSet = new Set<string>();
+    runningAddedStakesBlsKeysSet.add(BLS_KEY[2]);
+
     return parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set([BLS_KEY[2]]),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet,
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -255,8 +272,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });
@@ -287,8 +306,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
       nodeMinLifespanArbBlocks: 100,
       blockHeight: 1000,
     });
@@ -319,8 +340,10 @@ describe('parseContracts', () => {
     const result = parseContracts({
       contracts: [contract],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks: 100,
       blockHeight: 1000,
     });
@@ -331,43 +354,14 @@ describe('parseContracts', () => {
     expect(result.hiddenContractsWithStakes).toHaveLength(0);
   });
 
-  it('should correctly derive networkBlsKeys and networkContractIds from addedBlsKeys', () => {
-    const contract = {
-      address: CONTRACT_ADDRESS[6],
-      contributors: [],
-      events: [DEPLOY_ARB_EVENT(70)],
-      operator_address: WALLET_ADDRESS[6],
-      service_node_pubkey: ED25519_ADDRESS[6],
-      status: CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib,
-      fee: 70,
-      manual_finalize: false,
-      pubkey_bls: BLS_KEY[7],
-    };
-
-    const addedBlsKeys = {
-      [BLS_KEY[1]]: 0,
-      [BLS_KEY[2]]: 1,
-    };
-
-    const result = parseContracts({
-      contracts: [contract],
-      address: walletAddress,
-      addedBlsKeys,
-      runningStakesBlsKeysSet: new Set(),
-      nodeMinLifespanArbBlocks,
-      blockHeight: 1000,
-    });
-
-    expect(result.networkBlsKeys).toEqual(new Set([BLS_KEY[1], BLS_KEY[2]]));
-    expect(result.networkContractIds).toEqual(new Set([0, 1]));
-  });
-
   it('should handle an empty contracts array', () => {
     const result = parseContracts({
       contracts: [],
       address: walletAddress,
-      addedBlsKeys: {},
-      runningStakesBlsKeysSet: new Set(),
+      contractBlsKeys: new Set<string>(),
+      contractEd25519Keys: new Set(),
+      runningAddedStakesBlsKeysSet: new Set(),
+      runningAddedStakesEd25519KeysSet: new Set(),
       nodeMinLifespanArbBlocks,
       blockHeight: 1000,
     });

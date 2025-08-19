@@ -24,7 +24,11 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { type ReactNode, useMemo, useState } from 'react';
 
-export function NodeExitButtonDialog({ node }: { node: Stake }) {
+export function NodeExitButtonDialog({
+  node,
+  forceExpanded,
+  buttonContainerClassName,
+}: { node: Stake; forceExpanded?: boolean; buttonContainerClassName?: string }) {
   const dictionary = useTranslations('nodeCard.staked.exit');
   const { enabled: isNodeExitDisabled, isLoading: isRemoteFlagLoading } = useRemoteFeatureFlagQuery(
     REMOTE_FEATURE_FLAG.DISABLE_NODE_EXIT
@@ -33,7 +37,7 @@ export function NodeExitButtonDialog({ node }: { node: Stake }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <NodeExitButton />
+        <NodeExitButton forceExpanded={forceExpanded} className={buttonContainerClassName} />
       </AlertDialogTrigger>
       <AlertDialogContent dialogTitle={dictionary('dialog.title')} className="text-center">
         {isRemoteFlagLoading ? (

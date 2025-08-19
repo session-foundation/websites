@@ -2,29 +2,25 @@ import { sortContractByDeployBlockDesc, sortContracts } from '@/hooks/parseContr
 import logger from '@/lib/logger';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
-import type { Address } from 'viem';
+import type { BLSPublicKey, Ed25519PublicKey, EthereumAddress } from '@session/util-crypto/keys';
 
 /**
  * Parses the open contracts.
  * @param contracts - The contracts to parse.
  * @param address - The address to filter by.
- * @param networkBlsKeys - The network BLS keys.
- * @param addedBlsKeysPublic - The added BLS keys public.
+ * @param blsSet - The network BLS keys.
+ * @param ed25519Set - The added BLS keys public.
  * @returns The parsed open contracts.
  */
 export function parseOpenContracts(
   contracts: Array<ContributionContract>,
-  address?: Address,
-  networkBlsKeys?: Set<string> | null,
-  addedBlsKeysPublic?: Set<string> | null
+  blsSet: Set<BLSPublicKey>,
+  ed25519Set: Set<Ed25519PublicKey>,
+  address?: EthereumAddress
 ) {
-  if (!addedBlsKeysPublic && !networkBlsKeys) return [];
-
   const _contracts = sortContractByDeployBlockDesc(contracts);
 
   const added = new Set();
-
-  if (!addedBlsKeysPublic && !networkBlsKeys) return [];
 
   const contractsFiltered: Array<ContributionContract> = [];
   for (const contract of _contracts) {
@@ -35,16 +31,16 @@ export function parseOpenContracts(
       continue;
     }
 
-    if (addedBlsKeysPublic?.has(contract.pubkey_bls)) {
+    if (blsSet.has(contract.pubkey_bls)) {
       logger.debug(
-        `Open contract has duplicate pubkey, in addedBlsKeysPublic, hiding: ${contract.pubkey_bls}`
+        `Open contract has duplicate bls pubkey (${contract.pubkey_bls}), hiding: ${contract.service_node_pubkey}`
       );
       continue;
     }
 
-    if (networkBlsKeys?.has(contract.pubkey_bls)) {
+    if (ed25519Set.has(contract.service_node_pubkey)) {
       logger.debug(
-        `Open contract has duplicate pubkey, in networkBlsKeys, hiding: ${contract.pubkey_bls}`
+        `Open contract has duplicate ed25519 pubkey, hiding: ${contract.service_node_pubkey}`
       );
       continue;
     }
@@ -57,9 +53,5 @@ export function parseOpenContracts(
     logger.debug(`Open contract is hidden: ${contract.pubkey_bls}`);
   }
 
-  if (address) {
-    contractsFiltered.sort((a, b) => sortContracts(a, b, address));
-  }
-
-  return contractsFiltered;
+  return contractsFiltered.sort((a, b) => sortContracts(a, b, address));
 }

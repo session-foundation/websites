@@ -13,12 +13,12 @@ import { HumanIcon } from '@session/ui/icons/HumanIcon';
 import { KeyRoundIcon } from '@session/ui/icons/KeyRoundIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { areHexesEqual } from '@session/util-crypto/string';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef, useMemo, useState } from 'react';
-import type { Address } from 'viem';
 
 export const outerNodeCardVariants = cva(
   'rounded-xl bg-module-outline p-px bg-blend-lighten shadow-md transition-all ease-in-out',
@@ -57,10 +57,18 @@ export interface StakeCardProps
 const NodeCard = forwardRef<HTMLDivElement, StakeCardProps>(
   ({ className, variant, loading, children, ...props }, ref) => {
     return (
-      <div className={cn(outerNodeCardVariants({ variant }))}>
-        <div className={cn(innerNodeCardVariants({ variant, className }))} ref={ref} {...props}>
-          {loading ? <Loading /> : children}
-        </div>
+      <div
+        className={cn(
+          'relative flex w-full flex-row flex-wrap items-center gap-0.5 rounded-xl bg-module px-5 py-4 align-middle reduced-motion:transition-none transition-all duration-500 ease-in-out md:px-6 md:py-5',
+          className
+        )}
+        style={{
+          boxShadow: '0 0 0 1px #608983',
+        }}
+        ref={ref}
+        {...props}
+      >
+        {loading ? <Loading /> : children}
       </div>
     );
   }
@@ -236,9 +244,9 @@ const ContributorIconWithTooltip = ({
 
 type StakedNodeContributorListProps = HTMLAttributes<HTMLDivElement> & {
   contributors: Array<StakeContributor | ContributionContractContributor>;
-  userAddress?: Address;
-  operatorAddress: Address;
-  exitRequestAddress?: Address;
+  userAddress?: EthereumAddress;
+  operatorAddress: EthereumAddress;
+  exitRequestAddress?: EthereumAddress;
   showEmptySlots?: boolean;
   forceExpand?: boolean;
 };
@@ -260,7 +268,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
     const dictionary = useTranslations('maths');
 
     const userContributor = useMemo(
-      () => contributors.find(({ address }) => areHexesEqual(address, userAddress)),
+      () => contributors.find(({ address }) => areEthereumAddressesEqual(address, userAddress)),
       [contributors, userAddress]
     );
 
@@ -283,10 +291,11 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
           <ContributorIconWithTooltip
             className={cn('fill-text-primary peer-checked:hidden peer-checked:opacity-0')}
             contributor={userContributor}
-            isOperator={areHexesEqual(userContributor?.address, operatorAddress)}
-            isRequestingExit={
-              exitRequestAddress && areHexesEqual(userContributor?.address, exitRequestAddress)
-            }
+            isOperator={areEthereumAddressesEqual(userContributor?.address, operatorAddress)}
+            isRequestingExit={areEthereumAddressesEqual(
+              userContributor?.address,
+              exitRequestAddress
+            )}
             isUser
           />
         ) : null}
@@ -305,11 +314,9 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
             <ContributorIconWithTooltip
               key={contributor.address}
               contributor={contributor}
-              isUser={areHexesEqual(contributor.address, userAddress)}
-              isOperator={areHexesEqual(contributor.address, operatorAddress)}
-              isRequestingExit={
-                exitRequestAddress && areHexesEqual(contributor.address, exitRequestAddress)
-              }
+              isUser={areEthereumAddressesEqual(contributor.address, userAddress)}
+              isOperator={areEthereumAddressesEqual(contributor.address, operatorAddress)}
+              isRequestingExit={areEthereumAddressesEqual(contributor.address, exitRequestAddress)}
             />
           ))}
           {showEmptySlots
@@ -320,7 +327,7 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
         </div>
         <span
           className={cn(
-            'letter -ms-2 mt-0.5 block text-lg tracking-widest transition-all duration-300 ease-in-out',
+            'letter mt-0.5 block text-lg tracking-widest transition-all duration-300 ease-in-out',
             forceExpand
               ? 'w-0 opacity-0'
               : 'w-max opacity-100 peer-checked:w-0 peer-checked:opacity-0'
@@ -376,16 +383,17 @@ export const ToggleCardExpansionButton = forwardRef<
 });
 
 export const RowLabel = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <span className={cn('font-semibold', className)}>{children} </span>
+  <span className={cn('content-center font-semibold', className)}>{children} </span>
 );
 
 const collapsableContentVariants = cva(
-  'inline-flex h-full max-h-0 select-none flex-wrap gap-1 overflow-y-hidden transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
+  'inline-flex select-none flex-wrap items-center gap-1 transition-all duration-300 ease-in-out peer-checked:select-auto motion-reduce:transition-none',
   {
     variants: {
       size: {
         xs: 'text-xs peer-checked:max-h-4 md:text-xs',
         base: cn('text-sm peer-checked:max-h-5', 'md:text-base md:peer-checked:max-h-6'),
+        large: cn('peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5'),
         buttonMd: cn('peer-checked:max-h-11'),
         buttonSm: cn('peer-checked:max-h-9'),
       },
@@ -393,22 +401,29 @@ const collapsableContentVariants = cva(
         'w-full': 'w-full',
         'w-max': 'w-max',
       },
+      forceExpanded: {
+        false: 'h-full max-h-0 overflow-y-hidden',
+        true: '',
+      },
     },
     defaultVariants: {
       size: 'base',
       width: 'w-full',
+      forceExpanded: false,
     },
   }
 );
 
-type CollapsableContentProps = HTMLAttributes<HTMLSpanElement> &
-  VariantProps<typeof collapsableContentVariants>;
+export type CollapsableContentProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof collapsableContentVariants> & {
+    forceExpanded?: boolean;
+  };
 
 export const CollapsableContent = forwardRef<HTMLSpanElement, CollapsableContentProps>(
-  ({ className, size, width, ...props }, ref) => (
+  ({ className, size, width, forceExpanded, ...props }, ref) => (
     <NodeCardText
       ref={ref}
-      className={cn(collapsableContentVariants({ size, width, className }))}
+      className={cn(collapsableContentVariants({ size, width, forceExpanded, className }))}
       {...props}
     />
   )

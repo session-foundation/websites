@@ -53,7 +53,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
         ref={ref}
         {...props}
         className={cn(
-          'flex flex-row flex-wrap items-center justify-between gap-2 border border-transparent align-middle reduced-motion:transition-none transition-all duration-500 ease-in-out',
+          'justify-between gap-2 border border-transparent',
           forceSmall ? '' : 'md:gap-10',
           isActive && 'border-session-green',
           className

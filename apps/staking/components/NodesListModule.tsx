@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 export function NodeListModuleContent({ children }: { children: ReactNode }) {
   return (
     <ModuleGridContent
-      className="h-full pt-4 md:overflow-y-auto md:pt-0"
+      className="h-full pt-4 md:overflow-y-auto md:pt-0.5"
       alignment={MODULE_GRID_ALIGNMENT.TOP}
     >
       {children}

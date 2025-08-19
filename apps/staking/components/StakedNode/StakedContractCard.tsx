@@ -1,46 +1,37 @@
+import { NodeContributorList, ToggleCardExpansionButton } from '@/components/NodeCard';
+import { ContractSummary } from '@/components/StakedNode/ContractSummary';
+import { StakeCardSnKey } from '@/components/StakedNode/Info/StakeCardSnKey';
+import { StakeCardText } from '@/components/StakedNode/Info/StakeCardText';
+import { StakeCardWalletAddress } from '@/components/StakedNode/Info/StakeCardWalletAddress';
+import { NodeCardActionButton } from '@/components/StakedNode/NodeCardActionButton';
 import {
-  type UseConfirmationProgressReturn,
-  useConfirmationProgress,
-} from '@/app/register/[nodeId]/solo/SubmitSoloTab';
-import { ActionModuleDivider } from '@/components/ActionModule';
-import { CollapsableContent, NodeContributorList, RowLabel } from '@/components/NodeCard';
-import { ContractStartButton } from '@/components/StakedNode/ContractStartButton';
-import { NotificationJoiningNetwork } from '@/components/StakedNode/Notification/NotificationJoiningNetwork';
-import { StakeCard } from '@/components/StakedNode/StakeCard';
+  type ComponentData,
+  StakeCard,
+  renderOrderedComponents,
+} from '@/components/StakedNode/StakeCard';
 import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
-import { getTotalStakedAmountForAddress } from '@/components/getTotalStakedAmountForAddress';
+import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { formatPercentage } from '@/lib/locale-client';
-import {
-  type VolatileStorageNodeConfirming,
-  useNodesWithConfirmations,
-} from '@/lib/volatile-storage';
+import type { VolatileStorageNodeConfirming } from '@/lib/volatile-storage';
+import { useUser } from '@/providers/user-provider';
 import {
   ButtonDataTestId,
   NodeCardDataTestId,
   StakedNodeDataTestId,
 } from '@/testing/data-test-ids';
-import { SENT_DECIMALS } from '@session/contracts';
-import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type {
   ContributionContract,
   ContributionContractNotReady,
 } from '@session/staking-api-js/schema';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
-import { cn } from '@session/ui/lib/utils';
-import { Button } from '@session/ui/ui/button';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { jsonBigIntReplacer } from '@session/util-js/bigint';
-import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
-import { useWallet } from '@session/wallet/hooks/useWallet';
+import { ETH_ZERO_ADDRESS } from '@session/util-crypto/constants';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
-import { type Address, zeroAddress } from 'viem';
 
 function getContractStatusColor(
   state: STAKE_CONTRACT_STATE
@@ -57,206 +48,196 @@ function getContractStatusColor(
   }
 }
 
-type ContractSummaryProps = {
-  confirmationProgress: UseConfirmationProgressReturn;
-  contract: ContributionContract | ContributionContractNotReady;
-  isOperator?: boolean;
-  state: STAKE_CONTRACT_STATE;
-  userAddress?: Address;
-};
-
-const ContractSummary = ({
-  contract,
-  state,
-  isOperator,
-  confirmationProgress,
-  userAddress,
-}: ContractSummaryProps) => {
-  const contributorList = (
-    <NodeContributorList
-      contributors={contract.contributors}
-      operatorAddress={contract.operator_address}
-      userAddress={userAddress}
-      data-testid={StakedNodeDataTestId.Contributor_List}
-      showEmptySlots
-    />
-  );
-
-  if (state === STAKE_CONTRACT_STATE.AWAITING_OPERATOR_ACTIVATION) {
-    return (
-      <>
-        {contributorList}
-        {isOperator ? <ContractStartButton contractAddress={contract.address} /> : null}
-      </>
-    );
-  }
-
-  if (state === STAKE_CONTRACT_STATE.JOINING) {
-    return (
-      <>
-        {contributorList}
-        <NotificationJoiningNetwork
-          confirmations={confirmationProgress.confirmations}
-          enabled={confirmationProgress.enabled}
-          remainingTimeEst={confirmationProgress.remainingTimeEst}
-        />
-      </>
-    );
-  }
-
-  return contributorList;
-};
-
 const StakedContractCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    id: string;
+    toggleId: string;
     contract: ContributionContract | ContributionContractNotReady;
-    targetWalletAddress?: Address;
+    targetWalletAddress?: EthereumAddress;
     hideButton?: boolean;
+    isDetailedView?: boolean;
+    showAlreadyRunningWarning?: boolean;
   }
->(({ contract, hideButton, targetWalletAddress, ...props }, ref) => {
-  const generalDictionary = useTranslations('general');
-  const generalNodeDictionary = useTranslations('sessionNodes.general');
-  const stakingNodeDictionary = useTranslations('sessionNodes.staking');
-  const titleFormat = useTranslations('modules.title');
-  const notFoundString = generalDictionary('notFound');
-  const {
-    nodes: { nodesConfirmingRegistration },
-  } = useNodesWithConfirmations();
+>(
+  (
+    {
+      contract,
+      hideButton,
+      isDetailedView = false,
+      targetWalletAddress,
+      showAlreadyRunningWarning,
+      ...props
+    },
+    ref
+  ) => {
+    const generalDictionary = useTranslations('general');
+    const generalNodeDictionary = useTranslations('sessionNodes.general');
+    const stakingNodeDictionary = useTranslations('sessionNodes.staking');
+    const notFoundString = generalDictionary('notFound');
 
-  const estimateConfirmationTime = useMemo(() => {
-    const node = nodesConfirmingRegistration.find((m) =>
-      areHexesEqual(m.pubkeyEd25519, contract.service_node_pubkey)
+    const sharedProps = {
+      forceExpanded: isDetailedView,
+      width: isDetailedView ? 'w-max' : 'w-full',
+    } as const;
+    const { connectedAddress } = useUser();
+
+    const address = targetWalletAddress ?? connectedAddress;
+
+    const { fee, operator_address: operatorAddress, contributors } = contract;
+
+    const { formattedStakedBalance, beneficiaryAddress, isOperator } = useMemo(() => {
+      const contributor = address
+        ? contributors.find((contributor) =>
+            areEthereumAddressesEqual(contributor.address, address)
+          )
+        : null;
+
+      const beneficiaryAddress =
+        contributor &&
+        !areEthereumAddressesEqual(contributor.beneficiary_address, contributor.address)
+          ? contributor.beneficiary_address
+          : null;
+
+      return {
+        formattedStakedBalance: getTotalStakedAmountForAddressFormatted(contributors, address),
+        beneficiaryAddress,
+        isOperator: areEthereumAddressesEqual(operatorAddress, address),
+      };
+    }, [contributors, operatorAddress, address]);
+
+    const state = parseStakeContractState(contract);
+
+    const notificationComp = (
+      <ContractSummary
+        key="notification"
+        contract={contract}
+        state={state}
+        isOperator={isOperator}
+        showAlreadyRunningWarning={showAlreadyRunningWarning}
+      />
     );
-    if (!node) return null;
-    return node.estimatedConfirmationTimestampMs;
-  }, [contract, nodesConfirmingRegistration]);
 
-  const confirmationProgress = useConfirmationProgress(estimateConfirmationTime);
-
-  const { address: connectedAddress } = useWallet();
-
-  const address = targetWalletAddress ?? connectedAddress;
-
-  const { fee, operator_address: operatorAddress, contributors } = contract;
-
-  const formattedStakeBalance = formatSENTBigInt(
-    address ? getTotalStakedAmountForAddress(contributors, address) : 0n,
-    SENT_DECIMALS
-  );
-  const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
-
-  const beneficiaryAddress = useMemo(() => {
-    if (!address) return null;
-
-    const contributor = contributors.find((contributor) =>
-      areHexesEqual(contributor.address, address)
+    const contributorsComp = (
+      <NodeContributorList
+        key="contributors"
+        contributors={contract.contributors}
+        operatorAddress={contract.operator_address}
+        userAddress={address}
+        data-testid={StakedNodeDataTestId.Contributor_List}
+        showEmptySlots
+      />
     );
-    if (!contributor || !contributor.beneficiary_address) return null;
 
-    return !areHexesEqual(contributor.beneficiary_address, contributor.address)
-      ? contributor.beneficiary_address
-      : null;
-  }, [contributors, address]);
+    const snKeyComp = (
+      <StakeCardSnKey
+        key="snKey"
+        {...sharedProps}
+        pubkey={contract.service_node_pubkey}
+        tooltipSide={isDetailedView ? 'top' : 'bottom'}
+        isOperator={isOperator}
+      />
+    );
 
-  const isOperator = address ? areHexesEqual(contract.operator_address, address) : false;
+    const operatorComp = (
+      <StakeCardWalletAddress
+        key="operator"
+        {...sharedProps}
+        addressLabel="operatorAddress"
+        size={'large'}
+        address={operatorAddress}
+        pubkeyOptions={{
+          alwaysShowCopyButton: true,
+          force: isDetailedView || hideButton ? 'collapse' : undefined,
+        }}
+      />
+    );
 
-  const state = parseStakeContractState(contract);
+    const beneficiaryComp = beneficiaryAddress ? (
+      <StakeCardWalletAddress
+        key="beneficiary"
+        {...sharedProps}
+        addressLabel="beneficiaryAddress"
+        size={'large'}
+        address={beneficiaryAddress}
+        pubkeyOptions={{
+          alwaysShowCopyButton: true,
+          force: isDetailedView || hideButton ? 'collapse' : undefined,
+        }}
+      />
+    ) : null;
 
-  return (
-    <StakeCard
-      ref={ref}
-      {...props}
-      data-testid={NodeCardDataTestId.Staked_Node}
-      title={parseStakeContractState(contract)}
-      statusIndicatorColor={getContractStatusColor(state)}
-      publicKey={contract.service_node_pubkey}
-      isOperator={isOperator}
-      operatorAddress={contract.operator_address}
-      summary={
-        <ContractSummary
-          contract={contract}
-          state={state}
-          userAddress={address}
-          isOperator={isOperator}
-          confirmationProgress={confirmationProgress}
+    const stakeComp = (
+      <StakeCardText
+        key="stake"
+        {...sharedProps}
+        size={'large'}
+        label={stakingNodeDictionary('stakedBalance')}
+        content={formattedStakedBalance}
+      />
+    );
+
+    const feeComp =
+      contributors.length > 1 ? (
+        <StakeCardText
+          key="fee"
+          {...sharedProps}
+          size={'large'}
+          label={generalNodeDictionary('operatorFee')}
+          content={fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
+          hideCopyToClipboardButton
         />
-      }
-      collapsableLastChildren={
-        <>
-          <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-            <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
-            </RowLabel>
-            <PubkeyWithEns
-              pubKey={operatorAddress}
-              expandOnHoverDesktopOnly
-              force={hideButton ? 'collapse' : undefined}
-            />
-          </CollapsableContent>
-          {beneficiaryAddress ? (
-            <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-              <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
-              </RowLabel>
-              <PubkeyWithEns pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
-            </CollapsableContent>
-          ) : null}
-          <CollapsableContent>
-            <RowLabel>
-              {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
-            </RowLabel>
-            {formattedStakeBalance}
-          </CollapsableContent>
-          <CollapsableContent>
-            <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
-            </RowLabel>
-            {fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
-          </CollapsableContent>
-          {showRawNodeData ? (
-            <>
-              <CollapsableContent className="hidden peer-checked:block">
-                <RowLabel>
-                  {titleFormat('format', { title: generalNodeDictionary('rawData') })}
-                </RowLabel>
-              </CollapsableContent>
-              <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
-                <ActionModuleDivider className="h-0.5" />
-              </CollapsableContent>
-              {Object.entries(contract).map(([key, value]) => {
-                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
-                return (
-                  <CollapsableContent
-                    size="xs"
-                    key={key}
-                    className={cn(
-                      'hidden peer-checked:block',
-                      valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
-                    )}
-                  >
-                    <RowLabel>{`${key}: `}</RowLabel>
-                    <span>{valueToDisplay}</span>
-                  </CollapsableContent>
-                );
-              })}
-            </>
-          ) : null}
-          {!hideButton ? <StakedContractCardButton contract={contract} state={state} /> : null}
-        </>
-      }
-    />
-  );
-});
+      ) : null;
+
+    const buttonComp = !hideButton ? (
+      <StakedContractCardButton
+        key="actionButton"
+        contract={contract}
+        state={state}
+        forceExpanded={showAlreadyRunningWarning}
+      />
+    ) : null;
+
+    const expandButtonComp = (
+      <ToggleCardExpansionButton key="expansionButton" htmlFor={props.toggleId} />
+    );
+
+    const componentData: Array<ComponentData> = [
+      { id: 'notification', component: notificationComp },
+      { id: 'contributors', component: contributorsComp },
+      { id: 'snKey', component: snKeyComp },
+      { id: 'operatorAddress', component: operatorComp },
+      { id: 'beneficiaryAddress', component: beneficiaryComp },
+      { id: 'stake', component: stakeComp },
+      { id: 'fee', component: feeComp },
+      { id: 'actionButton', component: buttonComp },
+      { id: 'expandButton', component: expandButtonComp },
+    ];
+
+    const children = renderOrderedComponents(isDetailedView, componentData);
+    return (
+      <StakeCard
+        ref={ref}
+        {...props}
+        data-testid={NodeCardDataTestId.Staked_Node}
+        title={parseStakeContractState(contract)}
+        statusIndicatorColor={getContractStatusColor(state)}
+        operatorAddress={contract.operator_address}
+      >
+        {children}
+      </StakeCard>
+    );
+  }
+);
 StakedContractCard.displayName = 'StakedContractCard';
 
 function StakedContractCardButton({
   contract,
   state,
+  forceExpanded,
 }: {
   contract: ContributionContract | ContributionContractNotReady;
   state: STAKE_CONTRACT_STATE;
+  forceExpanded?: boolean;
 }) {
   const dictionaryOpenNode = useTranslations('nodeCard.open');
 
@@ -264,25 +245,16 @@ function StakedContractCardButton({
     return null;
   }
 
-  /** TODO: cleanup breakpoints */
   return (
-    <CollapsableContent
-      className="end-6 bottom-4 flex w-max items-end min-[500px]:absolute"
-      size="buttonMd"
+    <NodeCardActionButton
+      href={`/stake/${contract.address}`}
+      aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
+      data-testid={ButtonDataTestId.Node_Card_View}
+      variant="outline"
+      forceExpanded={forceExpanded}
     >
-      <Link href={`/stake/${contract.address}`}>
-        <Button
-          rounded="md"
-          size="md"
-          variant="outline"
-          className="uppercase"
-          aria-label={dictionaryOpenNode('viewButton.ariaLabel')}
-          data-testid={ButtonDataTestId.Node_Card_View}
-        >
-          {dictionaryOpenNode('viewButton.text')}
-        </Button>
-      </Link>
-    </CollapsableContent>
+      {dictionaryOpenNode('viewButton.text')}
+    </NodeCardActionButton>
   );
 }
 
@@ -296,7 +268,7 @@ export const getStakedContractCardContractFromConfirmation = (
     fee: 0,
     manual_finalize: false,
     status: CONTRIBUTION_CONTRACT_STATUS.Finalized,
-    address: zeroAddress,
+    address: ETH_ZERO_ADDRESS,
     contributors: [
       {
         address: node.operatorAddress,

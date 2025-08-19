@@ -1,54 +1,59 @@
 'use client';
-
-import { ActionModuleDivider } from '@/components/ActionModule';
+import { NodeCardLastReward } from '@/components/StakedNode/Info/NodeCardLastReward';
+import { NodeCardLastUptime } from '@/components/StakedNode/Info/NodeCardLastUptime';
+import { NodeCardUnlockTimer } from '@/components/StakedNode/Info/NodeCardUnlockTimer';
+import { NodeCardVersion } from '@/components/StakedNode/Info/NodeCardVersion';
+import { StakeCardSnKey } from '@/components/StakedNode/Info/StakeCardSnKey';
+import { StakeCardText } from '@/components/StakedNode/Info/StakeCardText';
+import { StakeCardWalletAddress } from '@/components/StakedNode/Info/StakeCardWalletAddress';
+import { StakeContributors } from '@/components/StakedNode/Info/StakeContributors';
 import { NodeExitButton } from '@/components/StakedNode/NodeExitButton';
 import { NodeExitButtonDialog } from '@/components/StakedNode/NodeExitButtonDialog';
 import {
   NodeRequestExitButton,
   NodeRequestExitButtonWithDialog,
 } from '@/components/StakedNode/NodeRequestExitButtonWithDialog';
-import { ExitUnlockTimerNotification, NodeSummary } from '@/components/StakedNode/NodeSummary';
-import { StakeCard } from '@/components/StakedNode/StakeCard';
+import { NodeNotification } from '@/components/StakedNode/Notification/NodeNotification';
+import { NodeVersionUpdateAvailableNotification } from '@/components/StakedNode/Notification/NodeVersionUpdateAvailableNotification';
+import {
+  type ComponentData,
+  StakeCard,
+  renderOrderedComponents,
+} from '@/components/StakedNode/StakeCard';
 import {
   STAKE_EVENT_STATE,
   STAKE_STATE,
-  isStakeRequestingExit,
   parseStakeEventState,
   parseStakeState,
 } from '@/components/StakedNode/state';
 import { WizardSectionDescription } from '@/components/Wizard';
 import { getTotalStakedAmountForAddressFormatted } from '@/components/getTotalStakedAmountForAddressFormatted';
+import { VERSION } from '@/hooks/useNetworkVersionInfo';
 import useRelativeTime from '@/hooks/useRelativeTime';
-import { useStakes } from '@/hooks/useStakes';
+import { BlockTimeManager, msInBlocks } from '@/lib/blocks';
 import { SESSION_NODE, SESSION_NODE_TIME, SESSION_NODE_TIME_STATIC } from '@/lib/constants';
-import { FEATURE_FLAG } from '@/lib/feature-flags';
-import { useFeatureFlag } from '@/lib/feature-flags-client';
 import {
   formatLocalizedTimeFromSeconds,
-  formatNumber,
   formatPercentage,
   useFormatDate,
 } from '@/lib/locale-client';
-import { ButtonDataTestId, NodeCardDataTestId } from '@/testing/data-test-ids';
+import { useUser } from '@/providers/user-provider';
+import { NodeCardDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
-import type { StakeContributor } from '@session/staking-api-js/schema';
-import type { Stake } from '@session/staking-api-js/schema';
-import { CopyToClipboardButton } from '@session/ui/components/CopyToClipboardButton';
+import type { Stake, StakeContributor } from '@session/staking-api-js/schema';
 import type { statusVariants } from '@session/ui/components/StatusIndicator';
 import { KeyRoundIcon } from '@session/ui/icons/KeyRoundIcon';
 import { SpannerAndScrewdriverIcon } from '@session/ui/icons/SpannerAndScrewdriverIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Tooltip } from '@session/ui/ui/tooltip';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { jsonBigIntReplacer } from '@session/util-js/bigint';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { getDateFromUnixTimestampSeconds } from '@session/util-js/date';
-import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, forwardRef, useMemo } from 'react';
-import type { Address } from 'viem';
-import { CollapsableContent, RowLabel } from './NodeCard';
+import { CollapsableContent, ToggleCardExpansionButton } from './NodeCard';
 
 /**
  * Checks if a given stake is ready to exit the smart contract.
@@ -71,6 +76,13 @@ export const isReadyToExitByUnlock = (
     unlockHeight <= blockHeight
   );
 
+const getVersionStringFromArray = (version: Array<number>) => {
+  if (!version || !Array.isArray(version) || version.length > 3) {
+    return undefined;
+  }
+  return version.join('.');
+};
+
 /**
  * Checks if a given stake is ready to exit the smart contract from a deregistration.
  * @param state - The stake state.
@@ -89,23 +101,6 @@ function getNodeStatus(state: STAKE_STATE): VariantProps<typeof statusVariants>[
       return 'red';
     default:
       return 'grey';
-  }
-}
-
-const blocksInMs = (blocks: number) => blocks * SESSION_NODE.MS_PER_BLOCK;
-const msInBlocks = (ms: number) => Math.floor(ms / SESSION_NODE.MS_PER_BLOCK);
-
-class BlockTimeManager {
-  private readonly networkTime: number;
-  private readonly currentBlock: number;
-
-  constructor(networkTime: number, currentBlock: number) {
-    this.networkTime = networkTime;
-    this.currentBlock = currentBlock;
-  }
-
-  getDateOfBlock(targetBlock: number) {
-    return new Date(this.networkTime * 1000 + blocksInMs(targetBlock - this.currentBlock));
   }
 }
 
@@ -165,7 +160,6 @@ export const ExitRequestorIndicator = forwardRef<HTMLDivElement, NodeContributor
 
 const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) => {
   const { chainId } = useWallet();
-  const blockTime = new BlockTimeManager(networkTime, currentBlock);
   const {
     registration_height: registrationBlock,
     last_reward_block_height: lastRewardBlock,
@@ -177,6 +171,7 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
   } = node;
 
   return useMemo(() => {
+    const blockTime = new BlockTimeManager(networkTime, currentBlock);
     const lastUptimeDate = lastUptimeProofSeconds
       ? getDateFromUnixTimestampSeconds(lastUptimeProofSeconds)
       : null;
@@ -223,9 +218,9 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
       smallContributorRequestExitDate,
     };
   }, [
-    chainId,
-    blockTime,
     currentBlock,
+    networkTime,
+    chainId,
     earnedDowntimeBlocks,
     lastUptimeProofSeconds,
     lastRewardBlock,
@@ -239,51 +234,82 @@ const useNodeDates = (node: Stake, currentBlock: number, networkTime: number) =>
 const StakedNodeCard = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    id: string;
+    toggleId: string;
     stake: Stake;
-    targetWalletAddress?: Address;
-    blockHeight: number;
-    networkTime: number;
+    targetWalletAddress?: EthereumAddress;
+    isDetailedView?: boolean;
     hideButton?: boolean;
   }
->(({ stake, blockHeight, networkTime, hideButton, targetWalletAddress, ...props }, ref) => {
-  const dictionary = useTranslations('nodeCard.staked');
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: see if it can be further componentised
+>(({ stake, hideButton, isDetailedView = false, targetWalletAddress, ...props }, ref) => {
   const generalDictionary = useTranslations('general');
   const generalNodeDictionary = useTranslations('sessionNodes.general');
   const stakingNodeDictionary = useTranslations('sessionNodes.staking');
-  const titleFormat = useTranslations('modules.title');
   const notFoundString = generalDictionary('notFound');
 
-  const { address: connectedAddress } = useWallet();
-
-  const address = targetWalletAddress ?? connectedAddress;
-
-  const { networkContractIds } = useStakes(address);
-  const isInContractIdList = networkContractIds?.has(stake.contract_id);
-
   const {
+    service_node_pubkey: pubKey,
+    contract_id: contractId,
     operator_fee: fee,
     operator_address: operatorAddress,
     contributors,
     last_reward_block_height: lastRewardBlock,
     last_uptime_proof: lastUptimeProofSeconds,
+    service_node_version: versionArray,
+    requested_unlock_height: requestedUnlockHeight,
   } = stake;
 
-  const formattedStakedBalance = getTotalStakedAmountForAddressFormatted(contributors, address);
-  const showRawNodeData = useFeatureFlag(FEATURE_FLAG.SHOW_NODE_RAW_DATA);
+  const { connectedAddress } = useUser();
 
-  const contributor = useMemo(
-    () => contributors.find((contributor) => areHexesEqual(contributor.address, address)),
-    [contributors, address]
+  const address = targetWalletAddress ?? connectedAddress;
+
+  const {
+    stakes: { networkTime, blockHeight },
+    network,
+    contractNodes,
+  } = useUser();
+  const isInContractIdList = useMemo(
+    () => contractNodes.contractIdSet.has(contractId),
+    [contractId, contractNodes.contractIdSet]
   );
 
-  const beneficiaryAddress = useMemo(() => {
-    if (!address || !contributor || !contributor.beneficiary) return null;
-
-    return !areHexesEqual(contributor.beneficiary, contributor.address)
-      ? contributor.beneficiary
+  const { formattedStakedBalance, contributor, beneficiaryAddress, isOperator } = useMemo(() => {
+    const contributor = address
+      ? contributors.find((contributor) => areEthereumAddressesEqual(contributor.address, address))
       : null;
-  }, [contributor, address]);
+
+    const beneficiaryAddress =
+      contributor && !areEthereumAddressesEqual(contributor.beneficiary, contributor.address)
+        ? contributor.beneficiary
+        : null;
+
+    return {
+      formattedStakedBalance: getTotalStakedAmountForAddressFormatted(contributors, address),
+      contributor,
+      beneficiaryAddress,
+      isOperator: areEthereumAddressesEqual(operatorAddress, address),
+    };
+  }, [contributors, operatorAddress, address]);
+
+  const availableUpdateStatus = useMemo(
+    () => (versionArray ? network.checkForUpdate(versionArray) : null),
+    [versionArray, network.checkForUpdate]
+  );
+
+  const version = useMemo(
+    () => (versionArray ? getVersionStringFromArray(versionArray) : ''),
+    [versionArray]
+  );
+
+  const sharedProps = {
+    forceExpanded: isDetailedView,
+    width: isDetailedView ? 'w-max' : 'w-full',
+  } as const;
+
+  const pubkeyOptions = {
+    alwaysShowCopyButton: true,
+    force: isDetailedView || hideButton ? 'collapse' : undefined,
+  } as const;
 
   const {
     lastUptimeDate,
@@ -295,28 +321,171 @@ const StakedNodeCard = forwardRef<
     smallContributorRequestExitDate,
   } = useNodeDates(stake, blockHeight, networkTime);
 
-  const formattedLastRewardDate = useFormatDate(lastRewardDate, {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  });
-  const formattedLastUptimeDate = useFormatDate(lastUptimeDate, {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  });
+  const state = useMemo(() => parseStakeState(stake, blockHeight), [stake, blockHeight]);
 
-  const lastRewardTime = useRelativeTime(lastRewardDate, { addSuffix: true });
-  const deregistrationTime = useRelativeTime(deregistrationDate, { addSuffix: true });
-  const lastUptimeTime = useRelativeTime(lastUptimeDate, { addSuffix: true });
-  const requestedUnlockTime = useRelativeTime(requestedUnlockDate, { addSuffix: true });
-  const deregistrationUnlockTime = useRelativeTime(deregistrationUnlockDate, { addSuffix: true });
-  const liquidationTime = useRelativeTime(liquidationDate, { addSuffix: true });
-  const smallContributorRequestExitTime = useRelativeTime(smallContributorRequestExitDate, {
-    addSuffix: true,
-  });
+  const notificationComp = (
+    <NodeNotification
+      key="notification"
+      node={stake}
+      state={state}
+      blockHeight={blockHeight}
+      isInContractIdList={isInContractIdList}
+      deregistrationDate={deregistrationDate}
+      deregistrationUnlockDate={deregistrationUnlockDate}
+      liquidationDate={liquidationDate}
+      requestedUnlockDate={requestedUnlockDate}
+      availableUpdate={availableUpdateStatus}
+    />
+  );
 
-  const isSoloNode = contributors.length === 1;
+  const contributorsComp = (
+    <StakeContributors
+      key="contributors"
+      stake={stake}
+      userAddress={address}
+      forceExpand={isDetailedView}
+    />
+  );
 
-  const state = parseStakeState(stake, blockHeight);
+  const snKeyComp = (
+    <StakeCardSnKey
+      key="snKey"
+      {...sharedProps}
+      pubkey={pubKey}
+      tooltipSide={isDetailedView ? 'top' : 'bottom'}
+      isOperator={isOperator}
+    />
+  );
+
+  const showUpdateAvailable =
+    availableUpdateStatus === VERSION.MAJOR || availableUpdateStatus === VERSION.MINOR;
+
+  const unlockTimerComp =
+    requestedUnlockHeight && (state === STAKE_STATE.DECOMMISSIONED || showUpdateAvailable) ? (
+      <NodeCardUnlockTimer key="unlockTimer" requestedUnlockDate={requestedUnlockDate} />
+    ) : null;
+
+  const updateSmallComp =
+    showUpdateAvailable && state === STAKE_STATE.DECOMMISSIONED ? (
+      <CollapsableContent forceExpanded size="xs">
+        <NodeVersionUpdateAvailableNotification
+          availableUpdate={availableUpdateStatus}
+          className="md:text-xs"
+        />
+      </CollapsableContent>
+    ) : null;
+
+  const rewardTimerComp =
+    state !== STAKE_STATE.RUNNING ? (
+      <NodeCardLastReward
+        key="rewardTimer"
+        lastRewardDate={lastRewardDate}
+        lastRewardBlock={lastRewardBlock}
+      />
+    ) : null;
+
+  const uptimeTimerComp = lastUptimeProofSeconds ? (
+    <NodeCardLastUptime
+      key="uptimeTimer"
+      {...sharedProps}
+      size="xs"
+      lastUptimeDate={lastUptimeDate}
+      blockHeight={blockHeight}
+      lastUptimeProofSeconds={lastUptimeProofSeconds}
+    />
+  ) : null;
+
+  const versionComp =
+    state === STAKE_STATE.RUNNING || state === STAKE_STATE.DECOMMISSIONED ? (
+      <NodeCardVersion
+        key="version"
+        {...sharedProps}
+        size="xs"
+        version={version}
+        availableUpdate={availableUpdateStatus}
+      />
+    ) : null;
+
+  const operatorComp = (
+    <StakeCardWalletAddress
+      key="operator"
+      {...sharedProps}
+      addressLabel="operatorAddress"
+      size={'large'}
+      address={operatorAddress}
+      pubkeyOptions={pubkeyOptions}
+    />
+  );
+
+  const beneficiaryComp = beneficiaryAddress ? (
+    <StakeCardWalletAddress
+      key="beneficiary"
+      {...sharedProps}
+      addressLabel="beneficiaryAddress"
+      size={'large'}
+      address={beneficiaryAddress}
+      pubkeyOptions={pubkeyOptions}
+    />
+  ) : null;
+
+  const stakeComp = (
+    <StakeCardText
+      key="stake"
+      {...sharedProps}
+      size={'large'}
+      label={stakingNodeDictionary('stakedBalance')}
+      content={formattedStakedBalance}
+    />
+  );
+
+  const feeComp =
+    contributors.length > 1 ? (
+      <StakeCardText
+        key="fee"
+        {...sharedProps}
+        size={'large'}
+        label={generalNodeDictionary('operatorFee')}
+        content={fee !== null ? formatPercentage(fee / 1_000_000) : notFoundString}
+        hideCopyToClipboardButton
+      />
+    ) : null;
+
+  const buttonComp = !hideButton ? (
+    <StakeNodeCardButton
+      key="actionButton"
+      stake={stake}
+      contributor={contributor}
+      state={state}
+      blockHeight={blockHeight}
+      requestedUnlockDate={requestedUnlockDate}
+      notFoundString={notFoundString}
+      smallContributorRequestExitDate={smallContributorRequestExitDate}
+      forceExpanded={isDetailedView}
+    />
+  ) : null;
+
+  const expandButtonComp = (
+    <ToggleCardExpansionButton key="expansionButton" htmlFor={props.toggleId} />
+  );
+
+  const componentData: Array<ComponentData> = [
+    { id: 'notification', component: notificationComp },
+    { id: 'contributors', component: contributorsComp },
+    { id: 'snKey', component: snKeyComp },
+    { id: 'unlockTimer', component: unlockTimerComp },
+    { id: 'updateSmall', component: updateSmallComp },
+    { id: 'rewardTimer', component: rewardTimerComp },
+    { id: 'uptimeTimer', component: uptimeTimerComp },
+    { id: 'version', component: versionComp },
+    { id: 'operatorAddress', component: operatorComp },
+    { id: 'beneficiaryAddress', component: beneficiaryComp },
+    { id: 'stake', component: stakeComp },
+    { id: 'fee', component: feeComp },
+    { id: 'actionButton', component: buttonComp },
+    { id: 'expandButton', component: expandButtonComp },
+  ];
+
+  const children = renderOrderedComponents(isDetailedView, componentData);
 
   return (
     <StakeCard
@@ -325,153 +494,14 @@ const StakedNodeCard = forwardRef<
       data-testid={NodeCardDataTestId.Staked_Node}
       title={state}
       statusIndicatorColor={getNodeStatus(state)}
-      publicKey={stake.service_node_pubkey}
-      isOperator={areHexesEqual(operatorAddress, address)}
-      operatorAddress={operatorAddress}
-      summary={
-        <NodeSummary
-          node={stake}
-          state={state}
-          userAddress={address}
-          blockHeight={blockHeight}
-          isInContractIdList={isInContractIdList}
-          deregistrationDate={deregistrationDate}
-          deregistrationTime={deregistrationTime}
-          deregistrationUnlockDate={deregistrationUnlockDate}
-          deregistrationUnlockTime={deregistrationUnlockTime}
-          liquidationDate={liquidationDate}
-          liquidationTime={liquidationTime}
-          requestedUnlockTime={requestedUnlockTime}
-          requestedUnlockDate={requestedUnlockDate}
-        />
-      }
-      collapsableFirstChildren={
-        <>
-          {state === STAKE_STATE.DECOMMISSIONED && stake.requested_unlock_height ? (
-            <CollapsableContent className="text-warning" size="xs">
-              <ExitUnlockTimerNotification
-                date={requestedUnlockDate}
-                timeString={requestedUnlockTime}
-                className="md:text-xs"
-              />
-            </CollapsableContent>
-          ) : null}
-          {state !== STAKE_STATE.RUNNING ? (
-            <CollapsableContent size="xs">
-              <Tooltip
-                tooltipContent={dictionary('lastRewardDescription', {
-                  blockNumber: lastRewardBlock ? formatNumber(lastRewardBlock) : notFoundString,
-                  date: formattedLastRewardDate ?? notFoundString,
-                })}
-              >
-                <span className="font-normal text-gray-lightest">
-                  {dictionary('lastReward', {
-                    relativeTime: lastRewardTime ?? notFoundString,
-                  })}
-                </span>
-              </Tooltip>
-            </CollapsableContent>
-          ) : null}
-          {lastUptimeProofSeconds ? (
-            <CollapsableContent size="xs">
-              <Tooltip
-                tooltipContent={dictionary('lastUptimeDescription', {
-                  blockNumber: lastUptimeProofSeconds
-                    ? formatNumber(
-                        blockHeight - msInBlocks(Date.now() - lastUptimeProofSeconds * 1000)
-                      )
-                    : notFoundString,
-                  date: formattedLastUptimeDate ?? notFoundString,
-                })}
-              >
-                <span className="font-normal text-gray-lightest">
-                  {dictionary('lastUptime', { relativeTime: lastUptimeTime ?? notFoundString })}
-                </span>
-              </Tooltip>
-            </CollapsableContent>
-          ) : null}
-        </>
-      }
-      collapsableLastChildren={
-        <>
-          <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-            <RowLabel>
-              {titleFormat('format', { title: generalNodeDictionary('operatorAddress') })}
-            </RowLabel>
-            <PubkeyWithEns pubKey={operatorAddress} expandOnHoverDesktopOnly />
-          </CollapsableContent>
-          {beneficiaryAddress ? (
-            <CollapsableContent className="peer-checked:max-h-12 sm:gap-1 sm:peer-checked:max-h-5">
-              <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('beneficiaryAddress') })}
-              </RowLabel>
-              <PubkeyWithEns pubKey={beneficiaryAddress} expandOnHoverDesktopOnly />
-            </CollapsableContent>
-          ) : null}
-          <CollapsableContent>
-            <RowLabel>
-              {titleFormat('format', { title: stakingNodeDictionary('stakedBalance') })}
-            </RowLabel>
-            {formattedStakedBalance}
-            <CopyToClipboardButton
-              textToCopy={formattedStakedBalance}
-              data-testid={ButtonDataTestId.Staked_Node_Copy_Staked_Balance}
-            />
-          </CollapsableContent>
-          {!isSoloNode ? (
-            <CollapsableContent>
-              <RowLabel>
-                {titleFormat('format', { title: generalNodeDictionary('operatorFee') })}
-              </RowLabel>
-              {fee !== null ? formatPercentage(fee / 1_000_000) : notFoundString}
-            </CollapsableContent>
-          ) : null}
-          {showRawNodeData ? (
-            <>
-              <CollapsableContent className="hidden peer-checked:block">
-                <RowLabel>
-                  {titleFormat('format', { title: generalNodeDictionary('rawData') })}
-                </RowLabel>
-              </CollapsableContent>
-              <CollapsableContent className="hidden peer-checked:block peer-checked:h-2" size="xs">
-                <ActionModuleDivider className="h-0.5" />
-              </CollapsableContent>
-              {Object.entries(stake).map(([key, value]) => {
-                const valueToDisplay = JSON.stringify(value, jsonBigIntReplacer);
-                return (
-                  <CollapsableContent
-                    size="xs"
-                    key={key}
-                    className={cn(
-                      'hidden peer-checked:block',
-                      valueToDisplay.length > 100 ? 'peer-checked:max-h-8' : ''
-                    )}
-                  >
-                    <RowLabel>{`${key}: `}</RowLabel>
-                    <span>{valueToDisplay}</span>
-                  </CollapsableContent>
-                );
-              })}
-            </>
-          ) : null}
-          {!hideButton ? (
-            <StakeNodeCardButton
-              stake={stake}
-              contributor={contributor}
-              state={state}
-              blockHeight={blockHeight}
-              requestedUnlockDate={requestedUnlockDate}
-              requestedUnlockTime={requestedUnlockTime}
-              notFoundString={notFoundString}
-              smallContributorRequestExitDate={smallContributorRequestExitDate}
-              smallContributorRequestExitTime={smallContributorRequestExitTime}
-            />
-          ) : null}
-        </>
-      }
-    />
+      isDetailedView={isDetailedView}
+      className={cn(props.className, isDetailedView ? 'space-x-1.5' : '')}
+    >
+      {children}
+    </StakeCard>
   );
 });
+
 StakedNodeCard.displayName = 'StakedNodeCard';
 
 function StakeNodeCardButton({
@@ -481,20 +511,23 @@ function StakeNodeCardButton({
   blockHeight,
   notFoundString,
   requestedUnlockDate,
-  requestedUnlockTime,
   smallContributorRequestExitDate,
-  smallContributorRequestExitTime,
+  forceExpanded,
 }: {
   stake: Stake;
-  contributor?: StakeContributor;
+  contributor?: StakeContributor | null;
   state: STAKE_STATE;
   blockHeight: number;
   requestedUnlockDate?: Date | null;
-  requestedUnlockTime?: string | null;
   smallContributorRequestExitDate?: Date | null;
-  smallContributorRequestExitTime?: string | null;
   notFoundString?: string;
+  forceExpanded?: boolean;
 }) {
+  // TODO: move the resulting buttons into their own components and these time hooks into them
+  const requestedUnlockTime = useRelativeTime(requestedUnlockDate, { addSuffix: true });
+  const smallContributorRequestExitTime = useRelativeTime(smallContributorRequestExitDate, {
+    addSuffix: true,
+  });
   const dictionary = useTranslations('nodeCard.staked');
   const dictInfoNotice = useTranslations('infoNotice');
   const formattedReqUnlockDate = useFormatDate(requestedUnlockDate, {
@@ -502,7 +535,9 @@ function StakeNodeCardButton({
     timeStyle: 'short',
   });
 
-  const eventState = parseStakeEventState(stake);
+  const eventState = useMemo(() => parseStakeEventState(stake), [stake]);
+  const stakeRequestingExit =
+    state === STAKE_STATE.RUNNING && eventState === STAKE_EVENT_STATE.EXIT_REQUESTED;
 
   if (
     state === STAKE_STATE.EXITED ||
@@ -516,11 +551,11 @@ function StakeNodeCardButton({
     isReadyToExitByUnlock(state, eventState, stake.requested_unlock_height, blockHeight) ||
     isReadyToExitByDeregistration(state, eventState)
   ) {
-    return <NodeExitButtonDialog node={stake} />;
+    return <NodeExitButtonDialog node={stake} forceExpanded />;
   }
 
   if (state === STAKE_STATE.RUNNING) {
-    if (isStakeRequestingExit(stake)) {
+    if (stakeRequestingExit) {
       return (
         <Tooltip
           tooltipContent={dictionary.rich('exit.disabledButtonTooltipContent', {
@@ -528,7 +563,7 @@ function StakeNodeCardButton({
             date: formattedReqUnlockDate ?? notFoundString,
           })}
         >
-          <NodeExitButton disabled />
+          <NodeExitButton disabled forceExpanded={forceExpanded} />
         </Tooltip>
       );
     }
@@ -557,12 +592,12 @@ function StakeNodeCardButton({
             />
           }
         >
-          <NodeRequestExitButton disabled />
+          <NodeRequestExitButton disabled forceExpanded={forceExpanded} />
         </Tooltip>
       );
     }
 
-    return <NodeRequestExitButtonWithDialog node={stake} />;
+    return <NodeRequestExitButtonWithDialog node={stake} forceExpanded={forceExpanded} />;
   }
 }
 
