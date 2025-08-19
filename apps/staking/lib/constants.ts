@@ -32,6 +32,7 @@ export enum URL {
   SESSION_NODE_SOLO_SETUP_DOCS = 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
   REMOVE_TOKEN_FROM_WATCH_LIST = 'https://support.metamask.io/managing-my-tokens/custom-tokens/how-to-remove-a-token/',
   NODE_LIQUIDATION_LEARN_MORE = 'https://docs.getsession.org/class-is-in-session/session-stagenet-single-contributor-node-setup#unlocking-your-stake',
+  SESSION_NODE_UPDATE_DOCS = 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node#keeping-your-binaries-up-to-date',
 }
 
 export const LANDING_BUTTON_URL = {
@@ -39,7 +40,8 @@ export const LANDING_BUTTON_URL = {
   SECONDARY: 'https://docs.getsession.org/contribute-to-the-session-network/running-a-session-node',
 };
 
-export const TOS_LOCKED_PATHS = ['/stake', '/mystakes', '/register'];
+// These paths are restricted by the TOS
+export const APP_PATHS = ['/stake', '/mystakes', '/vested-stakes', '/register'];
 export const VESTING_PATHS = ['/stake', '/mystakes', '/register'];
 
 export enum COMMUNITY_DATE {
@@ -169,8 +171,6 @@ export const SESSION_NODE_SMALL_CONTRIBUTOR_AMOUNT =
 export enum SESSION_NODE_TIME_STATIC {
   /** 30 days in seconds */
   SMALL_CONTRIBUTOR_EXIT_REQUEST_WAIT_TIME_SECONDS = 30 * 24 * 60 * 60,
-  /** isSoon amount in seconds for time-based notifications (2 minutes) */
-  SOON_TIME = 120_000,
   /** 24 hours in seconds */
   NON_FINALIZED_TIME_TO_REMOVE_STAKE_SECONDS = 24 * 60 * 60,
 }
@@ -236,13 +236,14 @@ export enum PREFERENCE {
   INFO_NOTICE_DONT_SHOW_REGISTER = 'infoNoticeDontShowRegister',
   INFO_NOTICE_DONT_SHOW_STAKE = 'infoNoticeDontShowStake',
   INFO_NOTICE_DONT_SHOW_STAKE_TOP_UP = 'infoNoticeDontShowStakeTopUp',
+  MY_STAKES_SETTINGS_VIEW = 'myStakesSettingsView',
 }
 
 export const preferenceStorageDefaultItems = {} as const;
 
-type WalletSheetSettingDetailsGenerator = Record<
-  PREFERENCE,
-  Omit<WalletSheetSettingDetails, 'key'>
+type WalletSheetSettingDetailsGenerator = Omit<
+  Record<PREFERENCE, Omit<WalletSheetSettingDetails, 'key'>>,
+  'myStakesSettingsView'
 >;
 
 export const prefDetails = {

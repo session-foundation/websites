@@ -1,7 +1,6 @@
-import { isAddress } from 'viem';
+import { isBLSPublicKey, isEd25519PublicKey, isEthereumAddress } from '@session/util-crypto/keys';
 import { z } from 'zod';
 import { ARBITRUM_EVENT, CONTRIBUTION_CONTRACT_STATUS, EXIT_TYPE } from './enums';
-import { isEd25519PublicKey } from './refine';
 
 //////////////////////////////////////////////////////////////
 //                                                          //
@@ -9,8 +8,9 @@ import { isEd25519PublicKey } from './refine';
 //                                                          //
 //////////////////////////////////////////////////////////////
 
-export const ethereumAddressSchema = z.string().refine(isAddress);
+export const ethereumAddressSchema = z.string().refine(isEthereumAddress);
 export const ed25519PublicKeySchema = z.string().refine(isEd25519PublicKey);
+export const blsPublicKeySchema = z.string().refine(isBLSPublicKey);
 export const nonSignerIndicesSchema = z.array(z.coerce.bigint());
 
 //////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ export const contributionContractNotReadySchema = contributionContractBaseSchema
   /** If true, the contract must be manually finalized by the operator before it will join the network */
   manual_finalize: z.coerce.boolean(),
   /** Nullable because it's set ~250ms after the contract is created */
-  pubkey_bls: z.string().nullable(),
+  pubkey_bls: blsPublicKeySchema.nullable(),
 });
 
 export const contributionContractSchema = contributionContractBaseSchema.extend({
@@ -167,8 +167,8 @@ export const contributionContractSchema = contributionContractBaseSchema.extend(
   fee: z.number(),
   /** If true, the contract must be manually finalized by the operator before it will join the network */
   manual_finalize: z.coerce.boolean(),
-  /** Nullable because it's set ~250ms after the contract is created */
-  pubkey_bls: z.string(),
+  /** Bls public key of the contract's node */
+  pubkey_bls: blsPublicKeySchema,
 });
 
 export type ContributionContractNotReady = z.infer<typeof contributionContractNotReadySchema>;
@@ -230,7 +230,7 @@ export const nodeRegistrationSchema = z.object({
   /** Ethereum address of the node operator */
   operator: ethereumAddressSchema,
   /** BLS public key of the node */
-  pubkey_bls: z.string(),
+  pubkey_bls: blsPublicKeySchema,
   /** Ed25519 public key of the node. This is the node's "SN key" */
   pubkey_ed25519: ed25519PublicKeySchema,
   /** BLS signature of the node */
@@ -335,7 +335,7 @@ export type DailyRewardsResponse = z.infer<typeof dailyRewardsResponseSchema>;
 
 export const blsExitSignatureSchema = z.object({
   /** The bls pubkey of the node to exit/liquidate */
-  bls_pubkey: z.string(),
+  bls_pubkey: blsPublicKeySchema,
   /** The message that has been signed by the network */
   msg_to_sign: z.string(),
   /** Non signer contract ids (The nodes that didn't sign the exit) */
@@ -358,11 +358,11 @@ export type BlsExitSignatureResponse = z.infer<typeof blsExitSignatureResponseSc
 
 export const exitLiquidationListItemSchema = z.object({
   info: z.object({
-    bls_public_key: z.string(),
+    bls_public_key: blsPublicKeySchema,
   }),
   height: z.number(),
   liquidation_height: z.number(),
-  service_node_pubkey: z.string(),
+  service_node_pubkey: ed25519PublicKeySchema,
   type: z.string(),
   version: z.string(),
 });
@@ -422,7 +422,7 @@ export const stakeSchema = z.object({
   operator_fee: z.number(),
   // payable: z.coerce.boolean(),
   /** BLS public key of the node */
-  pubkey_bls: z.string(),
+  pubkey_bls: blsPublicKeySchema,
   /** Ed25519 public key of the node */
   pubkey_ed25519: ed25519PublicKeySchema,
   // public_ip: z.string().nullable(),
@@ -437,7 +437,7 @@ export const stakeSchema = z.object({
   requested_unlock_height: z.number(),
   /** Ed25519 public key of the node */
   service_node_pubkey: ed25519PublicKeySchema,
-  // service_node_version: z.array(z.number()),
+  service_node_version: z.array(z.number()).nullable(),
   /** Total stake amount required for the node at registration time */
   staking_requirement: z.coerce.bigint(),
   // state_height: z.number(),
@@ -462,3 +462,32 @@ export const stakesResponseSchema = z.object({
 });
 
 export type StakesResponse = z.infer<typeof stakesResponseSchema>;
+
+export const hardForkInfoSchema = z.object({
+  enabled: z.boolean(),
+  earliest_height: z.number().nullable(),
+  version: z.number().nullable(),
+});
+
+export const hardForkInfoResponseSchema = z.object({
+  network: networkInfoSchema,
+  version_info: hardForkInfoSchema,
+});
+
+export type HardForkInfoResponse = z.infer<typeof hardForkInfoResponseSchema>;
+
+export const contractNodeStatusSchema = z.object({
+  /** BLS public key of the node */
+  bls: blsPublicKeySchema,
+  /** Ed25519 public key of the node. This is the node's "SN key" */
+  ed25519: ed25519PublicKeySchema,
+  /** If the node is actively in the contract. */
+  in: z.boolean(),
+});
+
+export const contractNodesResponseSchema = z.object({
+  network: networkInfoSchema,
+  nodes: z.record(z.coerce.number(), contractNodeStatusSchema),
+});
+
+export type ContractNodesResponse = z.infer<typeof contractNodesResponseSchema>;

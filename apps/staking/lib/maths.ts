@@ -4,10 +4,13 @@ import {
   type StakeContributor,
   isContributionContractContributor,
 } from '@session/staking-api-js/schema';
-import { areHexesEqual } from '@session/util-crypto/string';
-import type { Address } from 'viem';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 
 const SESSION_NODE_FULL_STAKE_AMOUNT = 25_000_000000000n;
+
+/** amount in seconds for time-based notifications (2 minutes) */
+const SESSION_NODE_SOON_TIME = 120_000;
 
 export const parseContributorDetails = (contributors: Array<ReservedContributorStruct> = []) => {
   let totalStaked = 0n;
@@ -94,14 +97,23 @@ export const getContributionRangeFromContributors = (
 
 export const getContributionRangeFromContributorsIgnoreAddress = (
   contributors: Array<StakeContributor | ContributionContractContributor> = [],
-  address?: Address
+  address?: EthereumAddress
 ) =>
   getContributionRangeFromContributors(
     contributors.filter(
-      ({ address: contributorAddress }) => !areHexesEqual(contributorAddress, address)
+      ({ address: contributorAddress }) => !areEthereumAddressesEqual(contributorAddress, address)
     )
   );
 
 export const getTotalStaked = (
   contributors: Array<StakeContributor | ContributionContractContributor> = []
 ) => contributors.reduce((acc, { amount }) => acc + amount, 0n);
+
+/**
+ * Checks if a given date is in the past or `soon`
+ * @see {@link SESSION_NODE_SOON_TIME}
+ * @param date - The date to check.
+ * @returns `true` if the date is in the past or `soon`, `false` otherwise.
+ */
+export const isDateSoonOrPast = (date: Date | null): boolean =>
+  !!(date && Date.now() > date.getTime() - SESSION_NODE_SOON_TIME);
