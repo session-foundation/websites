@@ -1,31 +1,20 @@
 import { getReadyContracts } from '@/hooks/parseContracts';
 import { parseOpenContracts } from '@/hooks/parseOpenContracts';
-import { useAddedBlsKeysPublic } from '@/hooks/useAddedBlsKeysPublic';
-import { useStakes } from '@/hooks/useStakes';
 import { BACKEND, PREFERENCE } from '@/lib/constants';
 import logger from '@/lib/logger';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { useDevicePref } from '@/providers/preferences-provider';
+import { useUser } from '@/providers/user-provider';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
-import { usePreferences } from 'usepref';
-import type { Address } from 'viem';
 
 /**
  * Hook to get the current open contributor contracts.
- * @param overrideAddress - The address to override the connected address.
  * @returns The open contributor contracts.
  */
-export function useOpenContributorContracts(overrideAddress?: Address) {
-  const { getItem } = usePreferences();
-  const autoRefresh = !getItem<boolean>(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
-  const { address: connectedAddress } = useWallet();
-  const address = overrideAddress ?? connectedAddress;
-
-  const refetchInterval = autoRefresh
-    ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000
-    : undefined;
+export function useOpenContributorContracts() {
+  const autoRefresh = !useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
   const {
     data,
@@ -34,25 +23,18 @@ export function useOpenContributorContracts(overrideAddress?: Address) {
     isFetching: isFetchingContracts,
     isError,
   } = useStakingBackendSuspenseQuery(getContributionContracts, {
-    refetchInterval,
+    refetchInterval: autoRefresh ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
   });
 
-  const {
-    networkBlsKeys,
-    isFetching: isFetchingStakes,
-    isLoading: isLoadingStakes,
-  } = useStakes(address, refetchInterval);
+  const { contractNodes, activeAddress } = useUser();
 
-  const enabledPublicBlsKeysQuery = !address;
-  const {
-    addedBlsKeys: addedBlsKeysPublic,
-    isLoading: isLoadingPublicBlsKeys,
-    isFetching: isFetchingPublicBlsKeys,
-  } = useAddedBlsKeysPublic({ enabled: enabledPublicBlsKeysQuery, refetchInterval });
+  const isLoading = isLoadingContracts || contractNodes?.isLoading;
+  const isFetching = isFetchingContracts || contractNodes?.isFetching;
 
   const { contracts, network } = useMemo(() => {
-    if (!data || (isLoadingStakes && isLoadingPublicBlsKeys))
+    if (isLoading || !data) {
       return { contracts: [], network: null };
+    }
 
     const [networkErr, network] = safeTrySyncWithFallback(() => data.network ?? null, null);
     if (networkErr) logger.error(networkErr);
@@ -63,18 +45,15 @@ export function useOpenContributorContracts(overrideAddress?: Address) {
     );
     if (contractsErr) logger.error(contractsErr);
 
-    const contracts = parseOpenContracts(_contracts, address, networkBlsKeys, addedBlsKeysPublic);
+    const contracts = parseOpenContracts(
+      _contracts,
+      contractNodes.blsSet,
+      contractNodes.ed25519Set,
+      activeAddress
+    );
 
     return { contracts, network };
-  }, [data, address, networkBlsKeys, addedBlsKeysPublic, isLoadingStakes, isLoadingPublicBlsKeys]);
-
-  const isLoading =
-    isLoadingContracts || isLoadingStakes || (enabledPublicBlsKeysQuery && isLoadingPublicBlsKeys);
-
-  const isFetching =
-    isFetchingContracts ||
-    isFetchingStakes ||
-    (enabledPublicBlsKeysQuery && isFetchingPublicBlsKeys);
+  }, [data, activeAddress, contractNodes, isLoading]);
 
   return {
     contracts,

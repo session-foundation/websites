@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "zod": "^3.23.8",
-    "viem": "2.21.54"
+    "viem": "2.21.54",
+    "@session/util-crypto": "workspace:*"
   },
   "devDependencies": {
     "@session/typescript-config": "workspace:*"
