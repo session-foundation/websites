@@ -112,8 +112,8 @@ export const areEd25519KeysEqual = (
  * @param key2 - Second BLS public key
  * @returns True if keys are equal
  *
- * NOTE: This function assumes if the BLS key is not falsy it is a valid BLS key, 96 characters without 0x prefix or 98 with 0x prefix.
+ * NOTE: This function assumes if the BLS key is not falsy it is a valid BLS key, 128 characters without 0x prefix or 130 with 0x prefix.
  */
 export const areBLSKeysEqual = (key1?: BLSPublicKey | null, key2?: BLSPublicKey | null) => {
-  return genericHexPubkeyComparison(96, key1, key2);
+  return genericHexPubkeyComparison(128, key1, key2);
 };
