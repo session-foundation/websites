@@ -67,6 +67,43 @@ const nextConfig = {
     }
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'X-Requested-With, content-type, Authorization',
+          },
+        ],
+      },{
+        source: '/manifest.webmanifest',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'X-Requested-With, content-type, Authorization',
+          },
+        ],
+      },
+    ];
+  },
   redirects: async () => {
     return [
       {
@@ -107,6 +144,10 @@ const nextConfig = {
       {
         source: '/api/network/:path*',
         destination: `${getNetworkApiUrl()}/:path*`,
+      },
+      {
+        source: '/manifest.json',
+        destination: '/manifest.webmanifest',
       },
     ];
   },
