@@ -176,8 +176,7 @@ const StakedContractCard = forwardRef<
       />
     );
 
-    const feeComp =
-      contributors.length > 1 ? (
+    const feeComp = (
         <StakeCardText
           key="fee"
           {...sharedProps}
@@ -186,7 +185,7 @@ const StakedContractCard = forwardRef<
           content={fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
           hideCopyToClipboardButton
         />
-      ) : null;
+      );
 
     const buttonComp = !hideButton ? (
       <StakedContractCardButton
