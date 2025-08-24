@@ -177,15 +177,15 @@ const StakedContractCard = forwardRef<
     );
 
     const feeComp = (
-        <StakeCardText
-          key="fee"
-          {...sharedProps}
-          size={'large'}
-          label={generalNodeDictionary('operatorFee')}
-          content={fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
-          hideCopyToClipboardButton
-        />
-      );
+      <StakeCardText
+        key="fee"
+        {...sharedProps}
+        size={'large'}
+        label={generalNodeDictionary('operatorFee')}
+        content={fee !== null ? formatPercentage(fee / 10_000) : notFoundString}
+        hideCopyToClipboardButton
+      />
+    );
 
     const buttonComp = !hideButton ? (
       <StakedContractCardButton
