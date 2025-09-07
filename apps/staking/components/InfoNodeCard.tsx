@@ -59,7 +59,7 @@ export const InfoNodeCard = forwardRef<HTMLDivElement, InfoNodeCardProps>(
           className
         )}
       >
-        <div className="flex flex-row gap-2 md:gap-4">
+        <div className="flex flex-row">
           {warnings ? (
             <div className="flex w-max flex-row items-center gap-2 align-middle">{warnings}</div>
           ) : null}

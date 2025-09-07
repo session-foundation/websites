@@ -406,7 +406,7 @@ const StakedNodeCard = forwardRef<
       />
     ) : null;
 
-  const operatorComp = (
+  const operatorComp = !isOperator ? (
     <StakeCardWalletAddress
       key="operator"
       {...sharedProps}
@@ -415,7 +415,7 @@ const StakedNodeCard = forwardRef<
       address={operatorAddress}
       pubkeyOptions={pubkeyOptions}
     />
-  );
+  ) : null;
 
   const beneficiaryComp = beneficiaryAddress ? (
     <StakeCardWalletAddress
@@ -495,7 +495,7 @@ const StakedNodeCard = forwardRef<
       title={state}
       statusIndicatorColor={getNodeStatus(state)}
       isDetailedView={isDetailedView}
-      className={cn(props.className, isDetailedView ? 'space-x-1.5' : '')}
+      className={cn(props.className, isDetailedView ? 'gap-x-2' : '')}
     >
       {children}
     </StakeCard>

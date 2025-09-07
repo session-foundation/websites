@@ -102,9 +102,9 @@ export const getOrderingForMode = (mode: VIEW_MODE): Array<OrderableComponents> 
         'uptimeTimer',
         'version',
         'snKey',
-        'operatorAddress',
         'beneficiaryAddress',
         'stake',
+        'operatorAddress',
         'fee',
         'actionButton',
       ];
