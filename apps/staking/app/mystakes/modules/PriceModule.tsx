@@ -43,7 +43,8 @@ const useHistoricalPriceQuery = () => {
         .map(({ price, t }) => ({
           price: Number(price.toFixed(3)),
           t: Math.trunc(t),
-        }));
+        }))
+        .filter(({ price }) => price < 100 && price > 0);
     },
     refetchInterval: autoRefresh ? BACKEND.NODE_TARGET_UPDATE_INTERVAL_SECONDS * 1000 : false,
   });
