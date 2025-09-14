@@ -16,6 +16,7 @@ import {
 } from '@session/ui/ui/sheet';
 import { Switch } from '@session/ui/ui/switch';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import { safe } from '@wagmi/connectors';
 import {
   QueryProvider,
   WalletProvider,
@@ -27,6 +28,7 @@ import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
 import { type ReactNode, forwardRef, useState } from 'react';
 import { http } from 'viem';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
+import { useAutoConnect } from '../hooks/useAutoConnect';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => (
@@ -182,6 +184,8 @@ export type ConfigParams = {
 
 const batchConfig = { batch: { batchSize: 100, wait: 500 } } as const;
 
+const safeAppDomainRegex = /app.safe.global$/;
+
 const createConfig = ({
   ethRpcUrl,
   arbRpcUrl,
@@ -208,6 +212,11 @@ const createConfig = ({
     wagmiConfig: {
       chains: [arb, eth],
       transports,
+      additionalConnectors: [
+        safe({
+          allowedDomains: [safeAppDomainRegex],
+        }),
+      ],
     },
     walletConnectConfig: {
       projectId,
@@ -248,7 +257,14 @@ export function Web3WalletProvider({
       config={config}
       wagmiCookie={wagmiCookie}
     >
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <AutoConnectProvider>{children}</AutoConnectProvider>
+      </QueryProvider>
     </WalletProvider>
   );
+}
+
+function AutoConnectProvider({ children }: { children: ReactNode }) {
+  useAutoConnect();
+  return children;
 }
