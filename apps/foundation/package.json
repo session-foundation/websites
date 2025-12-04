@@ -22,7 +22,7 @@
     "@session/util-js": "workspace:*",
     "@session/util-logger": "workspace:*",
     "class-variance-authority": "^0.7.0",
-    "next": "15.2.3",
+    "next": "15.2.6",
     "next-intl": "^3.14.1",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",

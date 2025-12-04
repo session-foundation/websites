@@ -36,7 +36,7 @@
     "bufferutil": "^4.0.8",
     "class-variance-authority": "^0.7.0",
     "date-fns": "^3.6.0",
-    "next": "15.2.3",
+    "next": "15.2.6",
     "next-intl": "3.26.0",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",
