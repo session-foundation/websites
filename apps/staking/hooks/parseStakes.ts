@@ -2,12 +2,11 @@ import type {
   ContributionContract,
   ContributionContractNotReady,
   Stake,
-  VestingContract,
 } from '@session/staking-api-js/schema';
+import type { BLSPublicKey, Ed25519PublicKey, EthereumAddress } from '@session/util-crypto/keys';
 import { bigIntSortDesc } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
-import type { Address } from 'viem';
 import {
   STAKE_EVENT_STATE,
   STAKE_STATE,
@@ -29,7 +28,7 @@ import { getReadyContracts, parseContracts } from './parseContracts';
 export const sortingTotalStakedDesc = (
   a: Stake | ContributionContract,
   b: Stake | ContributionContract,
-  address?: Address
+  address?: EthereumAddress
 ) => {
   const stakedA = address ? getTotalStakedAmountForAddress(a.contributors, address) : 0n;
   const stakedB = address ? getTotalStakedAmountForAddress(b.contributors, address) : 0n;
@@ -40,22 +39,22 @@ export const sortingTotalStakedDesc = (
  * Sorts reserved contracts by total staked amount descending.
  * @param a - The first contract to compare.
  * @param b - The second contract to compare.
- * @param connectedAddress - The connected address to filter by.
+ * @param activeAddress - The connected address to filter by.
  * @returns The sorted contracts.
  */
 export const sortingReservedContractsDesc = (
   a: ContributionContract,
   b: ContributionContract,
-  connectedAddress?: Address
+  activeAddress?: EthereumAddress
 ) => {
-  const reservedA = connectedAddress
-    ? (a.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ??
-      0n)
+  const reservedA = activeAddress
+    ? (a.contributors.find(({ address }) => areEthereumAddressesEqual(address, activeAddress))
+        ?.reserved ?? 0n)
     : 0n;
 
-  const reservedB = connectedAddress
-    ? (b.contributors.find(({ address }) => areHexesEqual(address, connectedAddress))?.reserved ??
-      0n)
+  const reservedB = activeAddress
+    ? (b.contributors.find(({ address }) => areEthereumAddressesEqual(address, activeAddress))
+        ?.reserved ?? 0n)
     : 0n;
 
   return bigIntSortDesc(reservedB, reservedA);
@@ -78,7 +77,7 @@ const stakeStateSortOrder = {
  * NOTE: If both stakes are {@link STAKE_STATE.DECOMMISSIONED} then they are sorted by earned_downtime_blocks ascending
  * NOTE: If both stakes are {@link STAKE_STATE.AWAITING_EXIT} then they are sorted by requested_unlock_height ascending
  */
-export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight = 0) {
+export function sortStakes(a: Stake, b: Stake, address?: EthereumAddress, blockHeight = 0) {
   const stateA = parseStakeState(a, blockHeight);
   const stateB = parseStakeState(b, blockHeight);
 
@@ -124,33 +123,36 @@ export function sortStakes(a: Stake, b: Stake, address?: Address, blockHeight = 
 }
 
 export type ParseStakesParams = {
-  address?: Address;
+  address?: EthereumAddress;
   blockHeight: number;
   stakes: Array<Stake>;
   contracts: Array<ContributionContractNotReady>;
-  vesting: Array<VestingContract>;
-  addedBlsKeys: Record<string, number>;
+  contractBlsKeys: Set<BLSPublicKey>;
+  contractEd25519Keys: Set<Ed25519PublicKey>;
   nodeMinLifespanArbBlocks: number;
 };
 
 export function parseStakes({
   stakes,
-  vesting,
   address,
   blockHeight,
   contracts,
-  addedBlsKeys,
+  contractBlsKeys,
+  contractEd25519Keys,
   nodeMinLifespanArbBlocks,
 }: ParseStakesParams) {
   stakes.sort((a, b) => sortStakes(a, b, address, blockHeight));
 
-  const runningStakesBlsKeysSet = new Set(
-    stakes
-      .filter((stake) => parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE)
-      .map(({ pubkey_bls }) => pubkey_bls)
-  );
+  // These are needed so we don't later show a contract for a stake we're already showing
+  const runningAddedStakesBlsKeysSet = new Set<BLSPublicKey>();
+  const runningAddedStakesEd25519KeysSet = new Set<Ed25519PublicKey>();
 
-  vesting.sort((a, b) => bigIntSortDesc(a.initial_amount, b.initial_amount));
+  for (const stake of stakes) {
+    if (parseStakeEventState(stake) === STAKE_EVENT_STATE.ACTIVE) {
+      runningAddedStakesBlsKeysSet.add(stake.pubkey_bls);
+      runningAddedStakesEd25519KeysSet.add(stake.service_node_pubkey);
+    }
+  }
 
   const [contractsErr, readyContracts] = safeTrySyncWithFallback(
     () => getReadyContracts(contracts),
@@ -163,12 +165,13 @@ export function parseStakes({
       contracts: readyContracts,
       address,
       blockHeight,
-      addedBlsKeys,
+      contractBlsKeys,
+      contractEd25519Keys,
       nodeMinLifespanArbBlocks,
-      runningStakesBlsKeysSet,
+      runningAddedStakesBlsKeysSet,
+      runningAddedStakesEd25519KeysSet,
     }),
     stakes,
-    vesting,
     blockHeight,
   };
 }

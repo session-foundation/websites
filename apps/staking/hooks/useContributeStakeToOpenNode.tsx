@@ -6,14 +6,14 @@ import {
 } from '@/lib/contracts';
 import { useContributeFunds } from '@session/contracts/hooks/ServiceNodeContribution';
 import { useProxyApproval } from '@session/contracts/hooks/Token';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
-import type { Address } from 'viem';
 
 export type UseContributeStakeToOpenNodeParams = {
   stakeAmount: bigint;
-  beneficiary: Address;
-  contractAddress: Address | null;
+  beneficiary: EthereumAddress;
+  contractAddress: EthereumAddress | null;
 };
 
 /**

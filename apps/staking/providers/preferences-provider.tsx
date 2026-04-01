@@ -1,7 +1,12 @@
 'use client';
 
-import { preferenceStorageDefaultItems, preferenceStorageKey } from '@/lib/constants';
+import {
+  type PREFERENCE,
+  preferenceStorageDefaultItems,
+  preferenceStorageKey,
+} from '@/lib/constants';
 import type { ReactNode } from 'react';
+import { usePreferences } from 'usepref';
 import { PreferencesProvider as PreferencesProviderUsePref } from 'usepref/providers/preferences-provider';
 import { PreferenceStorage } from 'usepref/storage/preference-storage';
 
@@ -27,4 +32,9 @@ export default function PreferencesProvider({ children }: { children: ReactNode 
       {children}
     </PreferencesProviderUsePref>
   );
+}
+
+export function useDevicePref<T = boolean>(pref: PREFERENCE) {
+  const { getItem } = usePreferences();
+  return !getItem<T>(pref);
 }

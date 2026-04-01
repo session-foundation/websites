@@ -2,6 +2,7 @@
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodeListModuleContent, NodesListSkeleton } from '@/components/NodesListModule';
+import { VIEW_MODE } from '@/components/StakedNode/StakeCard';
 import {
   StakedContractCard,
   getStakedContractCardContractFromConfirmation,
@@ -9,32 +10,82 @@ import {
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { useDisplayStatusBar } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
-import { useStakes } from '@/hooks/useStakes';
-import { EXPERIMENTAL_FEATURE_FLAG } from '@/lib/feature-flags';
-import { useExperimentalFeatureFlag } from '@/lib/feature-flags-client';
+import { useAddressStakes } from '@/hooks/useStakes';
+import { PREFERENCE } from '@/lib/constants';
 import { internalLink } from '@/lib/locale-defaults';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
+import { type useStakes, useUser } from '@/providers/user-provider';
 import { useActiveVestingContract } from '@/providers/vesting-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
+import type {
+  ContributionContract,
+  ContributionContractNotReady,
+  Stake,
+} from '@session/staking-api-js/schema';
 import {
   ModuleGridHeader,
   ModuleGridInfoContent,
   ModuleGridTitle,
 } from '@session/ui/components/ModuleGrid';
+import { CogIcon } from '@session/ui/icons/CogIcon';
+import { XIcon } from '@session/ui/icons/XIcon';
 import { Button } from '@session/ui/ui/button';
 import { Switch } from '@session/ui/ui/switch';
-import { useWallet } from '@session/wallet/hooks/useWallet';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import Link from 'next/link';
-import type { Address } from 'viem';
+import { useMemo, useState } from 'react';
+import { usePref } from 'usepref';
 
-export function StakedNodesWithAddress({
+type StakesListProps = {
+  stakesData: ReturnType<typeof useStakes>;
+  address: EthereumAddress;
+  scopeId: string;
+  hideButtons?: boolean;
+};
+
+export function StakedNodesForCurrentActorAddress({
+  scopeId = 'none',
+  hideButtons = false,
+}: { scopeId: string; hideButtons: boolean }) {
+  const { stakes, activeAddress } = useUser();
+  return activeAddress ? (
+    <StakedNodesFromData
+      stakesData={stakes}
+      address={activeAddress}
+      scopeId={scopeId}
+      hideButtons={hideButtons}
+    />
+  ) : (
+    <NoWallet />
+  );
+}
+
+export function StakedNodesForAddress({
   address,
   scopeId = 'none',
   hideButtons = false,
-}: { address: Address; scopeId?: string; hideButtons?: boolean }) {
+}: { scopeId?: string; hideButtons?: boolean; address: EthereumAddress }) {
+  const user = useUser();
+  const stakes = useAddressStakes(user.contractNodes, address);
+  return address ? (
+    <StakedNodesFromData
+      stakesData={stakes}
+      address={address}
+      scopeId={scopeId}
+      hideButtons={hideButtons}
+    />
+  ) : null;
+}
+
+export function StakedNodesFromData({
+  stakesData,
+  address,
+  scopeId,
+  hideButtons,
+}: StakesListProps) {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.stakedNodes');
   const {
@@ -50,14 +101,83 @@ export function StakedNodesWithAddress({
     isFetching,
     refetch,
     isError,
-  } = useStakes(address);
+  } = stakesData;
   useDisplayStatusBar({ network, isLoading, isFetching, refetch });
 
-  const hasStakes =
-    stakes?.length ||
-    hiddenContractsWithStakes?.length ||
-    visibleContracts?.length ||
-    notFoundJoiningNodes?.length;
+  const { getItem } = usePref();
+  const mode = getItem<string>(PREFERENCE.MY_STAKES_SETTINGS_VIEW) || 'simple';
+
+  const viewMode = mode === 'detailed' ? VIEW_MODE.DETAILED : VIEW_MODE.SIMPLE;
+
+  const isDetailedView = viewMode === VIEW_MODE.DETAILED;
+  const rows = useMemo(() => {
+    const items: Array<{
+      variant: 'contract' | 'stake';
+      key: string;
+      toggleId: string;
+      contract?: ContributionContract | ContributionContractNotReady | null;
+      stake?: Stake | null;
+      showAlreadyRunningWarning?: boolean;
+    }> = [];
+
+    for (const node of notFoundJoiningNodes) {
+      items.push({
+        variant: 'contract',
+        key: node.pubkeyEd25519,
+        toggleId: `${scopeId}.${node.pubkeyEd25519}`,
+        contract: getStakedContractCardContractFromConfirmation(node),
+      });
+    }
+
+    for (const node of hiddenContractsWithStakes) {
+      items.push({
+        variant: 'contract',
+        key: node.address,
+        toggleId: `${scopeId}.${node.address}`,
+        contract: node,
+        showAlreadyRunningWarning: true,
+      });
+    }
+
+    for (const node of joiningContracts) {
+      items.push({
+        variant: 'contract',
+        key: node.address,
+        toggleId: `${scopeId}.${node.address}`,
+        contract: node,
+      });
+    }
+
+    for (const node of visibleContracts) {
+      if (node.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib) {
+        continue;
+      }
+      items.push({
+        variant: 'contract',
+        key: node.address,
+        toggleId: `${scopeId}.${node.address}`,
+        contract: node,
+      });
+    }
+
+    for (const node of stakes) {
+      items.push({
+        variant: 'stake',
+        key: node.contract_id.toString(),
+        toggleId: `${scopeId}.${node.contract_id.toString()}`,
+        stake: node,
+      });
+    }
+
+    return items;
+  }, [
+    notFoundJoiningNodes,
+    hiddenContractsWithStakes,
+    joiningContracts,
+    visibleContracts,
+    stakes,
+    scopeId,
+  ]);
 
   return (
     <NodeListModuleContent>
@@ -70,67 +190,36 @@ export function StakedNodesWithAddress({
         />
       ) : isLoading ? (
         <NodesListSkeleton />
-      ) : hasStakes && blockHeight && networkTime ? (
-        <>
-          {notFoundJoiningNodes.map((node) => {
+      ) : rows.length && blockHeight && networkTime ? (
+        rows.map(({ key, variant, contract, stake, ...rest }) => {
+          if (variant === 'contract' && contract) {
             return (
               <StakedContractCard
-                key={node.pubkeyEd25519}
-                id={`${scopeId}.${node.pubkeyEd25519}`}
-                contract={getStakedContractCardContractFromConfirmation(node)}
-                hideButton={hideButtons}
-              />
-            );
-          })}
-          {hiddenContractsWithStakes.map((contract) => {
-            return (
-              <StakedContractCard
-                key={contract.address}
-                id={`${scopeId}.${contract.address}`}
+                {...rest}
+                key={key}
                 contract={contract}
-                targetWalletAddress={address}
+                isDetailedView={isDetailedView}
                 hideButton={hideButtons}
+                targetWalletAddress={address}
               />
             );
-          })}
-          {joiningContracts.map((contract) => {
-            return (
-              <StakedContractCard
-                key={contract.address}
-                id={`${scopeId}.${contract.address}`}
-                contract={contract}
-                targetWalletAddress={address}
-                hideButton={hideButtons}
-              />
-            );
-          })}
-          {visibleContracts
-            .filter(({ status }) => status !== CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib)
-            .map((contract) => {
-              return (
-                <StakedContractCard
-                  key={contract.address}
-                  id={`${scopeId}.${contract.address}`}
-                  contract={contract}
-                  targetWalletAddress={address}
-                  hideButton={hideButtons}
-                />
-              );
-            })}
-          {stakes.map((stake) => {
+          }
+
+          if (variant === 'stake' && stake) {
             return (
               <StakedNodeCard
-                key={stake.contract_id}
-                id={`${scopeId}.${stake.contract_id.toString()}`}
+                {...rest}
+                key={key}
                 stake={stake}
-                blockHeight={blockHeight}
-                networkTime={networkTime}
-                targetWalletAddress={address}
+                isDetailedView={isDetailedView}
                 hideButton={hideButtons}
+                targetWalletAddress={address}
               />
             );
-          })}
-        </>
+          }
+
+          return null;
+        })
       ) : (
         <NoNodes />
       )}
@@ -139,27 +228,47 @@ export function StakedNodesWithAddress({
 }
 
 export default function StakedNodesModule() {
-  const hideStakedNodesFlagEnabled = useExperimentalFeatureFlag(
-    EXPERIMENTAL_FEATURE_FLAG.HIDE_STAKED_NODES
-  );
+  const [inSettings, setInSettings] = useState(false);
+  const { getItem, setItem } = usePref();
+
+  const mode = getItem<string>(PREFERENCE.MY_STAKES_SETTINGS_VIEW) || 'simple';
+
+  const [stateMode, setStateMode] = useState(mode);
+
   const dictionary = useTranslations('modules.stakedNodes');
-  const { address } = useWallet();
+
+  const handleChange = () => {
+    const newMode = stateMode === 'simple' ? 'detailed' : 'simple';
+    setStateMode(newMode);
+    setItem(PREFERENCE.MY_STAKES_SETTINGS_VIEW, newMode);
+  };
 
   return (
     <>
       <ModuleGridHeader>
         <ModuleGridTitle>{dictionary('title')}</ModuleGridTitle>
-        <div className="flex flex-row gap-2 align-middle">
-          {hideStakedNodesFlagEnabled ? (
+        <div className="me-4 flex flex-row items-center gap-2 align-middle">
+          {inSettings ? (
             <>
-              <span className="hidden sm:block">{dictionary('showHiddenText')}</span>
-              <Switch />
+              <div className="flex flex-row gap-2">
+                Simple
+                <Switch checked={stateMode === 'detailed'} onCheckedChange={handleChange} />
+                Detailed
+              </div>
             </>
           ) : null}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setInSettings((prev) => !prev)}
+            data-testid={ButtonDataTestId.My_Stakes_Settings}
+          >
+            {inSettings ? <XIcon /> : <CogIcon />}
+          </Button>
         </div>
       </ModuleGridHeader>
       <ErrorBoundary errorComponent={ErrorBox}>
-        {address ? <StakedNodesWithAddress address={address} /> : <NoWallet />}
+        <StakedNodesForCurrentActorAddress scopeId={'main'} hideButtons={false} />
       </ErrorBoundary>
     </>
   );

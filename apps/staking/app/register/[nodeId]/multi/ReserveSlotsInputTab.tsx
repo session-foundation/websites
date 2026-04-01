@@ -26,8 +26,9 @@ import { PlusIcon } from '@session/ui/icons/PlusIcon';
 import { cn } from '@session/ui/lib/utils';
 import { Button } from '@session/ui/ui/button';
 import { Form, FormField, useForm } from '@session/ui/ui/form';
+import { isEthereumAddress } from '@session/util-crypto/keys';
 import { bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
@@ -175,7 +176,7 @@ export function ReserveSlotsInputTab() {
   });
 
   const handleSubmitSlot = (data: ReservedStakeSchema) => {
-    if (!data.addr || !isAddress(data.addr)) {
+    if (!data.addr || !isEthereumAddress(data.addr)) {
       formSlot.setError('addr', {
         type: 'manual',
         message: dictAddress('invalidAddress'),
@@ -185,7 +186,7 @@ export function ReserveSlotsInputTab() {
 
     const address = data.addr;
 
-    if (reservedStakes.find((slot) => areHexesEqual(slot.addr, address))) {
+    if (reservedStakes.find((slot) => areEthereumAddressesEqual(slot.addr, address))) {
       formSlot.setError('addr', {
         type: 'manual',
         message: dict('validation.addressAlreadyUsed'),

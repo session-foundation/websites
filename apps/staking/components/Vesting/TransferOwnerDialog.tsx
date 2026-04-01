@@ -21,11 +21,12 @@ import { cn } from '@session/ui/lib/utils';
 import { PROGRESS_STATUS, Progress } from '@session/ui/motion/progress';
 import { AlertDialogFooter } from '@session/ui/ui/alert-dialog';
 import { Form, FormField, useForm } from '@session/ui/ui/form';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { isEthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
-import { type Address, isAddress } from 'viem';
+import type { Address } from 'viem';
 import { z } from 'zod';
 
 export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: () => void }) {
@@ -69,7 +70,10 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
   });
 
   const handleSubmit = (data: z.infer<typeof TransferBeneficiaryFormSchema>) => {
-    if (!data.newBeneficiary || !isAddress(data.newBeneficiary)) {
+    // TODO: this should not be required, the schema should infer the type properly but I cant seem to get it to work.
+    const newBeneficiary = isEthereumAddress(data.newBeneficiary) ? data.newBeneficiary : undefined;
+
+    if (!newBeneficiary) {
       form.setError('newBeneficiary', {
         type: 'manual',
         message: dictEth('invalidAddress'),
@@ -77,7 +81,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
       return;
     }
 
-    if (areHexesEqual(data.newBeneficiary, contract?.beneficiary)) {
+    if (areEthereumAddressesEqual(newBeneficiary, contract?.beneficiary)) {
       form.setError('newBeneficiary', {
         type: 'manual',
         message: dict('errorCantBeSame'),
@@ -85,7 +89,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
       return;
     }
 
-    if (areHexesEqual(data.newBeneficiary, contract?.address)) {
+    if (areEthereumAddressesEqual(newBeneficiary, contract?.address)) {
       form.setError('newBeneficiary', {
         type: 'manual',
         message: dict('errorCantBeSelf'),
@@ -93,7 +97,7 @@ export function TransferOwnerDialog({ onSuccessCallback }: { onSuccessCallback: 
       return;
     }
 
-    setNewBeneficiary(data.newBeneficiary);
+    setNewBeneficiary(newBeneficiary);
   };
 
   const handleConfirmSubmit = () => {

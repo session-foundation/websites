@@ -3,10 +3,10 @@ import { AddressLink } from '@/components/AddressLink';
 import { NodeContributorList } from '@/components/NodeCard';
 import { ReservedStakesTable } from '@/components/ReservedStakesTable';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
 import { getContributionRangeFromContributorsIgnoreAddress, getTotalStaked } from '@/lib/maths';
+import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
@@ -15,12 +15,13 @@ import type { ContributionContract } from '@session/staking-api-js/schema';
 import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { Tooltip } from '@session/ui/ui/tooltip';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { bigIntMax } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useTranslations } from 'next-intl';
-import { type ReactNode, forwardRef } from 'react';
-import { type Address, isAddress } from 'viem';
+import { type ReactNode, forwardRef, useMemo } from 'react';
+import { isAddress } from 'viem';
 
 export function getReservedSlots(contract: ContributionContract): Array<ReservedContributorStruct> {
   return contract.contributors
@@ -32,42 +33,45 @@ export function getReservedSlots(contract: ContributionContract): Array<Reserved
       };
     })
     .sort((a, b) => {
-      const isAOperator = areHexesEqual(a.addr, contract.operator_address);
-      const isBOperator = areHexesEqual(b.addr, contract.operator_address);
+      const isAOperator = areEthereumAddressesEqual(a.addr, contract.operator_address);
+      const isBOperator = areEthereumAddressesEqual(b.addr, contract.operator_address);
       return isAOperator ? -1 : isBOperator ? 1 : 0;
     });
 }
 
-export function getContributedContributor(contract: ContributionContract, address?: Address) {
+export function getContributedContributor(
+  contract: ContributionContract,
+  address?: EthereumAddress
+) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, amount }) =>
-      areHexesEqual(contributorAddress, address) && amount > 0n
+      amount > 0n && areEthereumAddressesEqual(contributorAddress, address)
   );
 }
 
-export function getReservedContributor(contract: ContributionContract, address?: Address) {
+export function getReservedContributor(contract: ContributionContract, address?: EthereumAddress) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, reserved }) =>
-      areHexesEqual(contributorAddress, address) && reserved > 0n
+      reserved > 0n && areEthereumAddressesEqual(contributorAddress, address)
   );
 }
 
 export function getReservedContributorNonContributed(
   contract: ContributionContract,
-  address?: Address
+  address?: EthereumAddress
 ) {
   if (!address) return undefined;
   return contract.contributors.find(
     ({ address: contributorAddress, reserved, amount }) =>
-      areHexesEqual(contributorAddress, address) && reserved > 0n && amount === 0n
+      reserved > 0n && amount === 0n && areEthereumAddressesEqual(contributorAddress, address)
   );
 }
 
 export const getContributionRangeForWallet = (
   contract: ContributionContract,
-  address?: Address
+  address?: EthereumAddress
 ) => {
   const reservedContributor = getReservedContributor(contract, address);
 
@@ -100,7 +104,7 @@ export type StakeInfoProps = {
 
 export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
   ({ contract, totalStaked, editableFields, isSubmitting, children, ...props }, ref) => {
-    const address = useCurrentActor();
+    const { activeAddress } = useUser();
 
     const dictionaryRegistrationShared = useTranslations('actionModules.registration.shared');
     const dictShared = useTranslations('actionModules.shared');
@@ -108,15 +112,23 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
     const actionModuleDictionary = useTranslations('actionModules');
     const dictGeneral = useTranslations('general');
 
-    const isOperator = areHexesEqual(contract.operator_address, address);
-    const contributor = contract.contributors.find(
-      ({ address: contributorAddress, amount }) =>
-        areHexesEqual(contributorAddress, address) && amount > 0n
+    const isOperator = useMemo(
+      () => areEthereumAddressesEqual(contract.operator_address, activeAddress),
+      [contract.operator_address, activeAddress]
     );
+    const contributor = useMemo(
+      () =>
+        contract.contributors.find(
+          ({ address: contributorAddress, amount }) =>
+            areEthereumAddressesEqual(contributorAddress, activeAddress) && amount > 0n
+        ),
+      [contract.contributors, activeAddress]
+    );
+
     const haveOtherContributorsContributed = contract.contributors.length > 1;
     const isFinalized = contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized;
 
-    const reservedContributors = getReservedSlots(contract);
+    const reservedContributors = useMemo(() => getReservedSlots(contract), [contract]);
     const hasReservedContributors = reservedContributors.length > 1;
 
     return (
@@ -129,7 +141,7 @@ export const StakeInfo = forwardRef<HTMLDivElement, StakeInfoProps>(
             <NodeContributorList
               contributors={contract.contributors}
               operatorAddress={contract.operator_address}
-              userAddress={address}
+              userAddress={activeAddress}
               forceExpand
               showEmptySlots
             />

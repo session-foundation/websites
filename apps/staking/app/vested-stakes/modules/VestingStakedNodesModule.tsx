@@ -1,6 +1,6 @@
 'use client';
 
-import { StakedNodesWithAddress } from '@/app/mystakes/modules/StakedNodesModule';
+import { StakedNodesForAddress } from '@/app/mystakes/modules/StakedNodesModule';
 import { ErrorBox } from '@/components/Error/ErrorBox';
 import { useActiveVestingContractAddress } from '@/providers/vesting-provider';
 import { ModuleGridHeader, ModuleGridTitle } from '@session/ui/components/ModuleGrid';
@@ -15,7 +15,7 @@ export default function VestingStakedNodesModule() {
         <ModuleGridTitle>{useTranslations('vesting.modules.stakes')('title')}</ModuleGridTitle>
       </ModuleGridHeader>
       <ErrorBoundary errorComponent={ErrorBox}>
-        {address ? <StakedNodesWithAddress address={address} /> : null}
+        {address ? <StakedNodesForAddress address={address} /> : null}
       </ErrorBoundary>
     </>
   );

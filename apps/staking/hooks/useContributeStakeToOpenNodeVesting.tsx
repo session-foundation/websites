@@ -6,16 +6,16 @@ import {
   parseContractStatusToProgressStatus,
 } from '@/lib/contracts';
 import { useVestingContributeFunds } from '@session/contracts/hooks/TokenVestingStaking';
-import { areHexesEqual } from '@session/util-crypto/string';
+import type { EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
-import type { Address } from 'viem';
 
 export type UseContributeStakeToOpenNodeVestingParams = Omit<
   UseContributeStakeToOpenNodeParams,
   'contractAddress'
 > & {
-  vestingContractAddress?: Address;
+  vestingContractAddress?: EthereumAddress;
 };
 
 /**
@@ -42,7 +42,7 @@ export default function useContributeStakeToOpenNodeVesting({
     throw new Error('Beneficiary is required for vesting contracts');
   }
 
-  if (areHexesEqual(beneficiary, vestingContractAddress)) {
+  if (areEthereumAddressesEqual(beneficiary, vestingContractAddress)) {
     throw new Error('Beneficiary cannot be the vesting contract address');
   }
 

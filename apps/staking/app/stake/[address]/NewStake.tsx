@@ -19,9 +19,9 @@ import {
 import { WalletInteractionButtonWithLocales } from '@/components/WalletInteractionButtonWithLocales';
 import { useBannedRewardsAddresses } from '@/hooks/useBannedRewardsAddresses';
 import type { UseContributeStakeToOpenNodeParams } from '@/hooks/useContributeStakeToOpenNode';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { PREFERENCE, SESSION_NODE_MIN_STAKE_MULTI_OPERATOR } from '@/lib/constants';
 import { useDecimalDelimiter } from '@/lib/locale-client';
+import { useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
 import { ButtonDataTestId, InputDataTestId } from '@/testing/data-test-ids';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,11 +32,11 @@ import { EditButton } from '@session/ui/components/EditButton';
 import { PubKey } from '@session/ui/components/PubKey';
 import { cn } from '@session/ui/lib/utils';
 import { Form, FormErrorMessage, FormField, useForm } from '@session/ui/ui/form';
+import { isEthereumAddress } from '@session/util-crypto/keys';
 import { bigIntMin, bigIntToString, stringToBigInt } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { safeTrySync } from '@session/util-js/try';
 import { useWalletTokenBalance } from '@session/wallet/components/WalletButton';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useEffect, useMemo, useState } from 'react';
@@ -70,8 +70,7 @@ export function NewStake({
     null
   );
 
-  const address = useCurrentActor();
-  const { address: connectedAddress } = useWallet();
+  const { activeAddress, connectedAddress } = useUser();
   const { activeContract: vestingContract, isLoading } = useVesting();
 
   const bannedRewardsAddresses = useBannedRewardsAddresses();
@@ -85,11 +84,14 @@ export function NewStake({
 
   const decimalDelimiter = useDecimalDelimiter();
 
-  const isOperator = areHexesEqual(contract.operator_address, address);
+  const isOperator = useMemo(
+    () => areEthereumAddressesEqual(contract.operator_address, activeAddress),
+    [activeAddress, contract.operator_address]
+  );
 
   const { value: balanceValue } = useWalletTokenBalance();
 
-  const { minStake, maxStake } = getContributionRangeForWallet(contract, address);
+  const { minStake, maxStake } = getContributionRangeForWallet(contract, activeAddress);
 
   const allowNewStake = minStake > 0n || maxStake > 0n;
 
@@ -138,9 +140,14 @@ export function NewStake({
   const onSubmit = (data: StakeFormSchema) => {
     setIsSubmitting(true);
 
-    let rewardsAddress = data.rewardsAddress;
+    // TODO: this should not be required, the schema should infer the type properly but I cant seem to get it to work.
+    let rewardsAddress = isEthereumAddress(data.rewardsAddress) ? data.rewardsAddress : undefined;
     if (rewardsAddress) {
-      if (bannedRewardsAddresses.some(({ address }) => areHexesEqual(address, rewardsAddress))) {
+      if (
+        bannedRewardsAddresses.some(({ address }) =>
+          areEthereumAddressesEqual(address, rewardsAddress)
+        )
+      ) {
         form.setError('root', {
           type: 'manual',
           message: dictionaryRewardsAddress('bannedVestingContract'),
@@ -220,7 +227,7 @@ export function NewStake({
 
   return (
     <StakeInfo contract={contract} isSubmitting={isSubmitting}>
-      {address ? (
+      {activeAddress ? (
         <ContributeFundsFeeActionModuleRow
           contract={contract}
           stakeAmount={watchedStakeAmountBigInt}
@@ -271,7 +278,7 @@ export function NewStake({
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className={cn(
-            address && !stakingParams && allowNewStake ? 'flex flex-col gap-4' : 'hidden'
+            activeAddress && !stakingParams && allowNewStake ? 'flex flex-col gap-4' : 'hidden'
           )}
         >
           {!stakingParams ? (

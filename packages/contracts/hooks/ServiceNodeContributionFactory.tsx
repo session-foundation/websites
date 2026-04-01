@@ -1,3 +1,4 @@
+import type { BLSPublicKey, Ed25519PublicKey } from '@session/util-crypto/keys';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
 import { encodeAddBlsPubKeyArgs } from './ServiceNodeRewards';
@@ -9,9 +10,9 @@ export type UseCreateOpenNode = ContractWriteQueryProps & {
 };
 
 type UseCreateOpenNodeParams = {
-  blsPubKey: string;
+  blsPubKey: BLSPublicKey;
   blsSignature: string;
-  nodePubKey: string;
+  nodePubKey: Ed25519PublicKey;
   userSignature: string;
   autoStart: boolean;
   reservedContributors: Array<{

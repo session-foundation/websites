@@ -61,10 +61,12 @@ export function WizardSectionDescription({
   description,
   href,
   className,
+  invertColors,
 }: {
   description: ReactNode;
   href?: string;
   className?: string;
+  invertColors?: boolean;
 }) {
   const children = useMemo(() => {
     if (!href) return description;
@@ -89,12 +91,17 @@ export function WizardSectionDescription({
         <span className="ms-1 inline-flex gap-1.5 whitespace-nowrap">
           {hrefLinkedWord}
           <Link href={href} target="_blank" rel="noreferrer" className="group self-center">
-            <LinkOutIcon className="h-3.5 w-3.5 stroke-session-green group-hover:stroke-session-green-dark" />
+            <LinkOutIcon
+              className={cn(
+                'h-3.5 w-3.5 group-hover:stroke-session-green-dark',
+                invertColors ? 'stroke-session-black' : 'stroke-session-green'
+              )}
+            />
           </Link>
         </span>
       </>
     );
-  }, [description, href]);
+  }, [description, href, invertColors]);
 
   return (
     <Typography variant="p" className={cn('flex-wrap text-wrap text-xs md:text-sm', className)}>

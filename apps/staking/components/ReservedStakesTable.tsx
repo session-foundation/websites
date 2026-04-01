@@ -3,9 +3,9 @@
 import { ActionModuleTooltip } from '@/components/ActionModule';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
 import type { ReservedContributorStruct } from '@/hooks/useCreateOpenNodeRegistration';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
+import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { TOKEN } from '@session/contracts';
 import { formatSENTBigIntNoRounding } from '@session/contracts/hooks/Token';
@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@session/ui/ui/table';
 import { bigIntToNumber } from '@session/util-crypto/maths';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { PubkeyWithEns } from '@session/wallet/components/PubkeyWithEns';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useMemo } from 'react';
@@ -49,7 +49,7 @@ export function ReservedStakesTable({
 }) {
   const dict = useTranslations('actionModules.registration.reserveSlotsInput');
   const dictGeneral = useTranslations('general');
-  const address = useCurrentActor();
+  const { activeAddress } = useUser();
 
   const [slotRows, unreservedStake] = useMemo(() => {
     const rows: Array<ReservedStakeRow> = [];
@@ -99,13 +99,15 @@ export function ReservedStakesTable({
                 <TableCell>
                   <div className="-me-3 ms-auto w-max">
                     {i === 0 ? (
-                      <NodeOperatorIndicator isConnectedWallet={areHexesEqual(address, addr)} />
+                      <NodeOperatorIndicator
+                        isConnectedWallet={areEthereumAddressesEqual(activeAddress, addr)}
+                      />
                     ) : null}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-row items-center justify-start gap-2 ps-0 align-middle">
-                    {i !== 0 && areHexesEqual(address, addr) ? (
+                    {i !== 0 && areEthereumAddressesEqual(activeAddress, addr) ? (
                       <>
                         <span className="font-bold">({dictGeneral('you')})</span>
                         <PubKey pubKey={addr} force="collapse" alwaysShowCopyButton />

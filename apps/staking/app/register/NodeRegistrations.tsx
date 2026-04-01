@@ -6,13 +6,13 @@ import { NodesListSkeleton } from '@/components/NodesListModule';
 import { useNetworkStatus } from '@/components/StatusBar';
 import WalletButtonWithLocales from '@/components/WalletButtonWithLocales';
 import { useRegistrationsForCurrentActor } from '@/hooks/useRegistrationsForCurrentActor';
-import { useStakes } from '@/hooks/useStakes';
 import { URL } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
 import logger from '@/lib/logger';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
+import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
@@ -45,7 +45,7 @@ export default function NodeRegistrations() {
 
   const { setNetworkStatusVisible } = useNetworkStatus({ network, isLoading, isFetching, refetch });
 
-  const { networkBlsKeys, isLoading: isLoadingStakes } = useStakes();
+  const { contractNodes } = useUser();
 
   /**
    * - Sorted in descending order by the `timestamp` of the registration.
@@ -53,25 +53,32 @@ export default function NodeRegistrations() {
    * - Remove duplicate registrations, keeping only the most recent.
    */
   const registrations = useMemo(() => {
-    if (showNoNodes || !data || isLoadingStakes || !networkBlsKeys) {
+    if (showNoNodes || !data || isLoading || contractNodes.isLoading) {
       return [];
     }
 
     const addedRegistrationBlsKeys = new Set();
+    const addedRegistrationEd25519Keys = new Set();
 
     const [error, registrations] = safeTrySyncWithFallback(() => data.registrations, []);
     if (error) logger.error(error);
 
     return registrations
       .sort(({ timestamp: tA }, { timestamp: tB }) => tB - tA)
-      .filter(({ pubkey_bls }) => {
-        if (!networkBlsKeys.has(pubkey_bls) && !addedRegistrationBlsKeys.has(pubkey_bls)) {
+      .filter(({ pubkey_bls, pubkey_ed25519 }) => {
+        if (
+          !contractNodes.blsSet.has(pubkey_bls) &&
+          !addedRegistrationBlsKeys.has(pubkey_bls) &&
+          !contractNodes.ed25519Set.has(pubkey_ed25519) &&
+          !addedRegistrationEd25519Keys.has(pubkey_ed25519)
+        ) {
           addedRegistrationBlsKeys.add(pubkey_bls);
+          addedRegistrationEd25519Keys.add(pubkey_ed25519);
           return true;
         }
         return false;
       });
-  }, [networkBlsKeys, data, showNoNodes, isLoadingStakes]);
+  }, [data, contractNodes, showNoNodes, isLoading]);
 
   useMount(() => {
     if (isConnected) {
@@ -98,7 +105,7 @@ export default function NodeRegistrations() {
       buttonDataTestId={ButtonDataTestId.Open_Nodes_Error_Retry}
     />
   ) : isConnected ? (
-    isLoading || isLoadingStakes ? (
+    isLoading || contractNodes.isLoading ? (
       <NodesListSkeleton />
     ) : registrations?.length ? (
       registrations.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)

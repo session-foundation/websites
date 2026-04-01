@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber, formatPercentage } from '@/lib/locale-client';
+import { useUser } from '@/providers/user-provider';
 import { PubKey } from '@session/ui/components/PubKey';
 import Typography from '@session/ui/components/Typography';
 import { Loading } from '@session/ui/components/loading';
@@ -13,8 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@session/ui/ui/table';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { useWallet } from '@session/wallet/hooks/useWallet';
+import { isEthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { type Address, checksumAddress } from 'viem';
@@ -27,7 +28,7 @@ function smartFormatPercentage(decimalPercent: number) {
 }
 
 export default function PointsPage() {
-  const { address } = useWallet();
+  const { activeAddress } = useUser();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['points'],
     queryFn: async () => {
@@ -89,7 +90,7 @@ export default function PointsPage() {
                 key={wallet}
                 className={cn(
                   'text-sm md:text-base',
-                  areHexesEqual(wallet, address)
+                  isEthereumAddress(wallet) && areEthereumAddressesEqual(wallet, activeAddress)
                     ? 'bg-session-green text-session-black hover:bg-session-green-dark'
                     : 'hover:bg-session-green hover:text-session-black hover:selection:bg-session-black hover:selection:text-session-green'
                 )}

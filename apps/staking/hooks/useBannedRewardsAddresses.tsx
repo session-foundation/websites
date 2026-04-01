@@ -1,5 +1,7 @@
-import { useStakes } from '@/hooks/useStakes';
+import { useUser } from '@/providers/user-provider';
 import { addresses, isValidChainId } from '@session/contracts';
+import { ETH_ZERO_ADDRESS } from '@session/util-crypto/constants';
+import { isEthereumAddress } from '@session/util-crypto/keys';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
@@ -12,7 +14,7 @@ import { useMemo } from 'react';
 export function useBannedRewardsAddresses() {
   const dictRewardsAddress = useTranslations('actionModules.rewardsAddress.validation');
   const { chainId } = useWallet();
-  const { vesting } = useStakes();
+  const { vesting } = useUser();
 
   return useMemo(() => {
     if (!isValidChainId(chainId)) return [];
@@ -21,9 +23,12 @@ export function useBannedRewardsAddresses() {
       addresses.ServiceNodeRewards[chainId],
       addresses.ServiceNodeContributionFactory[chainId],
       addresses.Token[chainId],
-    ].map((address) => ({ address, errorMessage: dictRewardsAddress('bannedSessionContract') }));
+      ETH_ZERO_ADDRESS,
+    ]
+      .filter(isEthereumAddress)
+      .map((address) => ({ address, errorMessage: dictRewardsAddress('bannedSessionContract') }));
 
-    const vestingContracts = vesting.map(({ address }) => ({
+    const vestingContracts = vesting.contracts.map(({ address }) => ({
       address,
       errorMessage: dictRewardsAddress('bannedVestingContract'),
     }));

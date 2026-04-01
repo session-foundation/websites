@@ -92,7 +92,8 @@
     },
     "managedBy": "",
     "swap": "Migrate",
-    "bridgeArbitrum": "Arbitrum Bridge"
+    "bridgeArbitrum": "Arbitrum Bridge",
+    "getToken": "Get {tokenSymbol}"
   },
   "wallet": {
     "modalButton": {
@@ -227,8 +228,9 @@
   },
   "banner": {
     "registrationPaused": "Node registration is temporarily disabled. Apologies for any inconvenience, we expect to be able to re-enable registrations soon. For updates, visit the <discord-link>Session Token Discord</discord-link>.",
-    "claimRewardsDisabled": "Claiming rewards is temporarily disabled. Apologies for the inconvenience. This feature will be re-enabled soon. For updates, visit the <link>Session Token Discord</link>.",
-    "newTokenContract": "The Session Token contract has been updated. <remove-token-link>Remove the old token</remove-token-link> and <watch-token>add the new token contract</watch-token> to your wallet watch list to continue using the Staking Portal. If you have any questions, visit the <link>Session Token Discord</link>."
+    "claimRewardsDisabled": "Claiming rewards is temporarily disabled. Apologies for the inconvenience, this feature will be re-enabled soon. For updates, visit the <link>Session Token Discord</link>.",
+    "newTokenContract": "The Session Token contract has been updated. <remove-token-link>Remove the old token</remove-token-link> and <watch-token>add the new token contract</watch-token> to your wallet watch list to continue using the Staking Portal. If you have any questions, visit the <link>Session Token Discord</link>.",
+    "hardFork": "The Session Network is undergoing a hard fork <text-medium>{relativeTime}</text-medium>, all nodes must be upgraded to remain on the network {linkOut}"
   },
   "modules": {
     "title": {
@@ -820,6 +822,7 @@
       "youReservedNotContributed": "{tokenAmount} has been reserved for you to stake to this node",
       "stakedTo": "Your Stake",
       "stakedToTooltip": "You have staked {tokenAmount}",
+      "errorStakedButAlreadyRunningNotification": "Invalid node, withdraw your stake",
       "errorStakedButAlreadyRunning": "This registration can't be finalized as this node is already running as a single contributor node. You may want to withdraw your stake."
     },
     "pending": {
@@ -832,9 +835,12 @@
       "operator": "Operator",
       "operatorTooltip": "You are the operator of this node",
       "operatorTooltipOther": "This is the operator of this node",
-      "exitRequestor": "Exit Requestor",
-      "exitRequestorTooltip": "You requested the exit of this node",
-      "exitRequestorTooltipOther": "This contributor requested the exit of this node",
+      "versionLabel": "Node Version: {version}",
+      "versionTooltipOutOfDate": "This node needs to upgrade to the latest version",
+      "versionTooltipPatch": "A patch is available to upgrade this node",
+      "versionTooltipUpToDate": "This node is running the latest version",
+      "versionUpdateAvailableNotification": "A node upgrade is available",
+      "versionUpdateAvailableNotificationDescription": "A new version is available. Click <link>here</link> for upgrade instructions.",
       "labelExpand": "Expand",
       "ariaExpand": "Expand node details",
       "labelCollapse": "Collapse",
@@ -846,9 +852,9 @@
       "exitUnlockTimerProcessing": "Exit request is being processed",
       "exitUnlockTimerNotification": "Exit available <text-bold>{relativeTime}</text-bold>",
       "exitUnlockTimerDescription": "Time left until the node is available for exit. Return <text-bold>{relativeTime}</text-bold> ({date}) to exit the node.",
-      "exitTimerNotification": "Exit available. Exit <text-bold>{relativeTime}</text-bold> to avoid penalty.",
+      "exitTimerNotification": "Exit available. Exit within <text-bold>{relativeTimeNoSuffix}</text-bold> to avoid penalty.",
       "exitTimerNotificationNow": "Exit now to avoid penalty.",
-      "exitTimerDescription": "Node is ready for exit. If you don't exit <text-bold>{relativeTime}</text-bold>, you may be subject to a small penalty. {linkOut}",
+      "exitTimerDescription": "Node is ready for exit. If you don't exit within <text-bold>{relativeTimeNoSuffix}</text-bold>, you may be subject to a small penalty. {linkOut}",
       "exitTimerDescriptionNow": "Node is ready for exit. If you don't exit now, you may be subject to a small penalty. {linkOut}",
       "deregistrationTimerNotification": "Deregistration <text-bold>{relativeTime}</text-bold>",
       "deregistrationTimerDescription": "Time left until the node is deregistered and funds are locked for {lockedStakeTime}. Node will be deregistered <text-bold>{relativeTime}</text-bold> ({date}).",
@@ -915,7 +921,7 @@
           "description": {
             "title": "Are you sure?",
             "content2": "Once the node has exited the network, you can reclaim your stake via the Staking Portal.",
-            "content1": "Your node will be ready to exit the network {request_time}.<br></br><br></br>After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. {linkOut}"
+            "content1": "Your node will be ready to exit the network {request_time}.<br></br><br></br>After the {request_time} waiting period, you'll have a {exit_time} window to confirm the exit and allow reclaiming of your staked funds. If you don't confirm within this {exit_time} window, you may be subject to a small penalty. {linkOut}"
           },
           "buttons": {
             "submit": "Request Exit",
@@ -962,7 +968,10 @@
         }
       },
       "joiningNetworkNotification": "Node joining in ~{relativeTime}",
-      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)"
+      "joiningNetworkDescription": "The node will join the network once its registration has been confirmed by the network. ({confirmations}/{requiredConfirmations} confirmations)",
+      "exitRequestor": "Exit Requestor",
+      "exitRequestorTooltip": "You requested the exit of this node",
+      "exitRequestorTooltipOther": "This contributor requested the exit of this node"
     }
   },
   "statusBar": {
@@ -1035,8 +1044,6 @@
       "confirmHeading": "Are you sure?",
       "confirmTextS1": "This will remove the current owner {ethAddress}",
       "confirmTextS2": "and transfer ownership and control of this vesting contract to the new owner {ethAddress}",
-      "confirmTextS3": "<br></br>By proceeding, you confirm that:<br></br>\nYou own the new wallet address<br></br>You are NOT selling, transferring, granting any participation in, or distributing tokens",
-      "confirmTextS4": "<br></br>All funds will belong to the new address. This action is irreversible and cannot be undone.",
       "transferButton": {
         "label": "Transfer Owner",
         "aria": "Transfer the owner of the vesting contract to another wallet."
@@ -1052,7 +1059,9 @@
         "errorTemplate": "Ownership transfer failed, {reason}. Please try again.",
         "errors": {}
       },
-      "successToast": "Ownership of the vesting contract transferred successfully! Now exiting vesting mode."
+      "successToast": "Ownership of the vesting contract transferred successfully! Now exiting vesting mode.",
+      "confirmTextS4": "<br></br>All funds will belong to the new address. This action is irreversible and cannot be undone.",
+      "confirmTextS3": "<br></br>By proceeding, you confirm that:<br></br> You own the new wallet address<br></br>You are NOT selling, transferring, granting any participation in, or distributing tokens"
     },
     "headerSwitch": {
       "label": "Vesting Mode",

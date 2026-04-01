@@ -1,8 +1,7 @@
 'use client';
 
 import { Registration } from '@/app/register/[nodeId]/Registration';
-import { useStakes } from '@/hooks/useStakes';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEd25519KeysEqual, areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { NodeRegistrationFormSkeleton } from '@/app/register/[nodeId]/NodeRegistrationFormSkeleton';
@@ -10,10 +9,10 @@ import { useRegistrationsForCurrentActor } from '@/hooks/useRegistrationsForCurr
 import logger from '@/lib/logger';
 import { getNodeRegistrationsForSnKey } from '@/lib/queries/getNodeRegistrationsForSnKey';
 import { useStakingBackendBrowserClient } from '@/lib/staking-api-client';
+import { useStakes, useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
-import { isEd25519PublicKey } from '@session/staking-api-js/refine';
+import { isEd25519PublicKey } from '@session/util-crypto/keys';
 import { safeTrySync, safeTrySyncWithFallback } from '@session/util-js/try';
-import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
@@ -21,7 +20,7 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
   const pathname = usePathname();
   const stakingBackendClient = useStakingBackendBrowserClient();
 
-  const { address: walletAddress } = useWallet();
+  const { connectedAddress } = useUser();
 
   const { data: registrationsData, isLoading: isLoadingRegistrations } =
     useRegistrationsForCurrentActor();
@@ -40,7 +39,11 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
 
   const registration = useMemo(
     () =>
-      registrationsData?.registrations.find((node) => areHexesEqual(node.pubkey_ed25519, nodeId)),
+      isEd25519PublicKey(nodeId)
+        ? registrationsData?.registrations.find((node) =>
+            areEd25519KeysEqual(node.pubkey_ed25519, nodeId)
+          )
+        : null,
     [registrationsData, nodeId]
   );
 
@@ -83,13 +86,15 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
         return;
       }
 
-      if (activeContract && areHexesEqual(operator, walletAddress)) {
+      if (activeContract && areEthereumAddressesEqual(operator, connectedAddress)) {
         logger.debug('Registration is for the wallet, disconnecting from vesting contract');
         disconnectFromVestingContract();
         return;
       }
 
-      const contract = contracts.find((contract) => areHexesEqual(contract.address, operator));
+      const contract = contracts.find((contract) =>
+        areEthereumAddressesEqual(contract.address, operator)
+      );
       if (contract) {
         logger.debug(`Contract found! Connecting to vesting contract: ${contract.address}`);
         connectToVestingContract(contract);
@@ -98,7 +103,7 @@ export default function NodeRegistration({ nodeId }: { nodeId: string }) {
       }
     },
     [
-      walletAddress,
+      connectedAddress,
       activeContract,
       contracts,
       connectToVestingContract,

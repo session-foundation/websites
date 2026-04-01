@@ -14,10 +14,10 @@ import {
 } from '@/components/InfoNodeCard';
 import { STAKE_CONTRACT_STATE, parseStakeContractState } from '@/components/StakedNode/state';
 import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { SESSION_NODE_FULL_STAKE_AMOUNT } from '@/lib/constants';
 import { formatPercentage } from '@/lib/locale-client';
 import { getTotalStaked } from '@/lib/maths';
+import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { formatSENTBigInt } from '@session/contracts/hooks/Token';
 import type { ContributionContract } from '@session/staking-api-js/schema';
@@ -25,10 +25,10 @@ import { ContactIcon } from '@session/ui/icons/ContactIcon';
 import { SessionTokenIcon } from '@session/ui/icons/SessionTokenIcon';
 import { cn } from '@session/ui/lib/utils';
 import { AlertTooltip, Tooltip } from '@session/ui/ui/tooltip';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { type HTMLAttributes, forwardRef } from 'react';
+import { type HTMLAttributes, forwardRef, useMemo } from 'react';
 
 export const StakedToIndicator = forwardRef<
   HTMLDivElement,
@@ -79,13 +79,17 @@ const OpenNodeCard = forwardRef<
   const dictGeneral = useTranslations('general');
   const titleFormat = useTranslations('modules.title');
   const pathname = usePathname();
-  const address = useCurrentActor();
+  const { activeAddress } = useUser();
 
-  const isOperator = areHexesEqual(contract.operator_address, address);
-  const contributor = getContributedContributor(contract, address);
-  const reservedContributor = getReservedContributorNonContributed(contract, address);
+  const { isOperator, contributor, reservedContributor } = useMemo(() => {
+    return {
+      isOperator: areEthereumAddressesEqual(contract.operator_address, activeAddress),
+      contributor: getContributedContributor(contract, activeAddress),
+      reservedContributor: getReservedContributorNonContributed(contract, activeAddress),
+    };
+  }, [contract, activeAddress]);
 
-  const { minStake, maxStake } = getContributionRangeForWallet(contract, address);
+  const { minStake, maxStake } = getContributionRangeForWallet(contract, activeAddress);
   const totalStaked = getTotalStaked(contract.contributors);
 
   const connectedWalletNonContributedReservedStakeAmount =

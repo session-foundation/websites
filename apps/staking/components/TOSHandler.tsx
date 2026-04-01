@@ -1,6 +1,7 @@
 'use client';
 
-import { TOS_LOCKED_PATHS, URL } from '@/lib/constants';
+import { useIsAppPath } from '@/hooks/useIsAppPath';
+import { URL } from '@/lib/constants';
 import { FEATURE_FLAG } from '@/lib/feature-flags';
 import { useFeatureFlag } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
@@ -27,7 +28,6 @@ import {
 } from '@session/ui/ui/dialog';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -42,10 +42,11 @@ const FormSchema = z.object({
 type FormSchemaType = z.infer<typeof FormSchema>;
 
 export function TOSHandler() {
-  const pathname = usePathname();
   const clearAcceptTOSFlag = useFeatureFlag(FEATURE_FLAG.CLEAR_ACCEPT_BUG_BOUNTY);
   const accepted = useTOS();
   const { acceptTOS } = useSetTOS();
+
+  const isAppPath = useIsAppPath();
 
   const dict = useTranslations('terms');
 
@@ -73,7 +74,7 @@ export function TOSHandler() {
   }, [clearAcceptTOSFlag]);
 
   return (
-    <Dialog open={!accepted && TOS_LOCKED_PATHS.some((path) => pathname.startsWith(path))}>
+    <Dialog open={!accepted && isAppPath}>
       <DialogContent hideCloseButton className="bg-session-black text-session-white">
         <DialogHeader>
           <DialogTitle>

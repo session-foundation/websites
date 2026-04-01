@@ -9,7 +9,8 @@ import type {
   Stake,
 } from '@session/staking-api-js/schema';
 
-import { sortEvents } from '../../hooks/parseEvents';
+import { DEBUG_ASSERT } from '@session/util-js/assert';
+import { isEventArraySorted } from '../../hooks/parseEvents';
 
 export enum STAKE_EVENT_STATE {
   UNKNOWN = 0,
@@ -29,7 +30,7 @@ const STATE_EVENTS = new Set([
 
 export function parseStakeEventState(stake: Stake) {
   const stateEvents = stake.events.filter((event) => STATE_EVENTS.has(event.name));
-  stateEvents.sort(sortEvents);
+  DEBUG_ASSERT(() => isEventArraySorted(stateEvents), 'Stake events are not pre-sorted');
   const latestEvent = stateEvents[0];
   if (!latestEvent) return STAKE_EVENT_STATE.UNKNOWN;
 

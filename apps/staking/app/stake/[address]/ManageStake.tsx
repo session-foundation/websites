@@ -2,12 +2,13 @@ import { ErrorTab } from '@/app/register/[nodeId]/shared/ErrorTab';
 import { ManageStakeContribution } from '@/app/stake/[address]/ManageStakeContribution';
 import { OperatorRemoveStake } from '@/app/stake/[address]/OperatorRemoveStake';
 import { StakeInfo, type StakeInfoProps } from '@/app/stake/[address]/StakeInfo';
+import { StakerRemoveStake } from '@/app/stake/[address]/StakerRemoveStake';
 import type { ErrorBoxProps } from '@/components/Error/ErrorBox';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
 import { CONTRIBUTION_CONTRACT_STATUS } from '@session/staking-api-js/enums';
 import type { ContributionContract } from '@session/staking-api-js/schema';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
 import { useTranslations } from 'next-intl';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -25,12 +26,15 @@ export function ManageStake({
   const [editableStakeGroup, setEditableStakeGroup] = useState<EditableStakeGroup | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const address = useCurrentActor();
+  const { activeAddress } = useUser();
   const { isLoading } = useVesting();
 
   const dictionary = useTranslations('actionModules.staking');
 
-  const isOperator = areHexesEqual(contract.operator_address, address);
+  const isOperator = useMemo(
+    () => areEthereumAddressesEqual(contract.operator_address, activeAddress),
+    [activeAddress, contract.operator_address]
+  );
   const isFinalized = contract.status === CONTRIBUTION_CONTRACT_STATUS.Finalized;
 
   const haveOtherContributorsContributed = contract.contributors.length > 1;
@@ -113,12 +117,20 @@ export function ManageStake({
             rewardsAddressRef={rewardsAddressRef}
           />
         ) : null}
-        {!isLoading && isOperator ? (
-          <OperatorRemoveStake
-            contract={contract}
-            setIsSubmitting={setIsSubmitting}
-            refetch={refetch}
-          />
+        {!isLoading ? (
+          isOperator ? (
+            <OperatorRemoveStake
+              contract={contract}
+              setIsSubmitting={setIsSubmitting}
+              refetch={refetch}
+            />
+          ) : (
+            <StakerRemoveStake
+              contract={contract}
+              setIsSubmitting={setIsSubmitting}
+              refetch={refetch}
+            />
+          )
         ) : null}
       </ErrorBoundary>
     </StakeInfo>

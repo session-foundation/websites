@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin('./lib/locale-server.ts');
 const isTestnet = process.env.NEXT_PUBLIC_TESTNET === 'true';
 if (isTestnet) console.log('Building staking portal in TESTNET mode!');
 
+const debugEnv = process.env.APP_DEBUG;
+if (debugEnv) console.log('Running staking portal in DEBUG mode! Debug assertions are active!');
+
 if (process.env.NEXT_PUBLIC_ENABLE_FAUCET?.toLowerCase() === 'true') console.log('Faucet Enabled!')
 if (process.env.NEXT_PUBLIC_ENABLE_LEADERBOARD?.toLowerCase() === 'true') console.log('Leaderboard Enabled!');
 
@@ -35,6 +38,9 @@ const getNetworkApiUrl = () => {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env:{
+    APP_DEBUG: debugEnv,
+  },
   transpilePackages: [
     '@session/ui',
     '@session/wallet',

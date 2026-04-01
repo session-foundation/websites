@@ -1,3 +1,4 @@
+import { DEBUG_ASSERT } from '@session/util-js/assert';
 import { isProduction as isProductionEnv } from '@session/util-js/env';
 
 export const NEXT_PUBLIC_BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL!;
@@ -24,3 +25,5 @@ if (!NEXT_PUBLIC_PRICE_TOKEN) {
 export const NEXT_PUBLIC_TESTNET = process.env.NEXT_PUBLIC_TESTNET === 'true';
 
 export const isProduction = isProductionEnv();
+
+DEBUG_ASSERT(() => !isProductionEnv(), "APP_DEBUG can't be used with NEXT_PUBLIC_ENV prod!");

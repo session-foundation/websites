@@ -1,102 +1,133 @@
-import {
-  NodeCard,
-  NodeCardText,
-  NodeCardTitle,
-  RowLabel,
-  ToggleCardExpansionButton,
-} from '@/components/NodeCard';
-import { NodeOperatorIndicator } from '@/components/StakedNodeCard';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
+import { NodeCard, NodeCardTitle } from '@/components/NodeCard';
 import { StakedNodeDataTestId } from '@/testing/data-test-ids';
-import { PubKey } from '@session/ui/components/PubKey';
 import {
   StatusIndicator,
   type StatusIndicatorVariants,
 } from '@session/ui/components/StatusIndicator';
-import { cn } from '@session/ui/lib/utils';
-import { areHexesEqual } from '@session/util-crypto/string';
-import { useTranslations } from 'next-intl';
 import { type HTMLAttributes, type ReactNode, forwardRef } from 'react';
 import type { Address } from 'viem';
 
 type StakeCardProps = HTMLAttributes<HTMLDivElement> & {
-  id: string;
+  toggleId: string;
   'data-testid': string;
   title: string;
   statusIndicatorColor: StatusIndicatorVariants['status'];
-  summary: ReactNode;
-  publicKey?: string;
-  isOperator?: boolean;
   operatorAddress?: Address;
-  collapsableFirstChildren?: ReactNode;
-  collapsableLastChildren?: ReactNode;
+  isDetailedView?: boolean;
 };
 
 const StakeCard = forwardRef<HTMLDivElement, StakeCardProps>(
   (
     {
       className,
-      id,
-      summary,
+      toggleId,
       statusIndicatorColor,
       title,
-      isOperator,
       operatorAddress,
-      publicKey,
-      collapsableFirstChildren,
-      collapsableLastChildren,
+      isDetailedView,
+      children,
       ...props
     },
     ref
   ) => {
-    const generalNodeDictionary = useTranslations('sessionNodes.general');
-    const titleFormat = useTranslations('modules.title');
-
-    const address = useCurrentActor();
-
-    const toggleId = `toggle-${id}`;
-
     return (
-      <NodeCard
-        ref={ref}
-        {...props}
-        className={cn(
-          'relative flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5 overflow-hidden pb-4 align-middle',
-          className
-        )}
-        data-testid={props['data-testid']}
-      >
-        <input id={toggleId} type="checkbox" className="peer hidden appearance-none" />
+      <NodeCard ref={ref} {...props} className={className} data-testid={props['data-testid']}>
+        {!isDetailedView ? (
+          <input id={toggleId} type="checkbox" className="peer hidden appearance-none" />
+        ) : null}
         <StatusIndicator
           status={statusIndicatorColor}
           data-testid={StakedNodeDataTestId.Indicator}
         />
-        <NodeCardTitle data-testid={StakedNodeDataTestId.Title}>{title}</NodeCardTitle>
-        {summary}
-        <ToggleCardExpansionButton htmlFor={toggleId} />
-        {collapsableFirstChildren}
-        {/** NOTE - ensure any changes here still work with the pubkey component */}
-        <NodeCardText className="flex w-full flex-row flex-wrap gap-1 peer-checked:mt-1 peer-checked:[&>.separator]:opacity-0 md:peer-checked:[&>.separator]:opacity-100 peer-checked:[&>span>span>button]:opacity-100 peer-checked:[&>span>span>div]:block peer-checked:[&>span>span>span]:hidden">
-          {publicKey ? (
-            <span className="inline-flex flex-nowrap gap-1">
-              {isOperator ? (
-                <NodeOperatorIndicator
-                  className="me-0.5"
-                  isConnectedWallet={areHexesEqual(address, operatorAddress)}
-                />
-              ) : null}
-              <RowLabel className="self-center">
-                {titleFormat('format', { title: generalNodeDictionary('publicKeyShort') })}
-              </RowLabel>
-              <PubKey pubKey={publicKey} alwaysShowCopyButton leadingChars={8} trailingChars={4} />
-            </span>
-          ) : null}
-        </NodeCardText>
-        {collapsableLastChildren}
+        <NodeCardTitle className="mx-1" data-testid={StakedNodeDataTestId.Title}>
+          {title}
+        </NodeCardTitle>
+        {children}
       </NodeCard>
     );
   }
 );
 StakeCard.displayName = 'StakeCard';
+
+export type OrderableComponents =
+  | 'status'
+  | 'contributors'
+  | 'notification'
+  | 'snKey'
+  | 'version'
+  | 'unlockTimer'
+  | 'updateSmall'
+  | 'rewardTimer'
+  | 'uptimeTimer'
+  | 'operatorAddress'
+  | 'beneficiaryAddress'
+  | 'stake'
+  | 'fee'
+  | 'actionButton'
+  | 'expandButton';
+
+export enum VIEW_MODE {
+  SIMPLE = 0,
+  DETAILED = 1,
+}
+
+export const getOrderingForMode = (mode: VIEW_MODE): Array<OrderableComponents> => {
+  switch (mode) {
+    case VIEW_MODE.DETAILED:
+      return [
+        'status',
+        'snKey',
+        'stake',
+        'fee',
+        'beneficiaryAddress',
+        'operatorAddress',
+        'version',
+        'unlockTimer',
+        'updateSmall',
+        'rewardTimer',
+        'uptimeTimer',
+        'contributors',
+        'notification',
+        'actionButton',
+      ];
+    default:
+      return [
+        'status',
+        'contributors',
+        'notification',
+        'expandButton',
+        'unlockTimer',
+        'updateSmall',
+        'rewardTimer',
+        'uptimeTimer',
+        'version',
+        'snKey',
+        'beneficiaryAddress',
+        'stake',
+        'operatorAddress',
+        'fee',
+        'actionButton',
+      ];
+  }
+};
+
+export type ComponentData = {
+  id: OrderableComponents;
+  component: ReactNode;
+};
+
+export const renderOrderedComponents = (
+  isDetailedView: boolean,
+  componentData: Array<ComponentData>
+) => {
+  const ordering = getOrderingForMode(isDetailedView ? VIEW_MODE.DETAILED : VIEW_MODE.SIMPLE);
+  return ordering.map((id) => {
+    const item = componentData.find((comp) => comp.id === id);
+    if (item) {
+      return item.component;
+    }
+    return null;
+  });
+};
 
 export { StakeCard };

@@ -3,11 +3,12 @@ import {
   type ContributionContract,
   contributionContractSchema,
 } from '@session/staking-api-js/schema';
-import { areHexesEqual } from '@session/util-crypto/string';
-import type { Address } from 'viem';
+import type { Ed25519PublicKey, EthereumAddress } from '@session/util-crypto/keys';
+import { areEthereumAddressesEqual } from '@session/util-crypto/string';
+import { DEBUG_ASSERT } from '@session/util-js/assert';
 import { getTotalStakedAmountForAddress } from '../components/getTotalStakedAmountForAddress';
 import logger from '../lib/logger';
-import { sortEvents } from './parseEvents';
+import { isEventArraySorted } from './parseEvents';
 import { sortingReservedContractsDesc, sortingTotalStakedDesc } from './parseStakes';
 
 const contractStateSortOrderIfOperator = {
@@ -23,9 +24,13 @@ const contractStateSortOrderIfOperator = {
  * If the state is the same OR the connected wallet isn't the contract operator, then the contract are sorted by the total staked amount descending
  * then by the operator fee ascending
  */
-export function sortContracts(a: ContributionContract, b: ContributionContract, address?: Address) {
-  const operatorA = areHexesEqual(a.operator_address, address);
-  const operatorB = areHexesEqual(b.operator_address, address);
+export function sortContracts(
+  a: ContributionContract,
+  b: ContributionContract,
+  address?: EthereumAddress
+) {
+  const operatorA = areEthereumAddressesEqual(a.operator_address, address);
+  const operatorB = areEthereumAddressesEqual(b.operator_address, address);
 
   const priorityA = operatorA
     ? (contractStateSortOrderIfOperator[a.status] ?? Number.POSITIVE_INFINITY)
@@ -66,11 +71,13 @@ export function sortContracts(a: ContributionContract, b: ContributionContract, 
 
 export type ParseStakesParams = {
   contracts: Array<ContributionContract>;
-  address?: Address;
+  address?: EthereumAddress;
   blockHeight: number;
-  addedBlsKeys: Record<string, number>;
+  contractBlsKeys: Set<string>;
+  contractEd25519Keys: Set<Ed25519PublicKey>;
   nodeMinLifespanArbBlocks: number;
-  runningStakesBlsKeysSet: Set<string>;
+  runningAddedStakesBlsKeysSet: Set<string>;
+  runningAddedStakesEd25519KeysSet: Set<Ed25519PublicKey>;
 };
 
 /**
@@ -79,11 +86,11 @@ export type ParseStakesParams = {
  * @returns The sorted contracts.
  */
 export function sortContractByDeployBlockDesc(contracts: Array<ContributionContract>) {
-  const deployBlockMap = new Map<Address, number>();
+  const deployBlockMap = new Map<EthereumAddress, number>();
   const _contracts: Array<ContributionContract> = [];
 
   for (const contract of contracts) {
-    contract.events.sort(sortEvents);
+    DEBUG_ASSERT(() => isEventArraySorted(contract.events), 'Contract events are not pre-sorted');
     const deployEventBlock = contract.events.find(
       (event) => event.name === ARBITRUM_EVENT.NewServiceNodeContributionContract
     )?.block;
@@ -108,24 +115,25 @@ export function sortContractByDeployBlockDesc(contracts: Array<ContributionContr
  * Parses the stakes and contracts.
  * @param contracts - The contracts to parse.
  * @param address - The address to filter by.
- * @param addedBlsKeys - The added BLS keys.
  * @param runningStakesBlsKeysSet - The running stakes BLS keys set.
  * @param nodeMinLifespanArbBlocks - The node min lifespan in Arbitrum blocks.
  * @returns The parsed stakes and contracts.
  */
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify the logic
 export function parseContracts({
   contracts,
   address,
-  addedBlsKeys,
-  runningStakesBlsKeysSet,
+  contractBlsKeys,
+  contractEd25519Keys,
+  runningAddedStakesEd25519KeysSet,
+  runningAddedStakesBlsKeysSet,
   nodeMinLifespanArbBlocks,
 }: ParseStakesParams) {
-  const networkBlsKeys = new Set(Object.keys(addedBlsKeys));
-  const networkContractIds = new Set(Object.values(addedBlsKeys));
-
   const _contracts = sortContractByDeployBlockDesc(contracts);
 
-  const added = new Set();
+  const addedContractBlsKeys = new Set();
+  const addedContractEd25519Keys = new Set();
   const hiddenContractsWithStakes: Array<ContributionContract> = [];
   const visibleContracts: Array<ContributionContract> = [];
   const joiningContracts: Array<ContributionContract> = [];
@@ -137,20 +145,32 @@ export function parseContracts({
    * contracts are hidden unless the wallet has a stake for that contract.
    */
   for (const contract of _contracts) {
-    const { pubkey_bls, status, events, contributors } = contract;
+    const { pubkey_bls, service_node_pubkey, status, events, contributors } = contract;
 
-    if (added.has(pubkey_bls) || runningStakesBlsKeysSet.has(pubkey_bls)) {
+    const alreadyAddedBlsKey =
+      addedContractBlsKeys.has(pubkey_bls) ||
+      runningAddedStakesBlsKeysSet.has(pubkey_bls) ||
+      contractBlsKeys.has(pubkey_bls);
+    const alreadyAddedEd25519Key =
+      addedContractEd25519Keys.has(service_node_pubkey) ||
+      runningAddedStakesEd25519KeysSet.has(service_node_pubkey) ||
+      contractEd25519Keys.has(service_node_pubkey);
+
+    if (alreadyAddedBlsKey || alreadyAddedEd25519Key) {
+      const keyInfo = alreadyAddedEd25519Key
+        ? `(Ed25519) ${service_node_pubkey}`
+        : `(BLS) ${pubkey_bls}`;
       if (
         status !== CONTRIBUTION_CONTRACT_STATUS.Finalized &&
         address &&
         getTotalStakedAmountForAddress(contributors, address) > 0n
       ) {
         logger.debug(
-          `Contract has duplicate pubkey, but has stakes, showing with warning: ${pubkey_bls}`
+          `Contract has duplicate pubkey, but has stakes, showing with warning: ${keyInfo}`
         );
         hiddenContractsWithStakes.push(contract);
       } else {
-        logger.debug(`Contract has duplicate pubkey, hiding: ${pubkey_bls}`);
+        logger.debug(`Contract has duplicate pubkey, hiding: ${keyInfo}`);
       }
       continue;
     }
@@ -161,14 +181,14 @@ export function parseContracts({
         logger.warn(`Contract is finalized, but no Finalized event, showing: ${pubkey_bls}`);
       } else if (lastFinalized.block > nodeMinLifespanArbBlocks) {
         logger.debug(
-          `Contract was finalized at block ${lastFinalized.block}, this is within the minimum lifespan (${nodeMinLifespanArbBlocks}), showing: ${pubkey_bls}`
+          `Contract was finalized at block ${lastFinalized.block}, this is within the minimum lifespan (${nodeMinLifespanArbBlocks}), showing: ${service_node_pubkey}`
         );
         joiningContracts.push(contract);
-        added.add(pubkey_bls);
+        addedContractBlsKeys.add(pubkey_bls);
         continue;
       } else {
         logger.debug(
-          `Contract was finalized at block ${lastFinalized.block}, this is greater than the lifespan limit (${nodeMinLifespanArbBlocks}), hiding: ${pubkey_bls}`
+          `Contract was finalized at block ${lastFinalized.block}, this is greater than the lifespan limit (${nodeMinLifespanArbBlocks}), hiding: ${service_node_pubkey}`
         );
         continue;
       }
@@ -176,12 +196,14 @@ export function parseContracts({
 
     if (contract.status === CONTRIBUTION_CONTRACT_STATUS.WaitForOperatorContrib) {
       awaitingOperatorContracts.push(contract);
-      added.add(pubkey_bls);
+      addedContractBlsKeys.add(pubkey_bls);
+      addedContractEd25519Keys.add(service_node_pubkey);
       continue;
     }
 
     visibleContracts.push(contract);
-    added.add(pubkey_bls);
+    addedContractBlsKeys.add(pubkey_bls);
+    addedContractEd25519Keys.add(service_node_pubkey);
   }
   hiddenContractsWithStakes.sort((a, b) => sortContracts(a, b, address));
   visibleContracts.sort((a, b) => sortContracts(a, b, address));
@@ -192,8 +214,6 @@ export function parseContracts({
     joiningContracts,
     hiddenContractsWithStakes,
     awaitingOperatorContracts,
-    networkBlsKeys,
-    networkContractIds,
   };
 }
 

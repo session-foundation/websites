@@ -5,11 +5,11 @@ import {
 } from '@/components/StakedNode/StakedContractCard';
 import { StakedNodeCard } from '@/components/StakedNodeCard';
 import { WizardSectionDescription, WizardSectionTitle } from '@/components/Wizard';
-import { useStakes } from '@/hooks/useStakes';
+import { useStakes } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { Loading } from '@session/ui/components/loading';
 import { Button } from '@session/ui/ui/button';
-import { areHexesEqual } from '@session/util-crypto/string';
+import { areBLSKeysEqual, areEd25519KeysEqual } from '@session/util-crypto/string';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -20,18 +20,24 @@ export function AlreadyRegisteredRunningTab() {
   const dict = useTranslations('actionModules.registration.alreadyRegisteredRunning');
   const dictShared = useTranslations('actionModules.registration.shared');
 
-  const { stakes, joiningContracts, notFoundJoiningNodes, blockHeight, networkTime, refetch } =
-    useStakes();
+  const { stakes, joiningContracts, notFoundJoiningNodes, refetch } = useStakes();
 
-  const joiningContract = joiningContracts.find(({ service_node_pubkey }) =>
-    areHexesEqual(service_node_pubkey, props.ed25519PubKey)
-  );
-  const joiningFromConfirmation = notFoundJoiningNodes.find(({ pubkeyEd25519 }) =>
-    areHexesEqual(pubkeyEd25519, props.ed25519PubKey)
+  const joiningContract = joiningContracts.find(
+    ({ service_node_pubkey, pubkey_bls }) =>
+      areEd25519KeysEqual(service_node_pubkey, props.ed25519PubKey) ||
+      areBLSKeysEqual(pubkey_bls, props.blsKey)
   );
 
-  const stake = stakes.find((stake) =>
-    areHexesEqual(stake.service_node_pubkey, props.ed25519PubKey)
+  const joiningFromConfirmation = notFoundJoiningNodes.find(
+    ({ pubkeyEd25519, pubkeyBls }) =>
+      areEd25519KeysEqual(pubkeyEd25519, props.ed25519PubKey) ||
+      areBLSKeysEqual(pubkeyBls, props.blsKey)
+  );
+
+  const stake = stakes.find(
+    (stake) =>
+      areEd25519KeysEqual(stake.service_node_pubkey, props.ed25519PubKey) ||
+      areBLSKeysEqual(stake.pubkey_bls, props.blsKey)
   );
 
   useMount(() => {
@@ -45,19 +51,20 @@ export function AlreadyRegisteredRunningTab() {
         <WizardSectionDescription description={dict('specialDescription')} />
       </div>
       {joiningContract ? (
-        <StakedContractCard id={joiningContract.service_node_pubkey} contract={joiningContract} />
+        <StakedContractCard
+          toggleId={joiningContract.service_node_pubkey}
+          contract={joiningContract}
+        />
       ) : joiningFromConfirmation ? (
         <StakedContractCard
-          id={joiningFromConfirmation.pubkeyEd25519}
+          toggleId={joiningFromConfirmation.pubkeyEd25519}
           contract={getStakedContractCardContractFromConfirmation(joiningFromConfirmation)}
         />
       ) : stake ? (
         <StakedNodeCard
           className="text-start"
-          id={stake.contract_id.toString()}
+          toggleId={stake.contract_id.toString()}
           stake={stake}
-          blockHeight={blockHeight ?? 0}
-          networkTime={networkTime ?? Date.now()}
           hideButton
         />
       ) : (

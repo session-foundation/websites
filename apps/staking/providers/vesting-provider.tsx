@@ -1,6 +1,6 @@
 'use client';
 
-import { useStakes } from '@/hooks/useStakes';
+import { useVestingContracts } from '@/hooks/useVestingContracts';
 import { DYNAMIC_LINKS, PREFERENCE, VESTING_PATHS } from '@/lib/constants';
 import logger from '@/lib/logger';
 import type { VestingContract } from '@session/staking-api-js/schema';
@@ -62,7 +62,7 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
   const [showVestingSelectionDialog, setShowVestingSelectionDialog] = useState<boolean>(false);
   const [skipped, setSkipped] = useState<boolean>(false);
 
-  const { vesting, refetch, enabled, isLoading } = useStakes();
+  const { contracts, refetch, enabled, isLoading } = useVestingContracts();
   const stakesLoaded = enabled && !isLoading;
 
   const disconnectFromVestingContract = useCallback(() => {
@@ -100,7 +100,7 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     if (stakesLoaded) {
       if (
         !activeContract &&
-        vesting?.length &&
+        contracts?.length &&
         !getItem<boolean>(PREFERENCE.SKIP_VESTING_POPUP_ON_STARTUP) &&
         VESTING_PATHS.some((path) => pathname.startsWith(path))
       ) {
@@ -116,12 +116,12 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [activeContract, vesting, stakesLoaded]);
+  }, [activeContract, contracts, stakesLoaded]);
 
   return (
     <Context.Provider
       value={{
-        contracts: vesting,
+        contracts,
         activeContract,
         showVestingSelectionDialog,
         setShowVestingSelectionDialog,

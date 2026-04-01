@@ -1,7 +1,7 @@
 import { getNodeRegistrations } from '@/lib/queries/getNodeRegistrations';
 import type { SessionStakingClient } from '@session/staking-api-js/client';
-import type { Ed25519PublicKey } from '@session/staking-api-js/refine';
 import { registrationsResponseSchema } from '@session/staking-api-js/schema';
+import type { Ed25519PublicKey } from '@session/util-crypto/keys';
 
 /**
  * Retrieves the registrations for a given SN key.

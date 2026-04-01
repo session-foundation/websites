@@ -6,12 +6,12 @@ import {
 } from '@/lib/contracts';
 import { useCreateOpenNode } from '@session/contracts/hooks/ServiceNodeContributionFactory';
 import type { UseAddBlsPubKeyParams } from '@session/contracts/hooks/ServiceNodeRewards';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
-import type { Address } from 'viem';
 
 export type ReservedContributorStruct = {
-  addr: Address;
+  addr: EthereumAddress;
   amount: bigint;
 };
 

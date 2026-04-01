@@ -1,13 +1,15 @@
+import type { Ed25519PublicKey } from '@session/util-crypto/keys';
 import type { Address } from 'viem';
-import type { Ed25519PublicKey } from './refine';
 import type {
   BlsExitSignatureResponse,
   BlsRewardsResponse,
   BlsRewardsSignatureResponse,
+  ContractNodesResponse,
   ContributionContractByKeyResponse,
   ContributionContractResponse,
   DailyRewardsResponse,
   ExitLiquidationListResponse,
+  HardForkInfoResponse,
   NetworkInfoResponse,
   NodesBlsKeysResponse,
   RegistrationsResponse,
@@ -149,6 +151,22 @@ export class SessionStakingClient {
       method: 'GET',
     };
     return await this.request<StakesResponse>(options);
+  }
+
+  public async getHardForkInfo(): Promise<StakingBackendResponse<HardForkInfoResponse>> {
+    const options: RequestOptions = {
+      endpoint: '/hf_info',
+      method: 'GET',
+    };
+    return await this.request<HardForkInfoResponse>(options);
+  }
+
+  public async getContractNodes(): Promise<StakingBackendResponse<ContractNodesResponse>> {
+    const options: RequestOptions = {
+      endpoint: '/contract_nodes',
+      method: 'GET',
+    };
+    return await this.request<ContractNodesResponse>(options);
   }
 
   public async getNodesBlsKeys(): Promise<StakingBackendResponse<NodesBlsKeysResponse>> {

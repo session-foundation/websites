@@ -8,15 +8,14 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { NodesListSkeleton } from '@/components/NodesListModule';
 import { OpenNodeCard } from '@/components/OpenNodeCard';
 import { useDisplayStatusBar } from '@/components/StatusBar';
-import { useCurrentActor } from '@/hooks/useCurrentActor';
 import { useOpenContributorContracts } from '@/hooks/useOpenContributorContracts';
-import { useStakes } from '@/hooks/useStakes';
 import { PREFERENCE, SOCIALS, URL } from '@/lib/constants';
 import { REMOTE_FEATURE_FLAG } from '@/lib/feature-flags';
 import { useRemoteFeatureFlagQuery } from '@/lib/feature-flags-client';
 import { externalLink } from '@/lib/locale-defaults';
 import { getContributionRangeFromContributors } from '@/lib/maths';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
+import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
 import { Social } from '@session/ui/components/SocialLinkList';
@@ -28,11 +27,13 @@ import { usePreferences } from 'usepref';
 export default function OpenNodes() {
   useAllowTestingErrorToThrow();
   const dictionary = useTranslations('modules.openNodes');
-  const address = useCurrentActor();
   const { contracts, network, isFetching, refetch, isError, isLoading } =
-    useOpenContributorContracts(address);
+    useOpenContributorContracts();
   useDisplayStatusBar({ network, isFetching, refetch });
-  const { hiddenContractsWithStakes, awaitingOperatorContracts } = useStakes(address);
+  const {
+    stakes: { hiddenContractsWithStakes, awaitingOperatorContracts },
+    activeAddress,
+  } = useUser();
 
   const { enabled: isStakingDisabled } = useRemoteFeatureFlagQuery(
     REMOTE_FEATURE_FLAG.DISABLE_NODE_STAKING_MULTI
@@ -55,12 +56,12 @@ export default function OpenNodes() {
     return contracts.filter((contract) => {
       const { minStake: minStakeCalculated, maxStake: maxStakeCalculated } =
         getContributionRangeFromContributors(contract.contributors);
-      const contributor = getContributedContributor(contract, address);
-      const reserved = getReservedContributorNonContributed(contract, address);
+      const contributor = getContributedContributor(contract, activeAddress);
+      const reserved = getReservedContributorNonContributed(contract, activeAddress);
 
       return contributor || reserved || minStakeCalculated > 0n || maxStakeCalculated > 0n;
     });
-  }, [contracts, address]);
+  }, [contracts, activeAddress]);
 
   return isStakingDisabled ? (
     <StakingDisabled />

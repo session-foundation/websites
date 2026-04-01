@@ -15,11 +15,11 @@ import type {
 import { Loading } from '@session/ui/components/loading';
 import { PartyPopperIcon } from '@session/ui/icons/PartyPopperIcon';
 import { Button } from '@session/ui/ui/button';
+import type { EthereumAddress } from '@session/util-crypto/keys';
 import { numberToBigInt } from '@session/util-crypto/maths';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import type { Address } from 'viem';
 
 export function SuccessMultiTab() {
   const { contract, props, formMulti, address } = useRegistrationWizard();
@@ -74,7 +74,7 @@ export function SuccessMultiTab() {
         {
           address,
           amount: numberToBigInt(Number.parseInt(amount) * 10 ** TOKEN.DECIMALS),
-          beneficiary_address: beneficiary as Address,
+          beneficiary_address: beneficiary as EthereumAddress,
           reserved: 0n,
         },
       ] satisfies Array<ContributionContractContributor>;
@@ -93,7 +93,7 @@ export function SuccessMultiTab() {
       {deployedContract ? (
         <StakedContractCard
           className="text-start"
-          id={deployedContract.address}
+          toggleId={deployedContract.address}
           contract={deployedContract}
           hideButton
         />
