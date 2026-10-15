@@ -25,7 +25,7 @@ import {
 import type { DynamicTokenRowProps } from '@web3sheet/core/hooks/useWallet';
 import type { Web3WalletComponentLibrary } from '@web3sheet/ui/lib/library';
 import { type ReactNode, forwardRef, useState } from 'react';
-import { http, fallback } from 'viem';
+import { http } from 'viem';
 import { arbitrum, arbitrumSepolia, mainnet, sepolia } from 'viem/chains';
 
 const TabFullWidthButton = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -182,23 +182,6 @@ export type ConfigParams = {
 
 const batchConfig = { batch: { batchSize: 100, wait: 500 } } as const;
 
-// Public endpoints verified to accept batchConfig-sized batches and cross-origin requests.
-const ETH_FALLBACK_RPC_URLS = {
-  [mainnet.id]: [
-    'https://ethereum-rpc.publicnode.com',
-    'https://eth-mainnet.public.blastapi.io',
-    'https://1rpc.io/eth',
-  ],
-  [sepolia.id]: ['https://ethereum-sepolia-rpc.publicnode.com', sepolia.rpcUrls.default.http[0]],
-};
-
-const fallbackTransport = (urls: Array<string | undefined>, batch?: boolean) =>
-  fallback(
-    [...new Set(urls.filter((url): url is string => !!url))].map((url) =>
-      http(url, batch ? batchConfig : undefined)
-    )
-  );
-
 const createConfig = ({
   ethRpcUrl,
   arbRpcUrl,
@@ -215,7 +198,10 @@ const createConfig = ({
       arbRpcUrl ?? arb.rpcUrls.default.http[0],
       arbRpcBatchCalls ? batchConfig : undefined
     ),
-    [eth.id]: fallbackTransport([ethRpcUrl, ...ETH_FALLBACK_RPC_URLS[eth.id]], ethRpcBatchCalls),
+    [eth.id]: http(
+      ethRpcUrl ?? eth.rpcUrls.default.http[0],
+      ethRpcBatchCalls ? batchConfig : undefined
+    ),
   };
 
   const config = createWeb3WalletConfig({
