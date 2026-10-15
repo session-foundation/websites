@@ -107,7 +107,7 @@ export const areEd25519KeysEqual = (
 };
 
 /**
- * Check BLS public key equality (96 hex chars, optionally 0x prefixed)
+ * Check BLS public key equality (128 hex chars, optionally 0x prefixed)
  * @param key1 - First BLS public key
  * @param key2 - Second BLS public key
  * @returns True if keys are equal
