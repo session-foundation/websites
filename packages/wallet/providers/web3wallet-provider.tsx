@@ -182,7 +182,7 @@ export type ConfigParams = {
 
 const batchConfig = { batch: { batchSize: 100, wait: 500 } } as const;
 
-// viem's built-in mainnet default (cloudflare-eth.com) refuses every request.
+// viem 2.21.54's mainnet default (cloudflare-eth.com) answers every call with -32046.
 const MAINNET_DEFAULT_RPC_URL = 'https://ethereum-rpc.publicnode.com';
 
 const createConfig = ({
@@ -202,7 +202,7 @@ const createConfig = ({
       arbRpcBatchCalls ? batchConfig : undefined
     ),
     [eth.id]: http(
-      ethRpcUrl ?? (testnet ? eth.rpcUrls.default.http[0] : MAINNET_DEFAULT_RPC_URL),
+      ethRpcUrl || (testnet ? eth.rpcUrls.default.http[0] : MAINNET_DEFAULT_RPC_URL),
       ethRpcBatchCalls ? batchConfig : undefined
     ),
   };
