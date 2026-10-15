@@ -276,12 +276,12 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
   // biome-ignore  lint/correctness/useExhaustiveDependencies: We want this to update when the network info changes
   const lastFetchTimeStamp = useMemo(() => Date.now(), [networkInfo, l2BlockNumber]);
 
-  // useNetworkStatus effects depend on these setters, so a new identity per render re-fires them in a loop.
   const value = useMemo<StatusContext>(
     () => ({
       networkStatusVisible,
       setNetworkStatusVisible,
       networkInfo,
+      // Keep the raw useState setters: useNetworkStatus effects depend on their identity and loop if they change.
       setNetworkInfo,
       networkInfoIsFetching,
       networkInfoIsLoading,
