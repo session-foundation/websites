@@ -13,9 +13,9 @@ if (!NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID) {
 }
 
 export const NEXT_PUBLIC_RPC_URL_ARB = process.env.NEXT_PUBLIC_RPC_URL_ARB;
-export const NEXT_PUBLIC_RPC_BATCH_ARB = process.env.NEXT_PUBLIC_RPC_URL_ARB === 'true';
+export const NEXT_PUBLIC_RPC_BATCH_ARB = process.env.NEXT_PUBLIC_RPC_BATCH_ARB === 'true';
 export const NEXT_PUBLIC_RPC_URL_ETH = process.env.NEXT_PUBLIC_RPC_URL_ETH;
-export const NEXT_PUBLIC_RPC_BATCH_ETH = process.env.NEXT_PUBLIC_RPC_URL_ETH === 'true';
+export const NEXT_PUBLIC_RPC_BATCH_ETH = process.env.NEXT_PUBLIC_RPC_BATCH_ETH === 'true';
 
 export const NEXT_PUBLIC_PRICE_TOKEN = process.env.NEXT_PUBLIC_PRICE_TOKEN!;
 if (!NEXT_PUBLIC_PRICE_TOKEN) {

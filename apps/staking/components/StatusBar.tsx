@@ -17,7 +17,15 @@ import { Tooltip } from '@session/ui/ui/tooltip';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useBlockNumber } from '@session/wallet/hooks/useBlockNumber';
 import { useTranslations } from 'next-intl';
-import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { usePreferences } from 'usepref';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 
@@ -254,39 +262,48 @@ export default function StatusBarProvider({ children }: { children?: ReactNode }
     chainId: NEXT_PUBLIC_TESTNET ? arbitrumSepolia.id : arbitrum.id,
   });
 
-  const _refetch = () => {
+  const _refetch = useCallback(() => {
     refetch();
     refetchL2BlockNumber();
-  };
+  }, [refetch, refetchL2BlockNumber]);
 
-  const _setNetworkInfo = (networkInfo?: NetworkInfo) => {
-    setNetworkInfo(networkInfo);
-    refetchL2BlockNumber();
-  };
+  useEffect(() => {
+    if (networkInfo) {
+      refetchL2BlockNumber();
+    }
+  }, [networkInfo, refetchL2BlockNumber]);
 
   // biome-ignore  lint/correctness/useExhaustiveDependencies: We want this to update when the network info changes
   const lastFetchTimeStamp = useMemo(() => Date.now(), [networkInfo, l2BlockNumber]);
 
-  return (
-    <StatusContext.Provider
-      value={{
-        networkStatusVisible,
-        setNetworkStatusVisible,
-        networkInfo,
-        setNetworkInfo: _setNetworkInfo,
-        networkInfoIsFetching,
-        networkInfoIsLoading,
-        setNetworkInfoIsLoading,
-        setNetworkInfoIsFetching,
-        refetch: _refetch,
-        setRefetch,
-        lastFetchTimeStamp,
-        l2BlockNumber,
-      }}
-    >
-      {children}
-    </StatusContext.Provider>
+  const value = useMemo<StatusContext>(
+    () => ({
+      networkStatusVisible,
+      setNetworkStatusVisible,
+      networkInfo,
+      // Keep the raw useState setters: useNetworkStatus effects depend on their identity and loop if they change.
+      setNetworkInfo,
+      networkInfoIsFetching,
+      networkInfoIsLoading,
+      setNetworkInfoIsLoading,
+      setNetworkInfoIsFetching,
+      refetch: _refetch,
+      setRefetch,
+      lastFetchTimeStamp,
+      l2BlockNumber,
+    }),
+    [
+      networkStatusVisible,
+      networkInfo,
+      networkInfoIsFetching,
+      networkInfoIsLoading,
+      _refetch,
+      lastFetchTimeStamp,
+      l2BlockNumber,
+    ]
   );
+
+  return <StatusContext.Provider value={value}>{children}</StatusContext.Provider>;
 }
 
 type UseNetworkStatusParams = {
