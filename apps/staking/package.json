@@ -7,7 +7,7 @@
     "build": "next build",
     "build:large": "NO_MINIFY=true next build",
     "build:ci": "next build",
-    "start": "next start",
+    "start": "next start --hostname 127.0.0.1",
     "check-types": "tsc --noEmit",
     "check-telemetry": "next telemetry",
     "lint": "biome lint",
