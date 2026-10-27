@@ -23,7 +23,7 @@ export const cryptoAddressFields = [
     title: 'Icon',
     type: 'string',
     options: {
-      list: ['Ethereum', 'Arbitrum', 'Bitcoin', 'BNB'],
+      list: ['Ethereum', 'Arbitrum', 'Bitcoin', 'Bitcoin Cash', 'BNB'],
     },
     validation: (Rule) => Rule.required(),
   }),
@@ -37,6 +37,6 @@ export const cryptoAddressSchema = {
   fields: cryptoAddressFields,
 };
 
-type IconType = 'Ethereum' | 'Arbitrum' | 'Bitcoin' | 'BNB';
+type IconType = 'Ethereum' | 'Arbitrum' | 'Bitcoin' | 'BNB' | 'Bitcoin Cash';
 export type CryptoAddressSchemaType = DocumentFields<typeof cryptoAddressSchema> &
   SchemaFieldsType<typeof cryptoAddressFields> & {icon: IconType };
