@@ -8,6 +8,7 @@ import Typography from '@session/ui/components/Typography';
 import { EthIcon } from '@session/ui/icons/EthIcon';
 import { ArbitrumIcon } from '@session/ui/icons/ArbitrumIcon';
 import { BitcoinIcon } from '@session/ui/icons/BitcoinIcon';
+import { BitcoinCashIcon } from '@session/ui/icons/BitcoinCashIcon';
 import { BNBIcon } from '@session/ui/icons/BNBIcon';
 
 function getIcon(value: CryptoAddressDisplaySchemaType) {
@@ -17,6 +18,8 @@ function getIcon(value: CryptoAddressDisplaySchemaType) {
   switch (value.cryptoAddress.icon) {
     case 'Bitcoin':
       return BitcoinIcon;
+    case 'Bitcoin Cash':
+      return BitcoinCashIcon;
     case 'BNB':
       return BNBIcon;
     case 'Arbitrum':
