@@ -1,10 +1,7 @@
-import { BillIcon, SplitVerticalIcon, TokenIcon, UnlinkIcon } from '@sanity/icons';
+import { SplitVerticalIcon } from '@sanity/icons';
 import { type PortableTextBlock, defineArrayMember } from 'sanity';
 import { imageField } from '../basic/image';
 import { pickLinkField } from '../basic/links';
-import { anchorFields } from '../component/anchor';
-import { cryptoAddressDisplayFields } from '../component/crypto-address-display';
-import { donorboxFields } from '../component/donorbox';
 import { tilesFields } from '../component/tiles';
 
 export const copyFieldOf = [
@@ -52,24 +49,6 @@ export const copyFieldOf = [
     name: 'tiles',
     icon: SplitVerticalIcon,
     fields: tilesFields,
-  }),
-  defineArrayMember({
-    type: 'object',
-    name: 'cryptoAddressDisplay',
-    icon: TokenIcon,
-    fields: cryptoAddressDisplayFields,
-  }),
-  defineArrayMember({
-    type: 'object',
-    name: 'donorbox',
-    icon: BillIcon,
-    fields: donorboxFields,
-  }),
-  defineArrayMember({
-    type: 'object',
-    name: 'anchor',
-    icon: UnlinkIcon,
-    fields: anchorFields,
   }),
 ];
 

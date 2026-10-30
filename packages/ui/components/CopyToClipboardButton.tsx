@@ -1,5 +1,3 @@
-'use client';
-
 import { CheckIcon } from 'lucide-react';
 import { type ButtonHTMLAttributes, forwardRef, useState } from 'react';
 import type { BaseDataTestId, TestingProps } from '../data-test-ids';
@@ -70,7 +68,7 @@ const CopyToClipboardButton = forwardRef<HTMLButtonElement, CopyToClipboardButto
         ) : isCopied ? (
           <CheckIcon className='h-5 w-5 stroke-session-green' />
         ) : (
-          <ClipboardIcon className="h-5 w-5 stroke-current" />
+          <ClipboardIcon className='h-5 w-5 fill-session-white' />
         )}
       </Button>
     );

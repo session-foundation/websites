@@ -5,4 +5,3 @@ export { authorSchema } from './author';
 export { socialSchema } from './social';
 export { specialSchema } from './special';
 export { fileSchema } from './file';
-export { cryptoAddressSchema } from './crypto-address';

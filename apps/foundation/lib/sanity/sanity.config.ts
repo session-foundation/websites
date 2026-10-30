@@ -3,7 +3,6 @@ import { NEXT_PUBLIC_SANITY_DATASET, NEXT_PUBLIC_SANITY_PROJECT_ID } from '@/lib
 import { createSanityConfig } from '@session/sanity-cms/lib/config';
 import {
   authorSchema,
-  cryptoAddressSchema,
   fileSchema,
   pageSchema,
   postSchema,
@@ -20,14 +19,6 @@ export const sanityConfig = createSanityConfig({
     enableDrafts: SANITY_UTIL_PATH.ENABLE_DRAFT,
     disableDrafts: SANITY_UTIL_PATH.DISABLE_DRAFT,
   },
-  schemas: [
-    pageSchema,
-    postSchema,
-    authorSchema,
-    socialSchema,
-    specialSchema,
-    fileSchema,
-    cryptoAddressSchema,
-  ],
+  schemas: [pageSchema, postSchema, authorSchema, socialSchema, specialSchema, fileSchema],
   singletonSchemas: [siteSchema],
 });
