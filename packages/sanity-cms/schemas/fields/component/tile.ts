@@ -1,6 +1,7 @@
 import { defineField } from 'sanity';
 import type { SchemaFieldsType } from '../../types';
 import { imageFieldWithOutAltText } from '../basic/image';
+import { internalLinkFieldDefinition } from '../basic/links';
 
 export const tileFields = [
   defineField({
@@ -15,6 +16,21 @@ export const tileFields = [
     title: 'Description',
     type: 'string',
     description: 'The text content of the tile',
+  }),
+  defineField({
+    ...internalLinkFieldDefinition,
+    name: 'badge',
+    title: 'Badge Link',
+    type: 'reference',
+    to: [{ type: 'page' }, { type: 'post' }, { type: 'special' }, { type: 'cmsFile' }],
+  }),
+  defineField({
+    name: 'badgeIcon',
+    title: 'Badge Icon',
+    type: 'string',
+    options: {
+      list: ['linkOut', 'key'],
+    },
   }),
   imageFieldWithOutAltText,
 ];

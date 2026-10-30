@@ -20,7 +20,14 @@ const nextConfig = {
     return config;
   },
   images: {
-    remotePatterns: [{ hostname: 'cdn.sanity.io' }],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+        // cdn.sanity.io serves every Sanity project's uploads, so only our project's images may reach the optimizer.
+        pathname: `/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/**`,
+      },
+    ],
   },
   async rewrites() {
     return [

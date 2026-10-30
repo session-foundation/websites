@@ -28,7 +28,7 @@ export async function generateMetadata(
   { params }: PageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
   if (!slug) {
     logger.warn('No slug provided for metadata generation');
     return {};
@@ -71,15 +71,15 @@ export async function generateStaticParams() {
   const pagesToGenerate = Array.from(slugs);
   logger.info(`Generating static params for ${pagesToGenerate.length} pages`);
   logger.info(pagesToGenerate);
-  return pagesToGenerate;
+  return pagesToGenerate.map((slug) => ({ slug }));
 }
 
 type PageProps = {
-  params: { slug?: string };
+  params: Promise<{ slug?: string }>;
 };
 
 export default async function UniversalPage({ params }: PageProps) {
-  const slug = params.slug;
+  const { slug } = await params;
   if (!slug) return notFound();
 
   if (
@@ -114,6 +114,8 @@ export default async function UniversalPage({ params }: PageProps) {
             clickToDownloadAria: fileDictionary('clickToDownloadAria'),
             openPdfInNewTab: fileDictionary('openPdfInNewTab'),
             openPdfInNewTabAria: fileDictionary('openPdfInNewTabAria'),
+            openFileInNewTab: fileDictionary('openFileInNewTab'),
+            openFileInNewTabAria: fileDictionary('openFileInNewTabAria'),
           }}
         />
       );
