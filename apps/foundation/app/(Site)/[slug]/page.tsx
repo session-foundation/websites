@@ -71,7 +71,7 @@ export async function generateStaticParams() {
   const pagesToGenerate = Array.from(slugs);
   logger.info(`Generating static params for ${pagesToGenerate.length} pages`);
   logger.info(pagesToGenerate);
-  return pagesToGenerate;
+  return pagesToGenerate.map((slug) => ({ slug }));
 }
 
 type PageProps = {
