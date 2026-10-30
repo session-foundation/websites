@@ -113,21 +113,15 @@ async function Badge({ client, link, icon }: BadgeProps) {
   }
 
   return (
-    <Link href={res.href} title={res.label}>
-      <Button
-        data-testid="button:tile-badge"
-        size="icon"
-        variant="ghost"
-        className="h-5 w-5"
-        aria-label={res.label}
-      >
+    <Button data-testid="button:tile-badge" size="icon" variant="ghost" className="h-5 w-5" asChild>
+      <Link href={res.href} title={res.label} aria-label={res.label}>
         {cleanSanityString(icon) === 'key' ? (
           <KeyIcon className="h-3 w-3" />
         ) : (
           <LinkOutIcon className="h-3 w-3" />
         )}
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }
 
