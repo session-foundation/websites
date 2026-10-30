@@ -67,8 +67,8 @@ export const sanityFetchGeneric = async <R = unknown>({
   fetchOptions: { query, params = {}, revalidate, tags, isClient },
 }: SanityFetchGenericOptions) =>
   safeTry<R>(
-    (() => {
-      const isDraftMode = !isClient && token && isDraftModeEnabled();
+    (async () => {
+      const isDraftMode = !isClient && token && (await isDraftModeEnabled());
 
       const perspective = isDraftMode ? 'previewDrafts' : 'published';
       const next = {

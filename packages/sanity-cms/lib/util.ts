@@ -11,7 +11,8 @@ import logger from './logger';
  * @returns If draft mode is enabled
  */
 export const isDraftModeEnabled = async () => {
-  const [err, result] = await safeTry(draftMode());
+  // draftMode() throws synchronously outside a request, so it must run inside the async wrapper.
+  const [err, result] = await safeTry((async () => draftMode())());
 
   if (err) {
     /**
