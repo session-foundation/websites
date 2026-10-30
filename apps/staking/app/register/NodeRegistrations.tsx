@@ -14,12 +14,17 @@ import logger from '@/lib/logger';
 import { useAllowTestingErrorToThrow } from '@/lib/testing';
 import { useUser } from '@/providers/user-provider';
 import { ButtonDataTestId } from '@/testing/data-test-ids';
+import type { Registration } from '@session/staking-api-js/schema';
 import { ModuleGridInfoContent } from '@session/ui/components/ModuleGrid';
+import { ArrowDownIcon } from '@session/ui/icons/ArrowDownIcon';
 import { safeTrySyncWithFallback } from '@session/util-js/try';
 import { useMount } from '@session/util-react/hooks/useMount';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
+
+const OLDER_REGISTRATION_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export default function NodeRegistrations() {
   useAllowTestingErrorToThrow();
@@ -108,12 +113,54 @@ export default function NodeRegistrations() {
     isLoading || contractNodes.isLoading ? (
       <NodesListSkeleton />
     ) : registrations?.length ? (
-      registrations.map((node) => <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />)
+      <RegistrationsList registrations={registrations} />
     ) : (
       <NoNodes />
     )
   ) : (
     <NoWallet />
+  );
+}
+
+/** Registrations prepared over a month ago are folded away so recent ones stay at the top. */
+function RegistrationsList({ registrations }: { registrations: Array<Registration> }) {
+  const dictionary = useTranslations('modules.nodeRegistrations');
+  const pathname = usePathname();
+
+  const [recent, older] = useMemo(() => {
+    const cutoff = Date.now() - OLDER_REGISTRATION_AGE_MS;
+    return [
+      registrations.filter(({ timestamp }) => timestamp * 1000 >= cutoff),
+      registrations.filter(({ timestamp }) => timestamp * 1000 < cutoff),
+    ];
+  }, [registrations]);
+
+  const olderIsOpenInForm = older.some(
+    ({ pubkey_ed25519 }) => pathname === `/register/${pubkey_ed25519}`
+  );
+
+  return (
+    <>
+      {recent.map((node) => (
+        <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />
+      ))}
+      {older.length ? (
+        <details className="group" open={!recent.length || olderIsOpenInForm}>
+          <summary
+            className="flex cursor-pointer list-none items-center gap-2 py-2 font-medium text-session-text text-sm [&::-webkit-details-marker]:hidden"
+            data-testid={ButtonDataTestId.Older_Prepared_Registrations_Toggle}
+          >
+            {dictionary('olderTitle', { count: older.length })}
+            <ArrowDownIcon className="h-3 w-3 fill-session-text stroke-session-text transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none" />
+          </summary>
+          <div className="flex flex-col gap-4">
+            {older.map((node) => (
+              <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />
+            ))}
+          </div>
+        </details>
+      ) : null}
+    </>
   );
 }
 

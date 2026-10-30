@@ -260,6 +260,7 @@
     },
     "nodeRegistrations": {
       "title": "Your Prepared Registrations",
+      "olderTitle": "Older prepared registrations ({count})",
       "showHiddenText": "Show Hidden",
       "landingP1": "Select a node to complete registration and start staking.",
       "noWalletP1": "Connect your wallet to view Session Nodes that you have prepared registrations for.",
