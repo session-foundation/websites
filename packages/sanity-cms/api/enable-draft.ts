@@ -31,7 +31,8 @@ export const createEnableDraftHandler = ({
 
     (await draftMode()).enable();
     logger.info(`Enabled draft mode for ${req.url}`);
-    return NextResponse.redirect(new URL(redirectTo, req.url));
+    // req.url has next start's own origin (localhost:<port>) behind the reverse proxy, so keep the redirect relative.
+    return new NextResponse(null, { status: 307, headers: { Location: redirectTo } });
   };
 
   return { GET: enableDraftHandler };

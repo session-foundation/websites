@@ -5,7 +5,7 @@ import { seoMetaFields } from 'sanity-plugin-seo';
 import { presentationTool } from 'sanity/presentation';
 import { structureTool } from 'sanity/structure';
 import logger from './logger';
-import { defaultDocumentNode } from './preview';
+import { createDefaultDocumentNode } from './preview';
 
 export type CreateSanityConfigOptions = {
   /** The Sanity project ID. */
@@ -20,6 +20,8 @@ export type CreateSanityConfigOptions = {
     enableDrafts?: string;
     /** The path of the disable drafts endpoint. */
     disableDrafts?: string;
+    /** The path posts are served under, e.g. `/blog/`. */
+    post?: string;
   };
   /** The list of schemas. */
   schemas?: Array<SchemaTypeDefinition>;
@@ -104,7 +106,10 @@ export function createSanityConfig({
     plugins: [
       seoMetaFields(),
       structureTool({
-        defaultDocumentNode,
+        defaultDocumentNode: createDefaultDocumentNode({
+          postBasePath: paths.post,
+          enableDraftsPath,
+        }),
         structure: (S) => {
           const singletonItems = singletonSchemas.map((typeDef) => {
             return S.listItem()
