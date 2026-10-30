@@ -114,6 +114,8 @@ export default async function UniversalPage({ params }: PageProps) {
             clickToDownloadAria: fileDictionary('clickToDownloadAria'),
             openPdfInNewTab: fileDictionary('openPdfInNewTab'),
             openPdfInNewTabAria: fileDictionary('openPdfInNewTabAria'),
+            openFileInNewTab: fileDictionary('openFileInNewTab'),
+            openFileInNewTabAria: fileDictionary('openFileInNewTabAria'),
           }}
         />
       );
