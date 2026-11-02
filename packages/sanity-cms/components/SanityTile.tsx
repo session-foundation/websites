@@ -15,16 +15,18 @@ export async function SanityTile({
   value,
   variant,
   client,
+  postBaseUrl,
 }: {
   value: TileSchemaType;
   variant: TILES_VARIANT;
   client: SessionSanityClient;
+  postBaseUrl?: string;
 }) {
   switch (variant) {
     case TILES_VARIANT.TEXT_OVERLAY_IMAGE:
       return <SanityTileTextOnTopOfImage value={value} client={client} />;
     case TILES_VARIANT.TEXT_UNDER_IMAGE:
-      return <SanityTileTextUnderImage value={value} client={client} />;
+      return <SanityTileTextUnderImage value={value} client={client} postBaseUrl={postBaseUrl} />;
     default:
       console.warn('Invalid variant for tile');
       return null;
@@ -96,11 +98,12 @@ type BadgeProps = {
   client: SessionSanityClient;
   icon: string;
   link: unknown;
+  postBaseUrl?: string;
 };
 
-async function Badge({ client, link, icon }: BadgeProps) {
+async function Badge({ client, link, icon, postBaseUrl }: BadgeProps) {
   // @ts-expect-error -- These types are pretty rough, this is fine
-  const [err, res] = await safeTry(resolveAmbiguousLink(client, link));
+  const [err, res] = await safeTry(resolveAmbiguousLink(client, link, postBaseUrl));
 
   if (err) {
     console.error(err);
@@ -128,9 +131,11 @@ async function Badge({ client, link, icon }: BadgeProps) {
 export async function SanityTileTextUnderImage({
   value,
   client,
+  postBaseUrl,
 }: {
   value: TileSchemaType;
   client: SessionSanityClient;
+  postBaseUrl?: string;
 }) {
   if (!value.image) {
     console.warn('Missing image for tile');
@@ -149,7 +154,12 @@ export async function SanityTileTextUnderImage({
       <span className="ms-2 text-sm md:text-base">
         {value.title}
         {value.badge && value.badgeIcon && isValidBadgeIcon(value.badgeIcon) ? (
-          <Badge client={client} icon={value.badgeIcon} link={value.badge} />
+          <Badge
+            client={client}
+            icon={value.badgeIcon}
+            link={value.badge}
+            postBaseUrl={postBaseUrl}
+          />
         ) : null}
       </span>
       <span className="ms-2 font-light text-xs md:text-sm">{value.description ?? ' '}</span>

@@ -39,6 +39,7 @@ export const components = {
         <SanityTiles
           {...props}
           client={client}
+          postBaseUrl={SANITY_SCHEMA_URL.POST}
           scrollText={tileDictionary('scrollOrTap')}
           isRTLLocale={direction === 'rtl'}
         />

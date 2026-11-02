@@ -13,11 +13,14 @@ export function SanityTiles({
   scrollText,
   isRTLLocale,
   client,
+  postBaseUrl,
 }: {
   value: TilesSchemaType;
   scrollText: string;
   isRTLLocale?: boolean;
   client: SessionSanityClient;
+  /** The path posts are served under, e.g. `/blog/`. */
+  postBaseUrl?: string;
 }) {
   let variant: TILES_VARIANT;
   if (isTileVariant(value.variant)) {
@@ -67,7 +70,13 @@ export function SanityTiles({
         )}
       >
         {value?.tiles.map((tile) => (
-          <SanityTile variant={variant} value={tile} client={client} key={tile._key} />
+          <SanityTile
+            variant={variant}
+            value={tile}
+            client={client}
+            postBaseUrl={postBaseUrl}
+            key={tile._key}
+          />
         ))}
       </div>
     </div>

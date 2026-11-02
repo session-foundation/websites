@@ -30,18 +30,13 @@ export function DownloadFileButton({ href, ariaLabel, children }: DownloadFileBu
   return (
     <a
       href={href}
-      className="group"
+      className="mt-1 w-max text-sm underline decoration-session-black hover:decoration-session-green"
       target="_blank"
       rel="noopener noreferrer"
       download
       aria-label={ariaLabel}
     >
-      <button
-        className="mt-1 w-max text-sm underline decoration-session-black hover:decoration-session-green group-hover:underline group-hover:decoration-session-green"
-        type="button"
-      >
-        {children}
-      </button>
+      {children}
     </a>
   );
 }
