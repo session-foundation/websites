@@ -5,8 +5,11 @@ import { NewStake } from '@/app/stake/[address]/NewStake';
 import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRowSkeleton } from '@/components/ActionModule';
 import { getReadyContracts } from '@/hooks/parseContracts';
+import { useRefetchContributionContracts } from '@/hooks/useRefetchContributionContracts';
+import { BACKEND, PREFERENCE } from '@/lib/constants';
 import { getContributionContracts } from '@/lib/queries/getContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { useDevicePref } from '@/providers/preferences-provider';
 import { useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
 import { Loading } from '@session/ui/components/loading';
@@ -60,7 +63,11 @@ export function StakingActionModuleTitle({ address }: { address: string }) {
 }
 
 export default function Staking({ address }: { address: string }) {
-  const { data, isLoading, refetch } = useStakingBackendSuspenseQuery(getContributionContracts);
+  const autoRefresh = !useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
+  const refetch = useRefetchContributionContracts();
+  const { data, isLoading } = useStakingBackendSuspenseQuery(getContributionContracts, {
+    refetchInterval: autoRefresh ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
+  });
   const dictionary = useTranslations('general');
 
   const { activeAddress } = useUser();
