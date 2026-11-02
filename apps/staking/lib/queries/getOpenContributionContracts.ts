@@ -8,9 +8,9 @@ import { contributionContractResponseSchema } from '@session/staking-api-js/sche
  * @returns An array of contribution contracts.
  */
 export const getOpenContributionContracts = async (client: SessionStakingClient) => {
-  const res = await client.getContributionContracts([
-    CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib,
-  ]);
+  const res = await client.getContributionContracts({
+    statuses: [CONTRIBUTION_CONTRACT_STATUS.OpenForPublicContrib],
+  });
   res.data = contributionContractResponseSchema.parse(res.data);
   return res;
 };

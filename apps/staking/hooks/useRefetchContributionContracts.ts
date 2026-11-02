@@ -1,6 +1,5 @@
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { getContributionContractByAddress } from '@/lib/queries/getContributionContractByAddress';
 import { getOpenContributionContracts } from '@/lib/queries/getOpenContributionContracts';
-import { getStakingBackendQueryArgs } from '@/lib/staking-api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
@@ -14,8 +13,8 @@ export function useRefetchContributionContracts() {
   return useCallback(
     () =>
       Promise.all(
-        [getContributionContracts, getOpenContributionContracts].map((query) =>
-          queryClient.invalidateQueries(getStakingBackendQueryArgs(query))
+        [getContributionContractByAddress.fnName, getOpenContributionContracts.fnName].map((name) =>
+          queryClient.invalidateQueries({ queryKey: [name] })
         )
       ),
     [queryClient]

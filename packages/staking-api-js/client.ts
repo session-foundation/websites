@@ -116,15 +116,21 @@ export class SessionStakingClient {
   }
 
   /**
-   * Retrieves contribution contracts, all of them unless `statuses` is given. Backends without
-   * status filtering ignore `statuses` and return every contract.
+   * Retrieves contribution contracts, all of them unless `statuses` or `address` is given.
+   * Backends without filtering ignore both and return every contract, so callers must still
+   * filter the result.
    */
-  public async getContributionContracts(
-    statuses?: Array<CONTRIBUTION_CONTRACT_STATUS>
-  ): Promise<StakingBackendResponse<ContributionContractResponse>> {
-    const query = statuses?.length
-      ? `?${new URLSearchParams(statuses.map((status) => ['status', status.toString()]))}`
-      : '';
+  public async getContributionContracts({
+    statuses,
+    address,
+  }: { statuses?: Array<CONTRIBUTION_CONTRACT_STATUS>; address?: Address } = {}): Promise<
+    StakingBackendResponse<ContributionContractResponse>
+  > {
+    const params = new URLSearchParams(
+      (statuses ?? []).map((status) => ['status', status.toString()])
+    );
+    if (address) params.set('address', address);
+    const query = params.size ? `?${params}` : '';
     const options: RequestOptions = {
       endpoint: `/contract/contribution${query}`,
       method: 'GET',
