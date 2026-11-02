@@ -15,7 +15,7 @@ import { useMemo } from 'react';
  * @returns The open contributor contracts.
  */
 export function useOpenContributorContracts() {
-  const autoRefresh = !useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
+  const autoRefresh = useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
   const refetch = useRefetchContributionContracts();
   const {

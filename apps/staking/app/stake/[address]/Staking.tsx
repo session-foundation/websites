@@ -63,7 +63,7 @@ export function StakingActionModuleTitle({ address }: { address: string }) {
 }
 
 export default function Staking({ address }: { address: string }) {
-  const autoRefresh = !useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
+  const autoRefresh = useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
   const refetch = useRefetchContributionContracts();
   const { data, isLoading } = useStakingBackendSuspenseQuery(getContributionContracts, {
     refetchInterval: autoRefresh ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
