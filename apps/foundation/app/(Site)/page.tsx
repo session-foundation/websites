@@ -17,7 +17,7 @@ export async function generateMetadata(_: object, parent: ResolvingMetadata) {
     throw new Error('No landing page set in settings to generate metadata');
   }
 
-  return generateMetadataUniversalPage({ params: { slug } }, parent);
+  return generateMetadataUniversalPage({ params: Promise.resolve({ slug }) }, parent);
 }
 
 export default async function LandingPage() {
@@ -29,7 +29,7 @@ export default async function LandingPage() {
 
   return (
     <UniversalPageLayout>
-      <UniversalPage params={{ slug }} />
+      <UniversalPage params={Promise.resolve({ slug })} />
     </UniversalPageLayout>
   );
 }

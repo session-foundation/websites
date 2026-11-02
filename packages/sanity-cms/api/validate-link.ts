@@ -19,8 +19,9 @@ export const createValidateLinkHandler = ({
 
   const validateLinkHandler = async (
     _req: NextRequest,
-    { params: { url } }: { params: { url: string } }
+    { params }: { params: Promise<{ url: string }> }
   ) => {
+    const { url } = await params;
     if (!url) {
       return new NextResponse('Missing url', { status: 400 });
     }

@@ -26,6 +26,8 @@
     "clickToDownload": "Click to download",
     "clickToDownloadAria": "Click to download file",
     "openPdfInNewTab": "Open PDF in new tab",
-    "openPdfInNewTabAria": "Open PDF in new tab"
+    "openPdfInNewTabAria": "Open PDF in new tab",
+    "openFileInNewTab": "Open File in new tab",
+    "openFileInNewTabAria": "Open File in new tab"
   }
 }

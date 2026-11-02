@@ -23,7 +23,7 @@ export async function generateMetadata(
   { params }: PageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
   if (!slug) {
     logger.warn('No slug provided for metadata generation');
     return {};
@@ -64,15 +64,15 @@ export async function generateStaticParams() {
   const postsToGenerate = Array.from(slugs);
   logger.info(`Generating static params for ${postsToGenerate.length} posts`);
   logger.info(postsToGenerate);
-  return postsToGenerate;
+  return postsToGenerate.map((slug) => ({ slug }));
 }
 
 type PageProps = {
-  params: { slug?: string };
+  params: Promise<{ slug?: string }>;
 };
 
 export default async function PostPage({ params }: PageProps) {
-  const slug = params.slug;
+  const { slug } = await params;
 
   if (!slug) {
     logger.warn(
