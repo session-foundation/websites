@@ -133,6 +133,7 @@ export enum ButtonDataTestId {
   Stake_Manage_Remove_Stake = 'button:stake-manage-remove-stake',
   Vesting_Start_Continue = 'button:vesting-start-continue',
   Vesting_Start_Skip = 'button:vesting-start-skip',
+  Vesting_Start_Snooze = 'button:vesting-start-snooze',
   Vesting_Info_Switch = 'button:vesting-info-switch',
   Vesting_Disconnect = 'button:vesting-disconnect',
   Vesting_Wallet_Button = 'button:vesting-wallet-button',

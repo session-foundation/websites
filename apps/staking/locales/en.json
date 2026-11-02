@@ -1011,6 +1011,10 @@
       "skipButton": {
         "label": "Skip",
         "aria": "Skip vesting contract and continue using the connected wallet"
+      },
+      "snoozeButton": {
+        "label": "Don't ask again for 30 days",
+        "aria": "Skip vesting contract and don't ask again for 30 days unless a new vesting contract appears"
       }
     },
     "infoDialog": {

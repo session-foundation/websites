@@ -39,8 +39,13 @@ export function VestingHandler({
   const dict = useTranslations('vesting.startDialog');
   const dictCard = useTranslations('vesting.card');
   const dictEth = useTranslations('actionModules.ethAddress.validation');
-  const { contracts, connectToVestingContract, disconnectFromVestingContract, activeContract } =
-    useVesting();
+  const {
+    contracts,
+    connectToVestingContract,
+    disconnectFromVestingContract,
+    snoozeVestingSelectionDialog,
+    activeContract,
+  } = useVesting();
 
   const VestingContractFormSchema = z.object({
     contractAddress: getEthereumAddressFormFieldSchema({}),
@@ -72,6 +77,11 @@ export function VestingHandler({
   const handleSkip = () => {
     onCancelCallback?.();
     disconnectFromVestingContract();
+  };
+
+  const handleSnooze = () => {
+    onCancelCallback?.();
+    snoozeVestingSelectionDialog();
   };
 
   return (
@@ -158,6 +168,19 @@ export function VestingHandler({
             </Button>
           ) : null}
         </div>
+        {!hideSkipButton ? (
+          <Button
+            className="-mt-3 w-full"
+            data-testid={ButtonDataTestId.Vesting_Start_Snooze}
+            aria-label={dict('snoozeButton.aria')}
+            variant="ghost"
+            size="sm"
+            onClick={handleSnooze}
+            type="button"
+          >
+            {dict('snoozeButton.label')}
+          </Button>
+        ) : null}
       </form>
     </Form>
   );

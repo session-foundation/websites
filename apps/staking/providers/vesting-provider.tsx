@@ -38,12 +38,46 @@ function loadVestingContract(): VestingContract | null {
   return JSON.parse(storedContract, jsonBigIntReviver);
 }
 
+const VESTING_POPUP_SNOOZE_KEY = 'vestingPopupSnooze';
+const VESTING_POPUP_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
+
+type VestingPopupSnooze = {
+  until: number;
+  /** Lowercase addresses of the contracts the snooze applies to. */
+  addresses: Array<string>;
+};
+
+function saveVestingPopupSnooze(contracts: Array<VestingContract>) {
+  const snooze: VestingPopupSnooze = {
+    until: Date.now() + VESTING_POPUP_SNOOZE_MS,
+    addresses: contracts.map(({ address }) => address.toLowerCase()),
+  };
+  localStorage.setItem(VESTING_POPUP_SNOOZE_KEY, JSON.stringify(snooze));
+}
+
+/** A snooze lapses early when the wallet gains a contract it didn't cover. */
+function isVestingPopupSnoozed(contracts: Array<VestingContract>) {
+  try {
+    const stored = localStorage.getItem(VESTING_POPUP_SNOOZE_KEY);
+    if (!stored) return false;
+    const { until, addresses } = JSON.parse(stored) as VestingPopupSnooze;
+    return (
+      Date.now() < until &&
+      contracts.every(({ address }) => addresses.includes(address.toLowerCase()))
+    );
+  } catch (error) {
+    logger.error(error);
+    return false;
+  }
+}
+
 type VestingContext = {
   contracts: Array<VestingContract>;
   activeContract: VestingContract | null;
   showVestingSelectionDialog: boolean;
   setShowVestingSelectionDialog: Dispatch<SetStateAction<boolean>>;
   disconnectFromVestingContract: () => void;
+  snoozeVestingSelectionDialog: () => void;
   connectToVestingContract: (contract: VestingContract) => void;
   refetch: () => void;
   isLoading: boolean;
@@ -78,6 +112,13 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
     }
   }, [pathname, router]);
 
+  const snoozeVestingSelectionDialog = useCallback(() => {
+    saveVestingPopupSnooze(contracts);
+    disconnectFromVestingContract();
+    // The snooze check takes over from the session skip, so a contract it doesn't cover still opens the popup.
+    setSkipped(false);
+  }, [contracts, disconnectFromVestingContract]);
+
   const connectToVestingContract = useCallback(
     (contract: VestingContract) => {
       logger.debug(`Connecting to vesting contract: ${contract.address}`);
@@ -102,6 +143,7 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
         !activeContract &&
         contracts?.length &&
         !getItem<boolean>(PREFERENCE.SKIP_VESTING_POPUP_ON_STARTUP) &&
+        !isVestingPopupSnoozed(contracts) &&
         VESTING_PATHS.some((path) => pathname.startsWith(path))
       ) {
         if (!skipped) {
@@ -126,6 +168,7 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
         showVestingSelectionDialog,
         setShowVestingSelectionDialog,
         disconnectFromVestingContract,
+        snoozeVestingSelectionDialog,
         connectToVestingContract,
         refetch,
         isLoading,
