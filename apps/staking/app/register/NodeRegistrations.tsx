@@ -145,7 +145,7 @@ function RegistrationsList({ registrations }: { registrations: Array<Registratio
         <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />
       ))}
       {older.length ? (
-        <details className="group/older" open={!recent.length || olderIsOpenInForm}>
+        <details className="group/older" open={olderIsOpenInForm}>
           <summary
             className="flex cursor-pointer list-none items-center gap-2 py-2 font-medium text-session-text text-sm [&::-webkit-details-marker]:hidden"
             data-testid={ButtonDataTestId.Older_Prepared_Registrations_Toggle}
