@@ -50,7 +50,7 @@ export enum COMMUNITY_DATE {
 }
 
 export const SOCIALS = {
-  [Social.Discord]: { name: Social.Discord, link: 'http://getsession.org/discord' },
+  [Social.Discord]: { name: Social.Discord, link: 'https://getsession.org/discord' },
   [Social.X]: { name: Social.X, link: 'https://x.com/session_token' },
   [Social.Youtube]: { name: Social.Youtube, link: 'https://www.youtube.com/@sessiontv' },
   [Social.Session]: { name: Social.Session, link: 'https://getsession.org/' },
