@@ -102,7 +102,7 @@ export function VestingHandler({
                     <NodeCard className="w-full" key={contract.address}>
                       <FormItem
                         key={contract.address}
-                        className="flex items-center justify-between space-y-0"
+                        className="flex w-full items-center justify-between gap-4 space-y-0"
                       >
                         <FormLabel className="inline-flex flex-col gap-1.5 align-middle font-medium">
                           {collapseAddress ? (
@@ -134,7 +134,7 @@ export function VestingHandler({
                           </NodeItem>
                         </FormLabel>
                         <FormControl>
-                          <RadioGroupItem value={contract.address} />
+                          <RadioGroupItem className="shrink-0" value={contract.address} />
                         </FormControl>
                       </FormItem>
                     </NodeCard>
