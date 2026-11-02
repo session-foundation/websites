@@ -2,7 +2,7 @@ import { getReadyContracts } from '@/hooks/parseContracts';
 import { parseOpenContracts } from '@/hooks/parseOpenContracts';
 import { BACKEND, PREFERENCE } from '@/lib/constants';
 import logger from '@/lib/logger';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { getOpenContributionContracts } from '@/lib/queries/getOpenContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
 import { useDevicePref } from '@/providers/preferences-provider';
 import { useUser } from '@/providers/user-provider';
@@ -22,7 +22,7 @@ export function useOpenContributorContracts() {
     refetch,
     isFetching: isFetchingContracts,
     isError,
-  } = useStakingBackendSuspenseQuery(getContributionContracts, {
+  } = useStakingBackendSuspenseQuery(getOpenContributionContracts, {
     refetchInterval: autoRefresh ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
   });
 
