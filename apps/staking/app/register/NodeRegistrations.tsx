@@ -145,13 +145,13 @@ function RegistrationsList({ registrations }: { registrations: Array<Registratio
         <NodeRegistrationCard key={node.pubkey_ed25519} node={node} />
       ))}
       {older.length ? (
-        <details className="group" open={!recent.length || olderIsOpenInForm}>
+        <details className="group/older" open={!recent.length || olderIsOpenInForm}>
           <summary
             className="flex cursor-pointer list-none items-center gap-2 py-2 font-medium text-session-text text-sm [&::-webkit-details-marker]:hidden"
             data-testid={ButtonDataTestId.Older_Prepared_Registrations_Toggle}
           >
             {dictionary('olderTitle', { count: older.length })}
-            <ArrowDownIcon className="h-3 w-3 fill-session-text stroke-session-text transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none" />
+            <ArrowDownIcon className="h-3 w-3 fill-session-text stroke-session-text transition-transform duration-300 group-open/older:rotate-180 motion-reduce:transition-none" />
           </summary>
           <div className="flex flex-col gap-4">
             {older.map((node) => (
