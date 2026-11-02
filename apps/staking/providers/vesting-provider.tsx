@@ -115,6 +115,8 @@ export default function VestingProvider({ children }: { children: ReactNode }) {
   const snoozeVestingSelectionDialog = useCallback(() => {
     saveVestingPopupSnooze(contracts);
     disconnectFromVestingContract();
+    // The snooze check takes over from the session skip, so a contract it doesn't cover still opens the popup.
+    setSkipped(false);
   }, [contracts, disconnectFromVestingContract]);
 
   const connectToVestingContract = useCallback(
