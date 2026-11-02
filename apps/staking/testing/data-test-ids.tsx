@@ -1,4 +1,5 @@
 export enum ButtonDataTestId {
+  Older_Prepared_Registrations_Toggle = 'button:older-prepared-registrations-toggle',
   My_Stakes_Stake_Now = 'button:my-stakes-stake-now',
   Home_Primary = 'button:home-primary',
   Home_Secondary = 'button:home-secondary',
