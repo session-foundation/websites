@@ -20,7 +20,7 @@ const pricesSchema = z.object({
   prices: z.array(
     z.object({
       price: z.number(),
-      t: z.number(),
+      updated_at: z.number(),
     })
   ),
 });
@@ -40,8 +40,8 @@ const useHistoricalPriceQuery = () => {
       return pricesSchema
         .parse(await res.json())
         .prices.reverse()
-        .map(({ price, t }) => ({
-          price: Number(price.toFixed(3)),
+        .map(({ price, updated_at: t }) => ({
+          price: Number(price.toFixed(4)),
           t: Math.trunc(t),
         }))
         .filter(({ price }) => price < 100 && price > 0);
@@ -67,7 +67,7 @@ export default function PriceModule() {
   const usdFormatted = formatUSD(price?.price ?? 0);
   const date = useMemo(() => (price ? formatPriceTimeMedium(price.t) : null), [price]);
 
-  const range = useMemo(() => {
+  const chartRange = useMemo(() => {
     const range = { min: 0, max: 0 };
     if (data) {
       range.min = Number.POSITIVE_INFINITY;
@@ -125,7 +125,7 @@ export default function PriceModule() {
             />
             <YAxis
               dataKey="price"
-              domain={[range.min, range.max]}
+              domain={[chartRange.min, chartRange.max]}
               tickFormatter={(v) => formatUSD(v)}
               tickCount={20}
               fontSize={10}
