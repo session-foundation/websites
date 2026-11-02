@@ -76,7 +76,7 @@ const nextConfig = {
       },
       {
         source: '/support',
-        destination: 'https://discord.gg/sessiontoken',
+        destination: 'https://getsession.org/discord',
         permanent: false,
       },
       {
