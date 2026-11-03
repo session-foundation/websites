@@ -1,8 +1,9 @@
 import { getReadyContracts } from '@/hooks/parseContracts';
 import { parseOpenContracts } from '@/hooks/parseOpenContracts';
+import { useRefetchContributionContracts } from '@/hooks/useRefetchContributionContracts';
 import { BACKEND, PREFERENCE } from '@/lib/constants';
 import logger from '@/lib/logger';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
+import { getOpenContributionContracts } from '@/lib/queries/getOpenContributionContracts';
 import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
 import { useDevicePref } from '@/providers/preferences-provider';
 import { useUser } from '@/providers/user-provider';
@@ -14,15 +15,15 @@ import { useMemo } from 'react';
  * @returns The open contributor contracts.
  */
 export function useOpenContributorContracts() {
-  const autoRefresh = !useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
+  const autoRefresh = useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
 
+  const refetch = useRefetchContributionContracts();
   const {
     data,
     isLoading: isLoadingContracts,
-    refetch,
     isFetching: isFetchingContracts,
     isError,
-  } = useStakingBackendSuspenseQuery(getContributionContracts, {
+  } = useStakingBackendSuspenseQuery(getOpenContributionContracts, {
     refetchInterval: autoRefresh ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000 : undefined,
   });
 
