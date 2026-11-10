@@ -14,7 +14,7 @@ const moduleGridVariants = cva('module-grid', {
     },
     size: {
       md: 'grid-cols-1 gap-1 sm:grid-cols-2 md:gap-2',
-      lg: 'grid-cols-1 lg:gap-8 xl:grid-cols-3',
+      lg: 'grid-cols-1 lg:gap-8 lg:grid-cols-3',
     },
     colSpan: {
       1: 'col-span-1 xl:col-span-1',

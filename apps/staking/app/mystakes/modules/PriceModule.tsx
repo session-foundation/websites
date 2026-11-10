@@ -89,7 +89,7 @@ export default function PriceModule() {
   }, [data]);
 
   return (
-    <Module size="lg" className="flex max-h-52 flex-grow md:max-h-full" noPadding>
+    <Module size="lg" className="flex max-h-52 flex-grow lg:max-h-full" noPadding>
       <CardContent className="max-h-full p-0">
         <ModuleTitle className="p-4">
           {titleFormat('format', { title })} {usdFormatted}

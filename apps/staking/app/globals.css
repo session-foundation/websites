@@ -1,0 +1,21 @@
+* {
+  scrollbar-width: auto;
+  scrollbar-color: var(--session-green-dark) var(--session-black);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--session-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--session-green-dark);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--session-green-dark);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--session-black);
+}
