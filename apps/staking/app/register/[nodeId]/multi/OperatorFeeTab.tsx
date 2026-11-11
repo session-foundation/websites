@@ -61,7 +61,6 @@ export function OperatorFeeTab() {
               <OperatorFeeField
                 // TODO: consider using an informed placeholder for the operator fee
                 placeholder={'0'}
-                minFee={SESSION_NODE.MIN_OPERATOR_FEE}
                 maxFee={SESSION_NODE.MAX_OPERATOR_FEE}
                 field={field}
                 dataTestId={InputDataTestId.Registration_Operator_Fee}

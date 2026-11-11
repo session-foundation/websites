@@ -47,8 +47,6 @@ export type OperatorFeeFieldProps = {
   // biome-ignore lint/suspicious/noExplicitAny: TODO: resolve properly
   field: any;
   maxFee: number;
-  // TODO: investigate adding a min fee if needed
-  minFee: number;
   placeholder: string;
 };
 
@@ -56,7 +54,7 @@ const operatorFeeFormattingRegex = /[^0-9.,]/g;
 const operatorFeeLeadingZerosRegex = /^0+/;
 
 export const OperatorFeeField = forwardRef<HTMLInputElement, OperatorFeeFieldProps>(
-  ({ dataTestId, disabled, field, minFee, maxFee, placeholder, ...props }, ref) => {
+  ({ dataTestId, disabled, field, maxFee, placeholder, ...props }, ref) => {
     const decimalDelimiter = useDecimalDelimiter();
     const thousandsSeparator = decimalDelimiter === '.' ? ',' : '.';
     const formatInputText = (value: string) => {
@@ -85,10 +83,6 @@ export const OperatorFeeField = forwardRef<HTMLInputElement, OperatorFeeFieldPro
 
       if (Number.parseFloat(formattedValue) > maxFee) {
         return maxFee.toString();
-      }
-
-      if (Number.parseFloat(formattedValue) < minFee) {
-        return minFee.toString();
       }
 
       return formattedValue;
