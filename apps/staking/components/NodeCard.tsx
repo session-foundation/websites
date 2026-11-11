@@ -327,10 +327,10 @@ const NodeContributorList = forwardRef<HTMLDivElement, StakedNodeContributorList
         </div>
         <span
           className={cn(
-            'letter mt-0.5 block text-lg tracking-widest transition-all duration-300 ease-in-out',
+            'letter text-lg tracking-widest transition-all duration-300 ease-in-out',
             forceExpand
-              ? 'w-0 opacity-0'
-              : 'w-max opacity-100 peer-checked:w-0 peer-checked:opacity-0'
+              ? 'w-0 opacity-0 hidden'
+              : 'block mt-0.5 w-max opacity-100 peer-checked:w-0 peer-checked:opacity-0'
           )}
         >
           {showEmptySlots

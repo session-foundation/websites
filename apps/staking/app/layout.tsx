@@ -1,6 +1,7 @@
 import { siteMetadata } from '@/lib/metadata';
 import { MonumentExtended, RobotoFlex } from '@session/ui/fonts';
 import '@session/ui/styles';
+import './globals.css';
 import { AppBannerServer } from '@/components/Banner/AppBannerServer';
 import { DevSheet } from '@/components/DevSheet';
 import Header from '@/components/Header';

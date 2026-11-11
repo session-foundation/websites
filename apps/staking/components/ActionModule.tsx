@@ -205,7 +205,7 @@ export const ActionModulePage = ({ children, ...props }: ActionModuleProps) => (
     background={1}
     noHeader
     {...props}
-    contentClassName="text-xl text-center px-6 md:px-16 gap-6"
+    contentClassName="text-xl text-center px-6 xl:px-16 gap-6"
     contentContainerClassName="min-h-52"
   >
     {children}
