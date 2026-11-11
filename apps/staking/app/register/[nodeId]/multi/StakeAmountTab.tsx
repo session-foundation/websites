@@ -65,6 +65,7 @@ export function StakeAmountTab() {
   };
 
   useMount(() => {
+    formMulti.trigger(FIELD_NAME);
     setBackButtonClickCallback(() => handleBackButtonClick);
     return () => setBackButtonClickCallback(null);
   });

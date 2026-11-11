@@ -47,8 +47,6 @@ export type OperatorFeeFieldProps = {
   // biome-ignore lint/suspicious/noExplicitAny: TODO: resolve properly
   field: any;
   maxFee: number;
-  // TODO: investigate adding a min fee if needed
-  minFee: number;
   placeholder: string;
 };
 
