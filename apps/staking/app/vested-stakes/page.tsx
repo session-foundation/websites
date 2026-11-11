@@ -22,8 +22,8 @@ export async function generateMetadata() {
 
 export default function Page() {
   return (
-    <ModuleGrid size="lg" className="h-full px-4 md:px-10 xl:auto-rows-auto">
-      <div className="col-span-1 flex h-full min-h-max flex-col gap-4 pb-8 md:max-h-screen-without-header md:overflow-y-auto md:overflow-x-hidden">
+    <ModuleGrid size="lg" className="h-full px-4 md:px-10 lg:auto-rows-auto">
+      <div className="col-span-1 flex h-full min-h-max flex-col gap-4 pb-8 lg:max-h-screen-without-header lg:overflow-y-auto lg:overflow-x-hidden">
         <ModuleGrid className="mr-1">
           <ComingSoonModule />
           <VestingStakedBalanceModule />
@@ -34,7 +34,7 @@ export default function Page() {
         </ModuleGrid>
         <VestingInfoModule />
       </div>
-      <div className="col-span-2 mt-6 h-full pb-8 md:mt-0 md:max-h-screen-without-header">
+      <div className="col-span-2 mt-6 h-full pb-8 lg:mt-0 lg:max-h-screen-without-header">
         <ModuleGrid variant="section" colSpan={2} className="h-full">
           <ErrorBoundary errorComponent={ErrorBox}>
             <VestingStakedNodesModule />
