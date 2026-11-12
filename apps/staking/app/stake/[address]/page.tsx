@@ -33,7 +33,6 @@ export default function NodePage(props: NodePageParams) {
           <ArbitrumBlockExplorerLink address={address} />
         </Suspense>
       }
-      className="h-screen-without-header md:h-full"
     >
       <Suspense fallback={<NodeStakingFormSkeleton />}>
         <StakingClient address={address} />

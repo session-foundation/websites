@@ -15,12 +15,7 @@ export default function NodePage(props: NodePageParams) {
   const { nodeId } = params;
 
   return (
-    <ActionModule
-      background={2}
-      className="h-screen-without-header md:h-full"
-      noHeader
-      contentAlignment={MODULE_GRID_ALIGNMENT.TOP}
-    >
+    <ActionModule background={2} noHeader contentAlignment={MODULE_GRID_ALIGNMENT.TOP}>
       <Suspense fallback={<NodeRegistrationFormSkeleton />}>
         <NodeRegistration nodeId={nodeId} />
       </Suspense>
