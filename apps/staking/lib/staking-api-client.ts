@@ -86,11 +86,13 @@ export function useStakingBackendQuery<Q extends StakingBackendQuery>(
 
 export function useStakingBackendSuspenseQueryWithParams<Q extends StakingBackendQueryWithParams>(
   query: Q,
-  params: Parameters<Q>[1]
+  params: Parameters<Q>[1],
+  queryOptions?: QueryOptions<Q>
 ) {
   const stakingBackendClient = useStakingBackendBrowserClient();
   return useSuspenseQuery<Awaited<ReturnType<Q>>['data']>({
     ...getStakingBackendQueryWithParamsArgs(query, params),
+    ...queryOptions,
     queryFn: async () => {
       const res = await query(stakingBackendClient, params);
       debugLogRequest(res);

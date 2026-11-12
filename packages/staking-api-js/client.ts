@@ -1,5 +1,6 @@
 import type { Ed25519PublicKey } from '@session/util-crypto/keys';
 import type { Address } from 'viem';
+import type { CONTRIBUTION_CONTRACT_STATUS } from './enums';
 import type {
   BlsExitSignatureResponse,
   BlsRewardsResponse,
@@ -114,11 +115,24 @@ export class SessionStakingClient {
     return await this.request<NetworkInfoResponse>(options);
   }
 
-  public async getContributionContracts(): Promise<
+  /**
+   * Retrieves contribution contracts, all of them unless `statuses` or `address` is given.
+   * Backends without filtering ignore both and return every contract, so callers must still
+   * filter the result.
+   */
+  public async getContributionContracts({
+    statuses,
+    address,
+  }: { statuses?: Array<CONTRIBUTION_CONTRACT_STATUS>; address?: Address } = {}): Promise<
     StakingBackendResponse<ContributionContractResponse>
   > {
+    const params = new URLSearchParams(
+      (statuses ?? []).map((status) => ['status', status.toString()])
+    );
+    if (address) params.set('address', address);
+    const query = params.size ? `?${params}` : '';
     const options: RequestOptions = {
-      endpoint: '/contract/contribution',
+      endpoint: `/contract/contribution${query}`,
       method: 'GET',
     };
     return await this.request<ContributionContractResponse>(options);
