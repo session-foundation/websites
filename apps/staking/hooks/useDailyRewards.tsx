@@ -2,7 +2,6 @@ import { BACKEND, PREFERENCE } from '@/lib/constants';
 import { getDailyRewards } from '@/lib/queries/getDailyRewards';
 import { useStakingBackendQueryWithParams } from '@/lib/staking-api-client';
 import type { DailyRewardInfo } from '@session/staking-api-js/schema';
-import { numberToBigInt } from '@session/util-crypto/maths';
 import { useWallet } from '@session/wallet/hooks/useWallet';
 import { useMemo } from 'react';
 import { usePreferences } from 'usepref';
@@ -47,9 +46,7 @@ export const useDailyRewards = (params?: { addressOverride?: Address }) => {
 
       dailyRewardFrom = dailyRewardStart.timestamp;
       dailyRewardTo = dailyRewardEnd.timestamp;
-      dailyRewardAmount =
-        numberToBigInt(dailyRewardEnd.lifetime_rewards) -
-        numberToBigInt(dailyRewardStart.lifetime_rewards);
+      dailyRewardAmount = dailyRewardEnd.lifetime_rewards - dailyRewardStart.lifetime_rewards;
     }
 
     return {

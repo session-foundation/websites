@@ -23,7 +23,8 @@ describe('API amounts', () => {
       min_operator_contribution: 6_250_000_000_000,
       staking_requirement: 25_000_000_000_000,
     });
-    expect(parsed.staking_requirement).toBe(25_000_000_000_000);
+    expect(parsed.staking_requirement).toBe(25_000_000_000_000n);
+    expect(dailyRewardInfo.parse({ block: 1, lifetime_rewards: 123, timestamp: 2 }).lifetime_rewards).toBe(123n);
   });
 
   it('parse from strings, which keep amounts above 2^53 exact', () => {
@@ -32,10 +33,12 @@ describe('API amounts', () => {
       min_operator_contribution: '6250000000000',
       staking_requirement: '25000000000000',
     });
-    expect(parsed.staking_requirement).toBe(25_000_000_000_000);
-    expect(parsed.min_operator_contribution).toBe(6_250_000_000_000);
+    expect(parsed.staking_requirement).toBe(25_000_000_000_000n);
+    expect(parsed.min_operator_contribution).toBe(6_250_000_000_000n);
 
-    expect(dailyRewardInfo.parse({ block: 1, lifetime_rewards: '123', timestamp: 2 }).lifetime_rewards).toBe(123);
+    expect(
+      dailyRewardInfo.parse({ block: 1, lifetime_rewards: '22795422631493348102', timestamp: 2 }).lifetime_rewards
+    ).toBe(22_795_422_631_493_348_102n);
 
     const rewards = rewardsInfoSchema.parse({
       amount: '240000000000000000',
