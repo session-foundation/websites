@@ -38,7 +38,7 @@ export const networkInfoSchema = z.object({
   /** Median operator fee of registered nodes */
   median_operator_fee: z.number(),
   /** Minimum operator contribution required to register a node */
-  min_operator_contribution: z.number(),
+  min_operator_contribution: z.coerce.bigint(),
   /** Network type eg: mainnet, testnet */
   nettype: z.string(),
   /** Number of nodes on the network @see {@link networkInfoSchema.active_node_count} for active nodes */
@@ -46,7 +46,7 @@ export const networkInfoSchema = z.object({
   /** Target timestamp for the next block */
   pulse_target_timestamp: z.number(),
   /** Current staking requirement for a single node */
-  staking_requirement: z.number(),
+  staking_requirement: z.coerce.bigint(),
   /** Version of the node the backend is running */
   version: z.string(),
 });
@@ -314,7 +314,7 @@ export type BlsRewardsSignatureResponse = z.infer<typeof blsRewardsSignatureResp
 
 export const dailyRewardInfo = z.object({
   block: z.number(),
-  lifetime_rewards: z.number(),
+  lifetime_rewards: z.coerce.bigint(),
   timestamp: z.number(),
 });
 
