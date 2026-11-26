@@ -5,8 +5,11 @@ import { NewStake } from '@/app/stake/[address]/NewStake';
 import { getContributedContributor } from '@/app/stake/[address]/StakeInfo';
 import { ActionModuleRowSkeleton } from '@/components/ActionModule';
 import { getReadyContracts } from '@/hooks/parseContracts';
-import { getContributionContracts } from '@/lib/queries/getContributionContracts';
-import { useStakingBackendSuspenseQuery } from '@/lib/staking-api-client';
+import { useRefetchContributionContracts } from '@/hooks/useRefetchContributionContracts';
+import { BACKEND, PREFERENCE } from '@/lib/constants';
+import { getContributionContractByAddress } from '@/lib/queries/getContributionContractByAddress';
+import { useStakingBackendSuspenseQueryWithParams } from '@/lib/staking-api-client';
+import { useDevicePref } from '@/providers/preferences-provider';
 import { useUser } from '@/providers/user-provider';
 import { useVesting } from '@/providers/vesting-provider';
 import { Loading } from '@session/ui/components/loading';
@@ -21,7 +24,7 @@ export function getContractAndContributor({
   address,
   connectedAddress,
 }: {
-  data: Awaited<ReturnType<typeof getContributionContracts>>['data'];
+  data: Awaited<ReturnType<typeof getContributionContractByAddress>>['data'];
   address: string;
   connectedAddress?: EthereumAddress;
 }) {
@@ -47,7 +50,15 @@ export function getContractAndContributor({
 
 export function StakingActionModuleTitle({ address }: { address: string }) {
   const dict = useTranslations('actionModules.staking');
-  const { data } = useStakingBackendSuspenseQuery(getContributionContracts);
+  if (!isEthereumAddress(address)) return dict('titleNewStake');
+  return <StakingActionModuleTitleForContract address={address} />;
+}
+
+function StakingActionModuleTitleForContract({ address }: { address: EthereumAddress }) {
+  const dict = useTranslations('actionModules.staking');
+  const { data } = useStakingBackendSuspenseQueryWithParams(getContributionContractByAddress, {
+    address,
+  });
 
   const { activeAddress } = useUser();
 
@@ -60,7 +71,23 @@ export function StakingActionModuleTitle({ address }: { address: string }) {
 }
 
 export default function Staking({ address }: { address: string }) {
-  const { data, isLoading, refetch } = useStakingBackendSuspenseQuery(getContributionContracts);
+  const dictionary = useTranslations('general');
+  if (!isEthereumAddress(address)) return <span>{dictionary('nodeNotFound')}</span>;
+  return <StakingForContract address={address} />;
+}
+
+function StakingForContract({ address }: { address: EthereumAddress }) {
+  const autoRefresh = useDevicePref(PREFERENCE.DISABLE_BACKEND_AUTO_REFRESH);
+  const refetch = useRefetchContributionContracts();
+  const { data, isLoading } = useStakingBackendSuspenseQueryWithParams(
+    getContributionContractByAddress,
+    { address },
+    {
+      refetchInterval: autoRefresh
+        ? BACKEND.L2_BACKGROUND_UPDATE_INTERVAL_SECONDS * 1000
+        : undefined,
+    }
+  );
   const dictionary = useTranslations('general');
 
   const { activeAddress } = useUser();

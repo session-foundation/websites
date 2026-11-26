@@ -11,8 +11,10 @@ export type StakingBackendQueryWithParams = (
 ) => Promise<StakingBackendResponse<unknown>>;
 
 export function getStakingBackendQueryArgs<Q extends StakingBackendQuery>(query: Q) {
+  // `query.name` is minified in production builds, so two queries can share it; prefer `fnName`.
+  const name = 'fnName' in query && typeof query.fnName === 'string' ? query.fnName : query.name;
   return {
-    queryKey: [query.name],
+    queryKey: [name],
   };
 }
 

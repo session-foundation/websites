@@ -34,6 +34,7 @@ export default function PreferencesProvider({ children }: { children: ReactNode 
   );
 }
 
+/** Returns `true` unless `pref` is set, so `useDevicePref(DISABLE_X)` reads as "X is enabled". */
 export function useDevicePref<T = boolean>(pref: PREFERENCE) {
   const { getItem } = usePreferences();
   return !getItem<T>(pref);
